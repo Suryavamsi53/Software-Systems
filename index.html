@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon SDE Coding Interview Prep - Dark Edition</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sidebar-overlay"></div>
+  <button class="hamburger-btn" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Computer World</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <div class="sidebar-controls">
+        <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
+        <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item active">🏠 Home Dashboard</a>
+    
+        <!-- Section 1: Preparation -->
+        <details class="nav-section" open>
+          <summary class="nav-section-title">
+            <span>Preparation</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="pattern-recognition-guide.html" class="nav-item" data-id="prep-1">Pattern Recognition</a>
+          <a href="interview-approach.html" class="nav-item" data-id="prep-2">Interview Approach</a>
+          <a href="complexity-guide.html" class="nav-item" data-id="prep-3">Complexity Analysis</a>
+          <a href="dsa-roadmap.html" class="nav-item" data-id="prep-4">DSA Roadmap</a>
+          <a href="mock-interview-checklist.html" class="nav-item" data-id="prep-5">Mock Interview Checklist</a>
+          <a href="go-interview-plan.html" class ="nav-item" data-id="prep-6">📅 14-Day Interview Plan</a>
+        </details>
+    
+        <!-- Section 2: System Design -->
+        <details class="nav-section" open>
+          <summary class="nav-section-title">
+            <span>System Design</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="system-design.html" class="nav-item" data-id="sd-1">System Design Basics</a>
+          <a href="system-design-patterns.html" class="nav-item" data-id="sd-2">System Design Patterns</a>
+        </details>
+    
+        <!-- Section 3: DSA Patterns -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>DSA Patterns</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/two-pointers.html" class="nav-item" data-id="dsa-1">Two Pointers</a>
+          <a href="patterns/sliding-window.html" class="nav-item" data-id="dsa-2">Sliding Window</a>
+          <a href="patterns/fast-slow-pointers.html" class="nav-item" data-id="dsa-3">Fast & Slow Pointers</a>
+          <a href="patterns/binary-search.html" class="nav-item" data-id="dsa-4">Binary Search</a>
+          <a href="patterns/intervals.html" class="nav-item" data-id="dsa-5">Intervals</a>
+          <a href="patterns/prefix-sum.html" class="nav-item" data-id="dsa-6">Prefix Sum</a>
+        </details>
+    
+        <!-- Section 4: Data Structures -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Data Structures</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/hash-maps.html" class="nav-item" data-id="ds-1">Hash Maps & Sets</a>
+          <a href="patterns/linked-lists.html" class="nav-item" data-id="ds-2">Linked Lists</a>
+          <a href="patterns/stack.html" class="nav-item" data-id="ds-3">Stack</a>
+          <a href="patterns/heap.html" class="nav-item" data-id="ds-4">Heap (Priority Queue)</a>
+          <a href="patterns/trees.html" class="nav-item" data-id="ds-5">Trees</a>
+          <a href="patterns/tries.html" class="nav-item" data-id="ds-6">Tries</a>
+          <a href="patterns/graphs.html" class="nav-item" data-id="ds-7">Graphs</a>
+        </details>
+    
+        <!-- Section 5: Algorithms -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Algorithms</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/backtracking.html" class="nav-item" data-id="algo-1">Backtracking</a>
+          <a href="patterns/dynamic-programming.html" class="nav-item" data-id="algo-2">Dynamic Programming</a>
+          <a href="patterns/greedy.html" class="nav-item" data-id="algo-3">Greedy</a>
+          <a href="patterns/sort-search.html" class="nav-item" data-id="algo-4">Sort & Search</a>
+          <a href="patterns/bit-manipulation.html" class="nav-item" data-id="algo-5">Bit Manipulation</a>
+        </details>
+    
+        <!-- Section 6: Math -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Math</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/math-geometry.html" class="nav-item" data-id="math-1">Math & Geometry</a>
+        </details>
+        
+        <!-- Section 7: Guides & Tools -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Guides & Tools</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="cs-fundamentals.html" class="nav-item" data-id="tool-0">CS Fundamentals</a>
+          <a href="golang-guide.html" class="nav-item" data-id="tool-1">Go Language Guide</a>
+          <a href="go-interview-questions.html" class="nav-item" data-id="tool-2">Go Interview Questions</a>
+          <a href="go-interview-plan.html" class="nav-item" data-id="tool-6">📅 14-Day Interview Plan</a>
+          <a href="cheat-sheet.html" class="nav-item" data-id="tool-3">Pattern Cheat Sheet</a>
+          <a href="dashboard.html" class="nav-item" data-id="tool-4">📊 My Dashboard</a>
+          <a href="mobile-access.html" class="nav-item" data-id="tool-5">📱 Mobile Access</a>
+        </details>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🚀 Amazon SDE Coding Interview Patterns</h1>
+        <p>Master 18 essential DSA patterns used in real Amazon interviews</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📖</span> Welcome to Your Interview Prep Hub
+        </div>
+        <p>This is a self-hosted, pattern-focused preparation guide designed for Amazon SDE-1 / SDE-2 coding interviews.</p>
+        <p style="margin-top: 15px; color: var(--text-secondary);">Built with insights from ByteByteGo methodology and real interview experiences, each pattern page covers:</p>
+        
+        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-green);">✅ What Amazon Expects</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Time/space complexity, communication signals, and satisfaction criteria</p>
+          </div>
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">🧠 Core Concept Theory</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">When to use, recognition keywords, and edge cases</p>
+          </div>
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-yellow);">🎯 Real-World Amazon Scenarios</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Business applications: request limiting, ranking, microservices</p>
+          </div>
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-purple);">⚙️ Follow-up Questions</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Streaming data, memory constraints, parallelization</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🎯</span> How to Use This Guide
+        </div>
+        <ol style="margin-left: 20px; line-height: 2;">
+          <li><strong>Select a pattern</strong> from the sidebar</li>
+          <li><strong>Understand the expectation</strong> (green section) - what Amazon is checking for</li>
+          <li><strong>Read the theory</strong> (blue section) - when and why to apply the pattern</li>
+          <li><strong>Study the real-world scenario</strong> (yellow) - context beyond DSA terminology</li>
+          <li><strong>Review the canonical Amazon problem</strong> - the most common question</li>
+          <li><strong>Analyze brute force vs optimized</strong> - see what Amazon rejects and accepts</li>
+          <li><strong>Walk through the Go code</strong> - interview-quality implementation</li>
+          <li><strong>Practice follow-ups</strong> (purple) - prepare for deeper questions</li>
+        </ol>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🌟</span> Amazon Interview Format
+        </div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">✅ What Interviewers Are Looking For</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Problem-solving approach:</strong> Can you think systematically?</li>
+              <li><strong>Pattern recognition:</strong> Do you identify the problem type quickly?</li>
+              <li><strong>Time complexity consciousness:</strong> Do you optimize without over-engineering?</li>
+              <li><strong>Clear communication:</strong> Can you explain your logic aloud?</li>
+              <li><strong>Edge case handling:</strong> Do you think about boundary conditions?</li>
+              <li><strong>Code quality:</strong> Is it readable, well-named, maintainable?</li>
+              <li><strong>Follow-up readiness:</strong> Can you adapt your solution to new constraints?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">💡</span> Key Interview Tips
+        </div>
+        <div class="callout interview-tip">
+          <div class="callout-title">⭐ Golden Rules</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Clarify FIRST:</strong> Ask about constraints, edge cases, expected input ranges</li>
+              <li><strong>Brute force before optimization:</strong> Explain naive approach, then improve</li>
+              <li><strong>Complexity analysis:</strong> Always state time and space complexity explicitly</li>
+              <li><strong>Code as you think:</strong> Don't stay silent; explain your logic step-by-step</li>
+              <li><strong>Test with examples:</strong> Walk through small inputs before submitting</li>
+              <li><strong>Handle edge cases:</strong> Empty input, single element, duplicates, negative numbers</li>
+              <li><strong>Optimize memory when asked:</strong> Sometimes interviewers want O(1) space solutions</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📊</span> Pattern Coverage Map
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Pattern</th>
+              <th>Difficulty</th>
+              <th>Frequency in Interviews</th>
+              <th>Key Skill</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Two Pointers</strong></td>
+              <td>⭐ Easy-Medium</td>
+              <td>🔴 Very High</td>
+              <td>Index manipulation</td>
+            </tr>
+            <tr>
+              <td><strong>Sliding Window</strong></td>
+              <td>⭐⭐ Medium</td>
+              <td>🔴 Very High</td>
+              <td>Window management</td>
+            </tr>
+            <tr>
+              <td><strong>Binary Search</strong></td>
+              <td>⭐ Easy-Medium</td>
+              <td>🔴 Very High</td>
+              <td>Search optimization</td>
+            </tr>
+            <tr>
+              <td><strong>Hash Maps & Sets</strong></td>
+              <td>⭐ Easy</td>
+              <td>🔴 Very High</td>
+              <td>Lookup optimization</td>
+            </tr>
+            <tr>
+              <td><strong>Dynamic Programming</strong></td>
+              <td>⭐⭐⭐ Hard</td>
+              <td>🟠 High</td>
+              <td>Problem decomposition</td>
+            </tr>
+            <tr>
+              <td><strong>Graphs</strong></td>
+              <td>⭐⭐ Medium-Hard</td>
+              <td>🟠 High</td>
+              <td>Traversal & pathfinding</td>
+            </tr>
+            <tr>
+              <td><strong>Trees</strong></td>
+              <td>⭐⭐ Medium</td>
+              <td>🟠 High</td>
+              <td>Tree traversal</td>
+            </tr>
+            <tr>
+              <td><strong>Backtracking</strong></td>
+              <td>⭐⭐ Medium</td>
+              <td>🟡 Medium</td>
+              <td>Exploration & pruning</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⚠️</span> Common Interview Mistakes
+        </div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">🔴 What Leads to Rejection</div>
+          <div class="callout-content">
+            <ul>
+              <li>Not clarifying the problem → solving the wrong problem</li>
+              <li>Jumping to code without explaining → unclear thinking</li>
+              <li>Ignoring edge cases → code crashes on test cases</li>
+              <li>Wrong complexity analysis → claims efficiency they don't have</li>
+              <li>Messy variable names → unreadable, hard to follow logic</li>
+              <li>Brute forcing everything → signals limited problem-solving</li>
+              <li>Silent debugging → interviewer can't evaluate thought process</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📚</span> Study Recommendations
+        </div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 15px;">
+          <p><strong>Daily revision mode (30 minutes):</strong></p>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li>Pick one pattern from sidebar</li>
+            <li>Read the "What Amazon Expects" section (2 min)</li>
+            <li>Review the canonical problem and solution (5 min)</li>
+            <li>Walk through complexity analysis (3 min)</li>
+            <li>Implement the solution in Go from scratch (20 min)</li>
+          </ul>
+        </div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 15px;">
+          <p><strong>Deep dive mode (2 hours):</strong></p>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li>Read all 10 sections of a pattern</li>
+            <li>Code both brute force and optimized solutions</li>
+            <li>Try variations and edge cases</li>
+            <li>Answer follow-up questions without looking</li>
+            <li>Explain everything out loud (simulate interview)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom: 80px;">
+        <p style="color: var(--text-secondary); font-size: 0.95rem; text-align: center;">
+          Built with 💚 for Amazon SDE candidates • Self-hosted, daily revision mode • Interview-grade explanations
+        </p>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

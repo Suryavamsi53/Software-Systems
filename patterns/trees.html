@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trees Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Trees</h1>
+        <p>Recursion, Traversal, and Hierarchical Data</p>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ What Amazon Expects</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Recursion Mastery:</strong> Can you think recursively? (Base case + Recursive step)</li>
+              <li><strong>Traversal Types:</strong> Do you know when to use Preorder, Inorder, Postorder, or Level Order (BFS)?</li>
+              <li><strong>Complexity:</strong> Do you understand that visiting every node is O(N) time and recursion stack is O(H) space?</li>
+              <li><strong>BST Properties:</strong> Do you leverage the sorted property of Binary Search Trees?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Recursive Structure</div>
+          <div class="callout-content">
+            <p>A Tree is a hierarchical structure where each node has a value and a list of references to children nodes. A Binary Tree restricts this to at most two children (left and right).</p>
+            <p><strong>Key Mental Model:</strong> "Solve the problem for the left subtree, solve for the right subtree, then combine with the root."</p>
+            <p><strong>Traversals:</strong></p>
+            <ul>
+              <li><strong>DFS (Depth First):</strong> Go deep. Uses Stack (recursion). Good for path finding.</li>
+              <li><strong>BFS (Breadth First):</strong> Go wide. Uses Queue. Good for level-by-level processing.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Invert Binary Tree (LeetCode 226)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given the root of a binary tree, invert the tree, and return its root.</p>
+            <p><strong>Input:</strong> root = [4,2,7,1,3,6,9]<br>
+            <strong>Output:</strong> [4,7,2,9,6,3,1]</p>
+            <p><strong>Why Amazon Loves It:</strong> It's the "FizzBuzz" of tree problems. It tests if you can write a simple recursive function without overthinking.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+/**
+ * Definition for a binary tree node.
+ * type TreeNode struct {
+ *     Val int
+ *     Left *TreeNode
+ *     Right *TreeNode
+ * }
+ */
+func invertTree(root *TreeNode) *TreeNode {
+    // Base case: empty tree
+    if root == nil {
+        return nil
+    }
+    
+    // Recursive step: swap children
+    // We can swap first, then recurse, or recurse then swap.
+    // Here we swap first.
+    root.Left, root.Right = root.Right, root.Left
+    
+    // Recurse on children
+    invertTree(root.Left)
+    invertTree(root.Right)
+    
+    return root
+}
+</pre></div>
+            </div>
+
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public TreeNode invertTree(TreeNode root) {
+        if (root == null) {
+            return null;
+        }
+        
+        // Swap
+        TreeNode temp = root.left;
+        root.left = root.right;
+        root.right = temp;
+        
+        // Recurse
+        invertTree(root.left);
+        invertTree(root.right);
+        
+        return root;
+    }
+}
+</pre></div>
+            </div>
+
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if not root:
+            return None
+            
+        # Swap
+        root.left, root.right = root.right, root.left
+        
+        # Recurse
+        self.invertTree(root.left)
+        self.invertTree(root.right)
+        
+        return root
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        
+        <!-- Interactive Visualizer Link -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive BST Visualizer</strong>
+            <p style="margin-top: 5px; color: var(--text-secondary);">Visualize insertion and search in a Binary Search Tree.</p>
+          </div>
+          <a href="../visualizers/bst-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Inverting a Binary Tree</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Recursively swapping left and right children at every node to create a mirror image.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EInvert Binary Tree%3C/text%3E%3C!-- Original --%3E%3Cg transform='translate(150, 80)'%3E%3Ctext x='0' y='-20' text-anchor='middle' font-weight='bold' fill='%23333'%3EOriginal%3C/text%3E%3Ccircle cx='0' cy='0' r='20' fill='%233b82f6' stroke='%231d4ed8' stroke-width='2'/%3E%3Ctext x='0' y='5' text-anchor='middle' fill='white' font-weight='bold'%3E4%3C/text%3E%3Cpath d='M0,20 L-40,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Cpath d='M0,20 L40,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Ccircle cx='-40' cy='60' r='20' fill='%2394a3b8'/%3E%3Ctext x='-40' y='65' text-anchor='middle' fill='white'%3E2%3C/text%3E%3Ccircle cx='40' cy='60' r='20' fill='%2394a3b8'/%3E%3Ctext x='40' y='65' text-anchor='middle' fill='white'%3E7%3C/text%3E%3Cpath d='M-40,80 L-60,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M-40,80 L-20,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Ccircle cx='-60' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='-60' y='125' text-anchor='middle' fill='white' font-size='12'%3E1%3C/text%3E%3Ccircle cx='-20' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='-20' y='125' text-anchor='middle' fill='white' font-size='12'%3E3%3C/text%3E%3Cpath d='M40,80 L20,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M40,80 L60,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Ccircle cx='20' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='20' y='125' text-anchor='middle' fill='white' font-size='12'%3E6%3C/text%3E%3Ccircle cx='60' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='60' y='125' text-anchor='middle' fill='white' font-size='12'%3E9%3C/text%3E%3C/g%3E%3C!-- Arrow --%3E%3Cpath d='M300,150 L350,150' stroke='%23ef4444' stroke-width='4' marker-end='url(%23arrow)'/%3E%3Ctext x='325' y='140' text-anchor='middle' fill='%23ef4444' font-weight='bold'%3ESwap%3C/text%3E%3C!-- Inverted --%3E%3Cg transform='translate(550, 80)'%3E%3Ctext x='0' y='-20' text-anchor='middle' font-weight='bold' fill='%23333'%3EInverted%3C/text%3E%3Ccircle cx='0' cy='0' r='20' fill='%2310b981' stroke='%23059669' stroke-width='2'/%3E%3Ctext x='0' y='5' text-anchor='middle' fill='white' font-weight='bold'%3E4%3C/text%3E%3Cpath d='M0,20 L-40,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Cpath d='M0,20 L40,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Ccircle cx='-40' cy='60' r='20' fill='%2310b981'/%3E%3Ctext x='-40' y='65' text-anchor='middle' fill='white'%3E7%3C/text%3E%3Ccircle cx='40' cy='60' r='20' fill='%2310b981'/%3E%3Ctext x='40' y='65' text-anchor='middle' fill='white'%3E2%3C/text%3E%3Cpath d='M-40,80 L-60,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M-40,80 L-20,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Ccircle cx='-60' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='-60' y='125' text-anchor='middle' fill='white' font-size='12'%3E9%3C/text%3E%3Ccircle cx='-20' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='-20' y='125' text-anchor='middle' fill='white' font-size='12'%3E6%3C/text%3E%3Cpath d='M40,80 L20,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Cpath d='M40,80 L60,120' stroke='%23cbd5e1' stroke-width='2'/%3E%3Ccircle cx='20' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='20' y='125' text-anchor='middle' fill='white' font-size='12'%3E3%3C/text%3E%3Ccircle cx='60' cy='120' r='15' fill='%23cbd5e1'/%3E%3Ctext x='60' y='125' text-anchor='middle' fill='white' font-size='12'%3E1%3C/text%3E%3C/g%3E%3Cdefs%3E%3Cmarker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%23ef4444'/%3E%3C/marker%3E%3C/defs%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Invert Binary Tree Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#226</strong> - Invert Binary Tree</li>
+              <li style="margin-bottom: 12px;"><strong>#104</strong> - Maximum Depth of Binary Tree</li>
+              <li style="margin-bottom: 12px;"><strong>#100</strong> - Same Tree</li>
+              <li style="margin-bottom: 12px;"><strong>#543</strong> - Diameter of Binary Tree</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#102</strong> - Binary Tree Level Order Traversal</li>
+              <li style="margin-bottom: 12px;"><strong>#98</strong> - Validate Binary Search Tree</li>
+              <li style="margin-bottom: 12px;"><strong>#236</strong> - Lowest Common Ancestor</li>
+              <li style="margin-bottom: 12px;"><strong>#199</strong> - Binary Tree Right Side View</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#124</strong> - Binary Tree Maximum Path Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#297</strong> - Serialize and Deserialize Binary Tree</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    function switchTab(lang) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.lang-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        document.getElementById(lang).classList.add('active');
+        localStorage.setItem('preferredLanguage', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const lang = localStorage.getItem('preferredLanguage') || 'go';
+        const btn = document.querySelector(`.tab-btn[onclick*="${lang}"]`);
+        if (btn) btn.click();
+    });
+  </script>
+</body>
+</html>

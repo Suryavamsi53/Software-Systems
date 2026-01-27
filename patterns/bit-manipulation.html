@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bit Manipulation Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Bit Manipulation Pattern</h1>
+        <p>Bitwise operations and power manipulation</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Integer numbers</li>
+              <li>Binary representation</li>
+              <li>Power-of-two check</li>
+              <li>Bit-level manipulation</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Count set bits</li>
+              <li>Check power of 2</li>
+              <li>Bitwise operations</li>
+              <li>XOR problems</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>O(1) or O(log n) time</li>
+              <li>Bit operations needed</li>
+              <li>No extra space</li>
+              <li>Binary tricks help</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Binary representation: understand bits as 0s and 1s</li>
+              <li>Bitwise operators: AND (&), OR (|), XOR (^), NOT (~), left/right shift</li>
+              <li>Two's complement: how negative numbers are represented</li>
+              <li>Hexadecimal notation: convenient way to write binary numbers</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Check if bit is set: (num & (1 << i)) != 0</li>
+              <li>Set a bit: num |= (1 << i)</li>
+              <li>Clear a bit: num &= ~(1 << i)</li>
+              <li>Toggle a bit: num ^= (1 << i)</li>
+              <li>Common tricks: single number appearances, power of 2 check, count set bits</li>
+              <li>Recognize bit patterns: XOR for duplicates, AND for common bits</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">"Each bit position represents a binary digit. Bitwise ops manipulate these positions efficiently. XOR erases pairs, AND finds common bits."</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Amazon EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Bitwise Operators:</strong> Mastery of AND, OR, XOR, NOT, and Shifts (&lt;&lt;, &gt;&gt;).</li>
+              <li><strong>Bit Masks:</strong> Ability to create masks to set, clear, or toggle specific bits.</li>
+              <li><strong>2's Complement:</strong> Understanding how negative numbers are stored.</li>
+              <li><strong>Tricks:</strong> Knowing <code>x & (x-1)</code> clears the lowest set bit, and <code>x ^ x = 0</code>.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Binary Level Logic</div>
+          <div class="callout-content">
+            <p>Bit manipulation involves processing data at the bit level. It's extremely fast (O(1)) and memory efficient.</p>
+            <p><strong>Key Properties:</strong></p>
+            <ul>
+              <li><strong>XOR:</strong> <code>a ^ a = 0</code>, <code>a ^ 0 = a</code>. (Self-inverse).</li>
+              <li><strong>AND:</strong> <code>a & 1</code> checks odd/even.</li>
+              <li><strong>Shifts:</strong> <code>a &lt;&lt; 1</code> multiplies by 2, <code>a &gt;&gt; 1</code> divides by 2.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Permissions & Flags</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> In AWS IAM (Identity and Access Management), permissions are often stored as bit flags to save space. A single integer can store 32 different boolean permissions (Read, Write, Execute, Delete, etc.).</p>
+            <p><strong>Application:</strong> Checking if a user has 'Write' permission is just <code>(user_perms & WRITE_MASK) != 0</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">XOR Property (Single Number)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">XORing a number with itself results in 0. XORing with 0 keeps the number. This cancels out duplicates.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EXOR Cancellation: [4, 1, 2, 1, 2]%3C/text%3E%3Cg transform='translate(100, 80)'%3E%3C!-- Step 1 --%3E%3Ctext x='0' y='0' font-family='monospace' font-size='16' fill='%23333'%3EInit: 000%3C/text%3E%3Ctext x='0' y='30' font-family='monospace' font-size='16' fill='%23333'%3E^ 4 : 100%3C/text%3E%3Cline x1='0' y1='35' x2='100' y2='35' stroke='%23333'/%3E%3Ctext x='0' y='55' font-family='monospace' font-size='16' fill='%233b82f6' font-weight='bold'%3E      100 (4)%3C/text%3E%3C!-- Step 2 --%3E%3Ctext x='0' y='90' font-family='monospace' font-size='16' fill='%23333'%3E^ 1 : 001%3C/text%3E%3Cline x1='0' y1='95' x2='100' y2='95' stroke='%23333'/%3E%3Ctext x='0' y='115' font-family='monospace' font-size='16' fill='%233b82f6' font-weight='bold'%3E      101 (5)%3C/text%3E%3C!-- Step 3 --%3E%3Ctext x='0' y='150' font-family='monospace' font-size='16' fill='%23333'%3E^ 2 : 010%3C/text%3E%3Cline x1='0' y1='155' x2='100' y2='155' stroke='%23333'/%3E%3Ctext x='0' y='175' font-family='monospace' font-size='16' fill='%233b82f6' font-weight='bold'%3E      111 (7)%3C/text%3E%3C/g%3E%3Cg transform='translate(400, 80)'%3E%3C!-- Step 4 --%3E%3Ctext x='0' y='0' font-family='monospace' font-size='16' fill='%23333'%3EPrev: 111%3C/text%3E%3Ctext x='0' y='30' font-family='monospace' font-size='16' fill='%23ef4444'%3E^ 1 : 001 (Cancel 1)%3C/text%3E%3Cline x1='0' y1='35' x2='180' y2='35' stroke='%23333'/%3E%3Ctext x='0' y='55' font-family='monospace' font-size='16' fill='%233b82f6' font-weight='bold'%3E      110 (6)%3C/text%3E%3C!-- Step 5 --%3E%3Ctext x='0' y='90' font-family='monospace' font-size='16' fill='%23ef4444'%3E^ 2 : 010 (Cancel 2)%3C/text%3E%3Cline x1='0' y1='95' x2='180' y2='95' stroke='%23333'/%3E%3Ctext x='0' y='115' font-family='monospace' font-size='16' fill='%2310b981' font-weight='bold'%3E      100 (4) FOUND!%3C/text%3E%3C/g%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="XOR Bit Manipulation Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Single Number (LeetCode 136)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given a non-empty array of integers <code>nums</code>, every element appears twice except for one. Find that single one.</p>
+            <p><strong>Input:</strong> nums = [4,1,2,1,2]<br>
+            <strong>Output:</strong> 4</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">Hash Map or Sorting</div>
+          <div class="callout-content">
+            <p><strong>Hash Map:</strong> Count frequency of each number. O(N) time, but O(N) space.</p>
+            <p><strong>Sorting:</strong> Sort and check neighbors. O(N log N) time, O(1) space.</p>
+            <p><strong>Why Amazon Rejects:</strong> The problem often asks for O(N) time AND O(1) space. Only bit manipulation achieves this.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+        <div class="code-container">
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+func singleNumber(nums []int) int {
+    result := 0
+    for _, num := range nums {
+        // XORing a number with itself results in 0
+        // XORing with 0 results in the number
+        result ^= num
+    }
+    return result
+}
+</pre></div>
+            </div>
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public int singleNumber(int[] nums) {
+        int result = 0;
+        for (int num : nums) {
+            result ^= num;
+        }
+        return result;
+    }
+}
+</pre></div>
+            </div>
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class Solution:
+    def singleNumber(self, nums: List[int]) -> int:
+        result = 0
+        for num in nums:
+            result ^= num
+        return result
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace for <code>nums = [2, 1, 4, 2, 1]</code></p>
+        <div class="diagram">
+Init: result = 0
+
+1. result = 0 ^ 2 = 2
+2. result = 2 ^ 1 = 3
+3. result = 3 ^ 4 = 7
+4. result = 7 ^ 2 = 5 (2s cancelled)
+5. result = 5 ^ 1 = 4 (1s cancelled)
+
+Final: 4
+        </div>
+      </div>
+
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(N)</strong></p>
+            <p>We iterate through the array exactly once.</p>
+            <p><strong>Space Complexity: O(1)</strong></p>
+            <p>We only use a single variable to store the XOR sum.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: What if two numbers appear once?</strong><br>
+            A: XOR all numbers to get <code>a ^ b</code>. Find the rightmost set bit to distinguish <code>a</code> and <code>b</code>. Partition array into two groups based on that bit and XOR separately.</p>
+            <p><strong>Q: What if every number appears three times except one?</strong><br>
+            A: Count bits at each position modulo 3.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#190</strong> - Reverse Bits</li>
+              <li style="margin-bottom: 12px;"><strong>#191</strong> - Number of 1 Bits</li>
+              <li style="margin-bottom: 12px;"><strong>#231</strong> - Power of Two</li>
+              <li style="margin-bottom: 12px;"><strong>#401</strong> - Binary Watch</li>
+              <li style="margin-bottom: 12px;"><strong>#1342</strong> - Number of Steps to Reduce a Number to Zero</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#29</strong> - Divide Two Integers (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#201</strong> - Bitwise AND of Numbers Range</li>
+              <li style="margin-bottom: 12px;"><strong>#318</strong> - Maximum Product of Word Lengths</li>
+              <li style="margin-bottom: 12px;"><strong>#421</strong> - Maximum XOR of Two Numbers in an Array</li>
+              <li style="margin-bottom: 12px;"><strong>#1457</strong> - Pseudo-Palindromic Paths in a Binary Tree</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#37</strong> - Sudoku Solver</li>
+              <li style="margin-bottom: 12px;"><strong>#51</strong> - N-Queens</li>
+              <li style="margin-bottom: 12px;"><strong>#600</strong> - Non-negative Integers without Consecutive Ones</li>
+              <li style="margin-bottom: 12px;"><strong>#898</strong> - Bitwise ORs of Subarrays</li>
+              <li style="margin-bottom: 12px;"><strong>#1815</strong> - Maximum Number of Groups Getting Fresh Donuts</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary);">Master Bit Manipulation? Try <strong>Divide Two Integers</strong> (#29) - tricky bit-shifting!</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted);">Next: <strong>Math & Geometry</strong></p>
+      </div>
+      <div class="callout amazon-expects" style="margin-top: 40px; padding: 30px; text-align: center;">
+        <p style="font-size: 1.2rem; color: var(--callout-green);">📖 Full Content Coming Soon</p>
+        <p style="margin-top: 15px; color: var(--text-secondary);">This pattern page will include 10 comprehensive sections:</p>
+        <ul style="margin-top: 15px; text-align: left; display: inline-block; margin-left: 20px;">
+          <li>✅ What Amazon Expects</li>
+          <li>�� Core Concept Theory</li>
+          <li>🎯 Real-World Amazon Scenarios</li>
+          <li>🖼️ Visual Explanations & Diagrams</li>
+          <li>🧩 Canonical Amazon Problems</li>
+          <li>🔴 Brute Force Analysis</li>
+          <li>🟢 Optimized Go Solutions</li>
+          <li>🧩 Logical Walkthroughs</li>
+          <li>⚙️ Complexity Analysis</li>
+          <li>🟣 Amazon Follow-up Questions</li>
+        </ul>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">See <a href="two-pointers.html" style="color: var(--accent-color); text-decoration: none;">Two Pointers</a> pattern for the full detailed template.</p>
+      </div>
+
+      <div style="margin-top: 60px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary);">Each pattern page is interview-grade with real Go implementations, visual walkthroughs, and Amazon-specific follow-ups.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+</body>
+</html>

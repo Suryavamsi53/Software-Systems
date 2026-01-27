@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Roadmap - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Roadmap specific styles */
+    .roadmap-step {
+      position: relative;
+      padding-left: 30px;
+      margin-bottom: 40px;
+      border-left: 2px solid var(--border-color);
+    }
+    .roadmap-step::before {
+      content: '';
+      position: absolute;
+      left: -9px;
+      top: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: var(--bg-primary);
+      border: 2px solid var(--accent-color);
+    }
+    .step-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .step-duration {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background-color: var(--bg-secondary);
+      padding: 2px 8px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+    .topic-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .topic-card {
+      background-color: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 6px;
+      transition: transform 0.2s;
+    }
+    .topic-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-color);
+    }
+    .topic-card a {
+      text-decoration: none;
+      color: var(--text-secondary);
+      display: block;
+    }
+    .topic-card strong {
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item active">DSA Roadmap</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🗺️ DSA Roadmap</h1>
+        <p>A structured 8-week path to crack Amazon SDE interviews</p>
+      </div>
+
+      <!-- Introduction -->
+      <div class="section">
+        <div class="callout interview-tip">
+          <div class="callout-title">⭐ How to use this roadmap</div>
+          <div class="callout-content">
+            <p>This roadmap is designed for <strong>depth over breadth</strong>. Don't just memorize solutions. For each topic:</p>
+            <ol>
+              <li>Understand the core concept (Theory)</li>
+              <li>Learn the pattern (Templates)</li>
+              <li>Solve the canonical problem</li>
+              <li>Practice 3-5 variations</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 1 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 1: The Foundation
+          <span class="step-duration">Weeks 1-2</span>
+        </div>
+        <p style="color: var(--text-secondary);">Mastering the basics of arrays, strings, and complexity analysis. These are the building blocks for everything else.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="complexity-guide.html">
+              <strong>Complexity Analysis</strong>
+              Big O, Time vs Space, Logarithmic time
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/two-pointers.html">
+              <strong>Two Pointers</strong>
+              Pairs, Reversing, Partitioning
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/sliding-window.html">
+              <strong>Sliding Window</strong>
+              Subarrays, Substrings, Anagrams
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/prefix-sum.html">
+              <strong>Prefix Sum</strong>
+              Range queries, Cumulative sums
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 2: Core Data Structures
+          <span class="step-duration">Weeks 3-4</span>
+        </div>
+        <p style="color: var(--text-secondary);">Essential structures for organizing data. Hash Maps are the most important tool in your arsenal.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="patterns/hash-maps.html">
+              <strong>Hash Maps & Sets</strong>
+              O(1) lookups, Counting, Deduplication
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/linked-lists.html">
+              <strong>Linked Lists</strong>
+              Traversal, Reversal, Fast & Slow Pointers
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/stack.html">
+              <strong>Stacks & Queues</strong>
+              LIFO/FIFO, Monotonic Stack, BFS Queue
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 3: Search & Sorting
+          <span class="step-duration">Week 5</span>
+        </div>
+        <p style="color: var(--text-secondary);">Efficiently finding and organizing data. Binary search is critical for optimization problems.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="patterns/binary-search.html">
+              <strong>Binary Search</strong>
+              Sorted arrays, Search space reduction
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/sort-search.html">
+              <strong>Sorting & Searching</strong>
+              Merge Sort, Quick Sort, Custom Comparators
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/intervals.html">
+              <strong>Intervals</strong>
+              Merging, Overlaps, Scheduling
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 4: Non-Linear Structures
+          <span class="step-duration">Week 6</span>
+        </div>
+        <p style="color: var(--text-secondary);">Hierarchical and connected data. Trees and Graphs appear in almost every Amazon onsite loop.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="patterns/trees.html">
+              <strong>Trees & BST</strong>
+              DFS, BFS, Recursion, Level-order
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/graphs.html">
+              <strong>Graphs</strong>
+              Adjacency List, Islands, Shortest Path
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/heap.html">
+              <strong>Heaps (Priority Queue)</strong>
+              Top-K elements, Median, Scheduling
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/tries.html">
+              <strong>Tries</strong>
+              Prefix matching, Autocomplete
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 5: Advanced Algorithms
+          <span class="step-duration">Week 7</span>
+        </div>
+        <p style="color: var(--text-secondary);">Optimization and exhaustive search. These distinguish SDE-2 candidates.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="patterns/dynamic-programming.html">
+              <strong>Dynamic Programming</strong>
+              Memoization, Tabulation, Knapsack
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/backtracking.html">
+              <strong>Backtracking</strong>
+              Permutations, Subsets, Puzzles
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/greedy.html">
+              <strong>Greedy</strong>
+              Local optimization, Activity selection
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 6 -->
+      <div class="roadmap-step">
+        <div class="step-title">
+          Phase 6: Final Polish
+          <span class="step-duration">Week 8</span>
+        </div>
+        <p style="color: var(--text-secondary);">Specialized topics and behavioral prep.</p>
+        
+        <div class="topic-grid">
+          <div class="topic-card">
+            <a href="mock-interview-checklist.html">
+              <strong>Mock Interviews</strong>
+              Behavioral (LP), Coding, System Design
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="system-design.html">
+              <strong>System Design</strong>
+              Scalability, Load Balancing, Caching
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/bit-manipulation.html">
+              <strong>Bit Manipulation</strong>
+              XOR, Bit masking
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resources Section -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">📚</span> Recommended Resources
+        </div>
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">Curated list of high-quality external content to supplement your learning.</p>
+            <ul style="list-style: none; padding: 0;">
+                <li style="margin-bottom: 15px;">
+                    <a href="https://www.youtube.com/c/ByteByteGo" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">ByteByteGo (YouTube)</a>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Excellent system design and high-level architecture videos.</p>
+                </li>
+                <li style="margin-bottom: 15px;">
+                    <a href="https://neetcode.io/" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">NeetCode.io</a>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Great roadmap and video explanations for LeetCode problems.</p>
+                </li>
+                <li style="margin-bottom: 15px;">
+                    <a href="https://www.youtube.com/c/WilliamFiset-videos" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">William Fiset (YouTube)</a>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Deep dives into Graph Theory and Data Structures implementation.</p>
+                </li>
+                 <li>
+                    <a href="https://dataintensive.net/" target="_blank" style="color: var(--accent-color); text-decoration: none; font-weight: bold;">Designing Data-Intensive Applications</a>
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">The "Bible" of system design. Essential reading for SDE-2+.</p>
+                </li>
+            </ul>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

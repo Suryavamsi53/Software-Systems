@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stack Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Stack</h1>
+        <p>LIFO (Last In, First Out) Data Structure</p>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ What Amazon Expects</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>LIFO Property:</strong> Do you recognize problems that require processing elements in reverse order?</li>
+              <li><strong>Matching:</strong> Can you use stacks for matching problems (parentheses, tags)?</li>
+              <li><strong>Monotonic Stack:</strong> Can you use a stack to find "next greater" or "next smaller" elements efficiently?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Last In, First Out</div>
+          <div class="callout-content">
+            <p>A Stack is a collection that supports pushing elements onto the top and popping them from the top. It's like a stack of plates.</p>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+              <li><strong>Undo/Redo:</strong> Storing history.</li>
+              <li><strong>Parsing:</strong> Validating syntax (JSON, XML, code).</li>
+              <li><strong>DFS:</strong> Depth-First Search uses a stack (explicit or recursion).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Valid Parentheses (LeetCode 20)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given a string s containing just the characters '(', ')', '{', '}', '[' and ']', determine if the input string is valid.</p>
+            <p><strong>Input:</strong> s = "()[]{}"<br>
+            <strong>Output:</strong> true</p>
+            <p><strong>Why Amazon Loves It:</strong> It's a classic parsing problem that tests if you understand how to pair elements using LIFO logic.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+func isValid(s string) bool {
+    // Map for closing -> opening
+    pairs := map[rune]rune{
+        ')': '(',
+        ']': '[',
+        '}': '{',
+    }
+    
+    stack := []rune{}
+    
+    for _, char := range s {
+        // If it's a closing bracket
+        if open, isClose := pairs[char]; isClose {
+            // Check if stack is empty or top doesn't match
+            if len(stack) == 0 || stack[len(stack)-1] != open {
+                return false
+            }
+            // Pop
+            stack = stack[:len(stack)-1]
+        } else {
+            // It's an opening bracket, push
+            stack = append(stack, char)
+        }
+    }
+    
+    // Valid only if stack is empty
+    return len(stack) == 0
+}
+</pre></div>
+            </div>
+
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public boolean isValid(String s) {
+        Stack<Character> stack = new Stack<>();
+        
+        for (char c : s.toCharArray()) {
+            if (c == '(') stack.push(')');
+            else if (c == '{') stack.push('}');
+            else if (c == '[') stack.push(']');
+            else if (stack.isEmpty() || stack.pop() != c) return false;
+        }
+        
+        return stack.isEmpty();
+    }
+}
+</pre></div>
+            </div>
+
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class Solution:
+    def isValid(self, s: str) -> bool:
+        stack = []
+        mapping = {")": "(", "}": "{", "]": "["}
+        
+        for char in s:
+            if char in mapping:
+                # Closing bracket
+                top_element = stack.pop() if stack else '#'
+                if mapping[char] != top_element:
+                    return False
+            else:
+                # Opening bracket
+                stack.append(char)
+        
+        return not stack
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Stack Operations (Valid Parentheses)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Visualizing LIFO (Last-In, First-Out) behavior. Open brackets are pushed, closing brackets pop and match.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EStack: Valid Parentheses %22( [ ] )%22%3C/text%3E%3C!-- Input String --%3E%3Cg transform='translate(50, 80)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EInput:%3C/text%3E%3Crect x='0' y='10' width='40' height='40' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='20' y='35' text-anchor='middle' font-weight='bold'%3E(%3C/text%3E%3Crect x='45' y='10' width='40' height='40' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='65' y='35' text-anchor='middle' font-weight='bold'%3E[%3C/text%3E%3Crect x='90' y='10' width='40' height='40' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='110' y='35' text-anchor='middle' font-weight='bold'%3E]%3C/text%3E%3Crect x='135' y='10' width='40' height='40' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='155' y='35' text-anchor='middle' font-weight='bold'%3E)%3C/text%3E%3C/g%3E%3C!-- Stack Visual --%3E%3Cg transform='translate(350, 80)'%3E%3Ctext x='50' y='0' font-weight='bold' fill='%23333' text-anchor='middle'%3EStack%3C/text%3E%3Cpath d='M0,0 L0,150 L100,150 L100,0' fill='none' stroke='%23333' stroke-width='4'/%3E%3C!-- Elements --%3E%3Crect x='10' y='110' width='80' height='30' fill='%233b82f6' rx='5'/%3E%3Ctext x='50' y='130' text-anchor='middle' fill='white' font-weight='bold'%3E(%3C/text%3E%3Crect x='10' y='70' width='80' height='30' fill='%233b82f6' rx='5' opacity='0.3'/%3E%3Ctext x='50' y='90' text-anchor='middle' fill='%233b82f6' font-weight='bold'%3E[%3C/text%3E%3C/g%3E%3C!-- Operations --%3E%3Cg transform='translate(550, 80)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3ESteps:%3C/text%3E%3Ctext x='0' y='30' font-family='monospace' fill='%23333'%3E1. Push '('%3C/text%3E%3Ctext x='0' y='55' font-family='monospace' fill='%23333'%3E2. Push '['%3C/text%3E%3Ctext x='0' y='80' font-family='monospace' fill='%2310b981' font-weight='bold'%3E3. Found ']': Match with '[' -> POP%3C/text%3E%3Ctext x='0' y='105' font-family='monospace' fill='%2310b981' font-weight='bold'%3E4. Found ')': Match with '(' -> POP%3C/text%3E%3Ctext x='0' y='140' font-family='sans-serif' fill='%233b82f6' font-weight='bold'%3EStack Empty = Valid!%3C/text%3E%3C/g%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Stack Valid Parentheses Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#20</strong> - Valid Parentheses</li>
+              <li style="margin-bottom: 12px;"><strong>#1047</strong> - Remove All Adjacent Duplicates In String</li>
+              <li style="margin-bottom: 12px;"><strong>#155</strong> - Min Stack</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#739</strong> - Daily Temperatures (Monotonic Stack)</li>
+              <li style="margin-bottom: 12px;"><strong>#150</strong> - Evaluate Reverse Polish Notation</li>
+              <li style="margin-bottom: 12px;"><strong>#394</strong> - Decode String</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#84</strong> - Largest Rectangle in Histogram</li>
+              <li style="margin-bottom: 12px;"><strong>#42</strong> - Trapping Rain Water</li>
+              <li style="margin-bottom: 12px;"><strong>#224</strong> - Basic Calculator</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    function switchTab(lang) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.lang-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        document.getElementById(lang).classList.add('active');
+        localStorage.setItem('preferredLanguage', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const lang = localStorage.getItem('preferredLanguage') || 'go';
+        const btn = document.querySelector(`.tab-btn[onclick*="${lang}"]`);
+        if (btn) btn.click();
+    });
+  </script>
+</body>
+</html>

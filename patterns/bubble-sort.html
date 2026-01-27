@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Sort Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;   /* Yellow for active/swapping */
+            --compare: #fb923c;  /* Orange for comparison */
+            --success: #22c55e;  /* Green for sorted */
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .bar {
+            position: absolute;
+            bottom: 20px;
+            width: 50px;
+            background-color: var(--primary);
+            border-radius: 4px 4px 0 0;
+            transition: left 0.5s ease-in-out, background-color 0.3s ease, height 0.5s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--bg);
+            font-weight: bold;
+            font-size: 14px;
+            padding-top: 5px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .bar-value {
+            margin-top: -25px;
+            color: var(--text);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Complexity Section */
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .card {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .card h3 { margin-top: 0; color: var(--primary); font-size: 1rem; }
+        code { background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; font-family: monospace; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bubble Sort Visualization</h1>
+            <div class="subtitle">Repeatedly swapping adjacent elements until sorted</div>
+        </header>
+
+        <div class="viz-container" id="viz-container">
+            <!-- Bars will be injected here -->
+        </div>
+
+        <div class="info-panel">
+            <div class="step-text" id="step-text">Ready to start...</div>
+            <div class="legend">
+                <span><span class="dot" style="background: var(--compare)"></span>Compare</span>
+                <span><span class="dot" style="background: var(--active)"></span>Swap</span>
+                <span><span class="dot" style="background: var(--success)"></span>Sorted</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+
+        <div class="complexity-grid">
+            <div class="card">
+                <h3>Time Complexity</h3>
+                <p><strong>Worst/Average:</strong> <code>O(n²)</code><br>Nested loops comparing every pair.</p>
+                <p><strong>Best:</strong> <code>O(n)</code><br>If array is already sorted (with flag).</p>
+            </div>
+            <div class="card">
+                <h3>Space Complexity</h3>
+                <p><strong>Worst:</strong> <code>O(1)</code><br>In-place sorting. No extra memory needed.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const INITIAL_ARRAY = [5, 1, 4, 2, 8];
+        const BAR_WIDTH = 60;
+        const BAR_GAP = 20;
+        const ANIMATION_SPEED = 600;
+
+        // State
+        let array = [...INITIAL_ARRAY];
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+
+        // DOM Elements
+        const container = document.getElementById('viz-container');
+        const stepText = document.getElementById('step-text');
+        const playBtn = document.getElementById('playBtn');
+
+        // Initialize
+        function init() {
+            generateSteps();
+            render(0);
+        }
+
+        // Generate all animation steps upfront
+        function generateSteps() {
+            steps = [];
+            let arr = [...INITIAL_ARRAY];
+            let n = arr.length;
+            
+            // Initial state
+            steps.push({
+                arr: [...arr],
+                compare: [],
+                swap: [],
+                sorted: [],
+                msg: "Starting Bubble Sort. We will compare adjacent pairs."
+            });
+
+            for (let i = 0; i < n; i++) {
+                let swapped = false;
+                for (let j = 0; j < n - i - 1; j++) {
+                    // Comparison Step
+                    steps.push({
+                        arr: [...arr],
+                        compare: [j, j + 1],
+                        swap: [],
+                        sorted: getSortedIndices(n, i),
+                        msg: `Comparing ${arr[j]} and ${arr[j+1]}`
+                    });
+
+                    if (arr[j] > arr[j + 1]) {
+                        // Swap Step
+                        let temp = arr[j];
+                        arr[j] = arr[j+1];
+                        arr[j+1] = temp;
+                        swapped = true;
+
+                        steps.push({
+                            arr: [...arr],
+                            compare: [],
+                            swap: [j, j + 1],
+                            sorted: getSortedIndices(n, i),
+                            msg: `${temp} > ${arr[j]}, so we swap them.`
+                        });
+                    }
+                }
+                // After inner loop, n-1-i is sorted
+                if (!swapped && i < n-1) {
+                    // Optimization: if no swaps, everything is sorted
+                    // We'll just let the loop finish naturally for visual consistency
+                    // or we could jump to end. For visualizer, showing process is better.
+                }
+            }
+
+            // Final sorted state
+            steps.push({
+                arr: [...arr],
+                compare: [],
+                swap: [],
+                sorted: Array.from({length: n}, (_, i) => i),
+                msg: "Array is fully sorted!"
+            });
+        }
+
+        function getSortedIndices(n, i) {
+            // Elements from n-i to n-1 are sorted
+            let indices = [];
+            for(let k=0; k<i; k++) {
+                indices.push(n - 1 - k);
+            }
+            return indices;
+        }
+
+        // Render the bars based on state
+        function render(stepIndex) {
+            const state = steps[stepIndex];
+            container.innerHTML = '';
+            
+            // Calculate centering
+            const totalWidth = (state.arr.length * BAR_WIDTH) + ((state.arr.length - 1) * BAR_GAP);
+            const startX = (container.clientWidth - totalWidth) / 2;
+
+            state.arr.forEach((val, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${val * 30}px`; // Scale height
+                bar.style.left = `${startX + idx * (BAR_WIDTH + BAR_GAP)}px`;
+                
+                // Color logic
+                if (state.swap.includes(idx)) {
+                    bar.style.backgroundColor = 'var(--active)';
+                } else if (state.compare.includes(idx)) {
+                    bar.style.backgroundColor = 'var(--compare)';
+                } else if (state.sorted.includes(idx)) {
+                    bar.style.backgroundColor = 'var(--success)';
+                }
+
+                // Value label
+                const label = document.createElement('div');
+                label.className = 'bar-value';
+                label.textContent = val;
+                bar.appendChild(label);
+
+                container.appendChild(bar);
+            });
+
+            stepText.textContent = state.msg;
+        }
+
+        // Controls Logic
+        function togglePlay() {
+            if (isPlaying) {
+                pause();
+            } else {
+                play();
+            }
+        }
+
+        function play() {
+            if (currentStep >= steps.length - 1) return;
+            isPlaying = true;
+            playBtn.textContent = "Pause";
+            intervalId = setInterval(() => {
+                if (currentStep < steps.length - 1) {
+                    currentStep++;
+                    render(currentStep);
+                } else {
+                    pause();
+                }
+            }, ANIMATION_SPEED);
+        }
+
+        function pause() {
+            isPlaying = false;
+            playBtn.textContent = "Play";
+            clearInterval(intervalId);
+        }
+
+        function stepForward() {
+            pause();
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            pause();
+            if (currentStep > 0) {
+                currentStep--;
+                render(currentStep);
+            }
+        }
+
+        function reset() {
+            pause();
+            currentStep = 0;
+            render(0);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => render(currentStep));
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

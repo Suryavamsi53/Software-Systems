@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trie Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;
+            --success: #22c55e;
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 500px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        circle {
+            fill: var(--panel);
+            stroke: var(--primary);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        circle.is-end {
+            stroke: var(--success);
+            stroke-width: 3;
+        }
+
+        line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        text {
+            fill: var(--text);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            width: 150px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        .highlight { stroke: var(--active) !important; fill: rgba(250, 204, 21, 0.1); }
+        .found { stroke: var(--success) !important; fill: rgba(34, 197, 94, 0.1); }
+        .path-active { stroke: var(--active); stroke-width: 3; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Trie (Prefix Tree) Visualization</h1>
+            <div class="subtitle">Insert and Search Operations</div>
+        </header>
+
+        <div class="viz-container">
+            <svg id="trie-svg"></svg>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="word-input" placeholder="Enter word..." maxlength="8">
+            <button class="primary" onclick="insertWord()">Insert</button>
+            <button onclick="searchWord()">Search</button>
+            <button onclick="resetTrie()">Reset</button>
+        </div>
+
+        <div class="info-panel" id="status-text">
+            Enter a word to insert or search.
+        </div>
+    </div>
+
+    <script>
+        class TrieNode {
+            constructor(char) {
+                this.char = char;
+                this.children = {};
+                this.isEnd = false;
+                this.id = Math.random().toString(36).substr(2, 9);
+                this.x = 0;
+                this.y = 0;
+            }
+        }
+
+        let root = new TrieNode('');
+        const svg = document.getElementById('trie-svg');
+        const statusText = document.getElementById('status-text');
+        const input = document.getElementById('word-input');
+        const NODE_RADIUS = 18;
+        const VERTICAL_SPACING = 60;
+
+        // Initial Data
+        ['cat', 'car', 'dog'].forEach(w => insertSync(w));
+        drawTrie();
+
+        function insertWord() {
+            const word = input.value.toLowerCase().replace(/[^a-z]/g, '');
+            if (!word) return;
+            animateOperation(word, 'insert');
+            input.value = '';
+        }
+
+        function searchWord() {
+            const word = input.value.toLowerCase().replace(/[^a-z]/g, '');
+            if (!word) return;
+            animateOperation(word, 'search');
+            input.value = '';
+        }
+
+        function resetTrie() {
+            root = new TrieNode('');
+            drawTrie();
+            statusText.textContent = "Trie reset.";
+        }
+
+        function insertSync(word) {
+            let node = root;
+            for (let char of word) {
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode(char);
+                }
+                node = node.children[char];
+            }
+            node.isEnd = true;
+        }
+
+        // Layout Algorithm
+        function calculateLayout() {
+            // Assign widths to subtrees
+            function getWidth(node) {
+                if (Object.keys(node.children).length === 0) return 40; // Leaf width
+                let width = 0;
+                for (let key in node.children) {
+                    width += getWidth(node.children[key]);
+                }
+                return width;
+            }
+
+            // Assign coordinates
+            function assignCoords(node, x, y, availableWidth) {
+                node.x = x;
+                node.y = y;
+                
+                let startX = x - availableWidth / 2;
+                for (let key in node.children) {
+                    const child = node.children[key];
+                    const childWidth = getWidth(child);
+                    assignCoords(child, startX + childWidth / 2, y + VERTICAL_SPACING, childWidth);
+                    startX += childWidth;
+                }
+            }
+
+            const totalWidth = getWidth(root);
+            assignCoords(root, 450, 40, Math.max(totalWidth, 800));
+        }
+
+        function drawTrie() {
+            calculateLayout();
+            svg.innerHTML = '';
+            drawEdges(root);
+            drawNodes(root);
+        }
+
+        function drawEdges(node) {
+            for (let key in node.children) {
+                const child = node.children[key];
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", node.x);
+                line.setAttribute("y1", node.y);
+                line.setAttribute("x2", child.x);
+                line.setAttribute("y2", child.y);
+                line.setAttribute("id", `edge-${node.id}-${child.id}`);
+                svg.appendChild(line);
+                drawEdges(child);
+            }
+        }
+
+        function drawNodes(node) {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("id", `node-${node.id}`);
+            
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", node.x);
+            circle.setAttribute("cy", node.y);
+            circle.setAttribute("r", NODE_RADIUS);
+            if (node.isEnd) circle.classList.add('is-end');
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", node.x);
+            text.setAttribute("y", node.y);
+            text.textContent = node.char || 'R'; // R for Root
+
+            g.appendChild(circle);
+            g.appendChild(text);
+            svg.appendChild(g);
+
+            for (let key in node.children) {
+                drawNodes(node.children[key]);
+            }
+        }
+
+        async function animateOperation(word, type) {
+            let curr = root;
+            unhighlightAll();
+            
+            // Highlight Root
+            highlightNode(curr.id, 'highlight');
+            statusText.textContent = `Start at Root`;
+            await sleep(600);
+
+            for (let i = 0; i < word.length; i++) {
+                const char = word[i];
+                
+                if (type === 'insert') {
+                    if (!curr.children[char]) {
+                        curr.children[char] = new TrieNode(char);
+                        drawTrie(); // Redraw to show new node
+                        // Re-highlight path after redraw
+                        // (Simplified: just highlight current)
+                    }
+                } else if (type === 'search') {
+                    if (!curr.children[char]) {
+                        statusText.textContent = `Character '${char}' not found.`;
+                        return;
+                    }
+                }
+
+                const nextNode = curr.children[char];
+                highlightEdge(curr.id, nextNode.id);
+                highlightNode(nextNode.id, 'highlight');
+                statusText.textContent = `Move to '${char}'`;
+                curr = nextNode;
+                await sleep(600);
+            }
+
+            if (type === 'insert') {
+                curr.isEnd = true;
+                drawTrie();
+                highlightNode(curr.id, 'found');
+                statusText.textContent = `Inserted "${word}". Marked end of word.`;
+            } else {
+                if (curr.isEnd) {
+                    highlightNode(curr.id, 'found');
+                    statusText.textContent = `Found word "${word}"!`;
+                } else {
+                    statusText.textContent = `Prefix "${word}" exists, but not as a complete word.`;
+                }
+            }
+            
+            setTimeout(unhighlightAll, 2000);
+        }
+
+        function highlightNode(id, className) {
+            const node = document.getElementById(`node-${id}`);
+            if (node) node.querySelector('circle').classList.add(className);
+        }
+
+        function highlightEdge(fromId, toId) {
+            const edge = document.getElementById(`edge-${fromId}-${toId}`);
+            if (edge) edge.classList.add('path-active');
+        }
+
+        function unhighlightAll() {
+            document.querySelectorAll('circle').forEach(c => {
+                c.classList.remove('highlight');
+                c.classList.remove('found');
+            });
+            document.querySelectorAll('line').forEach(l => l.classList.remove('path-active'));
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>

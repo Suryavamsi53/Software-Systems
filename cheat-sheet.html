@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Cheat Sheet - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="cheat-sheet.html" class="nav-item active">Pattern Cheat Sheet</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+        <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>📜 Pattern Cheat Sheet</h1>
+        <p>Quick reference templates for all major DSA patterns</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⚡</span> Fundamental Patterns
+        </div>
+        
+        <div class="collapsible">
+          <strong>Two Pointers (Opposite Ends)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func twoPointers(nums []int) int {
+    left, right := 0, len(nums)-1
+    for left < right {
+        if condition(left, right) {
+            return result
+        } else if tooSmall {
+            left++
+        } else {
+            right--
+        }
+    }
+    return -1
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+          <strong>Sliding Window (Dynamic)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func slidingWindow(s string) int {
+    left := 0
+    for right := 0; right < len(s); right++ {
+        // 1. Add s[right] to window
+        
+        // 2. Shrink window while condition is invalid/met
+        for condition() {
+            // Remove s[left]
+            left++
+        }
+        // 3. Update result
+    }
+    return result
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+          <strong>Binary Search</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func binarySearch(nums []int, target int) int {
+    left, right := 0, len(nums)-1
+    for left <= right {
+        mid := left + (right-left)/2
+        if nums[mid] == target {
+            return mid
+        } else if nums[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return -1
+}</pre></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🌳</span> Tree & Graph Patterns
+        </div>
+
+        <div class="collapsible">
+          <strong>DFS (Recursive)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func dfs(node *Node, visited map[*Node]bool) {
+    if node == nil || visited[node] {
+        return
+    }
+    visited[node] = true
+    // Process node
+    for _, neighbor := range node.Neighbors {
+        dfs(neighbor, visited)
+    }
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+          <strong>BFS (Queue)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func bfs(start *Node) {
+    queue := []*Node{start}
+    visited := map[*Node]bool{start: true}
+    
+    for len(queue) > 0 {
+        node := queue[0]
+        queue = queue[1:]
+        // Process node
+        
+        for _, neighbor := range node.Neighbors {
+            if !visited[neighbor] {
+                visited[neighbor] = true
+                queue = append(queue, neighbor)
+            }
+        }
+    }
+}</pre></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🔄</span> Advanced Patterns
+        </div>
+
+        <div class="collapsible">
+          <strong>Backtracking</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="code-block"><pre>
+func backtrack(path []int, options []int) {
+    if isSolution(path) {
+        result = append(result, path)
+        return
+    }
+    for i := 0; i < len(options); i++ {
+        // Choose
+        path = append(path, options[i])
+        // Explore
+        backtrack(path, options)
+        // Unchoose
+        path = path[:len(path)-1]
+    }
+}</pre></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

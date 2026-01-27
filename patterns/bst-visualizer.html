@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BST Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;
+            --success: #22c55e;
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 400px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        circle {
+            fill: var(--panel);
+            stroke: var(--primary);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        text {
+            fill: var(--text);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            width: 80px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        .highlight { stroke: var(--active); fill: rgba(250, 204, 21, 0.1); }
+        .found { stroke: var(--success); fill: rgba(34, 197, 94, 0.1); }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Binary Search Tree Visualization</h1>
+            <div class="subtitle">Insert and Search Operations</div>
+        </header>
+
+        <div class="viz-container">
+            <svg id="tree-svg"></svg>
+        </div>
+
+        <div class="controls">
+            <input type="number" id="val-input" placeholder="Value">
+            <button class="primary" onclick="insertValue()">Insert</button>
+            <button onclick="searchValue()">Search</button>
+            <button onclick="resetTree()">Reset</button>
+        </div>
+
+        <div class="info-panel" id="status-text">
+            Enter a value to insert or search.
+        </div>
+    </div>
+
+    <script>
+        class Node {
+            constructor(val) {
+                this.val = val;
+                this.left = null;
+                this.right = null;
+                this.x = 0;
+                this.y = 0;
+            }
+        }
+
+        let root = null;
+        const svg = document.getElementById('tree-svg');
+        const statusText = document.getElementById('status-text');
+        const input = document.getElementById('val-input');
+        const NODE_RADIUS = 20;
+        const VERTICAL_SPACING = 60;
+
+        // Initial Tree
+        [50, 30, 70, 20, 40, 60, 80].forEach(v => insertNode(v));
+        drawTree();
+
+        function insertValue() {
+            const val = parseInt(input.value);
+            if (isNaN(val)) return;
+            
+            animateOperation(val, 'insert');
+            input.value = '';
+        }
+
+        function searchValue() {
+            const val = parseInt(input.value);
+            if (isNaN(val)) return;
+            
+            animateOperation(val, 'search');
+            input.value = '';
+        }
+
+        function resetTree() {
+            root = null;
+            drawTree();
+            statusText.textContent = "Tree reset.";
+        }
+
+        function insertNode(val) {
+            if (!root) {
+                root = new Node(val);
+                return;
+            }
+            let curr = root;
+            while (true) {
+                if (val < curr.val) {
+                    if (!curr.left) {
+                        curr.left = new Node(val);
+                        break;
+                    }
+                    curr = curr.left;
+                } else {
+                    if (!curr.right) {
+                        curr.right = new Node(val);
+                        break;
+                    }
+                    curr = curr.right;
+                }
+            }
+        }
+
+        // Calculate positions for rendering
+        function calculatePositions(node, x, y, level) {
+            if (!node) return;
+            
+            // Horizontal spacing decreases as level increases
+            const spread = 200 / Math.pow(2, level);
+            
+            node.x = x;
+            node.y = y;
+            
+            calculatePositions(node.left, x - spread, y + VERTICAL_SPACING, level + 1);
+            calculatePositions(node.right, x + spread, y + VERTICAL_SPACING, level + 1);
+        }
+
+        function drawTree() {
+            svg.innerHTML = '';
+            if (!root) return;
+
+            // Recalculate positions based on current structure
+            calculatePositions(root, 450, 50, 0);
+
+            // Draw edges first (so they are behind nodes)
+            drawEdges(root);
+            // Draw nodes
+            drawNodes(root);
+        }
+
+        function drawEdges(node) {
+            if (!node) return;
+            if (node.left) {
+                createLine(node.x, node.y, node.left.x, node.left.y);
+                drawEdges(node.left);
+            }
+            if (node.right) {
+                createLine(node.x, node.y, node.right.x, node.right.y);
+                drawEdges(node.right);
+            }
+        }
+
+        function drawNodes(node) {
+            if (!node) return;
+            createCircle(node.x, node.y, node.val);
+            drawNodes(node.left);
+            drawNodes(node.right);
+        }
+
+        function createCircle(x, y, val) {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            g.setAttribute("id", `node-${val}`);
+            
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", x);
+            circle.setAttribute("cy", y);
+            circle.setAttribute("r", NODE_RADIUS);
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", x);
+            text.setAttribute("y", y);
+            text.textContent = val;
+
+            g.appendChild(circle);
+            g.appendChild(text);
+            svg.appendChild(g);
+        }
+
+        function createLine(x1, y1, x2, y2) {
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", x1);
+            line.setAttribute("y1", y1);
+            line.setAttribute("x2", x2);
+            line.setAttribute("y2", y2);
+            svg.appendChild(line);
+        }
+
+        // Animation Logic
+        async function animateOperation(val, type) {
+            if (type === 'insert' && !root) {
+                insertNode(val);
+                drawTree();
+                statusText.textContent = `Inserted root ${val}`;
+                return;
+            }
+
+            let curr = root;
+            let path = [];
+            
+            // Trace path
+            while (curr) {
+                path.push(curr);
+                if (val === curr.val) break; // Found
+                if (val < curr.val) curr = curr.left;
+                else curr = curr.right;
+            }
+
+            // Animate traversal
+            for (let node of path) {
+                highlightNode(node.val, 'highlight');
+                statusText.textContent = `Comparing ${val} with ${node.val}...`;
+                await sleep(800);
+                
+                if (val === node.val) {
+                    if (type === 'search') {
+                        highlightNode(node.val, 'found');
+                        statusText.textContent = `Found ${val}!`;
+                        return;
+                    } else {
+                        statusText.textContent = `${val} already exists.`;
+                        unhighlightAll();
+                        return;
+                    }
+                }
+                
+                unhighlightNode(node.val);
+            }
+
+            if (type === 'insert') {
+                insertNode(val);
+                drawTree();
+                // Highlight new node
+                setTimeout(() => {
+                    highlightNode(val, 'found');
+                    statusText.textContent = `Inserted ${val}.`;
+                    setTimeout(unhighlightAll, 1000);
+                }, 100);
+            } else {
+                statusText.textContent = `${val} not found.`;
+            }
+        }
+
+        function highlightNode(val, className) {
+            const node = document.getElementById(`node-${val}`);
+            if (node) {
+                node.querySelector('circle').classList.add(className);
+            }
+        }
+
+        function unhighlightNode(val) {
+            const node = document.getElementById(`node-${val}`);
+            if (node) {
+                const circle = node.querySelector('circle');
+                circle.classList.remove('highlight');
+                circle.classList.remove('found');
+            }
+        }
+
+        function unhighlightAll() {
+            document.querySelectorAll('circle').forEach(c => {
+                c.classList.remove('highlight');
+                c.classList.remove('found');
+            });
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sliding Window Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;   /* Yellow for window */
+            --remove: #ef4444;   /* Red for removing */
+            --add: #22c55e;      /* Green for adding */
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 250px;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 10px;
+            position: relative;
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            background-color: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .cell-index {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Window Overlay */
+        .window-overlay {
+            position: absolute;
+            height: 70px;
+            border: 3px solid var(--active);
+            border-radius: 12px;
+            pointer-events: none;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+        }
+
+        .cell.in-window {
+            background-color: rgba(250, 204, 21, 0.1);
+            border-color: var(--active);
+        }
+
+        .cell.adding {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-color: var(--add);
+        }
+
+        .cell.removing {
+            background-color: rgba(239, 68, 68, 0.2);
+            border-color: var(--remove);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .stat-box {
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+
+        .step-text {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 1.1rem;
+            min-height: 1.4em;
+            margin-top: 10px;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+    </style>
+    <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sliding Window Visualization</h1>
+            <div class="subtitle">Problem: Find Max Sum Subarray of Size K=3</div>
+        </header>
+
+        <div class="viz-container">
+            <div class="array-container" id="array-container">
+                <!-- Cells injected here -->
+                <div class="window-overlay" id="window-overlay"></div>
+            </div>
+        </div>
+
+        <div class="info-panel">
+            <div class="stat-box">
+                <div class="stat-label">Current Window Sum</div>
+                <div class="stat-value" id="current-sum">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Max Sum So Far</div>
+                <div class="stat-value" id="max-sum">0</div>
+            </div>
+            <div class="step-text" id="step-text">Ready to start...</div>
+        </div>
+
+        <div class="controls">
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const ARRAY = [2, 1, 5, 1, 3, 2, 9, 7];
+        const K = 3;
+        const CELL_WIDTH = 60;
+        const CELL_GAP = 10;
+        const ANIMATION_SPEED = 1000;
+
+        // State
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+
+        // DOM Elements
+        const arrayContainer = document.getElementById('array-container');
+        const windowOverlay = document.getElementById('window-overlay');
+        const currentSumEl = document.getElementById('current-sum');
+        const maxSumEl = document.getElementById('max-sum');
+        const stepText = document.getElementById('step-text');
+        const playBtn = document.getElementById('playBtn');
+
+        function init() {
+            renderArray();
+            generateSteps();
+            updateView(0);
+        }
+
+        function renderArray() {
+            let html = '';
+            ARRAY.forEach((val, idx) => {
+                html += `
+                    <div class="cell" id="cell-${idx}">
+                        ${val}
+                        <span class="cell-index">${idx}</span>
+                    </div>
+                `;
+            });
+            // Keep overlay inside
+            html += '<div class="window-overlay" id="window-overlay"></div>';
+            arrayContainer.innerHTML = html;
+            
+            // Re-select overlay after innerHTML rewrite
+            const overlay = document.getElementById('window-overlay');
+            overlay.style.width = `${(CELL_WIDTH * K) + (CELL_GAP * (K-1))}px`;
+            overlay.style.left = '-10px'; // Initial offset
+            overlay.style.top = '-5px';
+            overlay.style.opacity = '0';
+        }
+
+        function generateSteps() {
+            steps = [];
+            let windowSum = 0;
+            let maxSum = 0;
+
+            // Step 0: Initial
+            steps.push({
+                windowStart: 0,
+                windowEnd: -1,
+                sum: 0,
+                max: 0,
+                msg: "Start with an empty window.",
+                action: 'init'
+            });
+
+            // Build first window
+            for (let i = 0; i < K; i++) {
+                windowSum += ARRAY[i];
+                steps.push({
+                    windowStart: 0,
+                    windowEnd: i,
+                    sum: windowSum,
+                    max: 0, // Max not set until window full
+                    msg: `Expand window: Add ${ARRAY[i]} (Index ${i})`,
+                    action: 'expand',
+                    targetIdx: i
+                });
+            }
+
+            maxSum = windowSum;
+            steps.push({
+                windowStart: 0,
+                windowEnd: K-1,
+                sum: windowSum,
+                max: maxSum,
+                msg: `Window size ${K} reached. Initial Max Sum = ${maxSum}`,
+                action: 'check'
+            });
+
+            // Slide window
+            for (let i = K; i < ARRAY.length; i++) {
+                let leaving = ARRAY[i-K];
+                let entering = ARRAY[i];
+                
+                windowSum = windowSum - leaving + entering;
+                maxSum = Math.max(maxSum, windowSum);
+
+                steps.push({
+                    windowStart: i-K+1,
+                    windowEnd: i,
+                    sum: windowSum,
+                    max: maxSum,
+                    msg: `Slide: Remove ${leaving}, Add ${entering}. New Sum = ${windowSum}`,
+                    action: 'slide',
+                    addIdx: i,
+                    removeIdx: i-K
+                });
+            }
+
+            steps.push({
+                windowStart: ARRAY.length - K,
+                windowEnd: ARRAY.length - 1,
+                sum: windowSum,
+                max: maxSum,
+                msg: `Finished! Maximum Sum is ${maxSum}`,
+                action: 'done'
+            });
+        }
+
+        function updateView(stepIndex) {
+            const state = steps[stepIndex];
+            const overlay = document.getElementById('window-overlay');
+
+            // Reset styles
+            document.querySelectorAll('.cell').forEach(c => {
+                c.className = 'cell';
+            });
+
+            // Update Overlay Position
+            if (state.windowEnd >= 0) {
+                overlay.style.opacity = '1';
+                const leftPos = state.windowStart * (CELL_WIDTH + CELL_GAP);
+                overlay.style.transform = `translateX(${leftPos}px)`;
+            } else {
+                overlay.style.opacity = '0';
+            }
+
+            // Highlight cells in window
+            for (let i = state.windowStart; i <= state.windowEnd; i++) {
+                if (i >= 0) document.getElementById(`cell-${i}`)?.classList.add('in-window');
+            }
+
+            // Action specific highlights
+            if (state.action === 'expand') {
+                document.getElementById(`cell-${state.targetIdx}`)?.classList.add('adding');
+            } else if (state.action === 'slide') {
+                document.getElementById(`cell-${state.addIdx}`)?.classList.add('adding');
+                // The removed cell is technically outside the new window start, but we can flash it red if we want
+                // But since we moved the window, the previous start is now outside.
+                // Let's just highlight the new addition for clarity.
+            }
+
+            // Update Stats
+            currentSumEl.textContent = state.sum;
+            maxSumEl.textContent = state.max;
+            stepText.textContent = state.msg;
+        }
+
+        // Controls
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        updateView(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateView(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateView(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            updateView(0);
+        }
+
+        init();
+    </script>
+    <script src="../script.js"></script>
+</body>
+</html>

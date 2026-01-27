@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile Access Guide - Amazon SDE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item active">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>📱 Mobile Access Guide</h1>
+        <p>How to study patterns on your phone or tablet over WiFi</p>
+      </div>
+
+      <!-- THE EASY WAY -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🚀</span> The Easy Way (Recommended)
+        </div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Use the Helper Script</div>
+          <div class="callout-content">
+            <p>We've included scripts that automatically find your IP address and start the server.</p>
+            <ol style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+              <li>Open your terminal in the project folder.</li>
+              <li><strong>Mac/Linux:</strong> Run this command:
+                <div class="code-block" style="margin: 10px 0; padding: 10px;">sh start.sh</div>
+              </li>
+              <li><strong>Windows:</strong> Double-click <code>start.bat</code> or run:
+                <div class="code-block" style="margin: 10px 0; padding: 10px;">start.bat</div>
+              </li>
+              <li>Look for the line that says <strong>"On your mobile"</strong>.</li>
+              <li>Type that exact URL into your phone's browser (Chrome/Safari).</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- MANUAL METHOD -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🛠️</span> Manual Method
+        </div>
+        
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--text-primary);">1. Ensure Same Network</strong>
+          <p style="color: var(--text-secondary); margin-top: 5px;">Your computer and mobile device must be connected to the <strong>same WiFi network</strong>.</p>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--text-primary);">2. Find Your Local IP</strong>
+          <div style="margin-top: 15px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #3b82f6;">Mac</strong>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px;">Run in terminal:<br><code>ipconfig getifaddr en0</code></p>
+            </div>
+            <div>
+              <strong style="color: #10b981;">Windows</strong>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px;">Run in cmd:<br><code>ipconfig</code><br>(Look for IPv4 Address)</p>
+            </div>
+            <div>
+              <strong style="color: #f59e0b;">Linux</strong>
+              <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 5px;">Run in terminal:<br><code>hostname -I</code></p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+          <strong style="color: var(--text-primary);">3. Connect</strong>
+          <p style="color: var(--text-secondary); margin-top: 5px;">On your phone, visit: <code>http://YOUR_IP_ADDRESS:8000</code></p>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Example: <code>http://192.168.1.45:8000</code></p>
+        </div>
+      </div>
+
+      <!-- REMOTE ACCESS -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🌍</span> Access from Anywhere (Different Network)
+        </div>
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <p style="color: var(--text-secondary); margin-bottom: 15px;">If you are not on the same WiFi, you can use a tunneling service to expose your local server to the internet securely.</p>
+          
+          <strong style="color: var(--text-primary);">Option 1: Using ngrok (Recommended)</strong>
+          <ol style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary); line-height: 1.6;">
+            <li>Download and install <a href="https://ngrok.com/download" target="_blank" style="color: var(--accent-color);">ngrok</a>.</li>
+            <li>Start your local server on port 8000 (as usual).</li>
+            <li>In a new terminal window, run: <code>ngrok http 8000</code></li>
+            <li>Copy the <code>https://....ngrok-free.app</code> URL provided.</li>
+            <li>Open that URL on any device, anywhere in the world.</li>
+          </ol>
+
+          <strong style="color: var(--text-primary); display: block; margin-top: 20px;">Option 2: Static Hosting (Permanent)</strong>
+          <p style="margin-top: 5px; color: var(--text-secondary);">Since this is a static website, you can host it for free on GitHub Pages, Netlify, or Vercel.</p>
+        </div>
+      </div>
+
+      <!-- TROUBLESHOOTING -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⚠️</span> Troubleshooting
+        </div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">If it doesn't load...</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Firewall:</strong> Your computer's firewall might block port 8000. Try temporarily disabling it or allowing Python.</li>
+              <li><strong>Network Isolation:</strong> Some "Guest" WiFi networks prevent devices from talking to each other. Use the main WiFi.</li>
+              <li><strong>Wrong IP:</strong> IP addresses can change. Re-run <code>serve.py</code> to check.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

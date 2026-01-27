@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Math & Geometry Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Math & Geometry Pattern</h1>
+        <p>GCD, prime checking, and geometric calculations</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Numbers or coordinates</li>
+              <li>Mathematical properties</li>
+              <li>Prime/factor problems</li>
+              <li>Geometric data</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>GCD/LCM calculation</li>
+              <li>Prime checking</li>
+              <li>Distance/area problems</li>
+              <li>Number factorization</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Math algorithms</li>
+              <li>Number theory</li>
+              <li>Coordinate operations</li>
+              <li>Formula-based</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Basic number theory: GCD, LCM, prime numbers, factorization</li>
+              <li>Geometry basics: points, lines, distances, areas, angles</li>
+              <li>Coordinate systems and distance formula</li>
+              <li>Modular arithmetic for handling large numbers and overflow</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>GCD and Euclidean algorithm for greatest common divisor</li>
+              <li>Prime checking and Sieve of Eratosthenes for multiple primes</li>
+              <li>Distance calculations: Euclidean, Manhattan, Chebyshev</li>
+              <li>Geometric intersection: lines, circles, rectangles</li>
+              <li>Area and perimeter calculations for shapes</li>
+              <li>Angle calculations and trigonometry when needed</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">\"Reduce complex math to simpler patterns. Use GCD to simplify ratios. Use coordinate geometry for distances. Prime factorization reveals structure.\"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Amazon EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Fundamentals:</strong> GCD, LCM, Prime numbers, and Modular Arithmetic.</li>
+              <li><strong>Matrix Manipulation:</strong> Rotating, transposing, and traversing 2D grids.</li>
+              <li><strong>Overflow Handling:</strong> Awareness of integer overflow limits (MAX_INT).</li>
+              <li><strong>Space Optimization:</strong> In-place matrix modification is often required.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Math & Matrices</div>
+          <div class="callout-content">
+            <p><strong>Math:</strong> Use properties like <code>gcd(a, b) = gcd(b, a % b)</code> or prime factorization to simplify problems.</p>
+            <p><strong>Geometry/Matrix:</strong> Map 2D coordinates to 1D (<code>idx = r * cols + c</code>) or use layer-by-layer traversal for rotation.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Image Processing & Logistics</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> Amazon Photos needs to rotate user-uploaded images by 90 degrees. Or, Amazon Robotics needs to calculate the optimal path (Euclidean/Manhattan distance) for a robot in a grid warehouse.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Matrix Rotation (Transpose + Reverse)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">To rotate 90° clockwise in-place: First Transpose (swap across diagonal), then Reverse each row.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3ERotate Image 90%C2%B0 Clockwise%3C/text%3E%3C!-- Original --%3E%3Cg transform='translate(50, 80)'%3E%3Ctext x='45' y='-15' text-anchor='middle' font-weight='bold' fill='%23333'%3EOriginal%3C/text%3E%3Crect x='0' y='0' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='15' y='20' text-anchor='middle' font-weight='bold'%3E1%3C/text%3E%3Crect x='30' y='0' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='45' y='20' text-anchor='middle' font-weight='bold'%3E2%3C/text%3E%3Crect x='60' y='0' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='75' y='20' text-anchor='middle' font-weight='bold'%3E3%3C/text%3E%3Crect x='0' y='30' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='15' y='50' text-anchor='middle' font-weight='bold'%3E4%3C/text%3E%3Crect x='30' y='30' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='45' y='50' text-anchor='middle' font-weight='bold'%3E5%3C/text%3E%3Crect x='60' y='30' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='75' y='50' text-anchor='middle' font-weight='bold'%3E6%3C/text%3E%3Crect x='0' y='60' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='15' y='80' text-anchor='middle' font-weight='bold'%3E7%3C/text%3E%3Crect x='30' y='60' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='45' y='80' text-anchor='middle' font-weight='bold'%3E8%3C/text%3E%3Crect x='60' y='60' width='30' height='30' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='75' y='80' text-anchor='middle' font-weight='bold'%3E9%3C/text%3E%3C/g%3E%3C!-- Arrow 1 --%3E%3Cpath d='M160,125 L210,125' stroke='%233b82f6' stroke-width='3' marker-end='url(%23arrow)'/%3E%3Ctext x='185' y='115' text-anchor='middle' fill='%233b82f6' font-size='12'%3ETranspose%3C/text%3E%3C!-- Transposed --%3E%3Cg transform='translate(230, 80)'%3E%3Ctext x='45' y='-15' text-anchor='middle' font-weight='bold' fill='%23333'%3ETransposed%3C/text%3E%3Crect x='0' y='0' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='15' y='20' text-anchor='middle' font-weight='bold'%3E1%3C/text%3E%3Crect x='30' y='0' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='45' y='20' text-anchor='middle' font-weight='bold'%3E4%3C/text%3E%3Crect x='60' y='0' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='75' y='20' text-anchor='middle' font-weight='bold'%3E7%3C/text%3E%3Crect x='0' y='30' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='15' y='50' text-anchor='middle' font-weight='bold'%3E2%3C/text%3E%3Crect x='30' y='30' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='45' y='50' text-anchor='middle' font-weight='bold'%3E5%3C/text%3E%3Crect x='60' y='30' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='75' y='50' text-anchor='middle' font-weight='bold'%3E8%3C/text%3E%3Crect x='0' y='60' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='15' y='80' text-anchor='middle' font-weight='bold'%3E3%3C/text%3E%3Crect x='30' y='60' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='45' y='80' text-anchor='middle' font-weight='bold'%3E6%3C/text%3E%3Crect x='60' y='60' width='30' height='30' fill='%23dbeafe' stroke='%233b82f6'/%3E%3Ctext x='75' y='80' text-anchor='middle' font-weight='bold'%3E9%3C/text%3E%3C/g%3E%3C!-- Arrow 2 --%3E%3Cpath d='M340,125 L390,125' stroke='%23ef4444' stroke-width='3' marker-end='url(%23arrow-red)'/%3E%3Ctext x='365' y='115' text-anchor='middle' fill='%23ef4444' font-size='12'%3EReverse Rows%3C/text%3E%3C!-- Final --%3E%3Cg transform='translate(410, 80)'%3E%3Ctext x='45' y='-15' text-anchor='middle' font-weight='bold' fill='%23333'%3EFinal%3C/text%3E%3Crect x='0' y='0' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='15' y='20' text-anchor='middle' fill='white' font-weight='bold'%3E7%3C/text%3E%3Crect x='30' y='0' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='45' y='20' text-anchor='middle' fill='white' font-weight='bold'%3E4%3C/text%3E%3Crect x='60' y='0' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='75' y='20' text-anchor='middle' fill='white' font-weight='bold'%3E1%3C/text%3E%3Crect x='0' y='30' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='15' y='50' text-anchor='middle' fill='white' font-weight='bold'%3E8%3C/text%3E%3Crect x='30' y='30' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='45' y='50' text-anchor='middle' fill='white' font-weight='bold'%3E5%3C/text%3E%3Crect x='60' y='30' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='75' y='50' text-anchor='middle' fill='white' font-weight='bold'%3E2%3C/text%3E%3Crect x='0' y='60' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='15' y='80' text-anchor='middle' fill='white' font-weight='bold'%3E9%3C/text%3E%3Crect x='30' y='60' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='45' y='80' text-anchor='middle' fill='white' font-weight='bold'%3E6%3C/text%3E%3Crect x='60' y='60' width='30' height='30' fill='%2310b981' stroke='%23059669'/%3E%3Ctext x='75' y='80' text-anchor='middle' fill='white' font-weight='bold'%3E3%3C/text%3E%3C/g%3E%3Cdefs%3E%3Cmarker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%233b82f6'/%3E%3C/marker%3E%3Cmarker id='arrow-red' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%23ef4444'/%3E%3C/marker%3E%3C/defs%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Matrix Rotation Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Rotate Image (LeetCode 48)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> You are given an <code>n x n</code> 2D matrix representing an image, rotate the image by 90 degrees (clockwise). You have to rotate the image in-place.</p>
+            <p><strong>Input:</strong> matrix = [[1,2,3],[4,5,6],[7,8,9]]<br>
+            <strong>Output:</strong> [[7,4,1],[8,5,2],[9,6,3]]</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">Extra Matrix</div>
+          <div class="callout-content">
+            <p>Create a new matrix and copy elements: <code>new_matrix[j][n-1-i] = matrix[i][j]</code>.</p>
+            <p><strong>Space Complexity:</strong> O(N²) - Uses extra space.</p>
+            <p><strong>Why Amazon Rejects:</strong> The constraint usually specifies <strong>in-place</strong> modification.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+        <div class="code-container">
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+func rotate(matrix [][]int) {
+    n := len(matrix)
+    
+    // 1. Transpose
+    for i := 0; i < n; i++ {
+        for j := i; j < n; j++ {
+            matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        }
+    }
+    
+    // 2. Reverse Rows
+    for i := 0; i < n; i++ {
+        for j := 0; j < n/2; j++ {
+            matrix[i][j], matrix[i][n-1-j] = matrix[i][n-1-j], matrix[i][j]
+        }
+    }
+}
+</pre></div>
+            </div>
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public void rotate(int[][] matrix) {
+        int n = matrix.length;
+        
+        // Transpose
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+        
+        // Reverse Rows
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n/2; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[i][n-1-j];
+                matrix[i][n-1-j] = temp;
+            }
+        }
+    }
+}
+</pre></div>
+            </div>
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class Solution:
+    def rotate(self, matrix: List[List[int]]) -> None:
+        n = len(matrix)
+        # Transpose
+        for i in range(n):
+            for j in range(i, n):
+                matrix[i][j], matrix[j][i] = matrix[j][i], matrix[i][j]
+        
+        # Reverse rows
+        for i in range(n):
+            matrix[i].reverse()
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace for 2x2 matrix: <code>[[1,2],[3,4]]</code></p>
+        <div class="diagram">
+Initial:
+1 2
+3 4
+
+Step 1: Transpose (swap [0][1] and [1][0])
+1 3
+2 4
+
+Step 2: Reverse Rows
+Row 0: [1, 3] -> [3, 1]
+Row 1: [2, 4] -> [4, 2]
+
+Final:
+3 1
+4 2
+        </div>
+      </div>
+
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(N²)</strong></p>
+            <p>We visit each cell twice (once for transpose, once for reverse).</p>
+            <p><strong>Space Complexity: O(1)</strong></p>
+            <p>We modify the matrix in-place without extra storage.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: How to rotate anti-clockwise?</strong><br>
+            A: Transpose first, then reverse <strong>columns</strong> (or reverse rows first, then transpose).</p>
+            <p><strong>Q: What if the matrix is not square (MxN)?</strong><br>
+            A: You cannot rotate in-place easily. You need a new matrix of size NxM.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#204</strong> - Count Primes</li>
+              <li style="margin-bottom: 12px;"><strong>#258</strong> - Add Digits</li>
+              <li style="margin-bottom: 12px;"><strong>#400</strong> - Nth Digit</li>
+              <li style="margin-bottom: 12px;"><strong>#1281</strong> - Subtract the Product and Sum of Digits</li>
+              <li style="margin-bottom: 12px;"><strong>#2469</strong> - Convert the Temperature</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#48</strong> - Rotate Image (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#61</strong> - Rotate List</li>
+              <li style="margin-bottom: 12px;"><strong>#166</strong> - Fraction to Recurring Decimal</li>
+              <li style="margin-bottom: 12px;"><strong>#367</strong> - Valid Perfect Square</li>
+              <li style="margin-bottom: 12px;"><strong>#507</strong> - Perfect Number</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#41</strong> - First Missing Positive</li>
+              <li style="margin-bottom: 12px;"><strong>#65</strong> - Valid Number</li>
+              <li style="margin-bottom: 12px;"><strong>#149</strong> - Max Points on a Line</li>
+              <li style="margin-bottom: 12px;"><strong>#587</strong> - Erect the Fence</li>
+              <li style="margin-bottom: 12px;"><strong>#1932</strong> - Path With Maximum Average Value</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary);">Master Math & Geometry? Try <strong>Rotate Image</strong> (#48) and <strong>Max Points on a Line</strong> (#149)!</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted);">Next: <strong>Sort & Search Techniques</strong></p>
+      </div>
+      <div class="callout amazon-expects" style="margin-top: 40px; padding: 30px; text-align: center;">
+        <p style="font-size: 1.2rem; color: var(--callout-green);">📖 Full Content Coming Soon</p>
+        <p style="margin-top: 15px; color: var(--text-secondary);">This pattern page will include 10 comprehensive sections:</p>
+        <ul style="margin-top: 15px; text-align: left; display: inline-block; margin-left: 20px;">
+          <li>✅ What Amazon Expects</li>
+          <li>�� Core Concept Theory</li>
+          <li>🎯 Real-World Amazon Scenarios</li>
+          <li>🖼️ Visual Explanations & Diagrams</li>
+          <li>🧩 Canonical Amazon Problems</li>
+          <li>🔴 Brute Force Analysis</li>
+          <li>🟢 Optimized Go Solutions</li>
+          <li>🧩 Logical Walkthroughs</li>
+          <li>⚙️ Complexity Analysis</li>
+          <li>🟣 Amazon Follow-up Questions</li>
+        </ul>
+        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">See <a href="two-pointers.html" style="color: var(--accent-color); text-decoration: none;">Two Pointers</a> pattern for the full detailed template.</p>
+      </div>
+
+      <div style="margin-top: 60px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary);">Each pattern page is interview-grade with real Go implementations, visual walkthroughs, and Amazon-specific follow-ups.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+</body>
+</html>

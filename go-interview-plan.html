@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Go Interview Plan (2 YOE) - Amazon SDE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sidebar-overlay"></div>
+  <button class="hamburger-btn" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <div class="sidebar-controls">
+        <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
+        <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
+        
+        <!-- Section 7: Guides & Tools -->
+        <details class="nav-section" open>
+          <summary class="nav-section-title">
+            <span>Guides & Tools</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="golang-guide.html" class="nav-item" data-id="tool-1">Go Language Guide</a>
+          <a href="go-interview-questions.html" class="nav-item" data-id="tool-2">Go Interview Questions</a>
+          <a href="go-interview-plan.html" class="nav-item active" data-id="tool-6">📅 14-Day Interview Plan</a>
+          <a href="cheat-sheet.html" class="nav-item" data-id="tool-3">Pattern Cheat Sheet</a>
+          <a href="dashboard.html" class="nav-item" data-id="tool-4">📊 My Dashboard</a>
+          <a href="mobile-access.html" class="nav-item" data-id="tool-5">📱 Mobile Access</a>
+        </details>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🎯 Go Interview-Ready Plan</h1>
+        <p>Target: 2 Years Experience (Mid-Level SDE)</p>
+      </div>
+
+      <!-- EXPECTATIONS -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📋</span> What Interviewers Expect (2 YOE)
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background-color: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e;">
+            <strong style="color: #22c55e;">✅ They Check For:</strong>
+            <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+              <li>Strong Go fundamentals (Slices, Maps, Structs)</li>
+              <li>Concurrency clarity (Goroutines, Channels, Select)</li>
+              <li>Solid DSA + Problem Solving (Patterns)</li>
+              <li>Ability to build real backend services</li>
+              <li>Clean code + reasoning</li>
+            </ul>
+          </div>
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">❌ They Don't Expect:</strong>
+            <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+              <li>Compiler internals deep-dive</li>
+              <li>Research-level Garbage Collector knowledge</li>
+              <li>Memorizing standard library trivia</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 1: CORE -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🧠</span> Part 1: Go Language Core
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">You must be able to explain and code these confidently.</p>
+
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--callout-blue);">1️⃣ Go Basics (Instant Answers)</strong>
+          <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+            <li><code>var</code> vs <code>:=</code></li>
+            <li>Zero values (0, false, "", nil)</li>
+            <li>Value vs Reference types</li>
+            <li><strong>Pass by Value:</strong> Go is always pass-by-value. Even pointers are passed by value (copy of the address).</li>
+            <li><code>defer</code> execution order (LIFO)</li>
+          </ul>
+        </div>
+
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--callout-blue);">2️⃣ Arrays vs Slices (Trap Question)</strong>
+          <div class="code-block"><pre>
+func modify(s []int) {
+    s = append(s, 100)
+}
+
+arr := []int{1, 2, 3}
+modify(arr)
+fmt.Println(arr) // Output?</pre></div>
+          <p style="color: var(--text-secondary); margin-top: 10px;">
+            <strong>Answer:</strong> <code>[1 2 3]</code>. The <code>append</code> likely caused a reallocation or just updated the local slice header in <code>modify</code>. The original slice header in <code>main</code> (len=3) remains unchanged.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">3️⃣ Maps</strong>
+            <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+              <li>Reference types</li>
+              <li>Zero value is <code>nil</code></li>
+              <li>Reading <code>nil</code> map → OK (returns zero value)</li>
+              <li>Writing <code>nil</code> map → <strong>Panic</strong></li>
+              <li><strong>Not thread-safe</strong></li>
+            </ul>
+          </div>
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">4️⃣ Structs & Methods</strong>
+            <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+              <li><strong>Value Receiver:</strong> Does not modify original.</li>
+              <li><strong>Pointer Receiver:</strong> Modifies original.</li>
+              <li><strong>Rule:</strong> Use pointer receiver if you modify data or if the struct is large (avoid copy).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 2: CONCURRENCY -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⚙️</span> Part 2: Concurrency (The Differentiator)
+        </div>
+        
+        <div class="callout amazon-expects">
+          <div class="callout-title">Classic Interview Question</div>
+          <div class="callout-content">
+            <p><strong>Q: Channel vs Mutex?</strong></p>
+            <p><strong>A:</strong> Use <strong>Channels</strong> for passing data/communication between goroutines. Use <strong>Mutex</strong> for protecting shared state (caches, counters) from race conditions.</p>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--callout-yellow);">6️⃣ Channels (Must Know)</strong>
+          <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Buffered vs Unbuffered:</strong> Unbuffered blocks sender until receiver is ready.</li>
+            <li><strong>Closing:</strong> Sender should close. Closing a closed channel panics.</li>
+            <li><strong>Reading Closed:</strong> Returns zero value + <code>false</code> immediately.</li>
+          </ul>
+        </div>
+
+        <div class="code-block"><pre>
+// 7️⃣ Select Statement Pattern
+select {
+case msg := <-ch:
+    fmt.Println(msg)
+case <-time.After(time.Second):
+    fmt.Println("timeout") // Essential for robust systems
+}</pre></div>
+      </div>
+
+      <!-- PART 3: ERROR HANDLING -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🧩</span> Part 3: Error Handling (Go Style)
+        </div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">🚫 Instant Rejection Signal</div>
+          <div class="callout-content">
+            <p>Don't say "try/catch". Go uses explicit error handling.</p>
+          </div>
+        </div>
+        <ul style="margin-left: 20px; color: var(--text-secondary);">
+          <li><strong>Wrapping:</strong> <code>fmt.Errorf("context: %w", err)</code></li>
+          <li><strong>Checking:</strong> <code>errors.Is(err, target)</code></li>
+          <li><strong>Casting:</strong> <code>errors.As(err, &target)</code></li>
+        </ul>
+      </div>
+
+      <!-- PART 4: MEMORY -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🧠</span> Part 4: Memory & Performance
+        </div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+          <strong style="color: var(--text-primary);">Interview-Safe GC Explanation:</strong>
+          <p style="margin-top: 10px; color: var(--text-secondary);">"Go uses a concurrent, tri-color mark-and-sweep Garbage Collector optimized for low pause times (latency) rather than high throughput."</p>
+          <p style="margin-top: 10px; color: var(--text-secondary);"><strong>Escape Analysis:</strong> The compiler decides whether to allocate on Stack (fast) or Heap (GC managed). If a reference returns from a function, it "escapes" to the Heap.</p>
+        </div>
+      </div>
+
+      <!-- PART 5: TOOLING -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🧪</span> Part 5: Tooling (Essential)
+        </div>
+        <div class="code-block"><pre>
+go mod init      # Initialize module
+go mod tidy      # Clean dependencies
+go test ./...    # Run tests
+go test -race    # Detect race conditions (CRITICAL)
+go test -bench   # Run benchmarks
+go fmt           # Format code
+go vet           # Static analysis</pre></div>
+      </div>
+
+      <!-- PART 6: BACKEND -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🌐</span> Part 6: Backend Development
+        </div>
+        <ul style="margin-left: 20px; color: var(--text-secondary);">
+          <li><strong>REST API:</strong> <code>net/http</code>, JSON handling (<code>json.Marshal</code>).</li>
+          <li><strong>Context:</strong> Use <code>ctx</code> for timeouts and cancellation. <code>req.Context()</code>.</li>
+          <li><strong>Middleware:</strong> Logging, Auth, Panic Recovery.</li>
+          <li><strong>Database:</strong> <code>database/sql</code>, Connection Pooling.</li>
+        </ul>
+      </div>
+
+      <!-- PART 7: DSA -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🧠</span> Part 7: DSA (Interview Critical)
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">Focus on patterns, not random problems. Language choice: <strong>Go only</strong>.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Must-Do Patterns</strong>
+            <ul style="margin-top: 5px; margin-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li><a href="patterns/two-pointers.html" style="color: var(--accent-color);">Two Pointers</a></li>
+              <li><a href="patterns/sliding-window.html" style="color: var(--accent-color);">Sliding Window</a></li>
+              <li><a href="patterns/binary-search.html" style="color: var(--accent-color);">Binary Search</a></li>
+              <li><a href="patterns/hash-maps.html" style="color: var(--accent-color);">Hash Maps</a></li>
+              <li><a href="patterns/stack.html" style="color: var(--accent-color);">Stack & Heap</a></li>
+            </ul>
+          </div>
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-green);">Go Expectations</strong>
+            <ul style="margin-top: 5px; margin-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Write clean structs</li>
+              <li>Avoid unnecessary allocations</li>
+              <li>Use slices correctly</li>
+              <li>Explain Time & Space clearly</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 14 DAY PLAN -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📅</span> 14-Day Interview Ready Plan
+        </div>
+        
+        <!-- Day 1-3 -->
+        <div class="collapsible">
+          <strong style="color: var(--callout-blue);">Day 1–3: The Foundation (Core Syntax & Data Structures)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">Concepts Briefly</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Slices:</strong> Dynamic arrays. Think of them as a window into an underlying array. They grow automatically.</li>
+                    <li><strong>Maps:</strong> Key-value storage (Hash Table). Fast lookups O(1). Unordered.</li>
+                    <li><strong>Structs:</strong> Custom data types grouping related fields. No classes, just structs.</li>
+                    <li><strong>Pointers:</strong> Direct memory addresses. Used to share data without copying.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-blue); margin-bottom: 10px;">Real-World Scenarios</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Slices:</strong> Storing a list of active WebSocket connections in a chat room.</li>
+                    <li><strong>Maps:</strong> An in-memory cache storing <code>userID -> UserProfile</code> for fast API responses.</li>
+                    <li><strong>Structs:</strong> Defining the <code>Order</code> payload for a JSON REST API.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-yellow); margin-bottom: 10px;">Ugly vs Clean Code</h3>
+                <div class="code-block"><pre>
+// ❌ Ugly: Returning pointer to slice (unnecessary)
+func getItems() *[]int {
+    s := []int{1, 2}
+    return &s
+}
+
+// ✅ Clean: Return slice directly (it's lightweight)
+func getItems() []int {
+    return []int{1, 2}
+}</pre></div>
+
+                <h3 style="color: var(--callout-purple); margin-bottom: 10px;">Interface Implementation</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 10px;">Go interfaces are implemented implicitly. No <code>implements</code> keyword.</p>
+                <div class="code-block"><pre>
+type Shape interface {
+    Area() float64
+}
+
+type Rect struct { w, h float64 }
+
+// Implicitly implements Shape
+func (r Rect) Area() float64 { return r.w * r.h }</pre></div>
+            </div>
+        </div>
+
+        <!-- Day 4-6 -->
+        <div class="collapsible">
+          <strong style="color: var(--callout-yellow);">Day 4–6: Concurrency Mastery (Goroutines & Channels)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+             <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">Concepts Briefly</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Goroutines:</strong> Functions running concurrently. Extremely cheap (2KB stack).</li>
+                    <li><strong>Channels:</strong> Pipes for goroutines to talk. "Don't communicate by sharing memory, share memory by communicating."</li>
+                    <li><strong>WaitGroup:</strong> Waits for a collection of goroutines to finish.</li>
+                    <li><strong>Mutex:</strong> Locks data so only one goroutine accesses it at a time.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-blue); margin-bottom: 10px;">Real-World Scenarios</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Goroutines:</strong> Handling 10,000 concurrent HTTP requests on a web server.</li>
+                    <li><strong>Channels:</strong> A job queue where an API handler sends tasks to background workers (e.g., email sending).</li>
+                    <li><strong>Mutex:</strong> Updating a global "request counter" safely across multiple threads.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-yellow); margin-bottom: 10px;">Ugly vs Clean Code</h3>
+                <div class="code-block"><pre>
+// ❌ Ugly: Sleep to wait for goroutine
+go doWork()
+time.Sleep(1 * time.Second)
+
+// ✅ Clean: Use WaitGroup
+var wg sync.WaitGroup
+wg.Add(1)
+go func() {
+    defer wg.Done()
+    doWork()
+}()
+wg.Wait()</pre></div>
+
+                <h3 style="color: var(--callout-purple); margin-bottom: 10px;">Select with Timeout Pattern</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 10px;">Essential for preventing goroutine leaks in production.</p>
+                <div class="code-block"><pre>
+select {
+case res := <-ch:
+    fmt.Println("Received:", res)
+case <-time.After(2 * time.Second):
+    fmt.Println("Timeout! Operation took too long.")
+}</pre></div>
+            </div>
+        </div>
+
+        <!-- Day 7-9 -->
+        <div class="collapsible">
+          <strong style="color: var(--callout-green);">Day 7–9: DSA Patterns in Go</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">Concepts Briefly</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Two Pointers:</strong> Using two indices to traverse a sequence (often sorted) to find pairs or reverse.</li>
+                    <li><strong>Sliding Window:</strong> Maintaining a subset of data that moves across the input (e.g., subarray sum).</li>
+                    <li><strong>Hash Maps:</strong> Using a map to track frequency or existence for O(1) checks.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-blue); margin-bottom: 10px;">Real-World Scenarios</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Two Pointers:</strong> Checking if a user's activity log is a palindrome (same sequence start/end).</li>
+                    <li><strong>Sliding Window:</strong> Rate limiting (allowing only 5 requests per 1-minute window).</li>
+                    <li><strong>Hash Maps:</strong> Finding duplicate transactions in a payment stream.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-yellow); margin-bottom: 10px;">Go DSA Idioms</h3>
+                <div class="code-block"><pre>
+// Stack (LIFO) using Slice
+stack := []int{}
+stack = append(stack, 10)    // Push
+val := stack[len(stack)-1]   // Peek
+stack = stack[:len(stack)-1] // Pop
+
+// Queue (FIFO) using Slice
+queue := []int{}
+queue = append(queue, 10) // Enqueue
+val := queue[0]           // Peek
+queue = queue[1:]         // Dequeue</pre></div>
+
+                <h3 style="color: var(--callout-purple); margin-bottom: 10px;">Custom Sorting</h3>
+                <div class="code-block"><pre>
+type User struct { Name string; Age int }
+users := []User{{"Bob", 30}, {"Alice", 25}}
+
+// Sort by Age using sort.Slice
+sort.Slice(users, func(i, j int) bool {
+    return users[i].Age < users[j].Age
+})</pre></div>
+            </div>
+        </div>
+
+        <!-- Day 10-11 -->
+        <div class="collapsible">
+          <strong style="color: var(--callout-purple);">Day 10–11: Backend Development (REST, JSON, Context)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">Concepts Briefly</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>REST API:</strong> Standard way to build web services using HTTP methods (GET, POST).</li>
+                    <li><strong>Context:</strong> Carries deadlines, cancellation signals, and request-scoped values across API boundaries.</li>
+                    <li><strong>JSON:</strong> Standard data format. Go uses struct tags (<code>`json:"name"`</code>) to map fields.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-blue); margin-bottom: 10px;">Real-World Scenarios</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Context:</strong> A user cancels a search request on the frontend; the backend cancels the heavy DB query immediately to save resources.</li>
+                    <li><strong>Middleware:</strong> Authentication middleware that checks a JWT token before allowing access to the handler.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-yellow); margin-bottom: 10px;">Ugly vs Clean Code</h3>
+                <div class="code-block"><pre>
+// ❌ Ugly: Ignoring context
+func handler(w http.ResponseWriter, r *http.Request) {
+    longProcess() // Keeps running even if client disconnects
+}
+
+// ✅ Clean: Respecting context
+func handler(w http.ResponseWriter, r *http.Request) {
+    ctx := r.Context()
+    select {
+    case <-time.After(2 * time.Second):
+        fmt.Fprintln(w, "Done")
+    case <-ctx.Done():
+        fmt.Println("Request cancelled")
+    }
+}</pre></div>
+
+                <h3 style="color: var(--callout-purple); margin-bottom: 10px;">Middleware Pattern</h3>
+                <div class="code-block"><pre>
+func LoggingMiddleware(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        start := time.Now()
+        next.ServeHTTP(w, r)
+        fmt.Printf("%s %s took %v\n", r.Method, r.URL.Path, time.Since(start))
+    })
+}</pre></div>
+            </div>
+        </div>
+
+        <!-- Day 12 -->
+        <div class="collapsible">
+          <strong style="color: var(--text-primary);">Day 12: System Design Basics</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--text-primary); margin-bottom: 10px;">Concepts Briefly</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px; margin-bottom: 15px;">
+                    <li><strong>Microservices:</strong> Breaking a large app into small, independent services. Go is perfect for this (small binaries, fast).</li>
+                    <li><strong>Load Balancing:</strong> Distributing traffic across servers.</li>
+                    <li><strong>gRPC:</strong> High-performance RPC framework, often used between Go microservices.</li>
+                </ul>
+
+                <h3 style="color: var(--callout-blue); margin-bottom: 10px;">Real-World Scenarios</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px;">
+                    <li><strong>Microservices:</strong> Amazon's "Order Service" (Go) talking to "Inventory Service" (Java) via gRPC.</li>
+                    <li><strong>Containerization:</strong> Packaging a Go binary in a 5MB Docker container (scratch image) for Kubernetes deployment.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Day 13-14 -->
+        <div class="collapsible">
+          <strong style="color: var(--callout-red);">Day 13–14: Mock & Revise</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <div style="padding: 15px; background-color: var(--bg-tertiary); border-radius: 8px; margin-bottom: 15px;">
+                <h3 style="color: var(--callout-red); margin-bottom: 10px;">Final Checklist</h3>
+                <ul style="color: var(--text-secondary); margin-left: 20px;">
+                    <li><strong>Defer:</strong> Do you close files/bodies? (<code>defer f.Close()</code>)</li>
+                    <li><strong>Panic:</strong> Do you avoid panic in production? Use error returns.</li>
+                    <li><strong>Race:</strong> Did you run <code>go test -race</code>?</li>
+                    <li><strong>Errors:</strong> Do you wrap errors for context? (<code>fmt.Errorf("db: %w", err)</code>)</li>
+                </ul>
+
+                <h3 style="color: var(--callout-purple); margin-bottom: 10px;">Classic Gotcha: Loop Variables</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 10px;">Before Go 1.22, loop variables were shared per iteration.</p>
+                <div class="code-block"><pre>
+// ❌ Wrong (prints same value)
+for _, v := range values {
+    go func() { fmt.Println(v) }()
+}
+
+// ✅ Correct (pass as arg)
+for _, v := range values {
+    go func(val int) { fmt.Println(val) }(v)
+}</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <div class="section" style="margin-bottom: 80px;">
+        <div class="callout interview-tip">
+          <div class="callout-title">Final Advice</div>
+          <div class="callout-content">
+            <p><strong>Structure your answers:</strong> Clarify → Brute Force → Optimized → Code → Complexity.</p>
+            <p><strong>Avoid:</strong> Over-engineering, forgetting edge cases, and panicking on concurrency.</p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

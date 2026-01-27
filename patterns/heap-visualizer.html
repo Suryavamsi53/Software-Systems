@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Min-Heap Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;
+            --compare: #fb923c;
+            --success: #22c55e;
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 400px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        circle {
+            fill: var(--panel);
+            stroke: var(--primary);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        text {
+            fill: var(--text);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Array View */
+        .array-view {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            background-color: var(--panel);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .array-index {
+            position: absolute;
+            bottom: -20px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        input {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            width: 80px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            min-height: 60px;
+        }
+
+        /* Animation Classes */
+        .highlight { stroke: var(--active) !important; fill: rgba(250, 204, 21, 0.1); }
+        .compare { stroke: var(--compare) !important; }
+        .cell-active { background-color: var(--active); color: var(--bg); }
+        .cell-compare { background-color: var(--compare); color: var(--bg); }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Min-Heap Visualization</h1>
+            <div class="subtitle">Tree and Array Representation</div>
+        </header>
+
+        <div class="viz-container">
+            <svg id="heap-svg"></svg>
+        </div>
+
+        <div class="array-view" id="array-view">
+            <!-- Array cells injected here -->
+        </div>
+
+        <div class="controls">
+            <input type="number" id="val-input" placeholder="Value" max="999">
+            <button class="primary" onclick="insertVal()">Insert</button>
+            <button onclick="extractMin()">Extract Min</button>
+            <button onclick="resetHeap()">Reset</button>
+        </div>
+
+        <div class="info-panel" id="status-text">
+            Ready. Min-Heap property: Parent <= Children.
+        </div>
+    </div>
+
+    <script>
+        let heap = [10, 20, 15, 30, 40];
+        const svg = document.getElementById('heap-svg');
+        const arrayView = document.getElementById('array-view');
+        const statusText = document.getElementById('status-text');
+        const input = document.getElementById('val-input');
+        const NODE_RADIUS = 20;
+        const VERTICAL_SPACING = 60;
+
+        function init() {
+            draw();
+        }
+
+        function insertVal() {
+            const val = parseInt(input.value);
+            if (isNaN(val)) return;
+            animateInsert(val);
+            input.value = '';
+        }
+
+        function extractMin() {
+            if (heap.length === 0) return;
+            animateExtractMin();
+        }
+
+        function resetHeap() {
+            heap = [10, 20, 15, 30, 40];
+            draw();
+            statusText.textContent = "Heap reset.";
+        }
+
+        // Drawing Logic
+        function draw() {
+            drawTree();
+            drawArray();
+        }
+
+        function drawArray() {
+            arrayView.innerHTML = '';
+            heap.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.id = `cell-${idx}`;
+                cell.innerHTML = `${val}<span class="array-index">${idx}</span>`;
+                arrayView.appendChild(cell);
+            });
+        }
+
+        function drawTree() {
+            svg.innerHTML = '';
+            if (heap.length === 0) return;
+
+            // Calculate positions
+            const positions = [];
+            const levels = Math.floor(Math.log2(heap.length)) + 1;
+            
+            for (let i = 0; i < heap.length; i++) {
+                const level = Math.floor(Math.log2(i + 1));
+                const posInLevel = i - Math.pow(2, level) + 1;
+                const totalInLevel = Math.pow(2, level);
+                
+                // Width of canvas divided by (nodes in this level + 1)
+                // Simple layout logic
+                const width = 900;
+                const x = (width / (totalInLevel + 1)) * (posInLevel + 1);
+                const y = 50 + level * VERTICAL_SPACING;
+                positions.push({x, y});
+            }
+
+            // Draw Edges
+            for (let i = 1; i < heap.length; i++) {
+                const parentIdx = Math.floor((i - 1) / 2);
+                const start = positions[parentIdx];
+                const end = positions[i];
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", start.x);
+                line.setAttribute("y1", start.y);
+                line.setAttribute("x2", end.x);
+                line.setAttribute("y2", end.y);
+                svg.appendChild(line);
+            }
+
+            // Draw Nodes
+            positions.forEach((pos, idx) => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("id", `node-${idx}`);
+                
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", pos.x);
+                circle.setAttribute("cy", pos.y);
+                circle.setAttribute("r", NODE_RADIUS);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", pos.x);
+                text.setAttribute("y", pos.y);
+                text.textContent = heap[idx];
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                svg.appendChild(g);
+            });
+        }
+
+        // Animations
+        async function animateInsert(val) {
+            heap.push(val);
+            draw();
+            
+            let idx = heap.length - 1;
+            highlight(idx, 'highlight');
+            statusText.textContent = `Inserted ${val} at end. Bubbling up...`;
+            await sleep(800);
+
+            while (idx > 0) {
+                let parentIdx = Math.floor((idx - 1) / 2);
+                
+                highlight(idx, 'highlight');
+                highlight(parentIdx, 'compare');
+                statusText.textContent = `Comparing ${heap[idx]} with parent ${heap[parentIdx]}`;
+                await sleep(800);
+
+                if (heap[idx] < heap[parentIdx]) {
+                    // Swap
+                    [heap[idx], heap[parentIdx]] = [heap[parentIdx], heap[idx]];
+                    draw();
+                    highlight(parentIdx, 'highlight'); // New position
+                    statusText.textContent = `Swapped!`;
+                    await sleep(600);
+                    idx = parentIdx;
+                } else {
+                    statusText.textContent = `Heap property satisfied.`;
+                    break;
+                }
+            }
+            unhighlightAll();
+        }
+
+        async function animateExtractMin() {
+            const min = heap[0];
+            const last = heap.pop();
+            
+            if (heap.length > 0) {
+                heap[0] = last;
+                draw();
+                statusText.textContent = `Removed min ${min}. Moved last element ${last} to root. Bubbling down...`;
+                
+                let idx = 0;
+                highlight(idx, 'highlight');
+                await sleep(800);
+
+                while (true) {
+                    let left = 2 * idx + 1;
+                    let right = 2 * idx + 2;
+                    let smallest = idx;
+
+                    if (left < heap.length && heap[left] < heap[smallest]) smallest = left;
+                    if (right < heap.length && heap[right] < heap[smallest]) smallest = right;
+
+                    if (smallest !== idx) {
+                        highlight(idx, 'compare');
+                        highlight(smallest, 'highlight');
+                        statusText.textContent = `Swapping with smaller child ${heap[smallest]}`;
+                        await sleep(800);
+
+                        [heap[idx], heap[smallest]] = [heap[smallest], heap[idx]];
+                        draw();
+                        idx = smallest;
+                        highlight(idx, 'highlight');
+                        await sleep(600);
+                    } else {
+                        break;
+                    }
+                }
+            } else {
+                draw();
+                statusText.textContent = `Removed last element ${min}. Heap empty.`;
+            }
+            unhighlightAll();
+        }
+
+        function highlight(idx, className) {
+            const node = document.getElementById(`node-${idx}`);
+            const cell = document.getElementById(`cell-${idx}`);
+            if (node) node.querySelector('circle').classList.add(className);
+            if (cell) cell.classList.add(className === 'highlight' ? 'cell-active' : 'cell-compare');
+        }
+
+        function unhighlightAll() {
+            document.querySelectorAll('circle').forEach(c => c.classList.remove('highlight', 'compare'));
+            document.querySelectorAll('.array-cell').forEach(c => c.classList.remove('cell-active', 'cell-compare'));
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        init();
+    </script>
+</body>
+</html>

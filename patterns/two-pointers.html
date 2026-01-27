@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two Pointers Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="../go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="../golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="../mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="../dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item active" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Two Pointers Pattern</h1>
+        <p>Master the most fundamental array manipulation technique in Amazon interviews</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Sorted array or string</li>
+              <li>Need to find pair/triplet</li>
+              <li>Compare two elements</li>
+              <li>Reverse or rearrange</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Find pair that sums to target</li>
+              <li>Remove duplicates</li>
+              <li>Container with most capacity</li>
+              <li>Valid palindrome check</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>O(n) time complexity</li>
+              <li>O(1) space (no extra array)</li>
+              <li>In-place modification needed</li>
+              <li>No sorting allowed</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Understanding of arrays and how to access elements by index</li>
+              <li>Basic loop control (while loops, break/continue)</li>
+              <li>Comparison operators and logical conditions (==, !=, <, >, &&, ||)</li>
+              <li>Function return values and how to return multiple results</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Moving two independent pointers left and right simultaneously</li>
+              <li>Deciding when to move left pointer vs right pointer based on condition</li>
+              <li>Recognizing problems where sorted or split arrays benefit from two pointers</li>
+              <li>Handling edge cases: empty arrays, single elements, duplicates</li>
+              <li>Writing O(1) space solutions without extra data structures</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);\">\"Two independent pointers exploring from different directions—when one pointer finds what we're looking for on its side, the other follows or adjusts accordingly.\"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 1: WHAT AMAZON EXPECTS -->
+      <div class="section" id="amazon-expects">
+        <div class="section-title">
+          <span class="emoji">✅</span> 1. What Amazon EXPECTS
+        </div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">✅ Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Problem recognition:</strong> Can you identify when two pointers apply?</li>
+              <li><strong>Pointer movement logic:</strong> Do you understand when to move left vs right?</li>
+              <li><strong>Efficiency:</strong> Linear O(n) time, ideally O(1) space</li>
+              <li><strong>Communication:</strong> Explain WHY you move each pointer, not just that you do</li>
+              <li><strong>Edge cases:</strong> Handle duplicates, empty arrays, single elements</li>
+              <li><strong>No sorting unless stated:</strong> Many problems expect original order</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout interview-tip" style="margin-top: 20px;">
+          <div class="callout-title">⭐ When Interviewer is Satisfied</div>
+          <div class="callout-content">
+            <ul>
+              <li>You state the expected complexity upfront</li>
+              <li>You explain the two-pointer strategy before coding</li>
+              <li>Your code is clean, variable names are meaningful</li>
+              <li>You trace through an example step-by-step</li>
+              <li>You mention edge cases and handle them</li>
+              <li>You can answer: "What if data is too large for memory?" → pointer approach is still O(1) space</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: CORE CONCEPT THEORY -->
+      <div class="section" id="core-concept">
+        <div class="section-title">
+          <span class="emoji">🧠</span> 2. Core Concept Theory
+        </div>
+        
+        <div class="callout key-intuition">
+          <div class="callout-title">🧠 What The Pattern Actually Solves</div>
+          <div class="callout-content">
+            <p><strong>Two Pointers</strong> is a technique to traverse an array/string with two references simultaneously, moving them toward each other or in the same direction based on the problem logic.</p>
+            <p style="margin-top: 12px;"><strong>Why it works:</strong> By controlling both ends or both speeds, you can find pairs, detect cycles, or solve matching problems in a single pass.</p>
+            <p style="margin-top: 12px;"><strong>Core insight:</strong> Instead of nested loops O(n²), two pointers often solve it in O(n) with one loop.</p>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-blue);">🔷 Recognition Keywords:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li>"Find a pair that sums to target"</li>
+            <li>"Container with most water"</li>
+            <li>"Remove duplicates in-place"</li>
+            <li>"Reverse a string/array"</li>
+            <li>"Move all zeros to end"</li>
+            <li>"Partition array by a value"</li>
+            <li>"Sorted array, find matching pairs"</li>
+          </ul>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-red);">🔴 When NOT to Use Two Pointers:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li>Problem requires finding all combinations (use backtracking)</li>
+            <li>You need to preserve original order AND modify (use hash map)</li>
+            <li>Problem is on 2D matrix (use different pattern)</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SECTION 3: REAL-WORLD AMAZON SCENARIO -->
+      <div class="section" id="real-world">
+        <div class="section-title">
+          <span class="emoji">🎯</span> 3. Real-World Amazon Scenario
+        </div>
+        
+        <div class="callout interview-tip">
+          <div class="callout-title">⭐ Request Rate Limiting (Real Amazon Use Case)</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> Amazon has request logs from millions of users. For each minute, you need to find if any two requests from the SAME user are closer than 5 seconds apart (rate limit violation).</p>
+            <p style="margin-top: 12px;"><strong>Input:</strong> Array of (user_id, timestamp) pairs, already sorted by user_id, then timestamp</p>
+            <p style="margin-top: 12px;"><strong>Output:</strong> Boolean: Are there any violations?</p>
+            <p style="margin-top: 12px;"><strong>Why two pointers works:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>Data is sorted by user_id → can group with one pointer</li>
+              <li>For each user, compare consecutive timestamps with two pointers</li>
+              <li>No nested loops needed</li>
+              <li>O(n) time, O(1) space</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-yellow);">Other Amazon Real-World Examples:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li><strong>Matching Delivery Partners:</strong> Match cheapest and fastest delivery pairs from sorted list</li>
+            <li><strong>Payment Processing:</strong> Find if two transactions match (expected vs actual) in O(n) time</li>
+            <li><strong>Inventory Reconciliation:</strong> Find discrepancies between two sorted inventory lists</li>
+            <li><strong>User Engagement:</strong> Find pairs of timestamps from different events that correlate</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SECTION 4: VISUAL EXPLANATION -->
+      <div class="section" id="visual">
+        <div class="section-title">
+          <span class="emoji">🖼️</span> 4. Visual / Image Explanation
+        </div>
+
+        <!-- GIF Animation: Two Sum Example -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Two Pointers Finding Target Sum (GIF Animation)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">This animation shows how two pointers approach each other to find a pair that sums to the target.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f5f5f5'/%3E%3Ctext x='400' y='30' font-size='24' font-weight='bold' text-anchor='middle' fill='%23333'%3ETwo Sum: Find Pair that Sums to 9%3C/text%3E%3Ctext x='400' y='60' font-size='14' text-anchor='middle' fill='%23666'%3EArray: [2, 7, 11, 15]%3C/text%3E%3Crect x='50' y='80' width='50' height='50' fill='%232563eb' stroke='%231e40af' stroke-width='2'/%3E%3Ctext x='75' y='112' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3E2%3C/text%3E%3Crect x='130' y='80' width='50' height='50' fill='%233b82f6' stroke='%232563eb' stroke-width='2'/%3E%3Ctext x='155' y='112' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3E7%3C/text%3E%3Crect x='210' y='80' width='50' height='50' fill='%239ca3af' stroke='%236b7280' stroke-width='1'/%3E%3Ctext x='235' y='112' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3E11%3C/text%3E%3Crect x='290' y='80' width='50' height='50' fill='%23ef4444' stroke='%23dc2626' stroke-width='2'/%3E%3Ctext x='315' y='112' font-size='20' font-weight='bold' text-anchor='middle' fill='white'%3E15%3C/text%3E%3Ctext x='75' y='150' font-size='12' text-anchor='middle' fill='%232563eb' font-weight='bold'%3ELEFT%3C/text%3E%3Ctext x='315' y='150' font-size='12' text-anchor='middle' fill='%23ef4444' font-weight='bold'%3ERIGHT%3C/text%3E%3Ctext x='400' y='190' font-size='14' text-anchor='middle' fill='%23333'%3ESum = 2 + 15 = 17 (too large, move RIGHT left)%3C/text%3E%3Ctext x='400' y='220' font-size='14' text-anchor='middle' fill='%233b82f6'%3ENext: Check [2, 11] = 13 → Then [2, 7] = 9 ✓ FOUND%3C/text%3E%3C/svg%3E" style="width: 100%; max-width: 600px; margin: 0 auto; display: block;" alt="Two pointers converging to find sum"/>
+        
+        <div class="diagram">
+Array: [2, 7, 11, 15]
+Target: 9
+
+Step 1: Start with left=0, right=3
+        L              R
+        2       7     11      15
+
+Step 2: Check sum = 2 + 15 = 17 (too large)
+        Move RIGHT pointer LEFT because sum is too big
+        
+Step 3: left=0, right=2
+        L           R
+        2       7  11      15
+        Sum = 2 + 11 = 13 (still too large)
+        Move RIGHT pointer LEFT
+
+Step 4: left=0, right=1
+        L       R
+        2       7   11      15
+        Sum = 2 + 7 = 9 ✅ FOUND!
+        
+        Return indices: [0, 1]
+        </div>
+
+        <!-- ASCII Walkthrough -->
+        <p style="margin-bottom: 15px; margin-top: 25px; color: var(--text-secondary);">Step-by-Step Walkthrough:</p>
+        
+        <div class="diagram">
+Array: ['h', 'e', 'l', 'l', 'o']
+
+Start: L and R at opposite ends
+       L                    R
+       h     e     l     l     o
+
+Swap: ['o', 'e', 'l', 'l', 'h']
+      Move L→ and R← inward
+
+After 1st iteration:
+              L           R
+       o     e     l     l     h
+
+Continue until L >= R
+Final: ['o', 'l', 'l', 'e', 'h']
+        </div>
+
+        <!-- GIF Animation: Reverse Array In-Place -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Reversing Array In-Place (GIF Animation)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Two pointers start at opposite ends and swap elements while moving inward, reversing the array in O(1) space.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 350'%3E%3Crect width='800' height='350' fill='%23f5f5f5'/%3E%3Ctext x='400' y='30' font-size='24' font-weight='bold' text-anchor='middle' fill='%23333'%3EReverse Array In-Place%3C/text%3E%3Ctext x='400' y='60' font-size='14' text-anchor='middle' fill='%23666'%3EArray: [h, e, l, l, o]%3C/text%3E%3Ctext x='50' y='90' font-size='12' font-weight='bold' fill='%23333'%3EStep 1: Swap ends%3C/text%3E%3Crect x='50' y='100' width='40' height='40' fill='%23ef4444' stroke='%23dc2626' stroke-width='2'/%3E%3Ctext x='70' y='128' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3Eh%3C/text%3E%3Crect x='100' y='100' width='40' height='40' fill='%239ca3af'/%3E%3Ctext x='120' y='128' font-size='18' text-anchor='middle' fill='white'%3Ee%3C/text%3E%3Crect x='150' y='100' width='40' height='40' fill='%239ca3af'/%3E%3Ctext x='170' y='128' font-size='18' text-anchor='middle' fill='white'%3El%3C/text%3E%3Crect x='200' y='100' width='40' height='40' fill='%239ca3af'/%3E%3Ctext x='220' y='128' font-size='18' text-anchor='middle' fill='white'%3El%3C/text%3E%3Crect x='250' y='100' width='40' height='40' fill='%231f2937' stroke='%23111827' stroke-width='2'/%3E%3Ctext x='270' y='128' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3Eo%3C/text%3E%3Ctext x='50' y='170' font-size='12' fill='%23666'%3EPointers move inward:%3C/text%3E%3Ctext x='50' y='190' font-size='11' fill='%23666'%3ELeft ↑ | Right ↓%3C/text%3E%3Crect x='50' y='205' width='40' height='40' fill='%231f2937' stroke='%23111827' stroke-width='2'/%3E%3Ctext x='70' y='233' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3Eo%3C/text%3E%3Crect x='100' y='205' width='40' height='40' fill='%23ef4444' stroke='%23dc2626' stroke-width='1'/%3E%3Ctext x='120' y='233' font-size='18' text-anchor='middle' fill='white'%3El%3C/text%3E%3Crect x='150' y='205' width='40' height='40' fill='%239ca3af'/%3E%3Ctext x='170' y='233' font-size='18' text-anchor='middle' fill='white'%3El%3C/text%3E%3Crect x='200' y='205' width='40' height='40' fill='%23ef4444' stroke='%23dc2626' stroke-width='1'/%3E%3Ctext x='220' y='233' font-size='18' text-anchor='middle' fill='white'%3Ee%3C/text%3E%3Crect x='250' y='205' width='40' height='40' fill='%23ef4444' stroke='%23dc2626' stroke-width='2'/%3E%3Ctext x='270' y='233' font-size='18' font-weight='bold' text-anchor='middle' fill='white'%3Eh%3C/text%3E%3Ctext x='50' y='290' font-size='12' fill='%23333' font-weight='bold'%3EFinal: [o, l, l, e, h] ✓%3C/text%3E%3Ctext x='50' y='315' font-size='11' fill='%23666'%3ECompleted in O(n) time, O(1) space%3C/text%3E%3C/svg%3E" style="width: 100%; max-width: 600px; margin: 0 auto; display: block;" alt="Reversing array with two pointers"/>
+      </div>
+
+      <!-- SECTION 5: CANONICAL AMAZON PROBLEM -->
+      <div class="section" id="canonical-problem">
+        <div class="section-title">
+          <span class="emoji">🧩</span> 5. Canonical Amazon Problem
+        </div>
+        
+        <div class="callout amazon-expects">
+          <div class="callout-title">✅ Container With Most Water (LeetCode 11 - VERY Common at Amazon)</div>
+          <div class="callout-content">
+            <p><strong>Problem Statement:</strong></p>
+            <p style="margin-top: 10px;">You are given an integer array <code>height</code> of length <code>n</code>. There are n vertical lines drawn such that the two endpoints of the i-th line are (i, 0) and (i, height[i]).</p>
+            <p style="margin-top: 10px;">Find two lines that together with the x-axis form a container, such that the container contains the most water.</p>
+            
+            <p style="margin-top: 15px;"><strong>Constraints:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>2 ≤ n ≤ 10^5</li>
+              <li>0 ≤ height[i] ≤ 10^4</li>
+            </ul>
+
+            <p style="margin-top: 15px;"><strong>Example 1:</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; font-family: monospace;">
+              Input: height = [1,8,6,2,5,4,8,3,7]<br/>
+              Output: 49<br/>
+              Explanation: The vertical lines are at indices 1 and 8.<br/>
+              Water capacity = min(8, 7) × (8 - 1) = 7 × 7 = 49
+            </div>
+
+            <p style="margin-top: 15px;"><strong>Why Amazon Likes This:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>Tests understanding of constraint optimization</li>
+              <li>Two pointers is optimal; brute force is obvious but too slow</li>
+              <li>Requires mathematical thinking (why move certain pointer)</li>
+              <li>Easy to get O(n²) wrong, hard to get O(n) right without guidance</li>
+              <li>Good follow-up questions possible (what if inverted, rotated, etc.)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 6: BRUTE FORCE → WHY IT FAILS -->
+      <div class="section" id="brute-force">
+        <div class="section-title">
+          <span class="emoji">🔴</span> 6. Brute Force → Why It Fails
+        </div>
+        
+        <div class="callout common-mistakes">
+          <div class="callout-title">🔴 Naive Nested Loop Approach</div>
+          <div class="callout-content">
+            <div class="code-block"><pre>// Brute Force - WRONG for Amazon
+// Check every pair (i, j)
+func maxArea(height []int) int {
+    maxWater := 0
+    for i := 0; i < len(height); i++ {
+        for j := i + 1; j < len(height); j++ {
+            // Calculate area for this pair
+            width := j - i
+            h := min(height[i], height[j])
+            area := width * h
+            if area > maxWater {
+                maxWater = area
+            }
+        }
+    }
+    return maxWater
+}
+
+// Time: O(n²) - For n=10^5, this is 10^10 operations!
+// Space: O(1)</pre></div>
+
+            <p style="margin-top: 15px;"><strong>🔴 Why Amazon Rejects This:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li><strong>Timeout:</strong> With n up to 100,000, O(n²) will TLE (Time Limit Exceeded)</li>
+              <li><strong>Signals:</strong> Shows you didn't think about optimization</li>
+              <li><strong>Brute force is fine as starting point:</strong> But you must optimize from there</li>
+              <li><strong>No interviewer patience:</strong> They'll stop you and say "Can you do better?"</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 7: OPTIMIZED SOLUTION (GO) -->
+      <div class="section" id="optimized-solution">
+        <div class="section-title">
+          <span class="emoji">🟢</span> 7. Optimized Solution (Go)
+        </div>
+        
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="color: var(--callout-green);">✅ Two Pointers Approach - O(n) Time, O(1) Space</strong>
+          <div style="margin-top: 12px; color: var(--text-secondary);">Start with pointers at both ends. Move the pointer pointing to the shorter line inward. This guarantees we won't miss the optimal solution.</div>
+        </div>
+
+        <div class="code-block"><pre>package main
+
+import "fmt"
+
+// Container With Most Water - Optimized Two Pointers
+func maxArea(height []int) int {
+    // Early exit: edge case
+    if len(height) < 2 {
+        return 0
+    }
+    
+    // Initialize pointers at both ends
+    left := 0
+    right := len(height) - 1
+    maxWater := 0
+    
+    // Converge inward
+    for left < right {
+        // Calculate area with current pair
+        width := right - left
+        h := height[left]
+        if height[right] < h {
+            h = height[right]  // Use min(left, right)
+        }
+        area := width * h
+        
+        // Update maximum
+        if area > maxWater {
+            maxWater = area
+        }
+        
+        // Move the pointer pointing to SHORTER line
+        // Why? Because moving the taller one can't increase area
+        // (width decreases, height is limited by shorter line)
+        if height[left] < height[right] {
+            left++  // Move shorter pointer
+        } else {
+            right--  // Move shorter pointer
+        }
+    }
+    
+    return maxWater
+}
+
+// Helper function for minimum
+func min(a, b int) int {
+    if a < b {
+        return a
+    }
+    return b
+}
+
+func main() {
+    // Example 1
+    height1 := []int{1, 8, 6, 2, 5, 4, 8, 3, 7}
+    fmt.Println(maxArea(height1))  // Output: 49
+    
+    // Example 2: Edge case - two elements
+    height2 := []int{2, 3}
+    fmt.Println(maxArea(height2))  // Output: 2
+    
+    // Example 3: All same height
+    height3 := []int{5, 5, 5, 5, 5}
+    fmt.Println(maxArea(height3))  // Output: 20 (any pair except first and last)
+}</pre></div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-blue);">💡 Key Code Comments Explained:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li><strong>"Move the pointer pointing to SHORTER line":</strong> This is the crucial insight. If we move the taller pointer inward, width decreases and height stays limited by the shorter line → area can only decrease or stay same.</li>
+            <li><strong>"Using min(left, right)":</strong> Water container height is limited by the shorter wall</li>
+            <li><strong>One pass through array:</strong> We're guaranteed to find optimal because we explore all promising pairs</li>
+          </ul>
+        </div>
+
+        <div class="callout key-intuition" style="margin-top: 20px;">
+          <div class="callout-title">🧠 Mathematical Proof of Correctness</div>
+          <div class="callout-content">
+            <p><strong>Claim:</strong> We never skip the optimal solution by moving the shorter pointer.</p>
+            <p style="margin-top: 12px;"><strong>Proof:</strong> Suppose optimal solution is (i, j) with i < j. If during our algorithm we skip this pair:</p>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+              <li>We moved because height[left] or height[right] was shorter</li>
+              <li>If we moved left pointer past i: area(i, j) ≤ area we found (width was smaller or equal, height limited by min)</li>
+              <li>If we moved right pointer past j: similar logic applies</li>
+              <li>Thus, we never miss the optimal by this greedy movement</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 8: LOGICAL WALKTHROUGH -->
+      <div class="section" id="walkthrough">
+        <div class="section-title">
+          <span class="emoji">🧩</span> 8. Logical Walkthrough
+        </div>
+        
+        <p style="margin-bottom: 20px; color: var(--text-secondary);">Let's trace through with example: height = [1,8,6,2,5,4,8,3,7]</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Iteration</th>
+              <th>Left (idx)</th>
+              <th>Right (idx)</th>
+              <th>Height @ Left</th>
+              <th>Height @ Right</th>
+              <th>Width</th>
+              <th>Min Height</th>
+              <th>Area</th>
+              <th>Max So Far</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>0</td>
+              <td>0</td>
+              <td>8</td>
+              <td>1</td>
+              <td>7</td>
+              <td>8</td>
+              <td>1</td>
+              <td>8</td>
+              <td>8</td>
+              <td>height[0]=1 is shorter → move left++</td>
+            </tr>
+            <tr>
+              <td>1</td>
+              <td>1</td>
+              <td>8</td>
+              <td>8</td>
+              <td>7</td>
+              <td>7</td>
+              <td>7</td>
+              <td>49</td>
+              <td><strong>49 ✅</strong></td>
+              <td>height[8]=7 is shorter → move right--</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>1</td>
+              <td>7</td>
+              <td>8</td>
+              <td>3</td>
+              <td>6</td>
+              <td>3</td>
+              <td>18</td>
+              <td>49</td>
+              <td>height[7]=3 is shorter → move right--</td>
+            </tr>
+            <tr>
+              <td>3</td>
+              <td>1</td>
+              <td>6</td>
+              <td>8</td>
+              <td>8</td>
+              <td>5</td>
+              <td>8</td>
+              <td>40</td>
+              <td>49</td>
+              <td>Equal heights → move right--</td>
+            </tr>
+            <tr>
+              <td>4</td>
+              <td>1</td>
+              <td>5</td>
+              <td>8</td>
+              <td>4</td>
+              <td>4</td>
+              <td>4</td>
+              <td>16</td>
+              <td>49</td>
+              <td>height[5]=4 is shorter → move right--</td>
+            </tr>
+            <tr>
+              <td>5</td>
+              <td>1</td>
+              <td>4</td>
+              <td>8</td>
+              <td>5</td>
+              <td>3</td>
+              <td>5</td>
+              <td>15</td>
+              <td>49</td>
+              <td>height[4]=5 is shorter → move right--</td>
+            </tr>
+            <tr>
+              <td>6</td>
+              <td>1</td>
+              <td>3</td>
+              <td>8</td>
+              <td>2</td>
+              <td>2</td>
+              <td>2</td>
+              <td>4</td>
+              <td>49</td>
+              <td>left >= right → STOP</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top: 20px; color: var(--text-secondary);"><strong>Result:</strong> Maximum water area found at iteration 1 = 49</p>
+        <p style="color: var(--text-secondary);">The pair is indices 1 and 8: height[1]=8, height[8]=7, width=7, min=7, area=49 ✅</p>
+      </div>
+
+      <!-- SECTION 9: COMPLEXITY ANALYSIS -->
+      <div class="section" id="complexity">
+        <div class="section-title">
+          <span class="emoji">⚙️</span> 9. Complexity Analysis
+        </div>
+        
+        <div class="callout amazon-expects">
+          <div class="callout-title">✅ Time & Space Complexity</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(n)</strong></p>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+              <li>Single pass through array with two pointers</li>
+              <li>Each element is visited at most once</li>
+              <li>Left pointer moves right, right pointer moves left</li>
+              <li>They converge: left + right ≤ array length iterations</li>
+            </ul>
+
+            <p style="margin-top: 15px;"><strong>Space Complexity: O(1)</strong></p>
+            <ul style="margin-top: 10px; margin-left: 20px;">
+              <li>Only using pointer variables (left, right, maxWater)</li>
+              <li>No extra data structures (arrays, hash maps, queues)</li>
+              <li>Perfect for memory-constrained environments</li>
+            </ul>
+
+            <p style="margin-top: 15px;"><strong>Compared to Brute Force:</strong></p>
+            <ul style="margin-left: 20px; margin-top: 8px;">
+              <li>Brute Force: O(n²) time → For n=100,000: 10 billion operations → TLE</li>
+              <li>Two Pointers: O(n) time → For n=100,000: 100,000 operations → ✅ Accepted</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-blue);">Why This Meets Amazon's Bar:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li><strong>Linear time:</strong> Processes data in single pass</li>
+            <li><strong>Constant space:</strong> Works with huge datasets without memory overhead</li>
+            <li><strong>Scalable:</strong> 100,000 elements → 1,000,000 elements, performance barely changes</li>
+            <li><strong>Production-ready:</strong> Amazon can use this in actual microservices</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- SECTION 10: AMAZON FOLLOW-UP QUESTIONS -->
+      <div class="section" id="followups">
+        <div class="section-title">
+          <span class="emoji">🟣</span> 10. Amazon Follow-Up Questions
+        </div>
+        
+        <div class="callout advanced-followup">
+          <div class="callout-title">🟣 Advanced Questions Amazon Will Ask</div>
+          <div class="callout-content">
+            <p><strong>Q1: "What if the input is a stream (you can't see all data upfront)?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> Two-pointer doesn't work on streams. You'd need a sliding window with a deque or segment tree. However, if the stream is sorted, you could maintain pointers to sliding window and recalculate max dynamically.</p>
+            </div>
+
+            <p><strong>Q2: "What if we have memory constraints and can only store O(log n) space?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> Still works! O(log n) is fine for a few pointers and variables. The two-pointer approach is still O(1) space, which is better than O(log n).</p>
+            </div>
+
+            <p><strong>Q3: "Can we parallelize this? What if data is on different servers?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> This specific problem is hard to parallelize because two-pointers are inherently sequential. However, if we had to: split data into chunks, solve independently with local two-pointers, then merge results. Trade-off: communication overhead vs compute speedup.</p>
+            </div>
+
+            <p><strong>Q4: "What if the heights are floating-point numbers instead of integers?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> Algorithm doesn't change. Just use float type. Be careful with floating-point comparison (use epsilon for equality checks). Complexity remains O(n).</p>
+            </div>
+
+            <p><strong>Q5: "What if we want to return the actual indices, not just the area?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> Store indices instead of area values. When we find new max area, save (leftIndex, rightIndex). Return pair instead of int. Complexity still O(n) time, O(1) space (ignoring return value size).</p>
+            </div>
+
+            <p><strong>Q6: "What if we need to find the top-K containers with most water?"</strong></p>
+            <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">
+              <p><strong>A:</strong> Modify to store all (area, indices) pairs in a max-heap. After single two-pointer pass, extract top-K. Time: O(n + k log n), Space: O(n) for heap.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
+          <strong style="color: var(--callout-purple);">Pro Tip for Following Up:</strong>
+          <ul style="margin-top: 12px; margin-left: 20px;">
+            <li>When interviewer asks follow-up, acknowledge the constraint change</li>
+            <li>Say: "With [new constraint], the two-pointer approach doesn't directly apply. We'd need to..."</li>
+            <li>Show flexibility: many patterns can adapt or combine</li>
+            <li>Always mention complexity of new approach</li>
+            <li>If unsure, ask: "Should we optimize for time or space with this new constraint?"</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ADDITIONAL: OTHER CLASSIC TWO-POINTER PROBLEMS -->
+      <div class="section" id="bonus">
+        <div class="section-title">
+          <span class="emoji">🎁</span> Bonus: Other Classic Two-Pointer Problems
+        </div>
+        
+        <p style="margin-bottom: 20px; color: var(--text-secondary);">Master these to solidify your two-pointer foundation:</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Two Sum II (Sorted Array)</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Find indices of two numbers that sum to target in sorted array. Return 1-indexed.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Remove Duplicates From Sorted Array</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Remove duplicates in-place, return new length. Keep only unique elements.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Reverse String</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Reverse character array in-place using two pointers.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Valid Palindrome</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Check if string is palindrome, ignoring non-alphanumeric chars.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Move Zeros to End</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Move all zeros to end, preserve order of non-zero elements.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--callout-blue);">Partition Array</strong>
+            <p style="margin-top: 8px; font-size: 0.9rem; color: var(--text-secondary);">Partition by pivot: elements < pivot on left, >= on right.</p>
+            <p style="margin-top: 8px; font-size: 0.85rem;"><code>Time: O(n), Space: O(1)</code></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#125</strong> - Valid Palindrome</li>
+              <li style="margin-bottom: 12px;"><strong>#167</strong> - Two Sum II</li>
+              <li style="margin-bottom: 12px;"><strong>#344</strong> - Reverse String</li>
+              <li style="margin-bottom: 12px;"><strong>#557</strong> - Reverse Words in String III</li>
+              <li style="margin-bottom: 12px;"><strong>#881</strong> - Boats to Save People</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#15</strong> - 3Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#16</strong> - 3Sum Closest</li>
+              <li style="margin-bottom: 12px;"><strong>#18</strong> - 4Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#142</strong> - Linked List Cycle II</li>
+              <li style="margin-bottom: 12px;"><strong>#287</strong> - Find Duplicate Number</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#42</strong> - Trapping Rain Water</li>
+              <li style="margin-bottom: 12px;"><strong>#76</strong> - Minimum Window Substring</li>
+              <li style="margin-bottom: 12px;"><strong>#992</strong> - Subarrays with K Different Integers</li>
+              <li style="margin-bottom: 12px;"><strong>#1498</strong> - Number of Subsequences</li>
+              <li style="margin-bottom: 12px;"><strong>#2444</strong> - Count Subarrays With Fixed Bounds</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary);">Ready for Two Pointers? Start with "Two Sum II" (#167) and build from there.</p>
+        <p style="margin-top: 10px; font-size: 0.9rem; color: var(--text-muted);">Next: Try <strong>Sliding Window</strong> pattern for consecutive element problems</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+</body>
+</html>

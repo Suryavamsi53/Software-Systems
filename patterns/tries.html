@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tries Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Tries Pattern</h1>
+        <p>Word search and prefix matching</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>List of words/strings</li>
+              <li>Dictionary given</li>
+              <li>Character sequences</li>
+              <li>Need to build structure</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Word search in grid</li>
+              <li>Prefix matching</li>
+              <li>Autocomplete</li>
+              <li>Spell checker</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Prefix sharing matters</li>
+              <li>Word boundary tracking</li>
+              <li>DFS through trie</li>
+              <li>Character by character</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Understanding of tree structure with branching at each character</li>
+              <li>Storing strings efficiently using prefix sharing (common prefix = shared path)</li>
+              <li>Marking word endings: each node has an \"is_word\" or \"end_of_word\" flag</li>
+              <li>Traversing character by character through the trie nodes</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Insert a word: create nodes if missing, mark end as word</li>
+              <li>Search for exact word: traverse path, verify is_word flag at end</li>
+              <li>Prefix search: traverse path without requiring end-of-word marker</li>
+              <li>Auto-complete: DFS from prefix node to find all words with that prefix</li>
+              <li>Handle character sets: English letters, digits, special chars, Unicode</li>
+              <li>Optimize space: only store necessary characters, prune unused branches</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">\"Trie is a branching tree where each path represents a string. Common prefixes share the same path. Perfect for fast prefix searches and auto-completion.\"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Amazon EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Node Structure:</strong> Can you define a Trie node correctly? (Map/Array of children + boolean flag).</li>
+              <li><strong>Prefix Efficiency:</strong> Do you understand why Tries are faster than Hash Maps for prefix searches?</li>
+              <li><strong>Space Complexity:</strong> Are you aware that Tries can use a lot of memory if there are few common prefixes?</li>
+              <li><strong>Recursion vs Iteration:</strong> Can you implement insert/search iteratively (preferred for stack safety)?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Prefix Tree</div>
+          <div class="callout-content">
+            <p>A Trie (pronounced "try") is a tree data structure used for storing strings. Each node represents a character. The root is empty. Paths from the root to a node represent prefixes.</p>
+            <p><strong>Key Insight:</strong> Common prefixes are stored only once. This makes Tries incredibly efficient for autocomplete and spell-checking.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Search Autocomplete</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> When a user types "kind" into the Amazon search bar, we want to suggest "kindle", "kindle fire", "kindness".</p>
+            <p><strong>Solution:</strong> Store all product keywords in a Trie. When the user types "kind", traverse to the 'd' node. Then perform a DFS from that node to find all complete words (marked with <code>isWord=true</code>) to suggest.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        
+        <!-- Interactive Visualizer Link -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive Trie Visualizer</strong>
+            <p style="margin-top: 5px; color: var(--text-secondary);">Visualize inserting and searching words in a Prefix Tree.</p>
+          </div>
+          <a href="../visualizers/trie-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Trie Structure (Prefix Sharing)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Storing "cat", "car", and "dog". Notice how "cat" and "car" share the 'c' -> 'a' path.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3ETrie: %22cat%22, %22car%22, %22dog%22%3C/text%3E%3Cg transform='translate(400, 60)'%3E%3C!-- Root --%3E%3Ccircle cx='0' cy='0' r='15' fill='%2394a3b8'/%3E%3Ctext x='0' y='5' text-anchor='middle' fill='white' font-size='12'%3Eroot%3C/text%3E%3C!-- Level 1 --%3E%3Cpath d='M0,15 L-100,60' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M0,15 L100,60' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='-100' cy='60' r='20' fill='%233b82f6'/%3E%3Ctext x='-100' y='65' text-anchor='middle' fill='white' font-weight='bold'%3Ec%3C/text%3E%3Ccircle cx='100' cy='60' r='20' fill='%233b82f6'/%3E%3Ctext x='100' y='65' text-anchor='middle' fill='white' font-weight='bold'%3Ed%3C/text%3E%3C!-- Level 2 --%3E%3Cpath d='M-100,80 L-100,130' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M100,80 L100,130' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='-100' cy='130' r='20' fill='%233b82f6'/%3E%3Ctext x='-100' y='135' text-anchor='middle' fill='white' font-weight='bold'%3Ea%3C/text%3E%3Ccircle cx='100' cy='130' r='20' fill='%233b82f6'/%3E%3Ctext x='100' y='135' text-anchor='middle' fill='white' font-weight='bold'%3Eo%3C/text%3E%3C!-- Level 3 --%3E%3Cpath d='M-100,150 L-140,200' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M-100,150 L-60,200' stroke='%23333' stroke-width='2'/%3E%3Cpath d='M100,150 L100,200' stroke='%23333' stroke-width='2'/%3E%3Ccircle cx='-140' cy='200' r='20' fill='%2310b981' stroke='%23059669' stroke-width='3'/%3E%3Ctext x='-140' y='205' text-anchor='middle' fill='white' font-weight='bold'%3Et%3C/text%3E%3Ccircle cx='-60' cy='200' r='20' fill='%2310b981' stroke='%23059669' stroke-width='3'/%3E%3Ctext x='-60' y='205' text-anchor='middle' fill='white' font-weight='bold'%3Er%3C/text%3E%3Ccircle cx='100' cy='200' r='20' fill='%2310b981' stroke='%23059669' stroke-width='3'/%3E%3Ctext x='100' y='205' text-anchor='middle' fill='white' font-weight='bold'%3Eg%3C/text%3E%3C!-- Labels --%3E%3Ctext x='-140' y='240' text-anchor='middle' fill='%2310b981' font-weight='bold' font-size='12'%3EisEnd=true%3C/text%3E%3Ctext x='-60' y='240' text-anchor='middle' fill='%2310b981' font-weight='bold' font-size='12'%3EisEnd=true%3C/text%3E%3Ctext x='100' y='240' text-anchor='middle' fill='%2310b981' font-weight='bold' font-size='12'%3EisEnd=true%3C/text%3E%3C/g%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Trie Data Structure Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Implement Trie (LeetCode 208)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Implement a Trie with <code>insert</code>, <code>search</code>, and <code>startsWith</code> methods.</p>
+            <p><strong>Input:</strong> Trie.insert("apple"), Trie.search("apple"), Trie.startsWith("app")<br>
+            <strong>Output:</strong> null, true, true</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">List of Strings</div>
+          <div class="callout-content">
+            <p>Store words in a list. For <code>startsWith(prefix)</code>, iterate through all words and check if they start with the prefix.</p>
+            <p><strong>Time Complexity:</strong> O(N * L) where N is number of words, L is word length.</p>
+            <p><strong>Why it fails:</strong> Too slow for millions of words. Trie does this in O(L).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+type Trie struct {
+    children map[rune]*Trie
+    isEnd    bool
+}
+
+func Constructor() Trie {
+    return Trie{children: make(map[rune]*Trie)}
+}
+
+func (this *Trie) Insert(word string) {
+    node := this
+    for _, char := range word {
+        if _, ok := node.children[char]; !ok {
+            node.children[char] = &Trie{children: make(map[rune]*Trie)}
+        }
+        node = node.children[char]
+    }
+    node.isEnd = true
+}
+
+func (this *Trie) Search(word string) bool {
+    node := this
+    for _, char := range word {
+        if _, ok := node.children[char]; !ok {
+            return false
+        }
+        node = node.children[char]
+    }
+    return node.isEnd
+}
+
+func (this *Trie) StartsWith(prefix string) bool {
+    node := this
+    for _, char := range prefix {
+        if _, ok := node.children[char]; !ok {
+            return false
+        }
+        node = node.children[char]
+    }
+    return true
+}
+</pre></div>
+            </div>
+
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Trie {
+    private Trie[] children;
+    private boolean isEnd;
+
+    public Trie() {
+        children = new Trie[26];
+        isEnd = false;
+    }
+    
+    public void insert(String word) {
+        Trie node = this;
+        for (char c : word.toCharArray()) {
+            int idx = c - 'a';
+            if (node.children[idx] == null) {
+                node.children[idx] = new Trie();
+            }
+            node = node.children[idx];
+        }
+        node.isEnd = true;
+    }
+    
+    public boolean search(String word) {
+        Trie node = searchPrefix(word);
+        return node != null && node.isEnd;
+    }
+    
+    public boolean startsWith(String prefix) {
+        return searchPrefix(prefix) != null;
+    }
+    
+    private Trie searchPrefix(String prefix) {
+        Trie node = this;
+        for (char c : prefix.toCharArray()) {
+            int idx = c - 'a';
+            if (node.children[idx] == null) return null;
+            node = node.children[idx];
+        }
+        return node;
+    }
+}
+</pre></div>
+            </div>
+
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end = False
+
+class Trie:
+    def __init__(self):
+        self.root = TrieNode()
+
+    def insert(self, word: str) -> None:
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                node.children[char] = TrieNode()
+            node = node.children[char]
+        node.is_end = True
+
+    def search(self, word: str) -> bool:
+        node = self.root
+        for char in word:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return node.is_end
+
+    def startsWith(self, prefix: str) -> bool:
+        node = self.root
+        for char in prefix:
+            if char not in node.children:
+                return False
+            node = node.children[char]
+        return True
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace <code>insert("apple")</code> then <code>search("app")</code></p>
+        <div class="diagram">
+Insert "apple":
+1. Root -> 'a' (create)
+2. 'a' -> 'p' (create)
+3. 'p' -> 'p' (create)
+4. 'p' -> 'l' (create)
+5. 'l' -> 'e' (create) -> Mark isEnd=true
+
+Search "app":
+1. Root -> 'a' (found)
+2. 'a' -> 'p' (found)
+3. 'p' -> 'p' (found)
+4. End of string. Check isEnd?
+   Node 'p' has isEnd=false.
+   Return false.
+        </div>
+      </div>
+
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(L)</strong></p>
+            <p>Where L is the length of the word. We process each character exactly once.</p>
+            <p><strong>Space Complexity: O(N * L * Σ)</strong></p>
+            <p>Where N is number of words, L is avg length, Σ is alphabet size (26). Tries trade space for time.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: How to optimize space?</strong><br>
+            A: Use a Radix Tree (Compressed Trie) where nodes can store strings instead of single characters (e.g., "app" -> "le").</p>
+            <p><strong>Q: How to handle wildcards (e.g., "d.g")?</strong><br>
+            A: Use DFS. When you hit '.', iterate through all children of the current node.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#14</strong> - Longest Common Prefix</li>
+              <li style="margin-bottom: 12px;"><strong>#205</strong> - Isomorphic Strings</li>
+              <li style="margin-bottom: 12px;"><strong>#824</strong> - Goat Latin</li>
+              <li style="margin-bottom: 12px;"><strong>#2080</strong> - Range Frequency Queries</li>
+              <li style="margin-bottom: 12px;"><strong>#2416</strong> - Sum of Prefix Scores of Strings</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#208</strong> - Implement Trie (Prefix Tree) (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#211</strong> - Design Add and Search Words Data Structure</li>
+              <li style="margin-bottom: 12px;"><strong>#212</strong> - Word Search II</li>
+              <li style="margin-bottom: 12px;"><strong>#588</strong> - Design In-Memory File System</li>
+              <li style="margin-bottom: 12px;"><strong>#820</strong> - Short Encoding of Words</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#212</strong> - Word Search II (Hard variant)</li>
+              <li style="margin-bottom: 12px;"><strong>#692</strong> - Top K Frequent Words</li>
+              <li style="margin-bottom: 12px;"><strong>#1032</strong> - Stream of Characters</li>
+              <li style="margin-bottom: 12px;"><strong>#1858</strong> - Longest Word With All the Longest Substrings</li>
+              <li style="margin-bottom: 12px;"><strong>#2416</strong> - Sum of Prefix Scores of Strings (Hard)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+</body>
+</html>

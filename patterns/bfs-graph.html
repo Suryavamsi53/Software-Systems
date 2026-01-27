@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFS Graph Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;   /* Yellow for current node */
+            --visited: #22c55e;  /* Green for visited */
+            --queue: #fb923c;    /* Orange for queue */
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 400px;
+            position: relative;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        /* Graph Nodes & Edges */
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        circle {
+            fill: var(--panel);
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.4s ease;
+        }
+
+        text {
+            fill: var(--text);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 14px;
+            pointer-events: none;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Queue Visualization */
+        .queue-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 60px;
+        }
+
+        .queue-label {
+            font-weight: bold;
+            color: var(--queue);
+            margin-right: 10px;
+        }
+
+        .queue-item {
+            background-color: var(--queue);
+            color: var(--bg);
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BFS Graph Visualization</h1>
+            <div class="subtitle">Breadth-First Search Traversal</div>
+        </header>
+
+        <div class="viz-container" id="viz-container">
+            <svg id="graph-svg"></svg>
+        </div>
+
+        <div class="queue-container" id="queue-container">
+            <span class="queue-label">Queue:</span>
+            <!-- Queue items injected here -->
+        </div>
+
+        <div class="info-panel">
+            <div class="step-text" id="step-text">Ready to start BFS from Node A...</div>
+            <div class="legend">
+                <span><span class="dot" style="background: var(--active)"></span>Current</span>
+                <span><span class="dot" style="background: var(--visited)"></span>Visited</span>
+                <span><span class="dot" style="background: var(--queue)"></span>In Queue</span>
+                <span><span class="dot" style="background: var(--panel); border: 1px solid var(--text-muted)"></span>Unvisited</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Graph Data (Adjacency List)
+        const graph = {
+            'A': ['B', 'C'],
+            'B': ['A', 'D', 'E'],
+            'C': ['A', 'F'],
+            'D': ['B'],
+            'E': ['B', 'F'],
+            'F': ['C', 'E']
+        };
+
+        // Node Positions for Visualization
+        const positions = {
+            'A': {x: 450, y: 50},
+            'B': {x: 250, y: 150},
+            'C': {x: 650, y: 150},
+            'D': {x: 150, y: 300},
+            'E': {x: 350, y: 300},
+            'F': {x: 750, y: 300}
+        };
+
+        // Animation State
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        const ANIMATION_SPEED = 1000;
+
+        // DOM Elements
+        const svg = document.getElementById('graph-svg');
+        const queueContainer = document.getElementById('queue-container');
+        const stepText = document.getElementById('step-text');
+        const playBtn = document.getElementById('playBtn');
+
+        // Initialize
+        function init() {
+            drawGraph();
+            generateSteps();
+            render(0);
+        }
+
+        function drawGraph() {
+            let html = '';
+            
+            // Draw Edges
+            const drawnEdges = new Set();
+            for (let node in graph) {
+                for (let neighbor of graph[node]) {
+                    const edgeKey = [node, neighbor].sort().join('-');
+                    if (!drawnEdges.has(edgeKey)) {
+                        const p1 = positions[node];
+                        const p2 = positions[neighbor];
+                        html += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" id="edge-${edgeKey}" />`;
+                        drawnEdges.add(edgeKey);
+                    }
+                }
+            }
+
+            // Draw Nodes
+            for (let node in positions) {
+                const p = positions[node];
+                html += `
+                    <g id="node-${node}">
+                        <circle cx="${p.x}" cy="${p.y}" r="25" />
+                        <text x="${p.x}" y="${p.y}">${node}</text>
+                    </g>
+                `;
+            }
+            svg.innerHTML = html;
+        }
+
+        function generateSteps() {
+            steps = [];
+            const queue = ['A'];
+            const visited = new Set(['A']);
+            const history = []; // To track queue history
+
+            // Initial State
+            steps.push({
+                current: null,
+                visited: new Set(['A']),
+                queue: ['A'],
+                msg: "Start BFS: Add root node 'A' to queue."
+            });
+
+            let qCopy = ['A'];
+            let vCopy = new Set(['A']);
+
+            while (qCopy.length > 0) {
+                const node = qCopy.shift();
+                
+                // Step: Dequeue and Process
+                steps.push({
+                    current: node,
+                    visited: new Set(vCopy),
+                    queue: [...qCopy],
+                    msg: `Dequeue '${node}'. Process it.`
+                });
+
+                // Check neighbors
+                const neighbors = graph[node] || [];
+                for (let neighbor of neighbors) {
+                    if (!vCopy.has(neighbor)) {
+                        vCopy.add(neighbor);
+                        qCopy.push(neighbor);
+                        
+                        // Step: Enqueue Neighbor
+                        steps.push({
+                            current: node,
+                            visited: new Set(vCopy),
+                            queue: [...qCopy],
+                            msg: `Neighbor '${neighbor}' not visited. Add to queue.`
+                        });
+                    }
+                }
+            }
+
+            // Final State
+            steps.push({
+                current: null,
+                visited: new Set(vCopy),
+                queue: [],
+                msg: "Queue empty. BFS Complete!"
+            });
+        }
+
+        function render(stepIndex) {
+            const state = steps[stepIndex];
+            
+            // Update Nodes
+            for (let node in positions) {
+                const circle = document.querySelector(`#node-${node} circle`);
+                if (state.current === node) {
+                    circle.style.fill = 'var(--active)';
+                    circle.style.stroke = 'var(--active)';
+                } else if (state.queue.includes(node)) {
+                    circle.style.fill = 'var(--queue)';
+                    circle.style.stroke = 'var(--queue)';
+                } else if (state.visited.has(node)) {
+                    circle.style.fill = 'var(--visited)';
+                    circle.style.stroke = 'var(--visited)';
+                } else {
+                    circle.style.fill = 'var(--panel)';
+                    circle.style.stroke = 'var(--text-muted)';
+                }
+            }
+
+            // Update Queue UI
+            let queueHtml = '<span class="queue-label">Queue:</span>';
+            state.queue.forEach(item => {
+                queueHtml += `<div class="queue-item">${item}</div>`;
+            });
+            queueContainer.innerHTML = queueHtml;
+
+            stepText.textContent = state.msg;
+        }
+
+        // Controls Logic
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        render(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                render(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            render(0);
+        }
+
+        init();
+    </script>
+</body>
+</html>

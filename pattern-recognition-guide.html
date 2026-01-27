@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Pattern Recognition Guide - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Paths</div>
+        <a href="index.html" class="nav-item">← Back to Patterns</a>
+        <a href="pattern-recognition-guide.html" class="nav-item" style="font-weight: bold; color: var(--accent-color);">Pattern Recognition</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+        <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <h1>🎯 DSA Pattern Recognition Guide</h1>
+      <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 30px;">Master the 3-Prong Detection System: Learn to identify the right pattern in any interview question</p>
+
+      <!-- DETECTION SYSTEM -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🔍</span> The 3-Prong Pattern Detection System
+        </div>
+        
+        <p style="margin-bottom: 20px; color: var(--text-secondary);">Every interview question contains three hidden signals. Learn to recognize them, and you'll instantly know which pattern to use.</p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 30px 0;">
+          <!-- SIGNAL 1 -->
+          <div style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; border-top: 4px solid #3b82f6;">
+            <div style="font-size: 1.3rem; font-weight: bold; color: #3b82f6; margin-bottom: 15px;">📊 INPUT SIGNAL</div>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;"><strong>What data structure is involved?</strong></p>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 8px;">Array or String</li>
+              <li style="margin-bottom: 8px;">Tree or Graph</li>
+              <li style="margin-bottom: 8px;">Linked List</li>
+              <li style="margin-bottom: 8px;">Stream of Data</li>
+              <li style="margin-bottom: 8px;">Matrix/2D Grid</li>
+              <li style="margin-bottom: 8px;">Sorted vs Unsorted</li>
+            </ul>
+          </div>
+
+          <!-- SIGNAL 2 -->
+          <div style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; border-top: 4px solid #10b981;">
+            <div style="font-size: 1.3rem; font-weight: bold; color: #10b981; margin-bottom: 15px;">❓ QUESTION SIGNAL</div>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;"><strong>What exactly are you asked to find?</strong></p>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 8px;">Find/Search a value</li>
+              <li style="margin-bottom: 8px;">Count occurrences</li>
+              <li style="margin-bottom: 8px;">Max/Min value</li>
+              <li style="margin-bottom: 8px;">Rebuild/Rearrange</li>
+              <li style="margin-bottom: 8px;">Valid path/sequence</li>
+              <li style="margin-bottom: 8px;">Optimize subproblem</li>
+            </ul>
+          </div>
+
+          <!-- SIGNAL 3 -->
+          <div style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; border-top: 4px solid #f59e0b;">
+            <div style="font-size: 1.3rem; font-weight: bold; color: #f59e0b; margin-bottom: 15px;">⚡ CONSTRAINT SIGNAL</div>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;"><strong>What's the limitation/requirement?</strong></p>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 8px;">Time: O(n) or O(n log n)</li>
+              <li style="margin-bottom: 8px;">Space: O(1) or O(n)</li>
+              <li style="margin-bottom: 8px;">In-place modification</li>
+              <li style="margin-bottom: 8px;">No sorting allowed</li>
+              <li style="margin-bottom: 8px;">Single pass through data</li>
+              <li style="margin-bottom: 8px;">Memory limited</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- PATTERN DECISION TREE -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">🌳</span> Pattern Decision Tree
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 30px; border-radius: 8px; margin: 20px 0;">
+          <div style="font-weight: bold; color: var(--accent-color); margin-bottom: 20px; font-size: 1.1rem;">Start: "Array or String with specific elements?"</div>
+
+          <div style="margin-left: 20px; padding-left: 20px; border-left: 3px solid var(--accent-color);">
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #10b981;">✓ YES & Need to find pair/triplet/combination</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Two Pointers</strong> (if sorted) or <strong>Hash Maps</strong> (any order)</div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #3b82f6;">✓ YES & Need contiguous subarray/substring</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Sliding Window</strong> (fixed/dynamic size)</div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #f59e0b;">✓ YES & Sorted array + Search/Find</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Binary Search</strong> (O(log n))</div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #ec4899;">✓ YES & Need to count/group unique elements</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Hash Maps & Sets</strong> (frequency/membership)</div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #8b5cf6;">✓ Tree/Graph traversal needed</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Tree/Graph Patterns</strong> (DFS, BFS, recursion)</div>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+              <strong style="color: #06b6d4;">✓ Overlapping subproblems detected</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Dynamic Programming</strong> (memoization/DP table)</div>
+            </div>
+
+            <div>
+              <strong style="color: #14b8a6;">✓ Greedy choice at each step</strong>
+              <div style="margin-top: 10px; margin-left: 15px; color: var(--text-secondary);">→ <strong>Greedy Algorithm</strong> (optimal substructure)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK REFERENCE -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">⚡</span> Quick Reference: When to Use Each Pattern
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <!-- ROW 1 -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">Two Pointers</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Sorted array + find pair</li>
+              <li>Reverse array in-place</li>
+              <li>Remove duplicates</li>
+              <li>Container with most water</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">Sliding Window</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Longest/shortest substring</li>
+              <li>Subarray with sum K</li>
+              <li>Max product of window</li>
+              <li>Anagram matching</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">Binary Search</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Search in sorted array</li>
+              <li>Find boundary (first/last)</li>
+              <li>Search in rotated array</li>
+              <li>Peak element finding</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #ec4899; display: block; margin-bottom: 10px;">Hash Maps/Sets</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Two Sum problem</li>
+              <li>Frequency counting</li>
+              <li>Duplicate detection</li>
+              <li>Anagram grouping</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #8b5cf6; display: block; margin-bottom: 10px;">Linked Lists</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Cycle detection</li>
+              <li>Reverse list</li>
+              <li>Merge lists</li>
+              <li>Remove Nth node</li>
+            </ul>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <strong style="color: #06b6d4; display: block; margin-bottom: 10px;">Dynamic Programming</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem;">
+              <li>Overlapping subproblems</li>
+              <li>Optimal substructure</li>
+              <li>Longest subsequence</li>
+              <li>Coin change problems</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW CHECKLIST -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">✅</span> Before You Code: The Final Action Box
+        </div>
+
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px;">
+          <p style="margin-bottom: 15px; color: var(--text-secondary);"><strong style="color: var(--text-primary);">Ask yourself these questions BEFORE touching the keyboard:</strong></p>
+          
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #3b82f6;">1. What is the input signature?</strong>
+            <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+              <li>Array? String? Tree? Graph? Stream?</li>
+              <li>Sorted or unsorted?</li>
+              <li>Can have duplicates?</li>
+            </ul>
+          </div>
+
+          <div style="margin-bottom: 15px;">
+            <strong style="color: #10b981;">2. What exactly is being optimized?</strong>
+            <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+              <li>Time complexity?</li>
+              <li>Space complexity?</li>
+              <li>Code simplicity?</li>
+              <li>In-place modification?</li>
+            </ul>
+          </div>
+
+          <div>
+            <strong style="color: #f59e0b;">3. What is the constraint telling me?</strong>
+            <ul style="margin: 8px 0 0 20px; color: var(--text-secondary);">
+              <li>Time limit rules out brute force?</li>
+              <li>Space limit rules out extra data structures?</li>
+              <li>Single pass requirement?</li>
+              <li>This suggests the pattern → ✅</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMON PITFALLS -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">⚠️</span> Why Patterns Fail: The Interview Reality Box
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 10px;">❌ Wrong Pattern Choice</strong>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">You misread the constraints. Re-check: is the array sorted? Is the window fixed or dynamic? Can you modify in-place?</p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 10px;">❌ Ignoring Edge Cases</strong>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Empty array? Single element? All duplicates? Negative numbers? Think through these before coding.</p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 10px;">❌ Complexity Not Optimized</strong>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">You chose the right pattern but implemented it wrong. Two Pointers should be O(n), not O(n²).</p>
+          </div>
+
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 10px;">❌ Off-by-One Errors</strong>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 0;">Boundary conditions in loops, array indexing, and pointer movement are critical. Test with small inputs first.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRACTICE STRATEGY -->
+      <div class="section" style="margin-top: 50px;">
+        <div class="section-title">
+          <span class="emoji">🎓</span> Practice Strategy
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px;">
+          <ol style="margin: 0; padding-left: 20px;">
+            <li style="margin-bottom: 20px;">
+              <strong>Identify the Pattern (30 seconds)</strong>
+              <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Use the 3-prong system. Input? Question? Constraint? → Which pattern?</p>
+            </li>
+            <li style="margin-bottom: 20px;">
+              <strong>Recall the Template (1 minute)</strong>
+              <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Remember the core approach: two pointers setup, window boundaries, binary search logic, etc.</p>
+            </li>
+            <li style="margin-bottom: 20px;">
+              <strong>Implement Carefully (5-10 minutes)</strong>
+              <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Write clean code, test edge cases, optimize for the stated constraint.</p>
+            </li>
+            <li>
+              <strong>Optimize if Needed (2 minutes)</strong>
+              <p style="margin: 8px 0 0 0; color: var(--text-secondary);">Can you improve time/space? Is there a variation you haven't considered?</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <div style="margin-top: 80px; padding: 20px; background-color: var(--bg-tertiary); border-radius: 8px; text-align: center;">
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Master pattern recognition → Instant solution → Interview confidence ✅</p>
+        <p style="margin-top: 15px; color: var(--text-muted);">Visit each pattern page to learn the detailed templates and practice problems.</p>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

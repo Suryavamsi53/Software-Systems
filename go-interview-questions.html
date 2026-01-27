@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Go Interview Questions - Amazon SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .q-list { list-style: none; padding: 0; }
+    .q-item { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+    .q-question { font-weight: 700; color: var(--text-primary); font-size: 1rem; }
+    .q-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+    .q-tag.beginner { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .q-tag.intermediate { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .q-tag.advanced { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .q-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .q-meta::before { content: '🎯'; font-size: 0.8rem; }
+    .q-answer { font-size: 0.95rem; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; line-height: 1.5; }
+    .category-header { color: var(--accent-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin: 30px 0 20px 0; font-size: 1.4rem; font-weight: 800; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item active">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+        <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+        <a href="patterns/stack.html" class="nav-item">Stack</a>
+        <a href="patterns/heap.html" class="nav-item">Heap (Priority Queue)</a>
+        <a href="patterns/trees.html" class="nav-item">Trees</a>
+        <a href="patterns/tries.html" class="nav-item">Tries</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+        <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+        <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+        <a href="patterns/greedy.html" class="nav-item">Greedy</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="patterns/fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+        <a href="patterns/intervals.html" class="nav-item">Intervals</a>
+        <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
+        <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+        <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="patterns/sort-search.html" class="nav-item">Sort & Search</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Go (Golang) Interview Questions: Top 200</h1>
+        <p>The definitive list of 200 interview questions used by FAANG and top tech companies. Categorized by topic with concise answers.</p>
+      </div>
+
+      <!-- INTRO -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🚀</span> Interviewer's Guide
+        </div>
+        <p style="margin-top: 10px; color: var(--text-secondary);">
+          This list covers <strong>20 categories</strong> ranging from syntax basics to advanced concurrency and system design. 
+          Each question includes a difficulty tag and what the interviewer is evaluating.
+        </p>
+      </div>
+
+      <!-- CATEGORY 1: BASICS -->
+      <div class="section">
+        <div class="category-header">1. Go Basics & Syntax</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">1. What is the difference between <code>var</code> and <code>:=</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Understanding of variable scopes and initialization.</div>
+            <div class="q-answer"><code>var</code> allows declaring variables without initialization (zero-valued) and works at package level. <code>:=</code> is short declaration, infers type, requires initialization, and only works inside functions.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">2. What are the zero values for standard types?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Basic language knowledge.</div>
+            <div class="q-answer"><code>int</code>=0, <code>float</code>=0.0, <code>bool</code>=false, <code>string</code>="" (empty), <code>pointer/slice/map/chan/func/interface</code>=nil.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">3. How does the <code>init()</code> function work?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Understanding of package initialization order.</div>
+            <div class="q-answer">It runs before <code>main()</code>. A package can have multiple <code>init()</code> functions. They execute in the order imports are processed, then variable declarations, then <code>init()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">4. What is the blank identifier <code>_</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Handling unused variables and imports.</div>
+            <div class="q-answer">It's a write-only placeholder for values you want to discard (e.g., ignoring an error return or importing a package solely for its side effects).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">5. Does Go support inheritance?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: OOP concepts in Go.</div>
+            <div class="q-answer">No. Go uses composition via struct embedding. It achieves polymorphism through interfaces, not class hierarchy.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">6. What is variable shadowing?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Debugging skills and scope awareness.</div>
+            <div class="q-answer">Declaring a variable in an inner scope with the same name as one in an outer scope, making the outer one inaccessible. Common with <code>err</code> in <code>if</code> blocks.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">7. Can you declare a variable without using it?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Compiler strictness knowledge.</div>
+            <div class="q-answer">No, the compiler will throw an error for unused local variables. Unused package-level variables are allowed.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">8. What is the difference between <code>const</code> and <code>var</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Immutability and compile-time evaluation.</div>
+            <div class="q-answer"><code>const</code> is evaluated at compile-time and cannot change. <code>var</code> can be changed and is evaluated at runtime.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">9. Does Go have exceptions?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Error handling philosophy.</div>
+            <div class="q-answer">No. Go uses explicit error return values. It has <code>panic</code> and <code>recover</code> for truly exceptional conditions, but they shouldn't be used for control flow.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">10. What is the scope of a package-level variable?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Visibility rules.</div>
+            <div class="q-answer">It is visible throughout the entire package. If capitalized, it is exported and visible to other packages.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 2: DATA TYPES -->
+      <div class="section">
+        <div class="category-header">2. Data Types & Variables</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">11. What is <code>iota</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Enum creation and constant management.</div>
+            <div class="q-answer">It's a predeclared identifier for creating enumerated constants. It resets to 0 at the start of a <code>const</code> block and increments by 1 for each line.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">12. Difference between <code>byte</code> and <code>rune</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: String handling and Unicode knowledge.</div>
+            <div class="q-answer"><code>byte</code> is an alias for <code>uint8</code> (ASCII). <code>rune</code> is an alias for <code>int32</code> (Unicode code point).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">13. Are strings mutable?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Memory model knowledge.</div>
+            <div class="q-answer">No. Strings are immutable byte slices. To modify, you must convert to <code>[]byte</code> or <code>[]rune</code>, creating a copy.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">14. What is the size of <code>int</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Platform dependence awareness.</div>
+            <div class="q-answer">It depends on the architecture. 32-bit on 32-bit systems, 64-bit on 64-bit systems. Use <code>int64</code> for fixed size.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">15. How do you check the type of a variable at runtime?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Reflection and type assertions.</div>
+            <div class="q-answer">Use type switches <code>switch v.(type)</code> or the <code>reflect</code> package (<code>reflect.TypeOf</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">16. Can you compare two structs?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Equality rules.</div>
+            <div class="q-answer">Yes, if all their fields are comparable. Structs with slices or maps are not comparable using <code>==</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">17. What is a raw string literal?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Syntax knowledge.</div>
+            <div class="q-answer">Strings enclosed in backticks <code>`...`</code>. They span multiple lines and ignore escape sequences.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">18. How does type conversion work?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Type safety.</div>
+            <div class="q-answer">Go requires explicit conversion: <code>T(v)</code>. There is no implicit casting between types (e.g., int to float).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">19. What is <code>nil</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Zero value concepts.</div>
+            <div class="q-answer">It is the zero value for pointers, interfaces, maps, slices, channels, and function types. It is NOT a keyword for "null" in the traditional sense.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">20. Can you define methods on basic types?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Type system flexibility.</div>
+            <div class="q-answer">Yes, if you define a type alias (e.g., <code>type MyInt int</code>), you can attach methods to <code>MyInt</code>.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 3: ARRAYS, SLICES, MAPS -->
+      <div class="section">
+        <div class="category-header">3. Arrays, Slices, Maps</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">21. Array vs Slice?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Core data structure knowledge.</div>
+            <div class="q-answer">Arrays are fixed-size value types. Slices are dynamic references to arrays (pointer, len, cap).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">22. How does <code>append</code> work?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Memory allocation mechanics.</div>
+            <div class="q-answer">If capacity allows, it extends length. If not, it allocates a new larger array, copies elements, and returns a new slice header.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">23. Difference between <code>nil</code> slice and empty slice?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Initialization nuances.</div>
+            <div class="q-answer"><code>nil</code> slice has no underlying array. Empty slice <code>[]int{}</code> has a pointer to a zero-sized array. JSON marshals them as <code>null</code> vs <code>[]</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">24. Are maps thread-safe?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Concurrency safety.</div>
+            <div class="q-answer">No. Concurrent read/write panics. Use <code>sync.RWMutex</code> or <code>sync.Map</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">25. Can you take the address of a map element?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Internal implementation knowledge.</div>
+            <div class="q-answer">No. Map elements can move during growth/rebalancing, invalidating pointers.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">26. How does <code>copy()</code> work?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Slice manipulation.</div>
+            <div class="q-answer">Copies elements from src to dst. Returns number of elements copied (min of len(src), len(dst)).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">27. What is the map iteration order?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Common pitfalls.</div>
+            <div class="q-answer">Random. Go explicitly randomizes it to prevent reliance on order.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">28. How to delete from a map?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Basic operations.</div>
+            <div class="q-answer"><code>delete(map, key)</code>. It's a no-op if the key doesn't exist.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">29. What types can be map keys?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Type system constraints.</div>
+            <div class="q-answer">Any comparable type (supports <code>==</code>). Slices, maps, and functions cannot be keys.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">30. Does deleting a key shrink the map memory?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Memory management.</div>
+            <div class="q-answer">Generally no. Buckets remain allocated. To shrink, you must copy to a new map.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 4: STRUCTS & POINTERS -->
+      <div class="section">
+        <div class="category-header">4. Structs, Methods, Pointers</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">31. Value vs Pointer Receiver?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Method design.</div>
+            <div class="q-answer">Use Pointer if modifying state or struct is large. Use Value for small, immutable objects or concurrency safety.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">32. Can you call a pointer method on a value?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Syntactic sugar knowledge.</div>
+            <div class="q-answer">Yes, if the value is addressable, Go automatically takes the address: <code>(&v).Method()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">33. What are struct tags?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Serialization knowledge.</div>
+            <div class="q-answer">Metadata attached to fields (e.g., <code>`json:"name"`</code>) used by reflection (encoding/json, DB ORMs).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">34. Does Go have constructors?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Idiomatic Go.</div>
+            <div class="q-answer">No. Convention is to use factory functions like <code>NewType()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">35. What is struct embedding?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Composition vs Inheritance.</div>
+            <div class="q-answer">Including a struct inside another without a name. It promotes fields/methods to the outer struct (Composition).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">36. Can you compare two pointers?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Pointer logic.</div>
+            <div class="q-answer">Yes, they are equal if they point to the same address or are both nil.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">37. What is <code>new()</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Allocation.</div>
+            <div class="q-answer">Allocates zeroed memory for a type and returns a pointer.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">38. Can a method be nil-safe?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Method dispatch.</div>
+            <div class="q-answer">Yes. A method with a pointer receiver can handle being called on a <code>nil</code> pointer (check <code>if p == nil</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">39. What is the size of an empty struct <code>struct{}</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Memory optimization.</div>
+            <div class="q-answer">Zero bytes. Useful for sets (<code>map[T]struct{}</code>) or signal channels.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">40. What is pointer arithmetic?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Safety features.</div>
+            <div class="q-answer">Go does NOT support pointer arithmetic (like C) unless using the <code>unsafe</code> package.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 5: INTERFACES -->
+      <div class="section">
+        <div class="category-header">5. Interfaces & Type System</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">41. How are interfaces implemented?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Implicit vs Explicit.</div>
+            <div class="q-answer">Implicitly. A type implements an interface if it defines all the required methods. No <code>implements</code> keyword.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">42. What is the empty interface?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Dynamic typing.</div>
+            <div class="q-answer"><code>interface{}</code> (or <code>any</code> in 1.18+) has no methods, so all types satisfy it. Used for generic-like code.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">43. What is a Type Assertion?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Interface usage.</div>
+            <div class="q-answer">Extracting the concrete value from an interface: <code>val, ok := i.(Type)</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">44. What is the "Nil Interface" trap?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Deep understanding of interface internals.</div>
+            <div class="q-answer">An interface is nil only if (Type=nil, Value=nil). An interface holding a nil pointer (Type=*int, Value=nil) is NOT nil.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">45. What is a Type Switch?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Control flow.</div>
+            <div class="q-answer">A switch statement that compares types instead of values: <code>switch v.(type) { case int: ... }</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">46. Can you embed interfaces?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Interface composition.</div>
+            <div class="q-answer">Yes. An interface can include other interfaces (e.g., <code>ReadWriter</code> embeds <code>Reader</code> and <code>Writer</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">47. What is the internal structure of an interface?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Runtime internals.</div>
+            <div class="q-answer">It's a pair of pointers: one to the method table (itable) and one to the data.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">48. Best practice: Accept interfaces, return structs?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: API design.</div>
+            <div class="q-answer">Yes. Be liberal in what you accept (interfaces allow mocking) and conservative in what you return (concrete types allow evolution).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">49. Can you cast a struct to an interface?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Basic assignment.</div>
+            <div class="q-answer">Yes, implicitly, if the struct implements the interface methods.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">50. What is interface pollution?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Design philosophy.</div>
+            <div class="q-answer">Creating interfaces before they are needed. In Go, interfaces should be defined by the consumer (where used), not the producer.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 6: ERROR HANDLING -->
+      <div class="section">
+        <div class="category-header">6. Error Handling</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">51. What is the <code>error</code> type?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Basics.</div>
+            <div class="q-answer">It's a built-in interface with a single method: <code>Error() string</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">52. How to create a custom error?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Implementation.</div>
+            <div class="q-answer">Use <code>errors.New()</code>, <code>fmt.Errorf()</code>, or create a struct that implements the <code>Error()</code> method.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">53. What is error wrapping?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Go 1.13+ features.</div>
+            <div class="q-answer">Adding context to an error while preserving the original. Use <code>fmt.Errorf("... %w", err)</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">54. Difference between <code>errors.Is</code> and <code>errors.As</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Error checking.</div>
+            <div class="q-answer"><code>Is</code> checks if an error matches a specific value (sentinel). <code>As</code> checks if it matches a specific type (and casts it).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">55. When to use <code>panic</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Best practices.</div>
+            <div class="q-answer">Only for unrecoverable errors (e.g., startup config missing). Never for normal control flow.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">56. How does <code>recover</code> work?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Panic management.</div>
+            <div class="q-answer">It regains control of a panicking goroutine. Must be called inside a <code>defer</code> function.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">57. What happens if you don't check an error?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Code hygiene.</div>
+            <div class="q-answer">The program continues in an undefined/invalid state. Always check errors.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">58. What are sentinel errors?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Error patterns.</div>
+            <div class="q-answer">Global variables for expected errors, e.g., <code>io.EOF</code>. Checked using <code>errors.Is</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">59. How to handle multiple errors?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Advanced handling.</div>
+            <div class="q-answer">Use <code>errors.Join</code> (Go 1.20+) or a multierror library to aggregate them.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">60. Does <code>defer</code> run if a panic occurs?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Execution flow.</div>
+            <div class="q-answer">Yes. Deferred functions are executed during the stack unwinding caused by a panic.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 7: CONCURRENCY -->
+      <div class="section">
+        <div class="category-header">7. Concurrency (Goroutines & Channels)</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">61. Goroutine vs OS Thread?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Runtime knowledge.</div>
+            <div class="q-answer">Goroutines are user-space, lightweight (2KB stack), managed by Go runtime (M:N scheduler). OS threads are heavy (1MB), managed by kernel.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">62. Buffered vs Unbuffered Channel?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Channel mechanics.</div>
+            <div class="q-answer">Unbuffered blocks sender until receiver is ready (sync). Buffered blocks only if full (async).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">63. What happens writing to a closed channel?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Safety.</div>
+            <div class="q-answer"><strong>Panic.</strong> Always ensure the sender closes the channel.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">64. What happens reading from a closed channel?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Safety.</div>
+            <div class="q-answer">Returns the zero value and <code>false</code> immediately. Does not panic.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">65. What happens with nil channels?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Deadlock awareness.</div>
+            <div class="q-answer">Read/Write blocks forever. Closing panics. Useful for disabling cases in <code>select</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">66. What is the <code>select</code> statement?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Multiplexing.</div>
+            <div class="q-answer">Like a switch for channels. It waits for the first channel operation to be ready.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">67. How to implement a timeout?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Patterns.</div>
+            <div class="q-answer">Use <code>select</code> with <code>time.After()</code> case.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">68. What is a goroutine leak?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Resource management.</div>
+            <div class="q-answer">When a goroutine starts but never terminates (e.g., blocked on a channel no one writes to).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">69. How to stop a goroutine?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Control.</div>
+            <div class="q-answer">Signal it via a channel (done channel) or Context cancellation. You cannot kill it externally.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">70. What is the default case in select?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Non-blocking ops.</div>
+            <div class="q-answer">It executes immediately if no other channel is ready, making the select non-blocking.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 8: SYNC PACKAGE -->
+      <div class="section">
+        <div class="category-header">8. sync Package & Thread Safety</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">71. Mutex vs Channel?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Architectural choice.</div>
+            <div class="q-answer">Use Channels to pass data/ownership. Use Mutex to protect shared state/cache.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">72. What is <code>sync.WaitGroup</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Synchronization.</div>
+            <div class="q-answer">Waits for a collection of goroutines to finish. <code>Add()</code>, <code>Done()</code>, <code>Wait()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">73. What is <code>sync.Once</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Patterns.</div>
+            <div class="q-answer">Ensures a function runs exactly once (e.g., singleton initialization). Thread-safe.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">74. RWMutex vs Mutex?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Optimization.</div>
+            <div class="q-answer">RWMutex allows multiple readers but only one writer. Better for read-heavy workloads.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">75. What is <code>sync.Pool</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Performance tuning.</div>
+            <div class="q-answer">A cache of temporary objects to reduce GC pressure. Items can be removed by GC at any time.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">76. What is a Race Condition?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Concurrency bugs.</div>
+            <div class="q-answer">When multiple threads access shared memory concurrently and at least one is writing.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">77. How to detect race conditions?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Tooling.</div>
+            <div class="q-answer">Run tests or app with <code>-race</code> flag.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">78. What is <code>sync.Map</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Specialized structures.</div>
+            <div class="q-answer">A concurrent map optimized for append-only or disjoint key sets. Slower than Mutex+Map for general use.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">79. What is <code>atomic</code> package?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Low-level sync.</div>
+            <div class="q-answer">Low-level atomic memory primitives (Add, Load, Store). Faster than Mutex for simple counters.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">80. What is a Deadlock?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Bug diagnosis.</div>
+            <div class="q-answer">When goroutines are waiting on each other and none can proceed. Go runtime detects some deadlocks.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 9: MEMORY & GC -->
+      <div class="section">
+        <div class="category-header">9. Memory Management & GC</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">81. Stack vs Heap?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Memory model.</div>
+            <div class="q-answer">Stack is fast, local to goroutine. Heap is slower, shared, GC-managed.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">82. What is Escape Analysis?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Compiler optimization.</div>
+            <div class="q-answer">Compiler decides if a variable stays on stack or moves to heap (escapes) based on scope usage.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">83. How does Go GC work?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Runtime internals.</div>
+            <div class="q-answer">Concurrent, Tri-color Mark-and-Sweep. Optimized for low latency (short pauses).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">84. What is GOGC?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Tuning.</div>
+            <div class="q-answer">Env var to control GC aggressiveness. Default 100 (GC runs when heap doubles).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">85. Do pointers affect GC performance?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Performance intuition.</div>
+            <div class="q-answer">Yes. GC must scan pointer-heavy structures (like maps of pointers). Pointers prevent stack allocation.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">86. What is a memory leak in Go?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Debugging.</div>
+            <div class="q-answer">Usually goroutine leaks or keeping references to large objects (e.g., substring of large string, slice of large array).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">87. Size of a pointer?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Basics.</div>
+            <div class="q-answer">4 bytes on 32-bit, 8 bytes on 64-bit.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">88. What is zero-allocation?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Optimization.</div>
+            <div class="q-answer">Writing code that avoids heap allocations (using stack, object pooling) to reduce GC pressure.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">89. Struct alignment/padding?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Memory layout.</div>
+            <div class="q-answer">Fields are aligned to memory boundaries. Ordering fields from largest to smallest size saves memory.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">90. Does Go have finalizers?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Cleanup.</div>
+            <div class="q-answer">Yes (<code>runtime.SetFinalizer</code>), but usage is discouraged due to unpredictability.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 10: PERFORMANCE -->
+      <div class="section">
+        <div class="category-header">10. Performance & Optimization</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">91. How to profile a Go app?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Tooling.</div>
+            <div class="q-answer">Use <code>pprof</code> (CPU, Memory, Block, Mutex profiles).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">92. String concatenation efficiency?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Optimization.</div>
+            <div class="q-answer">Use <code>strings.Builder</code> or <code>bytes.Buffer</code> instead of <code>+</code> for loops to avoid O(N²) allocs.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">93. Preallocating slices?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Best practices.</div>
+            <div class="q-answer">Always use <code>make([]T, 0, cap)</code> if size is known to avoid resizing allocations.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">94. What is inlining?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Compiler knowledge.</div>
+            <div class="q-answer">Compiler replaces function call with function body. Reduces overhead. Enabled for simple functions.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">95. Bounds check elimination?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Compiler optimization.</div>
+            <div class="q-answer">Compiler removes array bounds checks if it can prove safety, improving loop performance.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">96. Reflection performance?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Trade-offs.</div>
+            <div class="q-answer">Reflection is slow and prevents compiler optimizations. Avoid in hot paths.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">97. False sharing?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: CPU cache awareness.</div>
+            <div class="q-answer">When threads modify independent variables that share a cache line, causing cache invalidation storms. Pad structs to fix.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">98. Cgo overhead?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: FFI.</div>
+            <div class="q-answer">Calling C from Go has high overhead (stack switching). Avoid for small/frequent calls.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">99. How to benchmark?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Testing.</div>
+            <div class="q-answer">Write functions starting with <code>BenchmarkXxx(b *testing.B)</code> and run <code>go test -bench=.</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">100. Map preallocation?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Optimization.</div>
+            <div class="q-answer"><code>make(map[K]V, size)</code> hints initial capacity, reducing rehashing overhead.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 11: TOOLING -->
+      <div class="section">
+        <div class="category-header">11. Go Tooling</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">101. What is <code>go mod</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Dependency management.</div>
+            <div class="q-answer">The module system. <code>go.mod</code> defines dependencies and versions.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">102. What is <code>go sum</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Security.</div>
+            <div class="q-answer">Checksum database to verify module integrity and prevent tampering.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">103. <code>go build</code> vs <code>go install</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Workflow.</div>
+            <div class="q-answer"><code>build</code> compiles to current dir. <code>install</code> compiles and moves binary to <code>$GOPATH/bin</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">104. What is <code>go vet</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Code quality.</div>
+            <div class="q-answer">Static analysis tool to find common errors (e.g., printf args mismatch).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">105. What is <code>go fmt</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Style.</div>
+            <div class="q-answer">Formats code to standard Go style. Eliminates style bike-shedding.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">106. What are build tags?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Conditional compilation.</div>
+            <div class="q-answer">Comments like <code>//go:build linux</code> to include/exclude files based on OS/Arch/Flags.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">107. What is vendoring?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Dependency management.</div>
+            <div class="q-answer">Copying dependencies into a local <code>vendor</code> folder for hermetic builds.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">108. <code>go get</code> vs <code>go install</code> (modules)?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Modern workflow.</div>
+            <div class="q-answer"><code>go get</code> adds dependencies. <code>go install</code> installs binaries (tools).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">109. What is <code>gopls</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: IDE setup.</div>
+            <div class="q-answer">The Go Language Server. Provides IDE features like autocomplete and jump-to-def.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">110. How to upgrade dependencies?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Maintenance.</div>
+            <div class="q-answer"><code>go get -u ./...</code> and <code>go mod tidy</code>.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 12: TESTING -->
+      <div class="section">
+        <div class="category-header">12. Testing & Benchmarking</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">111. Table-driven tests?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Idiomatic testing.</div>
+            <div class="q-answer">Defining a slice of struct cases (input, expected), loop over them, run <code>t.Run()</code>. The Go way.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">112. What is <code>t.Run</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Subtests.</div>
+            <div class="q-answer">Runs a subtest. Allows hierarchical test reporting and running specific cases.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">113. <code>TestMain</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Setup/Teardown.</div>
+            <div class="q-answer">Global setup/teardown for a package. Must call <code>m.Run()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">114. How to mock in Go?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Testing strategy.</div>
+            <div class="q-answer">Use interfaces. Create a struct that implements the interface with dummy logic.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">115. What is <code>httptest</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Web testing.</div>
+            <div class="q-answer">Stdlib package to record HTTP responses (<code>ResponseRecorder</code>) and start test servers.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">116. What is Fuzzing?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Go 1.18+ features.</div>
+            <div class="q-answer">Automated testing with random inputs to find crashes/bugs. <code>func FuzzXxx(f *testing.F)</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">117. How to check test coverage?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Quality assurance.</div>
+            <div class="q-answer"><code>go test -cover</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">118. Parallel testing?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Speed.</div>
+            <div class="q-answer">Call <code>t.Parallel()</code> inside the test function.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">119. What is <code>iotest</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Reader/Writer testing.</div>
+            <div class="q-answer">Helpers to test Readers/Writers (e.g., simulate partial reads, errors).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">120. Example functions?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Documentation.</div>
+            <div class="q-answer">Functions starting with <code>Example</code>. They serve as docs and are verified as tests.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 13: STANDARD LIBRARY -->
+      <div class="section">
+        <div class="category-header">13. Standard Library</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">121. <code>net/http</code> basics?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Web dev.</div>
+            <div class="q-answer">Production-ready HTTP server/client. <code>http.Handler</code> interface is key.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">122. <code>io.Reader</code> / <code>io.Writer</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Abstraction.</div>
+            <div class="q-answer">Core interfaces for stream processing. Used everywhere (files, net, buffers).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">123. <code>time</code> package pitfalls?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Practical usage.</div>
+            <div class="q-answer">Monotonic time vs Wall clock. Formatting uses reference date "Mon Jan 2 15:04:05 2006".</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">124. <code>encoding/json</code> tags?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Serialization.</div>
+            <div class="q-answer"><code>`json:"name,omitempty"`</code>. Controls field naming and omission.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">125. <code>sort</code> package?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Algorithms.</div>
+            <div class="q-answer"><code>sort.Slice</code> (custom comparator) or <code>sort.Ints</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">126. <code>bufio</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: I/O performance.</div>
+            <div class="q-answer">Buffered I/O. Reduces syscalls when reading/writing files or network.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">127. <code>os/exec</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: System interaction.</div>
+            <div class="q-answer">Running external commands.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">128. <code>sync/atomic</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Lock-free sync.</div>
+            <div class="q-answer">Atomic operations on integers/pointers.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">129. <code>context</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Control flow.</div>
+            <div class="q-answer">Deadlines, cancellation, and request-scoped values.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">130. <code>math/rand</code> vs <code>crypto/rand</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Security.</div>
+            <div class="q-answer"><code>math</code> is pseudo-random (fast, deterministic). <code>crypto</code> is cryptographically secure (slower).</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 14: BACKEND DEV -->
+      <div class="section">
+        <div class="category-header">14. Backend Development</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">131. How to handle HTTP routing?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Web frameworks.</div>
+            <div class="q-answer">Stdlib <code>http.ServeMux</code> (Go 1.22+ is good) or libraries like Chi/Gin/Echo.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">132. What is Middleware?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Patterns.</div>
+            <div class="q-answer">Function wrapping a Handler to add logic (logging, auth) before/after execution.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">133. Database connection pooling?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: DB performance.</div>
+            <div class="q-answer"><code>database/sql</code> handles it automatically. Configure <code>SetMaxOpenConns</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">134. Graceful shutdown?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Ops.</div>
+            <div class="q-answer">Listen for OS signals (SIGTERM), call <code>server.Shutdown(ctx)</code> to finish active requests.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">135. Structured logging?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Observability.</div>
+            <div class="q-answer">Use <code>slog</code> (Go 1.21+) or Zap/Logrus. JSON format for machine parsing.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">136. How to prevent SQL injection?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Security.</div>
+            <div class="q-answer">Use parameterized queries (<code>?</code> or <code>$1</code>) in <code>database/sql</code>. Never concat strings.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">137. gRPC vs REST?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Architecture.</div>
+            <div class="q-answer">gRPC (Protobuf) is binary, typed, faster, good for internal services. REST (JSON) is standard, readable, good for public APIs.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">138. Configuration management?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Ops.</div>
+            <div class="q-answer">Env vars (12-factor app) or Viper (files + env).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">139. How to handle JSON?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Data format.</div>
+            <div class="q-answer">Struct tags + <code>json.Marshal/Unmarshal</code>. Use <code>json.Decoder</code> for streams.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">140. Metrics?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Observability.</div>
+            <div class="q-answer">Prometheus client library. Expose <code>/metrics</code> endpoint.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 15: CONTEXT -->
+      <div class="section">
+        <div class="category-header">15. Context & Cancellation</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">141. What is <code>context.Background()</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Usage.</div>
+            <div class="q-answer">The root of the context tree. Used in main, init, and tests.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">142. <code>context.TODO()</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Usage.</div>
+            <div class="q-answer">Placeholder when context is unclear or not yet available.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">143. <code>WithCancel</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Control.</div>
+            <div class="q-answer">Returns a copy of parent with a new Done channel. Calling cancel closes it.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">144. <code>WithTimeout</code> vs <code>WithDeadline</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Time handling.</div>
+            <div class="q-answer">Timeout takes a duration (5s). Deadline takes a specific time (2023-01-01...).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">145. <code>WithValue</code> pitfalls?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Best practices.</div>
+            <div class="q-answer">Use only for request-scoped data (TraceID, Auth). Not for optional function params. Keys should be unexported types to avoid collisions.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">146. Context propagation?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Flow.</div>
+            <div class="q-answer">Pass context as the first argument to functions performing I/O.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">147. Storing context in structs?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Anti-patterns.</div>
+            <div class="q-answer">Avoid it. Context should flow through function calls. Exception: request structs.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">148. HTTP Request Context?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Web dev.</div>
+            <div class="q-answer"><code>req.Context()</code>. Cancelled when client disconnects.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">149. Database Context?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: DB.</div>
+            <div class="q-answer"><code>db.QueryContext(ctx, ...)</code>. Cancels query if context expires.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">150. Cancellation propagation?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Tree structure.</div>
+            <div class="q-answer">Cancelling a parent context cancels all its children.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 16: DESIGN PATTERNS -->
+      <div class="section">
+        <div class="category-header">16. Design Patterns in Go</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">151. Functional Options?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: API design.</div>
+            <div class="q-answer">Pattern for optional config args: <code>NewServer(addr, WithTLS(), WithLogger())</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">152. Builder Pattern?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Object creation.</div>
+            <div class="q-answer">Less common in Go (Func Options preferred), but used for complex object construction.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">153. Singleton?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Sync.</div>
+            <div class="q-answer">Use <code>sync.Once</code> to ensure lazy initialization happens exactly once.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">154. Factory?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Creation.</div>
+            <div class="q-answer">Simple functions like <code>NewThing()</code> returning an interface or struct.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">155. Adapter?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Interfaces.</div>
+            <div class="q-answer">Converting one interface to another (e.g., <code>http.HandlerFunc</code> adapts a func to <code>Handler</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">156. Decorator?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Composition.</div>
+            <div class="q-answer">Wrapping a type to add behavior. Common in Middleware (wrapping <code>http.Handler</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">157. Observer?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Events.</div>
+            <div class="q-answer">Often implemented with Channels (pub/sub).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">158. Strategy?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Behavior.</div>
+            <div class="q-answer">Defining behavior via an interface field, swappable at runtime.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">159. Worker Pool?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Concurrency patterns.</div>
+            <div class="q-answer">Fixed number of goroutines processing jobs from a channel. Limits concurrency.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">160. Fan-in / Fan-out?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Concurrency patterns.</div>
+            <div class="q-answer">Fan-out: Distribute work to multiple workers. Fan-in: Collect results into one channel.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 17: GENERICS -->
+      <div class="section">
+        <div class="category-header">17. Generics (Go 1.18+)</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">161. What are Type Parameters?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Syntax.</div>
+            <div class="q-answer"><code>func Index[T comparable](s []T, x T)</code>. Allows writing code for multiple types.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">162. What is a Constraint?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Interfaces.</div>
+            <div class="q-answer">An interface defining the set of allowed types (e.g., <code>any</code>, <code>comparable</code>).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">163. What is <code>any</code>?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Alias.</div>
+            <div class="q-answer">Alias for <code>interface{}</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">164. What is <code>comparable</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Constraints.</div>
+            <div class="q-answer">Built-in constraint for types that support <code>==</code> and <code>!=</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">165. Generic Types?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Structs.</div>
+            <div class="q-answer"><code>type List[T any] struct { ... }</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">166. Generic Methods?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Limitations.</div>
+            <div class="q-answer">Go does NOT support type parameters on methods (only on functions and types).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">167. When to use Generics?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Best practices.</div>
+            <div class="q-answer">For data structures (sets, trees) and utility functions (slices, maps). Don't overuse.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">168. Type Sets?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Interface definition.</div>
+            <div class="q-answer">Interfaces can now list types: <code>type Number interface { int | float64 }</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">169. Performance impact?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Compilation.</div>
+            <div class="q-answer">Monomorphization (compiler generates code for each concrete type) or Gshape (runtime dict). Generally fast.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">170. Type Inference?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Usage.</div>
+            <div class="q-answer">Compiler can often infer T from arguments, so you can call <code>Min(a, b)</code> instead of <code>Minint</code>.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 18: REFLECTION & UNSAFE -->
+      <div class="section">
+        <div class="category-header">18. Reflection & Unsafe</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">171. <code>reflect.Type</code> vs <code>reflect.Value</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Reflection basics.</div>
+            <div class="q-answer">Type is metadata (int, struct). Value is the actual data (5, {x:1}).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">172. <code>reflect.DeepEqual</code>?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Testing.</div>
+            <div class="q-answer">Recursively checks equality (good for structs/slices). Slow.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">173. Modifying values via reflection?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Mechanics.</div>
+            <div class="q-answer">Requires <code>Value.Elem()</code> and <code>CanSet()</code>. Must pass pointer.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">174. Reading struct tags?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Usage.</div>
+            <div class="q-answer"><code>reflect.TypeOf(s).Field(i).Tag.Get("json")</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">175. Performance cost?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Trade-offs.</div>
+            <div class="q-answer">High. Allocations and runtime checks. Avoid in hot paths.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">176. <code>unsafe.Pointer</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Low-level.</div>
+            <div class="q-answer">Allows casting between incompatible types. Bypasses type safety.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">177. <code>uintptr</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Memory addressing.</div>
+            <div class="q-answer">Integer representation of a pointer. Used for arithmetic. GC ignores it (dangerous).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">178. Zero-copy string to byte slice?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Optimization.</div>
+            <div class="q-answer">Use <code>unsafe</code> to cast string header to slice header. Dangerous if modified.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">179. <code>Sizeof</code> / <code>Alignof</code>?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Memory layout.</div>
+            <div class="q-answer">Returns size and alignment requirements of types.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">180. When to use unsafe?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Judgment.</div>
+            <div class="q-answer">Almost never. Only for Cgo, OS syscalls, or extreme optimizations.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 19: PRODUCTION -->
+      <div class="section">
+        <div class="category-header">19. Production & Debugging</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">181. Race detector in prod?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Ops.</div>
+            <div class="q-answer">No. High overhead (CPU/Memory). Run in CI/CD or staging.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">182. Debugging goroutines?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Troubleshooting.</div>
+            <div class="q-answer">Stack traces (Ctrl+\), pprof goroutine profile, or <code>runtime.NumGoroutine()</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">183. Core dumps?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Post-mortem.</div>
+            <div class="q-answer"><code>GOTRACEBACK=crash</code> env var enables core dumps on panic.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">184. Delve (dlv)?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Tooling.</div>
+            <div class="q-answer">The standard Go debugger. Supports attaching to running processes.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">185. Dockerizing Go?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Deployment.</div>
+            <div class="q-answer">Multi-stage builds. Compile in builder, copy binary to <code>scratch</code> or <code>alpine</code> image. Small size.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">186. Static linking?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Build process.</div>
+            <div class="q-answer"><code>CGO_ENABLED=0</code> produces static binary (no libc dependency).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">187. Versioning binaries?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Release process.</div>
+            <div class="q-answer">Use <code>-ldflags "-X main.version=..."</code> during build to inject version info.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">188. Health checks?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Ops.</div>
+            <div class="q-answer">Expose <code>/healthz</code> endpoint. Check DB/Cache connectivity.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">189. CI/CD for Go?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Automation.</div>
+            <div class="q-answer">Lint, Test (with race), Build, Docker push.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">190. Logging best practices?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Observability.</div>
+            <div class="q-answer">Structured logging (JSON), correlation IDs, levels (Info/Error).</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 20: TRAPS -->
+      <div class="section">
+        <div class="category-header">20. Common Traps & Pitfalls</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">191. Loop variable capture?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Scope bugs.</div>
+            <div class="q-answer">Pre-1.22: Loop var address is constant. Goroutines see final value. Fix: <code>v := v</code> inside loop. (Fixed in 1.22).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">192. Nil interface != nil?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Interface internals.</div>
+            <div class="q-answer">An interface holding a nil pointer is not nil.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">193. Slice memory leak?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Memory.</div>
+            <div class="q-answer">Small slice referencing large array keeps array in memory. Fix: <code>copy</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">194. Map concurrent write?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Concurrency.</div>
+            <div class="q-answer">Fatal error. Always lock maps.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">195. JSON numbers?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Serialization.</div>
+            <div class="q-answer">Default to <code>float64</code>. Use <code>json.Number</code> to preserve precision.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">196. Time formatting?</span><span class="q-tag beginner">Beginner</span></div>
+            <div class="q-meta">Evaluates: Stdlib quirks.</div>
+            <div class="q-answer">Must use reference date: <code>Mon Jan 2 15:04:05 2006</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">197. Shadowing variables?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Scope.</div>
+            <div class="q-answer">Accidental <code>:=</code> inside <code>if</code> block shadows outer variable.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">198. Defer execution time?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: Defer mechanics.</div>
+            <div class="q-answer">Arguments evaluated at defer statement, function executed at return.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">199. Init order?</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-meta">Evaluates: Startup logic.</div>
+            <div class="q-answer">Imports -> Const -> Var -> Init -> Main.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">200. Default case in select?</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-meta">Evaluates: CPU usage.</div>
+            <div class="q-answer">Inside a loop, a default case causes a busy-wait spin loop (100% CPU). Avoid unless needed.</div>
+          </li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

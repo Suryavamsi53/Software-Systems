@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prefix Sum Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Prefix Sum Pattern</h1>
+        <p>Subarray sum queries and range queries</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Array of numbers</li>
+              <li>Range/subarray queries</li>
+              <li>Cumulative calculations</li>
+              <li>Need multiple lookups</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Sum of range [i, j]</li>
+              <li>Subarray with sum K</li>
+              <li>Cumulative frequency</li>
+              <li>Range queries</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>O(1) query after prep</li>
+              <li>Preprocessing allowed</li>
+              <li>Range-based problems</li>
+              <li>Cumulative property</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Understanding arrays and cumulative concepts</li>
+              <li>Range query concept: sum between indices i and j</li>
+              <li>Array indexing and off-by-one handling</li>
+              <li>Basic math: prefix_sum[i] = prefix_sum[i-1] + arr[i]</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Build prefix sum array in one pass: O(n) preprocessing</li>
+              <li>Query range sum in O(1): range_sum[i,j] = prefix[j] - prefix[i-1]</li>
+              <li>Handle negative numbers: prefix sum works with any integers</li>
+              <li>2D prefix sums: for matrix range sum queries</li>
+              <li>Find subarrays with target sum: combine with hash map</li>
+              <li>Space-time tradeoff: O(n) space for O(1) queries</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">\"Pre-compute cumulative sums. Any range sum = prefix[end] - prefix[start-1]. Trades O(n) space for O(1) query time.\"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Amazon EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Preprocessing:</strong> Do you understand that spending O(N) upfront saves time later?</li>
+              <li><strong>Range Formula:</strong> Do you know <code>Sum(i, j) = P[j] - P[i-1]</code>?</li>
+              <li><strong>Index Handling:</strong> Can you handle 0-based indexing without off-by-one errors?</li>
+              <li><strong>Space Trade-off:</strong> Are you aware this costs O(N) extra space?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Preprocessing for O(1) Queries</div>
+          <div class="callout-content">
+            <p>The Prefix Sum pattern involves preprocessing an array to create a new array where each element at index <code>i</code> represents the sum of all elements from the start up to <code>i</code>. This allows for O(1) sum queries on any subarray.</p>
+            <p><strong>Use when:</strong></p>
+            <ul>
+              <li>You need to perform multiple sum queries on subarrays.</li>
+              <li>You need to calculate cumulative totals.</li>
+              <li>You need to find subarrays with a specific target sum.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Sales Analytics</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> You have an array of daily sales figures for the last year. A dashboard needs to display total sales for any selected date range (e.g., "Last 7 days", "March 1-15") instantly.</p>
+            <p><strong>Solution:</strong> Compute prefix sums once. Any range query is then O(1).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Prefix Sum Array Construction</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Calculating cumulative sums allows O(1) range queries. <code>Sum(i, j) = P[j+1] - P[i]</code>.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 300'%3E%3Crect width='800' height='300' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EPrefix Sum Calculation%3C/text%3E%3C!-- Array --%3E%3Cg transform='translate(50, 80)'%3E%3Ctext x='0' y='25' font-weight='bold' fill='%23333'%3EArray:%3C/text%3E%3Crect x='80' y='0' width='50' height='50' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='105' y='30' text-anchor='middle' font-weight='bold'%3E1%3C/text%3E%3Crect x='130' y='0' width='50' height='50' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='155' y='30' text-anchor='middle' font-weight='bold'%3E2%3C/text%3E%3Crect x='180' y='0' width='50' height='50' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='205' y='30' text-anchor='middle' font-weight='bold'%3E3%3C/text%3E%3Crect x='230' y='0' width='50' height='50' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='255' y='30' text-anchor='middle' font-weight='bold'%3E4%3C/text%3E%3Crect x='280' y='0' width='50' height='50' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='305' y='30' text-anchor='middle' font-weight='bold'%3E5%3C/text%3E%3C/g%3E%3C!-- Prefix --%3E%3Cg transform='translate(50, 160)'%3E%3Ctext x='0' y='25' font-weight='bold' fill='%23333'%3EPrefix:%3C/text%3E%3Crect x='80' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='105' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E0%3C/text%3E%3Crect x='130' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='155' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E1%3C/text%3E%3Crect x='180' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='205' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E3%3C/text%3E%3Crect x='230' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='255' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E6%3C/text%3E%3Crect x='280' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='305' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E10%3C/text%3E%3Crect x='330' y='0' width='50' height='50' fill='%233b82f6' stroke='%231d4ed8'/%3E%3Ctext x='355' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E15%3C/text%3E%3C/g%3E%3C!-- Query --%3E%3Cg transform='translate(450, 100)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EQuery Sum(1, 3):%3C/text%3E%3Ctext x='0' y='30' font-family='monospace' fill='%23333'%3EIndices 1 to 3: [2, 3, 4]%3C/text%3E%3Ctext x='0' y='60' font-family='monospace' fill='%23333'%3EP[4] - P[1]%3C/text%3E%3Ctext x='0' y='90' font-family='monospace' fill='%23333'%3E10 - 1 = 9%3C/text%3E%3Ctext x='0' y='120' font-weight='bold' fill='%2310b981'%3EResult: 9%3C/text%3E%3C/g%3E%3C!-- Arrows --%3E%3Cpath d='M305,160 L305,140 L440,140' stroke='%23ef4444' stroke-width='2' fill='none' marker-end='url(%23arrow)'/%3E%3Cpath d='M155,160 L155,140 L440,140' stroke='%23ef4444' stroke-width='2' fill='none'/%3E%3Cdefs%3E%3Cmarker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%23ef4444'/%3E%3C/marker%3E%3C/defs%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Prefix Sum Array Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Range Sum Query (LeetCode 303)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given an integer array <code>nums</code>, handle multiple queries of the following type: Calculate the sum of the elements of <code>nums</code> between indices <code>left</code> and <code>right</code> inclusive where <code>left &lt;= right</code>.</p>
+            <p><strong>Input:</strong> nums = [-2, 0, 3, -5, 2, -1], sumRange(0, 2), sumRange(2, 5)<br>
+            <strong>Output:</strong> 1, -1</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">Looping per Query</div>
+          <div class="callout-content">
+            <p>Iterate from <code>left</code> to <code>right</code> for every query.</p>
+            <p><strong>Complexity:</strong> O(N) per query. If M queries, total O(M*N). Prefix sum is O(N + M).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+type NumArray struct {
+    prefix []int
+}
+
+func Constructor(nums []int) NumArray {
+    // Build prefix sum array
+    // Size is n+1 to handle 0-index easily
+    prefix := make([]int, len(nums)+1)
+    for i, num := range nums {
+        prefix[i+1] = prefix[i] + num
+    }
+    return NumArray{prefix: prefix}
+}
+
+func (this *NumArray) SumRange(left int, right int) int {
+    // Query sum of range [left, right]
+    // Formula: prefix[right + 1] - prefix[left]
+    return this.prefix[right+1] - this.prefix[left]
+}
+</pre></div>
+            </div>
+
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class NumArray {
+    private int[] prefix;
+
+    public NumArray(int[] nums) {
+        // Build prefix sum array
+        prefix = new int[nums.length + 1];
+        for (int i = 0; i < nums.length; i++) {
+            prefix[i + 1] = prefix[i] + nums[i];
+        }
+    }
+    
+    public int sumRange(int left, int right) {
+        // Query sum of range [left, right]
+        return prefix[right + 1] - prefix[left];
+    }
+}
+</pre></div>
+            </div>
+
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class NumArray:
+    def __init__(self, nums: List[int]):
+        # Build prefix sum array
+        self.prefix = [0] * (len(nums) + 1)
+        for i, num in enumerate(nums):
+            self.prefix[i + 1] = self.prefix[i] + num
+
+    def sumRange(self, left: int, right: int) -> int:
+        # Query sum of range [left, right]
+        return self.prefix[right + 1] - self.prefix[left]
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace for <code>nums = [1, 2, 3, 4, 5, 6]</code>, query <code>[1, 3]</code></p>
+        <div class="diagram">
+Step 1: Build Prefix Sum Array
+  prefix[0] = 0
+  prefix[1] = 0 + 1 = 1
+  prefix[2] = 1 + 2 = 3
+  prefix[3] = 3 + 3 = 6
+  prefix[4] = 6 + 4 = 10
+  prefix[5] = 10 + 5 = 15
+  prefix[6] = 15 + 6 = 21
+  Result: [0, 1, 3, 6, 10, 15, 21]
+
+Step 2: Query Range [1, 3]
+  Formula: prefix[right + 1] - prefix[left]
+  Calculation: prefix[4] - prefix[1]
+  Values: 10 - 1
+  Result: 9
+        </div>
+      </div>
+
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(N)</strong></p>
+            <p>O(N) to build the prefix array. O(1) per query.</p>
+            <p><strong>Space Complexity: O(N)</strong></p>
+            <p>To store the prefix sum array.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: What if values update frequently?</strong><br>
+            A: Prefix sum is bad for updates (O(N)). Use a Segment Tree or Fenwick Tree (Binary Indexed Tree) for O(log N) updates and queries.</p>
+            <p><strong>Q: How to handle 2D matrix range sums?</strong><br>
+            A: Use 2D prefix sums: <code>P[i][j] = val + P[i-1][j] + P[i][j-1] - P[i-1][j-1]</code>.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#303</strong> - Range Sum Query - Immutable</li>
+              <li style="margin-bottom: 12px;"><strong>#1480</strong> - Running Sum of 1d Array</li>
+              <li style="margin-bottom: 12px;"><strong>#1572</strong> - Matrix Diagonal Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#2011</strong> - Final Value of Variable After Performing Operations</li>
+              <li style="margin-bottom: 12px;"><strong>#2389</strong> - Longest Subsequence With Limited Sum</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#560</strong> - Subarray Sum Equals K (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#238</strong> - Product of Array Except Self</li>
+              <li style="margin-bottom: 12px;"><strong>#304</strong> - Range Sum Query 2D - Immutable</li>
+              <li style="margin-bottom: 12px;"><strong>#724</strong> - Find Pivot Index</li>
+              <li style="margin-bottom: 12px;"><strong>#1461</strong> - Check If a Number Is Majority Element In a Sorted Array</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#53</strong> - Maximum Subarray</li>
+              <li style="margin-bottom: 12px;"><strong>#209</strong> - Minimum Size Subarray Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#363</strong> - Max Sum of Rectangle No Larger Than K</li>
+              <li style="margin-bottom: 12px;"><strong>#1139</strong> - Largest 1-Bordered Square</li>
+              <li style="margin-bottom: 12px;"><strong>#1589</strong> - Maximum Sum of Subarray With Bounded Maximum</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+  <script>
+    function switchTab(lang) {
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll('.lang-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        event.target.classList.add('active');
+        document.getElementById(lang).classList.add('active');
+        localStorage.setItem('preferredLanguage', lang);
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const lang = localStorage.getItem('preferredLanguage') || 'go';
+        const btn = document.querySelector(`.tab-btn[onclick*="${lang}"]`);
+        if (btn) btn.click();
+    });
+  </script>
+</body>
+</html>

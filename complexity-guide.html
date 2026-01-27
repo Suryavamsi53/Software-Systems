@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time & Space Complexity Guide - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .complexity-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .complexity-table th, .complexity-table td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .complexity-table th {
+      background-color: rgba(59, 130, 246, 0.2);
+      font-weight: bold;
+      color: #3b82f6;
+    }
+    .complexity-table tr:hover {
+      background-color: rgba(59, 130, 246, 0.05);
+    }
+    .complexity-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.85em;
+      font-weight: bold;
+      margin: 5px 0;
+    }
+    .excellent { background-color: rgba(34, 197, 94, 0.2); color: #22c55e; }
+    .good { background-color: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+    .fair { background-color: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+    .poor { background-color: rgba(239, 68, 68, 0.2); color: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item active">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+        <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+        <a href="patterns/stack.html" class="nav-item">Stack</a>
+        <a href="patterns/heap.html" class="nav-item">Heap (Priority Queue)</a>
+        <a href="patterns/trees.html" class="nav-item">Trees</a>
+        <a href="patterns/tries.html" class="nav-item">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+        <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+        <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+        <a href="patterns/greedy.html" class="nav-item">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="patterns/fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+        <a href="patterns/intervals.html" class="nav-item">Intervals</a>
+        <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
+        <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+        <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="patterns/sort-search.html" class="nav-item">Sort & Search</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>⏱️ Time & Space Complexity Guide</h1>
+        <p>Master complexity analysis for Amazon coding interviews</p>
+      </div>
+
+      <!-- WHAT IS COMPLEXITY ANALYSIS -->
+      <div class="section" id="intro" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">📚</span> What is Complexity Analysis?
+        </div>
+        
+        <div style="margin-top: 20px; color: var(--text-secondary);">
+          <p><strong>Complexity analysis</strong> measures how the algorithm's resource usage (time/memory) grows as input size increases.</p>
+          
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <strong style="color: #3b82f6;">Why it matters for Amazon interviews:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+              <li>Shows you understand algorithm efficiency</li>
+              <li>Helps you choose between multiple solutions</li>
+              <li>Demonstrates scalability thinking (core Amazon value)</li>
+              <li>Essential for system design later in interviews</li>
+              <li>Proves you can handle large-scale problems</li>
+            </ul>
+          </div>
+
+          <p><strong>Two main metrics:</strong></p>
+          <ul style="padding-left: 20px;">
+            <li><strong>Time Complexity:</strong> How many operations the algorithm performs</li>
+            <li><strong>Space Complexity:</strong> How much extra memory the algorithm uses</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- TIME COMPLEXITY BREAKDOWN -->
+      <div class="section" id="time-complexity" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">⏱️</span> Time Complexity
+        </div>
+
+        <!-- VISUALIZATION -->
+        <div style="margin: 25px 0;">
+          <strong style="color: #3b82f6; display: block; margin-bottom: 15px;">Big-O Complexity Chart</strong>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Crect width='800' height='400' fill='%23f8fafc'/%3E%3C!-- Grid --%3E%3Cpath d='M50 350 L750 350' stroke='%23334155' stroke-width='2'/%3E%3Cpath d='M50 50 L50 350' stroke='%23334155' stroke-width='2'/%3E%3Ctext x='760' y='355' font-family='sans-serif' font-size='14' fill='%23475569'%3EInput Size (n)%3C/text%3E%3Ctext x='40' y='40' font-family='sans-serif' font-size='14' fill='%23475569'%3EOperations%3C/text%3E%3C!-- O(1) --%3E%3Cpath d='M50 340 L750 340' stroke='%2322c55e' stroke-width='3' fill='none'/%3E%3Ctext x='700' y='330' font-family='sans-serif' font-size='14' fill='%2322c55e' font-weight='bold'%3EO(1)%3C/text%3E%3C!-- O(log n) --%3E%3Cpath d='M50 350 Q 200 330 750 310' stroke='%233b82f6' stroke-width='3' fill='none'/%3E%3Ctext x='700' y='300' font-family='sans-serif' font-size='14' fill='%233b82f6' font-weight='bold'%3EO(log n)%3C/text%3E%3C!-- O(n) --%3E%3Cpath d='M50 350 L 750 150' stroke='%23eab308' stroke-width='3' fill='none'/%3E%3Ctext x='700' y='140' font-family='sans-serif' font-size='14' fill='%23eab308' font-weight='bold'%3EO(n)%3C/text%3E%3C!-- O(n log n) --%3E%3Cpath d='M50 350 Q 400 250 600 50' stroke='%23f97316' stroke-width='3' fill='none'/%3E%3Ctext x='560' y='60' font-family='sans-serif' font-size='14' fill='%23f97316' font-weight='bold'%3EO(n log n)%3C/text%3E%3C!-- O(n^2) --%3E%3Cpath d='M50 350 Q 200 350 350 50' stroke='%23ef4444' stroke-width='3' fill='none'/%3E%3Ctext x='310' y='60' font-family='sans-serif' font-size='14' fill='%23ef4444' font-weight='bold'%3EO(n²)%3C/text%3E%3C!-- O(2^n) --%3E%3Cpath d='M50 350 Q 100 350 150 50' stroke='%23a855f7' stroke-width='3' fill='none'/%3E%3Ctext x='160' y='60' font-family='sans-serif' font-size='14' fill='%23a855f7' font-weight='bold'%3EO(2^n)%3C/text%3E%3C/svg%3E" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" alt="Big-O Complexity Chart"/>
+          </div>
+        </div>
+
+        <!-- O(1) CONSTANT TIME -->
+        <div style="background-color: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #22c55e;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #22c55e; font-size: 1.2em;">O(1) - Constant Time</strong>
+            <span class="complexity-badge excellent">EXCELLENT</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Takes the same time regardless of input size. Operation count doesn't scale.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #22c55e;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Array/list access by index</li>
+                <li>Hash table lookup (average)</li>
+                <li>Set membership check</li>
+                <li>Basic arithmetic operations</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #22c55e;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def get_first(arr):
+    return arr[0]  # Always 1 operation
+
+def lookup_hash(hash_map, key):
+    return hash_map[key]  # O(1) average</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- O(log n) LOGARITHMIC -->
+        <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #3b82f6; font-size: 1.2em;">O(log n) - Logarithmic Time</strong>
+            <span class="complexity-badge excellent">EXCELLENT</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Time grows logarithmically with input size. Problem space is cut in half each iteration.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #3b82f6;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Binary search (sorted array)</li>
+                <li>Balanced binary tree operations</li>
+                <li>Heap operations (insert/delete)</li>
+                <li>Divide and conquer algorithms</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #3b82f6;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    while left <= right:
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1  # Cut search space
+        else:
+            right = mid - 1
+    return -1</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>💡 Insight:</strong> For n=1,000,000, O(log n) ≈ 20 operations. Incredibly efficient!
+          </div>
+        </div>
+
+        <!-- O(n) LINEAR -->
+        <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #3b82f6; font-size: 1.2em;">O(n) - Linear Time</strong>
+            <span class="complexity-badge good">GOOD</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Time grows proportionally with input size. Single loop through data.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #3b82f6;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Simple array iteration</li>
+                <li>Linear search (find in unsorted)</li>
+                <li>Finding min/max element</li>
+                <li>Sliding window with single pass</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #3b82f6;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def find_max(arr):
+    max_val = arr[0]
+    for num in arr:  # Iterate through all
+        max_val = max(max_val, num)
+    return max_val
+
+def linear_search(arr, target):
+    for i in range(len(arr)):  # O(n)
+        if arr[i] == target:
+            return i
+    return -1</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>💡 Insight:</strong> Often acceptable for n up to 10^8. Baseline for many problems.
+          </div>
+        </div>
+
+        <!-- O(n log n) LINEARITHMIC -->
+        <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #f59e0b; font-size: 1.2em;">O(n log n) - Linearithmic Time</strong>
+            <span class="complexity-badge good">GOOD</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Combination of linear and logarithmic. Typical for efficient sorting algorithms.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #f59e0b;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Merge sort</li>
+                <li>Quick sort (average)</li>
+                <li>Heap sort</li>
+                <li>Sorting + linear operations</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #f59e0b;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code">def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])    # O(log n) depth
+    right = merge_sort(arr[mid:])   # O(log n) depth
+    return merge(left, right)       # O(n) merge
+    
+# Total: O(n) * O(log n) = O(n log n)</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>💡 Insight:</strong> Default choice for sorting. Most sorting algorithms achieve this.
+          </div>
+        </div>
+
+        <!-- O(n²) QUADRATIC -->
+        <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #f59e0b; font-size: 1.2em;">O(n²) - Quadratic Time</strong>
+            <span class="complexity-badge fair">ACCEPTABLE</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Time grows with square of input size. Nested loops.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #f59e0b;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Bubble sort, insertion sort</li>
+                <li>Nested loops (all pairs)</li>
+                <li>Matrix operations</li>
+                <li>Brute force comparison</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #f59e0b;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def bubble_sort(arr):
+    for i in range(len(arr)):      # O(n)
+        for j in range(len(arr)-1):  # O(n)
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+    return arr
+# Total: O(n) * O(n) = O(n²)</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>⚠️ Caution:</strong> Works for n < 10,000. For n=100,000, takes billions of operations.
+          </div>
+        </div>
+
+        <!-- O(n³) CUBIC -->
+        <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #ef4444; font-size: 1.2em;">O(n³) - Cubic Time</strong>
+            <span class="complexity-badge poor">USUALLY AVOID</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Triple nested loops. Grows very quickly.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #ef4444;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>3D matrix traversal</li>
+                <li>Triple nested loops</li>
+                <li>Some DP solutions</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #ef4444;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def triple_loop(n):
+    count = 0
+    for i in range(n):      # O(n)
+        for j in range(n):    # O(n)
+            for k in range(n):  # O(n)
+                count += 1
+    return count
+# Total: O(n³)</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>❌ Problem:</strong> For n=100, already 1 million operations. Only use if unavoidable.
+          </div>
+        </div>
+
+        <!-- O(2^n) EXPONENTIAL -->
+        <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #ef4444; font-size: 1.2em;">O(2^n) - Exponential Time</strong>
+            <span class="complexity-badge poor">AVOID - OPTIMIZE!</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Time doubles with each additional input. Extremely fast growth.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #ef4444;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Recursive backtracking (no memoization)</li>
+                <li>Generate all subsets</li>
+                <li>Brute force password cracking</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #ef4444;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code">def fibonacci_slow(n):
+    if n <= 1:
+        return n
+    return fibonacci_slow(n-1) + \
+           fibonacci_slow(n-2)
+# O(2^n) - recalculates same values</code></pre>
+            </div>
+          </div>
+
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; margin-top: 15px; color: var(--text-secondary);">
+            <strong>🚨 Critical:</strong> For n=50, this is 10^15 operations! Use memoization or optimization.
+          </div>
+        </div>
+
+        <!-- O(n!) FACTORIAL -->
+        <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #ef4444; font-size: 1.2em;">O(n!) - Factorial Time</strong>
+            <span class="complexity-badge poor">IMPRACTICAL</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Extremely rare. Used for generating all permutations.</p>
+          
+          <div style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; color: var(--text-secondary);">
+            <strong>Example:</strong> Generating all permutations of a list<br>
+            <strong>⚠️ Never use unless there's absolutely no alternative.</strong><br>
+            For n=13, this is 6 billion operations. For n=20, impractical.
+          </div>
+        </div>
+      </div>
+
+      <!-- AMORTIZED ANALYSIS -->
+      <div class="section" id="amortized-analysis" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #8b5cf6;">
+        <div class="section-title">
+          <span class="emoji">📉</span> Amortized Analysis
+        </div>
+        
+        <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> The average time per operation over a sequence of operations. Even if one operation is slow, if most are fast, the amortized cost is low.</p>
+        
+        <div style="background-color: rgba(139, 92, 246, 0.1); padding: 20px; border-radius: 8px;">
+          <strong style="color: #8b5cf6; font-size: 1.1em;">Example: Dynamic Array (ArrayList / Slice)</strong>
+          <p style="margin: 10px 0; color: var(--text-secondary);">
+            <strong>Operation:</strong> Appending to an array.<br>
+            <strong>Most of the time:</strong> O(1) - just add element at end.<br>
+            <strong>Occasionally:</strong> O(n) - array is full, allocate double size, copy all elements.<br>
+            <strong>Amortized Cost:</strong> O(1).
+          </p>
+          <p style="margin: 10px 0; color: var(--text-secondary);">
+            <strong>Why?</strong> If we double capacity, we won't resize again for another n operations. The expensive O(n) copy is "paid for" by the n cheap O(1) insertions.
+          </p>
+        </div>
+      </div>
+
+      <!-- SPACE COMPLEXITY -->
+      <div class="section" id="space-complexity" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">💾</span> Space Complexity
+        </div>
+
+        <p style="color: var(--text-secondary); margin: 0 0 20px 0;"><strong>Space complexity</strong> measures extra memory used by the algorithm (not counting input).</p>
+
+        <!-- O(1) SPACE -->
+        <div style="background-color: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #22c55e;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #22c55e; font-size: 1.2em;">O(1) - Constant Space</strong>
+            <span class="complexity-badge excellent">OPTIMAL</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Uses constant memory regardless of input size. Only a few variables.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #22c55e;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>In-place array sorting</li>
+                <li>Two pointer technique</li>
+                <li>Simple counter variables</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #22c55e;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def reverse_array(arr):
+    left, right = 0, len(arr) - 1
+    while left < right:
+        arr[left], arr[right] = \
+            arr[right], arr[left]
+        left += 1
+        right -= 1
+    return arr
+# Only 2 variables: O(1) space</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- O(n) SPACE -->
+        <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #3b82f6; font-size: 1.2em;">O(n) - Linear Space</strong>
+            <span class="complexity-badge good">COMMON</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Memory grows proportionally with input. Creating a new data structure.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #3b82f6;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Hash map for storing all elements</li>
+                <li>Result array same size as input</li>
+                <li>Queue/stack for BFS/DFS</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #3b82f6;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code>def two_sum(nums, target):
+    seen = {}  # O(n) space
+    for num in nums:
+        complement = target - num
+        if complement in seen:
+            return [seen[complement], 
+                   nums.index(num)]
+        seen[num] = nums.index(num)
+    return []</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- O(log n) SPACE -->
+        <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #3b82f6; font-size: 1.2em;">O(log n) - Logarithmic Space</strong>
+            <span class="complexity-badge good">GOOD</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> Recursion depth or partial data structures.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #3b82f6;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>Binary search (recursion depth)</li>
+                <li>Balanced tree operations</li>
+                <li>Divide and conquer</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #3b82f6;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code">def binary_search(arr, target):
+    def search(left, right):
+        if left > right:
+            return -1
+        mid = (left + right) // 2
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            return search(mid+1, right)
+        else:
+            return search(left, mid-1)
+    # Recursion depth: O(log n)
+    return search(0, len(arr)-1)</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- O(n²) SPACE -->
+        <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <strong style="color: #f59e0b; font-size: 1.2em;">O(n²) - Quadratic Space</strong>
+            <span class="complexity-badge fair">ACCEPTABLE</span>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin: 0 0 15px 0;"><strong>Definition:</strong> 2D matrix or nested data structures.</p>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div>
+              <strong style="color: #f59e0b;">Examples:</strong>
+              <ul style="margin: 10px 0; padding-left: 20px; color: var(--text-secondary);">
+                <li>2D DP table</li>
+                <li>Adjacency matrix</li>
+                <li>Cartesian product results</li>
+              </ul>
+            </div>
+            <div>
+              <strong style="color: #f59e0b;">Code Example:</strong>
+              <pre style="background-color: rgba(255,255,255,0.05); padding: 10px; border-radius: 5px; font-size: 0.85em; color: var(--text-primary);"><code">def create_dp_table(n, m):
+    # 2D table: O(n*m) space
+    dp = [[0 for _ in range(m)]
+          for _ in range(n)]
+    # Other calculations...
+    return dp</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLEXITY CHEAT SHEET -->
+      <div class="section" id="cheat-sheet" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">📋</span> Complexity Cheat Sheet
+        </div>
+
+        <table class="complexity-table">
+          <thead>
+            <tr>
+              <th>Operation</th>
+              <th>Data Structure</th>
+              <th>Time Complexity</th>
+              <th>Space Complexity</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Array Access</strong></td>
+              <td>Array</td>
+              <td><span class="complexity-badge excellent">O(1)</span></td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td><strong>Array Search</strong></td>
+              <td>Unsorted Array</td>
+              <td><span class="complexity-badge good">O(n)</span></td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td><strong>Binary Search</strong></td>
+              <td>Sorted Array</td>
+              <td><span class="complexity-badge excellent">O(log n)</span></td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td><strong>Hash Lookup</strong></td>
+              <td>Hash Map</td>
+              <td><span class="complexity-badge excellent">O(1) avg</span></td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td><strong>Tree Search</strong></td>
+              <td>Binary Search Tree</td>
+              <td><span class="complexity-badge good">O(log n) avg</span></td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td><strong>Heap Insert/Delete</strong></td>
+              <td>Heap</td>
+              <td><span class="complexity-badge good">O(log n)</span></td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td><strong>Merge Sort</strong></td>
+              <td>Array</td>
+              <td><span class="complexity-badge good">O(n log n)</span></td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td><strong>Quick Sort</strong></td>
+              <td>Array</td>
+              <td><span class="complexity-badge good">O(n log n) avg</span></td>
+              <td>O(log n)</td>
+            </tr>
+            <tr>
+              <td><strong>Graph Traversal</strong></td>
+              <td>Graph</td>
+              <td><span class="complexity-badge good">O(V + E)</span></td>
+              <td>O(V)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- WHEN TO USE WHAT -->
+      <div class="section" id="when-to-use" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> When to Optimize Complexity
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <div style="background-color: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e;">
+            <strong style="color: #22c55e; display: block; margin-bottom: 15px; font-size: 1.1em;">✅ This Complexity is FINE</strong>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>O(1):</strong> Always perfect</li>
+              <li><strong>O(log n):</strong> For n up to 10^8</li>
+              <li><strong>O(n):</strong> For n up to 10^8</li>
+              <li><strong>O(n log n):</strong> For n up to 10^6</li>
+              <li><strong>O(n²):</strong> For n up to 10^4</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 15px; font-size: 1.1em;">⚠️ This Complexity NEEDS Optimization</strong>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>O(n²):</strong> For n > 10^5</li>
+              <li><strong>O(n³):</strong> Usually always</li>
+              <li><strong>O(2^n):</strong> Always! (use DP)</li>
+              <li><strong>O(n!):</strong> Only for n < 12</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- INTERVIEW TIPS -->
+      <div class="section" id="tips" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">⭐</span> Interview Tips for Discussing Complexity
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6;">💬 Always Explain, Don't Just State</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Don't say "O(n log n)". Say "O(n log n) because we sort the array and then iterate once."</p>
+          </div>
+
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981;">🔄 Discuss Trade-offs</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">"This uses O(n) space to achieve O(n) time. Without that space, it would be O(n²) time."</p>
+          </div>
+
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b;">🔍 Count Operations Explicitly</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">For small examples, trace through and count: "This loop runs n times, and each iteration does 5 operations."</p>
+          </div>
+
+          <div style="background-color: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #a855f7;">
+            <strong style="color: #a855f7;">📊 Relate to Real Numbers</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">"For n=1 million, O(n) is 1 million operations. O(n²) would be 1 trillion—definitely too slow."</p>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">🚀 Suggest Optimizations</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">"We could optimize this to O(n) if we use a hash map instead, though it would cost O(n) space."</p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

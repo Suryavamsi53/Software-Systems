@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knapsack DP Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;   /* Yellow for current cell */
+            --compare: #fb923c;  /* Orange for comparison source */
+            --success: #22c55e;  /* Green for final value */
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* DP Table */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            background-color: var(--panel);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid var(--border);
+            min-width: 40px;
+        }
+
+        th {
+            background-color: rgba(255,255,255,0.05);
+            color: var(--primary);
+        }
+
+        td {
+            transition: background-color 0.3s;
+        }
+
+        .cell-active { background-color: var(--active) !important; color: var(--bg); font-weight: bold; }
+        .cell-compare { background-color: var(--compare) !important; color: var(--bg); }
+        .cell-final { background-color: var(--success) !important; color: var(--bg); font-weight: bold; }
+
+        /* Items List */
+        .items-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .item-card {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .item-card.active {
+            border-color: var(--active);
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+        }
+
+        .item-val { color: var(--success); font-weight: bold; }
+        .item-wt { color: var(--text-muted); font-size: 0.9em; }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        .formula { font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 10px; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>0/1 Knapsack Visualization</h1>
+            <div class="subtitle">Max Capacity: 7</div>
+        </header>
+
+        <div class="items-container" id="items-list">
+            <!-- Items injected here -->
+        </div>
+
+        <div class="table-container">
+            <table id="dp-table">
+                <!-- Table injected here -->
+            </table>
+        </div>
+
+        <div class="info-panel">
+            <div class="step-text" id="step-text">Ready to start...</div>
+            <div class="formula" id="formula-text">dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])</div>
+        </div>
+
+        <div class="controls">
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        // Problem Data
+        const CAPACITY = 7;
+        const ITEMS = [
+            { id: 1, w: 1, v: 1 },
+            { id: 2, w: 3, v: 4 },
+            { id: 3, w: 4, v: 5 },
+            { id: 4, w: 5, v: 7 }
+        ];
+
+        // Animation State
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        const ANIMATION_SPEED = 800;
+
+        // DOM Elements
+        const table = document.getElementById('dp-table');
+        const itemsList = document.getElementById('items-list');
+        const stepText = document.getElementById('step-text');
+        const formulaText = document.getElementById('formula-text');
+        const playBtn = document.getElementById('playBtn');
+
+        function init() {
+            renderItems();
+            renderTableStructure();
+            generateSteps();
+            updateView(0);
+        }
+
+        function renderItems() {
+            let html = '';
+            ITEMS.forEach(item => {
+                html += `
+                    <div class="item-card" id="item-${item.id}">
+                        <div>Item ${item.id}</div>
+                        <div class="item-val">Val: ${item.v}</div>
+                        <div class="item-wt">Wt: ${item.w}</div>
+                    </div>
+                `;
+            });
+            itemsList.innerHTML = html;
+        }
+
+        function renderTableStructure() {
+            let html = '<thead><tr><th>Item \\ Cap</th>';
+            for (let w = 0; w <= CAPACITY; w++) {
+                html += `<th>${w}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            // Row 0 (No items)
+            html += '<tr><th>0</th>';
+            for (let w = 0; w <= CAPACITY; w++) html += `<td id="cell-0-${w}">0</td>`;
+            html += '</tr>';
+
+            // Item Rows
+            ITEMS.forEach((item, i) => {
+                html += `<tr><th>${item.id} (w:${item.w}, v:${item.v})</th>`;
+                for (let w = 0; w <= CAPACITY; w++) {
+                    html += `<td id="cell-${i+1}-${w}"></td>`;
+                }
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function generateSteps() {
+            steps = [];
+            // DP Matrix
+            const dp = Array(ITEMS.length + 1).fill().map(() => Array(CAPACITY + 1).fill(0));
+
+            // Initial state
+            steps.push({
+                i: 0, w: 0, val: 0,
+                active: [], compare: [],
+                msg: "Base case: 0 value for 0 items."
+            });
+
+            for (let i = 1; i <= ITEMS.length; i++) {
+                const item = ITEMS[i-1];
+                for (let w = 0; w <= CAPACITY; w++) {
+                    let valWithout = dp[i-1][w];
+                    let valWith = -1;
+                    
+                    if (item.w <= w) {
+                        valWith = item.v + dp[i-1][w - item.w];
+                    }
+
+                    // Step 1: Highlight comparison
+                    let compareCells = [`cell-${i-1}-${w}`];
+                    if (item.w <= w) {
+                        compareCells.push(`cell-${i-1}-${w-item.w}`);
+                    }
+
+                    steps.push({
+                        i: i, w: w,
+                        active: [`cell-${i}-${w}`],
+                        compare: compareCells,
+                        val: 0, // Placeholder
+                        msg: item.w > w 
+                            ? `Item ${i} too heavy (${item.w} > ${w}). Copy from above.`
+                            : `Compare: Skip (${valWithout}) vs Take (${item.v} + ${dp[i-1][w-item.w]} = ${valWith})`
+                    });
+
+                    // Step 2: Fill value
+                    dp[i][w] = Math.max(valWithout, valWith);
+                    steps.push({
+                        i: i, w: w,
+                        active: [`cell-${i}-${w}`],
+                        compare: [],
+                        val: dp[i][w],
+                        msg: `Max value is ${dp[i][w]}`
+                    });
+                }
+            }
+
+            // Final Step
+            steps.push({
+                i: ITEMS.length, w: CAPACITY,
+                active: [`cell-${ITEMS.length}-${CAPACITY}`],
+                compare: [],
+                val: dp[ITEMS.length][CAPACITY],
+                msg: `Final Answer: ${dp[ITEMS.length][CAPACITY]}`,
+                isFinal: true
+            });
+        }
+
+        function updateView(stepIndex) {
+            const state = steps[stepIndex];
+            
+            // Clear previous highlights
+            document.querySelectorAll('td').forEach(td => {
+                td.className = '';
+                // Keep values filled
+                if (td.dataset.filled === 'true') return;
+                // Don't clear values for current row if we are backtracking
+            });
+
+            // Fill values up to current step
+            // This is inefficient but simple for visualizer
+            // Better: store full table state or incremental updates
+            // For simplicity, we'll just re-render values we know
+            // Actually, let's just set the value for the current step
+            if (state.val !== undefined && state.active.length > 0) {
+                const cell = document.getElementById(state.active[0]);
+                if (cell) {
+                    cell.textContent = state.val;
+                    cell.dataset.filled = 'true';
+                }
+            }
+
+            // Highlight
+            state.active.forEach(id => document.getElementById(id)?.classList.add(state.isFinal ? 'cell-final' : 'cell-active'));
+            state.compare.forEach(id => document.getElementById(id)?.classList.add('cell-compare'));
+
+            // Highlight Item
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
+            if (state.i > 0) {
+                document.getElementById(`item-${state.i}`)?.classList.add('active');
+            }
+
+            stepText.textContent = state.msg;
+        }
+
+        // Controls
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        updateView(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateView(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                // We need to clear the value if we go back
+                const state = steps[currentStep + 1]; // The step we are undoing
+                if (state && state.active.length > 0) {
+                     // Logic to clear value is tricky without full state
+                     // For now, just re-render structure and fast-forward
+                     renderTableStructure();
+                     for(let i=0; i<=currentStep; i++) updateView(i);
+                } else {
+                    updateView(currentStep);
+                }
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            renderTableStructure();
+            updateView(0);
+        }
+
+        init();
+    </script>
+</body>
+</html>

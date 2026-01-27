@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CS Fundamentals - Amazon SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="sidebar-overlay"></div>
+  <button class="hamburger-btn" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <div class="sidebar-controls">
+        <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
+        <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
+        
+        <!-- Section 7: Guides & Tools -->
+        <details class="nav-section" open>
+          <summary class="nav-section-title">
+            <span>Guides & Tools</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="cs-fundamentals.html" class="nav-item active" data-id="tool-0">CS Fundamentals</a>
+          <a href="golang-guide.html" class="nav-item" data-id="tool-1">Go Language Guide</a>
+          <a href="go-interview-questions.html" class="nav-item" data-id="tool-2">Go Interview Questions</a>
+          <a href="go-interview-plan.html" class="nav-item" data-id="tool-6">📅 14-Day Interview Plan</a>
+          <a href="cheat-sheet.html" class="nav-item" data-id="tool-3">Pattern Cheat Sheet</a>
+          <a href="dashboard.html" class="nav-item" data-id="tool-4">📊 My Dashboard</a>
+          <a href="mobile-access.html" class="nav-item" data-id="tool-5">📱 Mobile Access</a>
+        </details>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Core Computer Science Concepts</h1>
+        <p>Operating Systems, Networks, Databases, LLD, and HLD for SDE Interviews</p>
+      </div>
+
+      <!-- 1. OPERATING SYSTEMS -->
+      <div class="section" id="os">
+        <div class="section-title">
+          <span class="emoji">🖥️</span> Operating Systems – From Basics to Advanced
+        </div>
+
+        <!-- 1. OS FUNDAMENTALS -->
+        <div class="collapsible">
+          <strong>1. OS Fundamentals (Must Know)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>What is an OS?</strong> Software that manages hardware/software resources and provides services for programs.</li>
+            <li><strong>Goals:</strong> Performance (efficiency), Fairness (resource distribution), Isolation (process protection), Security.</li>
+            <li><strong>Types:</strong> Batch (jobs in groups), Time-sharing (multitasking), Distributed (networked), Real-time (strict timing).</li>
+            <li><strong>Kernel vs User Space:</strong> Kernel has full hardware access; User space is restricted.</li>
+            <li><strong>System Calls:</strong> Interface for user programs to request kernel services (e.g., file I/O).</li>
+          </ul>
+          <div class="callout amazon-expects">
+            <div class="callout-title">Interview Expectation</div>
+            <div class="callout-content">Explain OS as a resource manager that abstracts hardware complexity.</div>
+          </div>
+        </div>
+
+        <!-- 2. PROCESSES & THREADS -->
+        <div class="collapsible">
+          <strong>2. Processes & Threads (Top Topic)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Process:</strong> Program in execution. Heavyweight, separate memory, requires IPC.</li>
+            <li><strong>Thread:</strong> Unit of execution within a process. Lightweight, shared memory, direct access.</li>
+            <li><strong>PCB/TCB:</strong> Data structures storing state (Process/Thread Control Block).</li>
+            <li><strong>States:</strong> New, Ready, Running, Waiting, Terminated.</li>
+            <li><strong>Context Switching:</strong> Saving/restoring state to switch execution.</li>
+          </ul>
+          <table class="complexity-table">
+            <thead><tr><th>Feature</th><th>Process</th><th>Thread</th></tr></thead>
+            <tbody>
+              <tr><td>Weight</td><td>Heavyweight</td><td>Lightweight</td></tr>
+              <tr><td>Memory</td><td>Separate</td><td>Shared</td></tr>
+              <tr><td>Communication</td><td>IPC (slow)</td><td>Direct (fast)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3. CPU SCHEDULING -->
+        <div class="collapsible">
+          <strong>3. CPU Scheduling</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Goal:</strong> Maximize throughput, minimize wait/response time.</li>
+            <li><strong>Algorithms:</strong>
+              <ul>
+                <li><strong>FCFS:</strong> First Come First Serve (simple, convoy effect).</li>
+                <li><strong>SJF:</strong> Shortest Job First (optimal avg wait, starvation risk).</li>
+                <li><strong>Round Robin:</strong> Time slices (fair, good for time-sharing).</li>
+                <li><strong>Priority:</strong> Based on importance (starvation risk).</li>
+                <li><strong>Multilevel Queue:</strong> Separate queues for different process types.</li>
+              </ul>
+            </li>
+            <li><strong>Issues:</strong> Starvation (low priority never runs), Aging (solution to starvation).</li>
+          </ul>
+        </div>
+
+        <!-- 4. CONTEXT SWITCHING -->
+        <div class="collapsible">
+          <strong>4. Context Switching</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>Definition:</strong> Storing state of active process/thread and loading another.</p>
+          <p style="color: var(--text-secondary);"><strong>Cost:</strong> Expensive due to register saving, cache flushing, and TLB invalidation.</p>
+          <div class="callout interview-tip">
+            <div class="callout-title">Follow-up</div>
+            <div class="callout-content">Why do too many threads hurt performance? Excessive context switching overhead consumes CPU cycles that could be used for actual work.</div>
+          </div>
+        </div>
+
+        <!-- 5. IPC -->
+        <div class="collapsible">
+          <strong>5. Inter-Process Communication (IPC)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Mechanisms:</strong> Pipes (unidirectional), Message Queues, Shared Memory (fastest), Sockets (network), Signals.</li>
+            <li><strong>Comparison:</strong> Shared Memory is faster but needs sync; Message Passing is safer/easier for distributed systems.</li>
+          </ul>
+        </div>
+
+        <!-- 6. SYNCHRONIZATION -->
+        <div class="collapsible">
+          <strong>6. Synchronization & Concurrency</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Race Condition:</strong> Outcome depends on execution order.</li>
+            <li><strong>Critical Section:</strong> Code accessing shared resources.</li>
+            <li><strong>Solutions:</strong>
+              <ul>
+                <li><strong>Mutex:</strong> Locking mechanism (binary).</li>
+                <li><strong>Semaphore:</strong> Signaling mechanism (counter).</li>
+                <li><strong>Monitor:</strong> High-level abstraction (e.g., Java synchronized).</li>
+              </ul>
+            </li>
+            <li><strong>Problems:</strong> Producer-Consumer, Readers-Writers, Dining Philosophers.</li>
+          </ul>
+        </div>
+
+        <!-- 7. DEADLOCKS -->
+        <div class="collapsible">
+          <strong>7. Deadlocks (Favorite Topic)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>Definition:</strong> Processes waiting indefinitely for each other.</p>
+          <p style="color: var(--text-secondary);"><strong>4 Conditions (Coffman):</strong> Mutual Exclusion, Hold and Wait, No Preemption, Circular Wait.</p>
+          <p style="color: var(--text-secondary);"><strong>Handling:</strong> Prevention (break one condition), Avoidance (Banker's Algorithm), Detection & Recovery.</p>
+        </div>
+
+        <!-- 8. MEMORY MANAGEMENT -->
+        <div class="collapsible">
+          <strong>8. Memory Management</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Logical vs Physical:</strong> CPU sees logical, MMU maps to physical.</li>
+            <li><strong>Paging:</strong> Fixed-size blocks (pages). Eliminates external fragmentation.</li>
+            <li><strong>Segmentation:</strong> Variable-size blocks (segments). Logical grouping.</li>
+            <li><strong>Virtual Memory:</strong> Illusion of larger memory using disk (swap).</li>
+            <li><strong>Thrashing:</strong> Excessive paging causing CPU to wait for I/O.</li>
+            <li><strong>Replacement Algos:</strong> FIFO, LRU (Least Recently Used), Optimal.</li>
+          </ul>
+        </div>
+
+        <!-- 9. CACHE & HIERARCHY -->
+        <div class="collapsible">
+          <strong>9. Cache & Memory Hierarchy</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">Registers &gt; L1/L2/L3 Cache &gt; RAM &gt; Disk.</p>
+          <p style="color: var(--text-secondary);"><strong>Locality of Reference:</strong></p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Temporal:</strong> Recently accessed items likely accessed again.</li>
+            <li><strong>Spatial:</strong> Items near accessed ones likely accessed soon.</li>
+          </ul>
+        </div>
+
+        <!-- 10. FILE SYSTEMS -->
+        <div class="collapsible">
+          <strong>10. File Systems</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Concepts:</strong> Files, Directories, Permissions.</li>
+            <li><strong>Allocation:</strong> Contiguous (fast, fragmentation), Linked (no frag, slow random), Indexed (inode).</li>
+            <li><strong>Inodes:</strong> Data structure storing file metadata.</li>
+            <li><strong>Journaling:</strong> Logs changes before committing for crash recovery.</li>
+          </ul>
+        </div>
+
+        <!-- 11. DISK SCHEDULING -->
+        <div class="collapsible">
+          <strong>11. Disk Scheduling</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">Optimizing I/O seek time.</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>FCFS:</strong> Simple, fair.</li>
+            <li><strong>SSTF:</strong> Shortest Seek Time First (fast, starvation risk).</li>
+            <li><strong>SCAN/Elevator:</strong> Moves one way servicing requests, then reverses.</li>
+          </ul>
+        </div>
+
+        <!-- 12. I/O SYSTEMS -->
+        <div class="collapsible">
+          <strong>12. I/O Systems</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>DMA (Direct Memory Access):</strong> Device transfers data to RAM without CPU intervention.</li>
+            <li><strong>Buffering:</strong> Smoothing speed mismatch between devices.</li>
+            <li><strong>Spooling:</strong> Queueing jobs (e.g., printer).</li>
+          </ul>
+        </div>
+
+        <!-- 13. MULTI-PROCESSOR -->
+        <div class="collapsible">
+          <strong>13. Multi-Processor Systems</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>SMP:</strong> Symmetric Multiprocessing (shared memory, equal peers).</li>
+            <li><strong>NUMA:</strong> Non-Uniform Memory Access (memory access time depends on location).</li>
+            <li><strong>Affinity:</strong> Keeping a process on the same CPU for cache benefits.</li>
+          </ul>
+        </div>
+
+        <!-- 14. VIRTUALIZATION -->
+        <div class="collapsible">
+          <strong>14. Virtualization & Containers</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>VMs:</strong> Full OS virtualization via Hypervisor (Type 1 bare metal, Type 2 hosted).</li>
+            <li><strong>Containers:</strong> OS-level virtualization (shared kernel). Lightweight.</li>
+            <li><strong>Namespaces:</strong> Isolation (PID, Network).</li>
+            <li><strong>Cgroups:</strong> Resource limiting (CPU, Memory).</li>
+          </ul>
+        </div>
+
+        <!-- 15. SECURITY -->
+        <div class="collapsible">
+          <strong>15. Security & Protection</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Protection:</strong> User vs Kernel mode (Ring 0/3).</li>
+            <li><strong>Access Control:</strong> Authentication (Who), Authorization (What).</li>
+            <li><strong>Isolation:</strong> Processes cannot access each other's memory.</li>
+          </ul>
+        </div>
+
+        <!-- 16. RTOS -->
+        <div class="collapsible">
+          <strong>16. Real-Time OS (RTOS)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Hard RTOS:</strong> Strict deadlines (miss = failure).</li>
+            <li><strong>Soft RTOS:</strong> Deadlines preferred but flexible.</li>
+            <li><strong>Priority Inversion:</strong> Low priority holds lock needed by high priority.</li>
+          </ul>
+        </div>
+
+        <!-- 17. PERFORMANCE -->
+        <div class="collapsible">
+          <strong>17. OS Performance & Tuning</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Metrics:</strong> Throughput, Latency, Utilization.</li>
+            <li><strong>Load Average:</strong> Avg number of processes running/waiting.</li>
+            <li><strong>Bottlenecks:</strong> CPU bound vs I/O bound.</li>
+          </ul>
+        </div>
+
+        <!-- 18. REAL WORLD -->
+        <div class="collapsible">
+          <strong>18. OS + Real-World Connections</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Web Servers:</strong> Nginx uses event loops (epoll) to handle thousands of connections.</li>
+            <li><strong>Databases:</strong> Use O_DIRECT to bypass OS cache for data integrity.</li>
+            <li><strong>Containers:</strong> Docker relies on Linux Namespaces and Cgroups.</li>
+          </ul>
+        </div>
+
+        <!-- 19. TRAPS -->
+        <div class="collapsible">
+          <strong>19. Common Interview Traps</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout common-mistakes">
+            <div class="callout-title">Avoid These Mistakes</div>
+            <div class="callout-content">
+              <ul>
+                <li>❌ "Process and thread are same" (Threads share memory).</li>
+                <li>❌ "More threads = faster" (Context switching kills perf).</li>
+                <li>❌ "Deadlock always bad" (Sometimes ignored, e.g., Ostrich algorithm).</li>
+                <li>❌ "Paging removes fragmentation completely" (Removes external, not internal).</li>
+                <li>❌ "Context switching is free" (It's expensive).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 20. READINESS CHECK -->
+        <div class="collapsible">
+          <strong>20. Final Readiness Check</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout amazon-expects">
+            <div class="callout-title">You are ready if you can:</div>
+            <div class="callout-content">
+              <ul>
+                <li>Explain process vs thread without notes.</li>
+                <li>Solve a deadlock problem (Banker's algo).</li>
+                <li>Explain paging & page faults.</li>
+                <li>Describe Round Robin scheduling.</li>
+                <li>Connect OS concepts to backend systems (DBs, Web Servers).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. COMPUTER NETWORKS -->
+      <div class="section" id="networks">
+        <div class="section-title">
+          <span class="emoji">🌐</span> Computer Networks – From Basics to Advanced
+        </div>
+
+        <!-- 1. NETWORK FUNDAMENTALS -->
+        <div class="collapsible">
+          <strong>1. Network Fundamentals (Must Know)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Definition:</strong> Interconnected computers sharing resources.</li>
+            <li><strong>Goals:</strong> Communication, Reliability, Scalability, Performance.</li>
+            <li><strong>Types:</strong> LAN (Local), WAN (Wide), MAN (Metro), PAN (Personal).</li>
+            <li><strong>Topologies:</strong> Bus, Star (common), Ring, Mesh (redundant).</li>
+            <li><strong>Metrics:</strong> Bandwidth (capacity), Throughput (actual speed), Latency (delay).</li>
+            <li><strong>Switching:</strong> Packet (internet) vs Circuit (old phone).</li>
+          </ul>
+        </div>
+
+        <!-- 2. OSI & TCP/IP MODELS -->
+        <div class="collapsible">
+          <strong>2. OSI & TCP/IP Models</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <table class="complexity-table">
+            <thead><tr><th>Layer</th><th>OSI (7 Layers)</th><th>TCP/IP (4 Layers)</th><th>Protocol Examples</th></tr></thead>
+            <tbody>
+              <tr><td>Application</td><td>Application, Presentation, Session</td><td>Application</td><td>HTTP, DNS, SMTP</td></tr>
+              <tr><td>Transport</td><td>Transport</td><td>Transport</td><td>TCP, UDP</td></tr>
+              <tr><td>Network</td><td>Network</td><td>Internet</td><td>IP, ICMP</td></tr>
+              <tr><td>Link</td><td>Data Link, Physical</td><td>Link</td><td>Ethernet, Wi-Fi</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 3. PHYSICAL & DATA LINK -->
+        <div class="collapsible">
+          <strong>3. Physical & Data Link Layers</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>MAC Address:</strong> Physical hardware address (burned in).</li>
+            <li><strong>ARP:</strong> Maps IP address to MAC address.</li>
+            <li><strong>Ethernet:</strong> Standard for wired LANs.</li>
+            <li><strong>Switch vs Hub:</strong> Switch is smart (sends to specific port), Hub broadcasts to all.</li>
+          </ul>
+        </div>
+
+        <!-- 4. NETWORK LAYER -->
+        <div class="collapsible">
+          <strong>4. Network Layer (IP & Routing)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>IP Addressing:</strong> IPv4 (32-bit) vs IPv6 (128-bit).</li>
+            <li><strong>Subnetting:</strong> Dividing a network into smaller networks (CIDR notation).</li>
+            <li><strong>NAT:</strong> Network Address Translation (Private IP -> Public IP).</li>
+            <li><strong>Routing Protocols:</strong> BGP (Internet backbone), OSPF (Internal).</li>
+            <li><strong>ICMP:</strong> Used for diagnostics (Ping, Traceroute).</li>
+          </ul>
+        </div>
+
+        <!-- 5. TRANSPORT LAYER -->
+        <div class="collapsible">
+          <strong>5. Transport Layer (TCP vs UDP)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <h4 style="color: var(--callout-blue);">TCP (Transmission Control Protocol)</h4>
+            <p style="color: var(--text-secondary);">Connection-oriented, Reliable, Ordered, Flow Control. Used for Web, Email.</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">UDP (User Datagram Protocol)</h4>
+            <p style="color: var(--text-secondary);">Connectionless, Unreliable, Unordered, Fast. Used for Video, Gaming, DNS.</p>
+          </div>
+        </div>
+
+        <!-- 6. TCP INTERNALS -->
+        <div class="collapsible">
+          <strong>6. TCP Internals (Advanced)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>3-Way Handshake:</strong> SYN -> SYN-ACK -> ACK (Establish connection).</li>
+            <li><strong>Flow Control:</strong> Sliding Window (Receiver tells Sender how much it can handle).</li>
+            <li><strong>Congestion Control:</strong> Slow Start, Congestion Avoidance (Network health).</li>
+            <li><strong>Reliability:</strong> Sequence numbers, ACKs, Retransmission.</li>
+          </ul>
+        </div>
+
+        <!-- 7. APPLICATION LAYER -->
+        <div class="collapsible">
+          <strong>7. Application Layer Protocols</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>HTTP/HTTPS:</strong> Stateless, Methods (GET, POST), Status Codes (200, 404, 500).</li>
+            <li><strong>DNS:</strong> Domain Name System. Recursive vs Iterative queries. Caching is key.</li>
+            <li><strong>SMTP/IMAP:</strong> Email protocols.</li>
+            <li><strong>WebSockets:</strong> Persistent, full-duplex communication.</li>
+          </ul>
+        </div>
+
+        <!-- 8. SECURITY -->
+        <div class="collapsible">
+          <strong>8. Security in Networks</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>TLS/SSL:</strong> Encryption for HTTPS. Handshake involves certificates.</li>
+            <li><strong>Symmetric vs Asymmetric:</strong> Shared key vs Public/Private key pair.</li>
+            <li><strong>Firewall:</strong> Filters traffic based on rules.</li>
+            <li><strong>VPN:</strong> Encrypted tunnel over public network.</li>
+            <li><strong>DDoS:</strong> Distributed Denial of Service attacks.</li>
+          </ul>
+        </div>
+
+        <!-- 9. PERFORMANCE -->
+        <div class="collapsible">
+          <strong>9. Performance & Reliability</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Latency:</strong> Propagation + Transmission + Processing + Queuing delay.</li>
+            <li><strong>Jitter:</strong> Variation in packet delay.</li>
+            <li><strong>Packet Loss:</strong> Data failing to reach destination.</li>
+            <li><strong>QoS:</strong> Prioritizing traffic (e.g., Voice over Download).</li>
+          </ul>
+        </div>
+
+        <!-- 10. LOAD BALANCING -->
+        <div class="collapsible">
+          <strong>10. Load Balancing & Scaling</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>L4 vs L7:</strong> Transport (TCP/IP ports) vs Application (HTTP headers/URL).</li>
+            <li><strong>Algorithms:</strong> Round Robin, Least Connections, Consistent Hashing.</li>
+            <li><strong>Reverse Proxy:</strong> Server-side proxy (Nginx) for load balancing, caching, security.</li>
+          </ul>
+        </div>
+
+        <!-- 11. CDN -->
+        <div class="collapsible">
+          <strong>11. Content Delivery Network (CDN)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>Concept:</strong> Distributed network of edge servers to deliver content faster.</p>
+          <p style="color: var(--text-secondary);"><strong>Usage:</strong> Caching static assets (images, CSS, JS) closer to user. Reduces latency and server load.</p>
+        </div>
+
+        <!-- 12. SOCKET PROGRAMMING -->
+        <div class="collapsible">
+          <strong>12. Socket Programming</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Socket:</strong> Endpoint for communication (IP + Port).</li>
+            <li><strong>Client-Server:</strong> Server listens on port, Client connects.</li>
+            <li><strong>Ports:</strong> 0-1023 (Well-known), 1024-49151 (Registered).</li>
+          </ul>
+        </div>
+
+        <!-- 13. NETWORK DEVICES -->
+        <div class="collapsible">
+          <strong>13. Network Devices</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Router:</strong> Connects different networks (L3). Uses IP.</li>
+            <li><strong>Switch:</strong> Connects devices in same network (L2). Uses MAC.</li>
+            <li><strong>Gateway:</strong> Entry/Exit point of a network.</li>
+            <li><strong>Proxy:</strong> Intermediary for requests.</li>
+          </ul>
+        </div>
+
+        <!-- 14. VIRTUALIZATION & CLOUD -->
+        <div class="collapsible">
+          <strong>14. Network Virtualization & Cloud</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>VPC:</strong> Virtual Private Cloud (Isolated network in cloud).</li>
+            <li><strong>Subnets:</strong> Public (Internet access) vs Private (Internal only).</li>
+            <li><strong>Security Groups:</strong> Virtual firewall for instances.</li>
+            <li><strong>NAT Gateway:</strong> Allows private subnet to access internet.</li>
+          </ul>
+        </div>
+
+        <!-- 15. REAL WORLD SCENARIOS -->
+        <div class="collapsible">
+          <strong>15. Real-World Scenarios</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Scenario 1: Opening a Website</div>
+            <div class="callout-content">
+              <ol>
+                <li><strong>DNS:</strong> Browser resolves domain to IP.</li>
+                <li><strong>TCP:</strong> 3-way handshake to establish connection.</li>
+                <li><strong>TLS:</strong> Handshake for encryption (HTTPS).</li>
+                <li><strong>HTTP:</strong> Browser sends GET request.</li>
+                <li><strong>Server:</strong> Processes and sends HTML response.</li>
+              </ol>
+            </div>
+          </div>
+          <div class="callout interview-tip">
+            <div class="callout-title">Scenario 2: Video Streaming</div>
+            <div class="callout-content">
+              <p>Uses <strong>CDN</strong> to serve content from edge. Uses <strong>Adaptive Bitrate</strong> to adjust quality based on bandwidth. Often uses TCP (DASH/HLS) for reliability, but live streaming might use UDP-based protocols.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 16. COMMON QUESTIONS -->
+        <div class="collapsible">
+          <strong>16. Common Interview Questions</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li>TCP vs UDP differences?</li>
+            <li>What happens when you type a URL and hit enter?</li>
+            <li>How does HTTPS work? (TLS Handshake)</li>
+            <li>Difference between Switch (L2) and Router (L3)?</li>
+            <li>What is NAT and why do we need it?</li>
+            <li>Why does DNS use UDP? (Speed, small packet size).</li>
+          </ul>
+        </div>
+
+        <!-- 17. COMMON MISTAKES -->
+        <div class="collapsible">
+          <strong>17. Common Mistakes (Avoid These)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout common-mistakes">
+            <div class="callout-title">Red Flags</div>
+            <div class="callout-content">
+              <ul>
+                <li>❌ Mixing OSI and TCP/IP layers.</li>
+                <li>❌ Saying UDP is always faster (context matters).</li>
+                <li>❌ Confusing bandwidth (width of pipe) with latency (speed of travel).</li>
+                <li>❌ Ignoring packet loss in design discussions.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 18. READINESS CHECK -->
+        <div class="collapsible">
+          <strong>18. Final Readiness Check</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout amazon-expects">
+            <div class="callout-title">You are ready if you can:</div>
+            <div class="callout-content">
+              <ul>
+                <li>Explain the TCP 3-way handshake clearly.</li>
+                <li>Compare TCP vs UDP with use cases.</li>
+                <li>Walk through the DNS resolution flow.</li>
+                <li>Explain HTTPS/TLS at a high level.</li>
+                <li>Connect networking concepts to backend systems (LBs, CDNs).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. DATABASES -->
+      <div class="section" id="databases">
+        <div class="section-title">
+          <span class="emoji">🗄️</span> Databases – From Basics to Advanced
+        </div>
+
+        <!-- 1. DB FUNDAMENTALS -->
+        <div class="collapsible">
+          <strong>1. Database Fundamentals</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>DBMS:</strong> Software to store and manage data.</li>
+            <li><strong>Relational (SQL):</strong> Structured, Schema-based, Tables (MySQL, PostgreSQL).</li>
+            <li><strong>Non-Relational (NoSQL):</strong> Flexible, Schema-less, Documents/Key-Value (MongoDB, Redis).</li>
+            <li><strong>SQL vs NoSQL:</strong> SQL for complex queries/transactions; NoSQL for scale/flexibility.</li>
+          </ul>
+        </div>
+
+        <!-- 2. ACID PROPERTIES -->
+        <div class="collapsible">
+          <strong>2. ACID Properties (Transactions)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <h4 style="color: var(--callout-blue);">The Guarantee of Reliability</h4>
+            <ul style="margin-left: 20px; color: var(--text-secondary);">
+              <li><strong>Atomicity:</strong> All or nothing. If one part fails, the whole transaction rolls back.</li>
+              <li><strong>Consistency:</strong> DB goes from one valid state to another (constraints enforced).</li>
+              <li><strong>Isolation:</strong> Concurrent transactions don't interfere (Read Committed, Serializable).</li>
+              <li><strong>Durability:</strong> Saved data survives power loss (Write-Ahead Log).</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- 3. INDEXING -->
+        <div class="collapsible">
+          <strong>3. Indexing (Performance)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>What is it?</strong> A data structure (like a B-Tree) that improves the speed of data retrieval operations on a database table.</p>
+          <p style="color: var(--text-secondary);"><strong>Trade-off:</strong> Faster reads (SELECT), slower writes (INSERT/UPDATE) because the index must be updated.</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>B-Tree Index:</strong> Good for range queries (<code>&lt;</code>, <code>&gt;</code>, <code>BETWEEN</code>). Default in most DBs.</li>
+            <li><strong>Hash Index:</strong> Good for equality checks (<code>=</code>). O(1) lookup.</li>
+            <li><strong>Clustered Index:</strong> Sorts the data rows on disk (Primary Key). Only one per table.</li>
+            <li><strong>Non-Clustered Index:</strong> Separate structure pointing to data rows. Can have multiple.</li>
+          </ul>
+        </div>
+
+        <!-- 4. CAP THEOREM -->
+        <div class="collapsible">
+          <strong>4. CAP Theorem (Distributed Systems)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">In a distributed data store, you can only guarantee 2 out of 3:</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Consistency (C):</strong> Every read receives the most recent write or an error.</li>
+            <li><strong>Availability (A):</strong> Every request receives a response (no error), without guarantee of latest data.</li>
+            <li><strong>Partition Tolerance (P):</strong> System continues to operate despite network message drops.</li>
+          </ul>
+          <div class="callout interview-tip">
+            <div class="callout-title">Real World</div>
+            <div class="callout-content">Since network partitions (P) are inevitable, you must choose between CP (Banking) and AP (Social Media Feed).</div>
+          </div>
+        </div>
+
+        <!-- 5. SCALING DATABASES -->
+        <div class="collapsible">
+          <strong>5. Scaling Databases</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Vertical Scaling:</strong> Bigger machine (CPU/RAM). Limit: Hardware cost/max specs.</li>
+            <li><strong>Horizontal Scaling:</strong> More machines.</li>
+            <li><strong>Replication:</strong> Master-Slave (Read Replicas). Master handles writes, Slaves handle reads.</li>
+            <li><strong>Sharding:</strong> Partitioning data across servers (e.g., Users A-M on DB1, N-Z on DB2).</li>
+          </ul>
+        </div>
+
+        <!-- 6. NORMALIZATION -->
+        <div class="collapsible">
+          <strong>6. Normalization</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">Organizing data to reduce redundancy.</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>1NF:</strong> Atomic values (no lists in cells).</li>
+            <li><strong>2NF:</strong> No partial dependencies (all columns depend on full primary key).</li>
+            <li><strong>3NF:</strong> No transitive dependencies (columns depend ONLY on primary key).</li>
+            <li><strong>Denormalization:</strong> Adding redundancy for read performance (Star Schema).</li>
+          </ul>
+        </div>
+
+        <!-- 7. REAL WORLD EXAMPLES -->
+        <div class="collapsible">
+          <strong>7. Real-World Examples</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Example 1: Banking System (ACID)</div>
+            <div class="callout-content">
+              <p><strong>Requirement:</strong> Transfer $100 from Alice to Bob.</p>
+              <p><strong>Tech:</strong> RDBMS (PostgreSQL/MySQL).</p>
+              <p><strong>Why:</strong> Need strong consistency (C) and Atomicity. If system crashes after debiting Alice but before crediting Bob, transaction must rollback.</p>
+            </div>
+          </div>
+          <div class="callout interview-tip">
+            <div class="callout-title">Example 2: User Session Cache</div>
+            <div class="callout-content">
+              <p><strong>Requirement:</strong> Store login tokens for millions of users with low latency.</p>
+              <p><strong>Tech:</strong> Key-Value Store (Redis).</p>
+              <p><strong>Why:</strong> Simple lookup (get token by ID), extremely fast (in-memory), TTL support (auto-expire sessions).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 8. COMMON QUESTIONS -->
+        <div class="collapsible">
+          <strong>8. Common Interview Questions</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li>Explain ACID properties.</li>
+            <li>Index vs Primary Key?</li>
+            <li>Clustered vs Non-Clustered Index?</li>
+            <li>SQL vs NoSQL - when to choose which?</li>
+            <li>What is the N+1 problem? (ORM fetching issue).</li>
+            <li>Optimistic vs Pessimistic Locking?</li>
+          </ul>
+        </div>
+
+        <!-- 9. READINESS CHECK -->
+        <div class="collapsible">
+          <strong>9. Final Readiness Check</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout amazon-expects">
+            <div class="callout-title">You are ready if you can:</div>
+            <div class="callout-content">
+              <ul>
+                <li>Design a schema for a simple app (e.g., Library).</li>
+                <li>Explain how an Index speeds up queries (Binary Search on B-Tree).</li>
+                <li>Discuss trade-offs of Sharding vs Replication.</li>
+                <li>Explain Eventual Consistency.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. LOW LEVEL DESIGN (LLD) -->
+      <div class="section" id="lld">
+        <div class="section-title">
+          <span class="emoji">📐</span> Low Level Design (LLD) – Object Oriented Design
+        </div>
+
+        <div class="collapsible">
+          <strong>1. LLD Fundamentals (OOP & UML)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Encapsulation:</strong> Bundling data and methods, hiding internal state (private fields).</li>
+            <li><strong>Abstraction:</strong> Hiding complex implementation details, exposing only necessary interfaces.</li>
+            <li><strong>Inheritance:</strong> Mechanism where a new class derives properties from an existing class.</li>
+            <li><strong>Polymorphism:</strong> Ability of different classes to be treated as instances of the same general class (Overriding/Overloading).</li>
+            <li><strong>UML Relationships:</strong>
+              <ul>
+                <li><strong>Association:</strong> "Uses a" (Teacher uses Board).</li>
+                <li><strong>Aggregation:</strong> "Has a" (Department has Teachers). Weak bond.</li>
+                <li><strong>Composition:</strong> "Part of" (House has Rooms). Strong bond.</li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>2. SOLID Principles (Deep Dive)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <h4 style="color: var(--callout-blue);">S - Single Responsibility Principle (SRP)</h4>
+            <p style="color: var(--text-secondary);">A class should have only one reason to change. Example: A `User` class should not handle DB operations; delegate that to `UserRepository`.</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">O - Open/Closed Principle (OCP)</h4>
+            <p style="color: var(--text-secondary);">Open for extension, closed for modification. Use Interfaces/Abstract classes so you can add new behavior without changing existing code.</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">L - Liskov Substitution Principle (LSP)</h4>
+            <p style="color: var(--text-secondary);">Subtypes must be substitutable for their base types. If `Square` inherits `Rectangle`, setting width shouldn't break logic expecting a rectangle.</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">I - Interface Segregation Principle (ISP)</h4>
+            <p style="color: var(--text-secondary);">Clients should not be forced to depend on interfaces they do not use. Split large interfaces into smaller, specific ones.</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">D - Dependency Inversion Principle (DIP)</h4>
+            <p style="color: var(--text-secondary);">High-level modules should not depend on low-level modules. Both should depend on abstractions (Interfaces). Use Dependency Injection.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <strong>3. Design Patterns (Interview Core)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Singleton:</strong> Ensure a class has only one instance (e.g., DB Connection). <em>Watch out for thread safety!</em></li>
+            <li><strong>Factory:</strong> Create objects without specifying the exact class (e.g., `ShapeFactory` returns `Circle` or `Square`).</li>
+            <li><strong>Builder:</strong> Construct complex objects step by step (e.g., `HttpRequest.Builder().setUrl().setMethod().build()`).</li>
+            <li><strong>Adapter:</strong> Allow incompatible interfaces to work together (e.g., XML to JSON adapter).</li>
+            <li><strong>Observer:</strong> Notify subscribers of state changes (e.g., Event Listeners, Pub/Sub).</li>
+            <li><strong>Strategy:</strong> Select algorithm at runtime (e.g., `PaymentStrategy`: CreditCard vs PayPal).</li>
+            <li><strong>Decorator:</strong> Add behavior dynamically (e.g., `GzipStream(FileStream)`).</li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>4. Concurrency in LLD</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">For 5+ YOE, you must handle thread safety.</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Race Conditions:</strong> Multiple threads modifying shared data.</li>
+            <li><strong>Locks/Mutex:</strong> Protecting critical sections.</li>
+            <li><strong>Atomic Operations:</strong> Lock-free thread safety for simple counters.</li>
+            <li><strong>Thread Pool:</strong> Reusing threads to avoid overhead.</li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>5. Real-World Example: Parking Lot</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Problem: Design a Parking Lot</div>
+            <div class="callout-content">
+              <p><strong>Requirements:</strong> Multiple floors, multiple vehicle types (Car, Bike, Truck), hourly pricing, capacity checks.</p>
+              <p><strong>Key Classes:</strong></p>
+              <ul>
+                <li><code>ParkingLot</code> (Singleton): Manages levels.</li>
+                <li><code>Level</code>: Contains list of spots.</li>
+                <li><code>ParkingSpot</code>: Has type (Compact, Large), status (Occupied/Free).</li>
+                <li><code>Vehicle</code> (Abstract): Car, Bike, Truck inherit from this.</li>
+                <li><code>Ticket</code>: Entry time, Spot ID.</li>
+              </ul>
+              <p><strong>Design Patterns:</strong></p>
+              <ul>
+                <li><strong>Factory:</strong> To create vehicle objects from input.</li>
+                <li><strong>Strategy:</strong> <code>PricingStrategy</code> (Weekday vs Weekend).</li>
+              </ul>
+              <p><strong>Concurrency:</strong> <code>bookSpot()</code> must be synchronized to prevent double booking.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <strong>6. Real-World Example: Rate Limiter</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Problem: Design a Rate Limiter Library</div>
+            <div class="callout-content">
+              <p><strong>Requirements:</strong> Limit user to X requests per Y seconds.</p>
+              <p><strong>Algorithms:</strong></p>
+              <ul>
+                <li><strong>Token Bucket:</strong> Tokens added at rate r. Request consumes token. Good for bursty traffic.</li>
+                <li><strong>Leaky Bucket:</strong> Requests processed at constant rate. Good for smoothing traffic.</li>
+                <li><strong>Sliding Window Counter:</strong> Accurate but memory heavy.</li>
+              </ul>
+              <p><strong>Class Structure:</strong> <code>RateLimiter</code> interface, <code>TokenBucket</code> implementation, <code>UserBucketMap</code>.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. HIGH LEVEL DESIGN (HLD) -->
+      <div class="section" id="hld">
+        <div class="section-title">
+          <span class="emoji">🏗️</span> High Level Design (HLD) – Scalable Architectures
+        </div>
+
+        <div class="collapsible">
+          <strong>1. Scalability Fundamentals</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Vertical Scaling (Scale Up):</strong> Bigger server (RAM/CPU). Limited cap, single point of failure.</li>
+            <li><strong>Horizontal Scaling (Scale Out):</strong> More servers. Infinite scale, requires load balancing.</li>
+            <li><strong>Latency vs Throughput:</strong> Latency = time for one request. Throughput = requests per second.</li>
+            <li><strong>Availability vs Consistency (CAP):</strong> In partition, choose A (always respond) or C (correct data).</li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>2. Load Balancing & Caching</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <h4 style="color: var(--callout-blue);">Load Balancing</h4>
+            <p style="color: var(--text-secondary);">Distributes traffic across servers. Algorithms: Round Robin, Least Connections, <strong>Consistent Hashing</strong> (crucial for distributed caches).</p>
+            
+            <h4 style="color: var(--callout-blue); margin-top: 15px;">Caching Strategies</h4>
+            <ul style="margin-left: 20px; color: var(--text-secondary);">
+              <li><strong>Cache-Aside:</strong> App checks cache -> DB -> updates cache. (Most common).</li>
+              <li><strong>Write-Through:</strong> App writes to cache -> cache writes to DB. (Data consistency).</li>
+              <li><strong>Eviction Policies:</strong> LRU (Least Recently Used), LFU (Least Frequently Used).</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <strong>3. Database Scaling</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Replication:</strong> Master-Slave. Master for writes, Slaves for reads. Async replication lag issues.</li>
+            <li><strong>Sharding:</strong> Partitioning data (e.g., UserID % 10). Complex joins, re-balancing is hard.</li>
+            <li><strong>NoSQL Types:</strong> Key-Value (Redis), Document (MongoDB), Columnar (Cassandra), Graph (Neo4j).</li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>4. Communication & Async Processing</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>REST:</strong> Resource-based, HTTP, JSON. Standard.</li>
+            <li><strong>gRPC:</strong> Action-based, Protobuf, HTTP/2. High performance, internal microservices.</li>
+            <li><strong>WebSockets:</strong> Bi-directional, persistent. Chat apps, live feeds.</li>
+            <li><strong>Message Queues:</strong> Kafka (Log-based, high throughput), RabbitMQ (Queue-based, complex routing). Decouples producer/consumer.</li>
+          </ul>
+        </div>
+
+        <div class="collapsible">
+          <strong>5. Real-World Example: URL Shortener</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Design TinyURL</div>
+            <div class="callout-content">
+              <p><strong>Requirements:</strong> 100M new URLs/month. Read:Write = 100:1. Short alias (7 chars).</p>
+              <p><strong>API:</strong> <code>create(long_url) -> short_url</code>, <code>get(short_url) -> long_url</code>.</p>
+              <p><strong>DB Schema:</strong> <code>{id, long_url, short_url, created_at}</code>. Indexed on <code>short_url</code>.</p>
+              <p><strong>Algorithm:</strong> Base62 encoding of a unique ID. Use a <strong>Key Generation Service (KGS)</strong> to pre-generate unique tokens to avoid collision checks.</p>
+              <p><strong>Scaling:</strong> Cache heavily (Cache-Aside). 20% of URLs generate 80% of traffic.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <strong>6. Real-World Example: Chat App</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div class="callout interview-tip">
+            <div class="callout-title">Design WhatsApp/Slack</div>
+            <div class="callout-content">
+              <p><strong>Requirements:</strong> 1:1 Chat, Group Chat, Online Status, Persistent History.</p>
+              <p><strong>Protocol:</strong> <strong>WebSockets</strong> for real-time delivery. HTTP for media upload.</p>
+              <p><strong>Database:</strong> <strong>Cassandra/HBase</strong> (Wide-column) for chat history (Write heavy, time-series access). SQL for User Profiles.</p>
+              <p><strong>Status Service:</strong> Heartbeat mechanism. Redis for "Last Seen".</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SUMMARY CHECKLIST -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">✅</span> Summary Checklist
+        </div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Before the Interview</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>OS:</strong> Know Process vs Thread and Deadlocks.</li>
+              <li><strong>Network:</strong> Know what happens when you type a URL in browser.</li>
+              <li><strong>DB:</strong> Know ACID vs CAP and Indexing.</li>
+              <li><strong>LLD:</strong> Practice Singleton and Factory patterns.</li>
+              <li><strong>HLD:</strong> Know when to use Cache and Message Queues.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

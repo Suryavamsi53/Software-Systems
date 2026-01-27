@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>N-Queens Visualization - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;   /* Yellow for current placement */
+            --invalid: #ef4444;  /* Red for conflict */
+            --success: #22c55e;  /* Green for solution */
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+            --board-light: #e2e8f0;
+            --board-dark: #475569;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 450px;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .board {
+            display: grid;
+            border: 4px solid #334155;
+        }
+
+        .cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            position: relative;
+        }
+
+        .cell.light { background-color: var(--board-light); color: #1e293b; }
+        .cell.dark { background-color: var(--board-dark); color: #f1f5f9; }
+
+        .cell.active { background-color: var(--active) !important; }
+        .cell.invalid { background-color: var(--invalid) !important; }
+        .cell.solution { background-color: var(--success) !important; }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+        input[type="number"] {
+            background-color: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px;
+            border-radius: 6px;
+            width: 60px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>N-Queens Visualization</h1>
+            <div class="subtitle">Backtracking to place N queens safely</div>
+        </header>
+
+        <div class="viz-container">
+            <div id="board" class="board"></div>
+        </div>
+
+        <div class="info-panel">
+            <div class="step-text" id="step-text">Ready to start...</div>
+            <div class="legend">
+                <span><span class="dot" style="background: var(--active)"></span>Placing</span>
+                <span><span class="dot" style="background: var(--invalid)"></span>Conflict</span>
+                <span><span class="dot" style="background: var(--success)"></span>Safe</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <label style="display:flex; align-items:center; gap:10px;">
+                N: <input type="number" id="n-input" value="4" min="4" max="8">
+            </label>
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let N = 4;
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        const ANIMATION_SPEED = 800;
+
+        const boardEl = document.getElementById('board');
+        const stepText = document.getElementById('step-text');
+        const playBtn = document.getElementById('playBtn');
+        const nInput = document.getElementById('n-input');
+
+        function init() {
+            N = parseInt(nInput.value);
+            renderBoardStructure();
+            generateSteps();
+            updateView(0);
+        }
+
+        function renderBoardStructure() {
+            boardEl.style.gridTemplateColumns = `repeat(${N}, 50px)`;
+            boardEl.innerHTML = '';
+            for (let r = 0; r < N; r++) {
+                for (let c = 0; c < N; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+                    cell.id = `cell-${r}-${c}`;
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        function generateSteps() {
+            steps = [];
+            const board = Array(N).fill().map(() => Array(N).fill('.'));
+            
+            // Helper to check safety
+            function isSafe(row, col) {
+                // Check column
+                for (let i = 0; i < row; i++) {
+                    if (board[i][col] === 'Q') return false;
+                }
+                // Check upper left diagonal
+                for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+                    if (board[i][j] === 'Q') return false;
+                }
+                // Check upper right diagonal
+                for (let i = row, j = col; i >= 0 && j < N; i--, j++) {
+                    if (board[i][j] === 'Q') return false;
+                }
+                return true;
+            }
+
+            function solve(row) {
+                if (row === N) {
+                    steps.push({
+                        board: JSON.parse(JSON.stringify(board)),
+                        msg: "Solution Found!",
+                        status: 'success'
+                    });
+                    return true; // Stop after first solution for simplicity
+                }
+
+                for (let col = 0; col < N; col++) {
+                    // Try placing
+                    board[row][col] = 'Q';
+                    steps.push({
+                        board: JSON.parse(JSON.stringify(board)),
+                        msg: `Trying Queen at (${row}, ${col})...`,
+                        active: [row, col],
+                        status: 'active'
+                    });
+
+                    if (isSafe(row, col)) {
+                        steps.push({
+                            board: JSON.parse(JSON.stringify(board)),
+                            msg: `(${row}, ${col}) is Safe. Moving to next row.`,
+                            active: [row, col],
+                            status: 'safe'
+                        });
+
+                        if (solve(row + 1)) return true;
+
+                        // Backtrack
+                        steps.push({
+                            board: JSON.parse(JSON.stringify(board)),
+                            msg: `Backtracking from row ${row+1}. Removing Queen at (${row}, ${col}).`,
+                            active: [row, col],
+                            status: 'backtrack'
+                        });
+                        board[row][col] = '.';
+                    } else {
+                        steps.push({
+                            board: JSON.parse(JSON.stringify(board)),
+                            msg: `Conflict at (${row}, ${col})! Invalid placement.`,
+                            active: [row, col],
+                            status: 'invalid'
+                        });
+                        board[row][col] = '.';
+                    }
+                }
+                return false;
+            }
+
+            solve(0);
+        }
+
+        function updateView(stepIndex) {
+            const state = steps[stepIndex];
+            if (!state) return;
+
+            // Clear board
+            for (let r = 0; r < N; r++) {
+                for (let c = 0; c < N; c++) {
+                    const cell = document.getElementById(`cell-${r}-${c}`);
+                    cell.textContent = '';
+                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
+                    
+                    if (state.board[r][c] === 'Q') {
+                        cell.textContent = '♛';
+                    }
+                }
+            }
+
+            // Highlight active cell
+            if (state.active) {
+                const [r, c] = state.active;
+                const cell = document.getElementById(`cell-${r}-${c}`);
+                if (state.status === 'active') cell.classList.add('active');
+                if (state.status === 'invalid') cell.classList.add('invalid');
+                if (state.status === 'safe') cell.classList.add('solution');
+                if (state.status === 'backtrack') cell.classList.add('invalid'); // Flash red on remove
+            }
+
+            if (state.status === 'success') {
+                // Highlight all queens green
+                for (let r = 0; r < N; r++) {
+                    for (let c = 0; c < N; c++) {
+                        if (state.board[r][c] === 'Q') {
+                            document.getElementById(`cell-${r}-${c}`).classList.add('solution');
+                        }
+                    }
+                }
+            }
+
+            stepText.textContent = state.msg;
+        }
+
+        // Controls
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        updateView(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateView(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateView(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            init(); // Re-init in case N changed
+        }
+
+        nInput.addEventListener('change', reset);
+
+        init();
+    </script>
+</body>
+</html>

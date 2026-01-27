@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Heap (Priority Queue) Pattern - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Heap (Priority Queue) Pattern</h1>
+        <p>Top-K problems and scheduling</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Array of comparable values</li>
+              <li>Large dataset</li>
+              <li>Need extremal values</li>
+              <li>Priority matter</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Find K largest/smallest</li>
+              <li>Find median</li>
+              <li>Merge sorted arrays</li>
+              <li>Top K frequent elements</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>O(log n) insertion/deletion</li>
+              <li>Can't sort full array</li>
+              <li>"K largest/smallest"</li>
+              <li>Streaming/large data</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- BASIC REQUIREMENTS -->
+      <div class="section" id="basic-requirements" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid var(--callout-blue);">
+        <div class="section-title">
+          <span class="emoji">📋</span> Basic Requirements to Solve Problems
+        </div>
+        <div style="margin-top: 15px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">✓ Prerequisites You Need:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Understanding of binary tree structure and complete binary trees</li>
+              <li>Min-heap vs max-heap properties and which to use for each scenario</li>
+              <li>Heap operations: insert O(log n), delete-min/max O(log n), peek O(1)</li>
+              <li>Ability to use priority queue from standard library</li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">🎯 Key Skills to Master:</strong>
+            <ul style="margin-top: 8px; margin-left: 20px;">
+              <li>Choose min-heap vs max-heap based on \"K largest\" or \"K smallest\" requirement</li>
+              <li>Maintain top-K elements: use min-heap of size K for K largest items</li>
+              <li>Extract all elements in sorted order: n log n time via heap extraction</li>
+              <li>Merge K sorted streams: use min-heap with one element from each stream</li>
+              <li>Recognize when O(n log k) is better than O(n log n) sorting</li>
+              <li>Implement custom comparators for complex objects</li>
+            </ul>
+          </div>
+          <div>
+            <strong style="color: var(--text-primary);">💡 Mental Model:</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">\"Heap gives you O(log n) access to the extreme value (min or max). Build once, then repeatedly extract extremes. Perfect for top-K problems.\"</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Amazon EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Min-Heap vs Max-Heap:</strong> Do you know which one to use? (e.g., Min-Heap for "K largest", Max-Heap for "K smallest").</li>
+              <li><strong>Complexity:</strong> Do you know that insertion and extraction are O(log n), but peeking is O(1)?</li>
+              <li><strong>Library Usage:</strong> Can you use your language's priority queue implementation correctly? (Java <code>PriorityQueue</code>, Python <code>heapq</code>, Go <code>container/heap</code>).</li>
+              <li><strong>Streaming Data:</strong> Do you recognize Heaps as the go-to solution for processing continuous streams of data?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Ordered Efficiency</div>
+          <div class="callout-content">
+            <p>A Heap is a specialized tree-based data structure that satisfies the heap property: in a <em>Min-Heap</em>, for any given node I, the value of I is less than or equal to the values of its children. This means the smallest element is always at the root.</p>
+            <p><strong>Key Insight:</strong> Heaps give you O(1) access to the extreme element (min or max) and O(log n) ability to remove it or add a new one. They are NOT sorted, but they are "ordered enough" for priority tasks.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Log Analysis & Top-K Errors</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> Amazon CloudWatch processes millions of error logs per second. You need to display the "Top 10 Most Frequent Error Types" in real-time on a dashboard.</p>
+            <p><strong>Solution:</strong> Use a Min-Heap of size K (10). For every new error count coming in:</p>
+            <ul>
+              <li>If heap size < K, add it.</li>
+              <li>If heap size == K and new error count > heap.peek(), remove min and add new error.</li>
+            </ul>
+            <p>This ensures the heap always contains the K largest elements seen so far.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        
+        <!-- Interactive Visualizer Link -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive Heap Visualizer</strong>
+            <p style="margin-top: 5px; color: var(--text-secondary);">Watch Insert (Bubble Up) and Extract-Min (Bubble Down) operations.</p>
+          </div>
+          <a href="../visualizers/heap-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+        </div>
+
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Min-Heap Structure & Array Mapping</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">A Heap is a complete binary tree efficiently stored in an array. For node at index <code>i</code>, left child is <code>2i+1</code>, right is <code>2i+2</code>.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 350'%3E%3Crect width='800' height='350' fill='%23f8fafc'/%3E%3Ctext x='400' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EMin-Heap: Tree vs Array%3C/text%3E%3C!-- Tree --%3E%3Cg transform='translate(200, 80)'%3E%3Ccircle cx='0' cy='0' r='20' fill='%233b82f6' stroke='%231d4ed8' stroke-width='2'/%3E%3Ctext x='0' y='5' text-anchor='middle' fill='white' font-weight='bold'%3E1%3C/text%3E%3Cpath d='M0,20 L-60,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Cpath d='M0,20 L60,60' stroke='%2394a3b8' stroke-width='2'/%3E%3Ccircle cx='-60' cy='60' r='20' fill='%233b82f6' stroke='%231d4ed8' stroke-width='2'/%3E%3Ctext x='-60' y='65' text-anchor='middle' fill='white' font-weight='bold'%3E3%3C/text%3E%3Ccircle cx='60' cy='60' r='20' fill='%233b82f6' stroke='%231d4ed8' stroke-width='2'/%3E%3Ctext x='60' y='65' text-anchor='middle' fill='white' font-weight='bold'%3E5%3C/text%3E%3Cpath d='M-60,80 L-90,120' stroke='%2394a3b8' stroke-width='2'/%3E%3Cpath d='M-60,80 L-30,120' stroke='%2394a3b8' stroke-width='2'/%3E%3Ccircle cx='-90' cy='120' r='20' fill='%2394a3b8'/%3E%3Ctext x='-90' y='125' text-anchor='middle' fill='white'%3E7%3C/text%3E%3Ccircle cx='-30' cy='120' r='20' fill='%2394a3b8'/%3E%3Ctext x='-30' y='125' text-anchor='middle' fill='white'%3E9%3C/text%3E%3Cpath d='M60,80 L30,120' stroke='%2394a3b8' stroke-width='2'/%3E%3Ccircle cx='30' cy='120' r='20' fill='%2394a3b8'/%3E%3Ctext x='30' y='125' text-anchor='middle' fill='white'%3E8%3C/text%3E%3C/g%3E%3C!-- Array --%3E%3Cg transform='translate(50, 250)'%3E%3Ctext x='0' y='-10' font-weight='bold' fill='%23333'%3EArray Representation:%3C/text%3E%3Crect x='0' y='0' width='50' height='50' fill='%233b82f6' stroke='%23fff'/%3E%3Ctext x='25' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E1%3C/text%3E%3Ctext x='25' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E0%3C/text%3E%3Crect x='50' y='0' width='50' height='50' fill='%233b82f6' stroke='%23fff'/%3E%3Ctext x='75' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E3%3C/text%3E%3Ctext x='75' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E1%3C/text%3E%3Crect x='100' y='0' width='50' height='50' fill='%233b82f6' stroke='%23fff'/%3E%3Ctext x='125' y='30' text-anchor='middle' fill='white' font-weight='bold'%3E5%3C/text%3E%3Ctext x='125' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E2%3C/text%3E%3Crect x='150' y='0' width='50' height='50' fill='%2394a3b8' stroke='%23fff'/%3E%3Ctext x='175' y='30' text-anchor='middle' fill='white'%3E7%3C/text%3E%3Ctext x='175' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E3%3C/text%3E%3Crect x='200' y='0' width='50' height='50' fill='%2394a3b8' stroke='%23fff'/%3E%3Ctext x='225' y='30' text-anchor='middle' fill='white'%3E9%3C/text%3E%3Ctext x='225' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E4%3C/text%3E%3Crect x='250' y='0' width='50' height='50' fill='%2394a3b8' stroke='%23fff'/%3E%3Ctext x='275' y='30' text-anchor='middle' fill='white'%3E8%3C/text%3E%3Ctext x='275' y='65' text-anchor='middle' fill='%23666' font-size='12'%3E5%3C/text%3E%3C/g%3E%3C!-- Operations --%3E%3Cg transform='translate(450, 100)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EProperties:%3C/text%3E%3Ctext x='0' y='30' font-family='sans-serif' fill='%23333'%3E1. Parent(i) = (i-1)/2%3C/text%3E%3Ctext x='0' y='55' font-family='sans-serif' fill='%23333'%3E2. Left(i) = 2*i + 1%3C/text%3E%3Ctext x='0' y='80' font-family='sans-serif' fill='%23333'%3E3. Right(i) = 2*i + 2%3C/text%3E%3Ctext x='0' y='120' font-weight='bold' fill='%2310b981'%3EMin-Heap: Parent <= Children%3C/text%3E%3C/g%3E%3C/svg%3E" style="width: 100%; max-width: 700px; margin: 0 auto; display: block;" alt="Min-Heap Tree and Array Visualization"/>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Kth Largest Element in an Array (LeetCode 215)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given an integer array <code>nums</code> and an integer <code>k</code>, return the <code>k</code>th largest element in the array.</p>
+            <p><strong>Input:</strong> nums = [3,2,1,5,6,4], k = 2<br>
+            <strong>Output:</strong> 5</p>
+            <p><strong>Why Amazon Loves It:</strong> It tests if you know the difference between sorting (O(N log N)) and using a heap (O(N log K)).</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">Sorting the Array</div>
+          <div class="callout-content">
+            <p>Sort the entire array and take the element at index <code>len - k</code>.</p>
+            <p><strong>Time Complexity:</strong> O(N log N)</p>
+            <p><strong>Why it's inferior:</strong> We do unnecessary work sorting elements we don't care about. If N=10,000,000 and K=5, sorting is overkill.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
+        </div>
+
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+import (
+    "container/heap"
+)
+
+// Define a Min-Heap
+type IntHeap []int
+func (h IntHeap) Len() int           { return len(h) }
+func (h IntHeap) Less(i, j int) bool { return h[i] < h[j] } // Min-Heap
+func (h IntHeap) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func (h *IntHeap) Push(x interface{}) { *h = append(*h, x.(int)) }
+func (h *IntHeap) Pop() interface{} {
+    old := *h
+    n := len(old)
+    x := old[n-1]
+    *h = old[0 : n-1]
+    return x
+}
+
+func findKthLargest(nums []int, k int) int {
+    h := &IntHeap{}
+    heap.Init(h)
+    
+    for _, num := range nums {
+        heap.Push(h, num)
+        // If heap size exceeds k, remove the smallest element
+        if h.Len() > k {
+            heap.Pop(h)
+        }
+    }
+    
+    // The root of the min-heap is the Kth largest element
+    return (*h)[0]
+}
+</pre></div>
+            </div>
+
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public int findKthLargest(int[] nums, int k) {
+        // Min-Heap to store the K largest elements
+        PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+        
+        for (int num : nums) {
+            minHeap.add(num);
+            if (minHeap.size() > k) {
+                minHeap.poll(); // Remove smallest
+            }
+        }
+        
+        return minHeap.peek();
+    }
+}
+</pre></div>
+            </div>
+
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+import heapq
+
+class Solution:
+    def findKthLargest(self, nums: List[int], k: int) -> int:
+        # Min-heap of size k
+        heap = []
+        
+        for num in nums:
+            heapq.heappush(heap, num)
+            if len(heap) > k:
+                heapq.heappop(heap)
+                
+        return heap[0]
+</pre></div>
+            </div>
+        </div>
+      </div>
+
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace for <code>nums = [3, 2, 1, 5, 6, 4]</code>, <code>k = 2</code></p>
+        <div class="diagram">
+Heap (Size limit 2, Min-Heap)
+
+1. Push 3 -> [3]
+2. Push 2 -> [2, 3]
+3. Push 1 -> [1, 3, 2] -> Pop min(1) -> [2, 3]
+4. Push 5 -> [2, 3, 5] -> Pop min(2) -> [3, 5]
+5. Push 6 -> [3, 5, 6] -> Pop min(3) -> [5, 6]
+6. Push 4 -> [4, 6, 5] -> Pop min(4) -> [5, 6]
+
+Result: Heap contains [5, 6].
+Top of heap (min) is 5.
+5 is the 2nd largest element.
+        </div>
+      </div>
+
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(N log K)</strong></p>
+            <p>We iterate through N elements. Each insertion/deletion into the heap of size K takes O(log K).</p>
+            <p><strong>Space Complexity: O(K)</strong></p>
+            <p>We store at most K elements in the heap.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: What if N is huge and we can't load all numbers into memory?</strong><br>
+            A: This heap approach is perfect. We only need memory for K elements. We can stream the numbers one by one.</p>
+            <p><strong>Q: How would you merge K sorted lists?</strong><br>
+            A: Use a Min-Heap of size K. Initialize with the first element of each list. Extract min, then push the next element from the same list the min came from.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#215</strong> - Kth Largest Element in an Array</li>
+              <li style="margin-bottom: 12px;"><strong>#703</strong> - Kth Largest Element in a Stream</li>
+              <li style="margin-bottom: 12px;"><strong>#1046</strong> - Last Stone Weight</li>
+              <li style="margin-bottom: 12px;"><strong>#1619</strong> - Mean of Array After Removing Some Elements</li>
+              <li style="margin-bottom: 12px;"><strong>#2462</strong> - Total Cost to Hire K Workers</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#264</strong> - Ugly Number II</li>
+              <li style="margin-bottom: 12px;"><strong>#347</strong> - Top K Frequent Elements (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#378</strong> - Kth Smallest Element in a Sorted Matrix</li>
+              <li style="margin-bottom: 12px;"><strong>#621</strong> - Task Scheduler</li>
+              <li style="margin-bottom: 12px;"><strong>#973</strong> - K Closest Points to Origin</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#23</strong> - Merge k Sorted Lists</li>
+              <li style="margin-bottom: 12px;"><strong>#295</strong> - Find Median from Data Stream</li>
+              <li style="margin-bottom: 12px;"><strong>#480</strong> - Sliding Window Median</li>
+              <li style="margin-bottom: 12px;"><strong>#1675</strong> - Minimize Deviation in Array</li>
+              <li style="margin-bottom: 12px;"><strong>#1882</strong> - Process Tasks Using Servers</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="../script.js"></script>
+</body>
+</html>

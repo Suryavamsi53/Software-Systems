@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Interview Approach Guide - Amazon SDE Interview</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item active">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+        <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+        <a href="patterns/stack.html" class="nav-item">Stack</a>
+        <a href="patterns/heap.html" class="nav-item">Heap (Priority Queue)</a>
+        <a href="patterns/trees.html" class="nav-item">Trees</a>
+        <a href="patterns/tries.html" class="nav-item">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+        <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+        <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+        <a href="patterns/greedy.html" class="nav-item">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="patterns/fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+        <a href="patterns/intervals.html" class="nav-item">Intervals</a>
+        <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
+        <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+        <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="patterns/sort-search.html" class="nav-item">Sort & Search</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🎯 Amazon Interview Approach Guide</h1>
+        <p>Master the systematic approach to solve any coding problem during your interview</p>
+      </div>
+
+      <!-- THE 5-STEP INTERVIEW FRAMEWORK -->
+      <div class="section" id="framework" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">📋</span> The 5-Step Amazon Interview Framework
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+            <div style="font-size: 1.3em; font-weight: bold; color: #3b82f6; margin-bottom: 10px;">Step 1: Clarify the Problem (2-3 minutes)</div>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Read carefully:</strong> Don't rush. Re-read the problem statement.</li>
+              <li><strong>Ask clarifying questions:</strong>
+                <ul>
+                  <li>What are the input constraints? (size, range, duplicates?)</li>
+                  <li>Are there edge cases I should handle? (empty, single element, negative numbers?)</li>
+                  <li>What is the expected output format?</li>
+                  <li>Any time/space constraints mentioned?</li>
+                </ul>
+              </li>
+              <li><strong>Examples:</strong> Work through 2-3 examples with the interviewer</li>
+              <li><strong>Confirm understanding:</strong> "So the problem is asking me to..."</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+            <div style="font-size: 1.3em; font-weight: bold; color: #10b981; margin-bottom: 10px;">Step 2: Identify the Pattern (2-3 minutes)</div>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Use the 3-Prong Detection:</strong>
+                <ul>
+                  <li>What INPUT SIGNAL do I see?</li>
+                  <li>What QUESTION SIGNAL is being asked?</li>
+                  <li>What CONSTRAINT SIGNAL is given?</li>
+                </ul>
+              </li>
+              <li><strong>Pattern matching:</strong> "This looks like a [Pattern Name] problem because..."</li>
+              <li><strong>Think aloud:</strong> Help interviewer follow your reasoning</li>
+              <li><strong>Multiple approaches?</strong> Acknowledge if multiple patterns could apply</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+            <div style="font-size: 1.3em; font-weight: bold; color: #f59e0b; margin-bottom: 10px;">Step 3: Plan Your Approach (3-5 minutes)</div>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Discuss before coding:</strong> Never jump straight to code</li>
+              <li><strong>Explain your strategy:</strong>
+                <ul>
+                  <li>What data structure will you use and why?</li>
+                  <li>What is the main algorithm/approach?</li>
+                  <li>Walk through the algorithm on one of your examples</li>
+                </ul>
+              </li>
+              <li><strong>Estimate complexity:</strong> "This approach will be O(n time) and O(n space)"</li>
+              <li><strong>Get approval:</strong> "Does this approach sound good to you?" before coding</li>
+              <li><strong>Consider optimizations:</strong> "We could optimize this further by..."</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #ef4444;">
+            <div style="font-size: 1.3em; font-weight: bold; color: #ef4444; margin-bottom: 10px;">Step 4: Implement the Solution (8-12 minutes)</div>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Code structure:</strong>
+                <ul>
+                  <li>Write function signature first</li>
+                  <li>Handle edge cases at the start</li>
+                  <li>Use clear variable names (not just i, j, x)</li>
+                  <li>Add comments for non-obvious steps</li>
+                </ul>
+              </li>
+              <li><strong>Narrate while coding:</strong> Explain what each section does</li>
+              <li><strong>Test as you go:</strong> "In this section, I initialize the result array"</li>
+              <li><strong>Don't write too fast:</strong> Quality over speed</li>
+              <li><strong>Be organized:</strong> Format code properly, use indentation</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(168, 85, 247, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #a855f7;">
+            <div style="font-size: 1.3em; font-weight: bold; color: #a855f7; margin-bottom: 10px;">Step 5: Test & Optimize (3-5 minutes)</div>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li><strong>Walk through examples:</strong> Trace through your code with the examples</li>
+              <li><strong>Edge cases:</strong> Test empty input, single element, all duplicates, etc.</li>
+              <li><strong>Check for bugs:</strong> Off-by-one errors, null pointer issues, infinite loops</li>
+              <li><strong>Complexity analysis:</strong> Count operations, analyze loops</li>
+              <li><strong>Optimization discussion:</strong> Can we do better? Trade-offs?</li>
+              <li><strong>Code cleanup:</strong> Remove debug code, improve readability</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- WHAT AMAZON REALLY EXPECTS -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">✅</span> What Amazon REALLY Expects From You
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <div style="background-color: rgba(34, 197, 94, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #22c55e;">
+            <strong style="color: #22c55e; display: block; margin-bottom: 15px; font-size: 1.1em;">✓ Amazon WANTS to See</strong>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li>Problem-solving approach (not just coding ability)</li>
+              <li>Communication throughout the interview</li>
+              <li>Ability to identify patterns and apply them</li>
+              <li>Knowledge of time and space complexity</li>
+              <li>Edge case handling</li>
+              <li>Clean, readable code</li>
+              <li>Optimization mindset</li>
+              <li>Asking good clarifying questions</li>
+              <li>Handling feedback/suggestions gracefully</li>
+              <li>Thinking out loud</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 15px; font-size: 1.1em;">✗ Amazon DOES NOT Want</strong>
+            <ul style="margin: 0; padding-left: 20px; color: var(--text-secondary);">
+              <li>Jumping into code immediately</li>
+              <li>Silent coding (no explanation)</li>
+              <li>Assuming requirements without clarifying</li>
+              <li>Ignoring edge cases</li>
+              <li>Code that doesn't compile/run</li>
+              <li>Poor variable naming</li>
+              <li>No discussion of complexity</li>
+              <li>Defensive attitude to suggestions</li>
+              <li>Overengineered solutions</li>
+              <li>Giving up when stuck</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- HOW TO EXPLAIN TIME & SPACE COMPLEXITY -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">⏱️</span> How to Explain Time & Space Complexity in an Interview
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px; font-size: 1.1em;">Time Complexity Explanation</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Don't just say "O(n log n)" — explain it:</p>
+            <div style="background-color: rgba(255, 255, 255, 0.5); padding: 15px; border-radius: 5px; margin-top: 10px; font-family: monospace; color: var(--text-primary);">
+              ❌ "The time complexity is O(n log n)"<br><br>
+              ✅ "The time complexity is O(n log n) because:<br>
+              &nbsp;&nbsp;- We need to sort the input [outer n operations]<br>
+              &nbsp;&nbsp;- Sorting takes O(n log n) time<br>
+              &nbsp;&nbsp;- Then we iterate through [O(n) more operations]<br>
+              &nbsp;&nbsp;- Overall: O(n log n) dominates, so O(n log n)"
+            </div>
+          </div>
+
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px; font-size: 1.1em;">Space Complexity Explanation</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Be specific about what uses space:</p>
+            <div style="background-color: rgba(255, 255, 255, 0.5); padding: 15px; border-radius: 5px; margin-top: 10px; font-family: monospace; color: var(--text-primary);">
+              ❌ "The space complexity is O(n)"<br><br>
+              ✅ "The space complexity is O(n) because:<br>
+              &nbsp;&nbsp;- We use a hash map to store elements: O(n)<br>
+              &nbsp;&nbsp;- Result array: O(n)<br>
+              &nbsp;&nbsp;- Input doesn't count (given)<br>
+              &nbsp;&nbsp;- Total: O(n) for the hash map"
+            </div>
+          </div>
+
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px; font-size: 1.1em;">Discussing Trade-offs</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Show you understand optimization:</p>
+            <div style="background-color: rgba(255, 255, 255, 0.5); padding: 15px; border-radius: 5px; margin-top: 10px; font-family: monospace; color: var(--text-primary);">
+              "My current approach is O(n log n) time and O(n) space.<br>
+              We could optimize the time to O(n) using a hash map, but<br>
+              that would increase space to O(n). In this case, O(n) time<br>
+              is worth the extra space, so that's my preferred solution."
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMON MISTAKES TO AVOID -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">⚠️</span> Common Interview Mistakes to AVOID
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 20px;">
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">❌ Code Quality</strong>
+            <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9em; color: var(--text-secondary);">
+              <li>Single-letter vars (i, j, x)</li>
+              <li>No comments</li>
+              <li>Messy formatting</li>
+              <li>Copy-paste errors</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">❌ Communication</strong>
+            <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9em; color: var(--text-secondary);">
+              <li>Silent for 10+ minutes</li>
+              <li>No clarifying questions</li>
+              <li>Not explaining your approach</li>
+              <li>Getting defensive</li>
+            </ul>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">❌ Problem Solving</strong>
+            <ul style="margin: 5px 0; padding-left: 20px; font-size: 0.9em; color: var(--text-secondary);">
+              <li>Not testing edge cases</li>
+              <li>No complexity analysis</li>
+              <li>Not handling errors</li>
+              <li>Wrong algorithm choice</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXAMPLE: SOLVE TWO SUM LIVE -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">📝</span> Example: How to Solve "Two Sum" in an Interview
+        </div>
+        
+        <div style="margin-top: 20px;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 8px;">📌 Problem Statement:</strong>
+            <p style="margin: 0; color: var(--text-secondary); font-family: monospace;">Given an array of integers nums and an integer target, return the indices of the two numbers that add up to the target. You may not use the same element twice. You can return the answer in any order.</p>
+          </div>
+
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #10b981; display: block; margin-bottom: 8px;">💬 Step 1: Clarify (What you should SAY)</strong>
+            <p style="margin: 0; color: var(--text-secondary);">
+              "Let me clarify the problem:<br>
+              • I need to find two numbers that add to the target<br>
+              • Return their indices (not values)<br>
+              • Can't use the same element twice<br>
+              • Is the array sorted? [Wait for answer]<br>
+              • Are there guaranteed to be two numbers that sum to target?<br><br>
+              Let me trace through an example:<br>
+              nums = [2, 7, 11, 15], target = 9<br>
+              Output: [0, 1] because 2 + 7 = 9"
+            </p>
+          </div>
+
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 8px;">🔍 Step 2: Identify Pattern (What you should SAY)</strong>
+            <p style="margin: 0; color: var(--text-secondary);">
+              "This looks like a Hash Maps pattern because:<br>
+              • INPUT: Array of integers<br>
+              • QUESTION: Find two numbers with specific sum<br>
+              • CONSTRAINT: Need O(n) time, not O(n²)<br><br>
+              I can use the complementary sum approach:<br>
+              For each number, check if (target - number) exists in my seen numbers"
+            </p>
+          </div>
+
+          <div style="background-color: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #a855f7; display: block; margin-bottom: 8px;">📋 Step 3: Plan (What you should SAY)</strong>
+            <p style="margin: 0; color: var(--text-secondary);">
+              "My approach:<br>
+              1. Create a hash map to store value → index<br>
+              2. Iterate through the array<br>
+              3. For each number, calculate complement = target - num<br>
+              4. Check if complement exists in hash map<br>
+              5. If yes, return [complement_index, current_index]<br>
+              6. If no, add current number to hash map<br><br>
+              Time: O(n) single pass<br>
+              Space: O(n) for hash map<br>
+              Does this approach look good to you?"
+            </p>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <strong style="color: #ef4444; display: block; margin-bottom: 8px;">💻 Step 4: Code (Implementation)</strong>
+            <pre style="background-color: rgba(255,255,255,0.5); padding: 15px; border-radius: 5px; overflow-x: auto; color: var(--text-primary); font-size: 0.85em;"><code>def twoSum(nums, target):
+    """
+    Find two indices whose values sum to target.
+    
+    Args:
+        nums: List of integers
+        target: Target sum
+    
+    Returns:
+        List of two indices [i, j] where nums[i] + nums[j] = target
+    """
+    # Edge case: array too small
+    if not nums or len(nums) < 2:
+        return []
+    
+    # Hash map: value → index
+    seen = {}
+    
+    # Single pass through array
+    for i, num in enumerate(nums):
+        complement = target - num
+        
+        # Check if complement exists
+        if complement in seen:
+            return [seen[complement], i]
+        
+        # Add current number to map
+        seen[num] = i
+    
+    # No solution found
+    return []</code></pre>
+          </div>
+
+          <div style="background-color: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px;">
+            <strong style="color: #22c55e; display: block; margin-bottom: 8px;">✅ Step 5: Test (What you should SAY)</strong>
+            <p style="margin: 0; color: var(--text-secondary);">
+              "Let me trace through the example:<br>
+              nums = [2, 7, 11, 15], target = 9<br><br>
+              i=0, num=2: complement=7, seen={}, add 2→0<br>
+              i=1, num=7: complement=2, 2 in seen! Return [0, 1] ✓<br><br>
+              Edge cases:<br>
+              • Empty array: handled ✓<br>
+              • Single element: handled ✓<br>
+              • No solution: returns [] ✓<br><br>
+              Complexity:<br>
+              • Time: O(n) - one pass<br>
+              • Space: O(n) - hash map size"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- TIPS FOR SUCCESS -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">⭐</span> Golden Tips for Interview Success
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6;">🗣️ Communication is Key</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Talk constantly. Interviewers want to hear your thought process. Silence makes them think you're stuck or lost.</p>
+          </div>
+
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981;">⏸️ Plan Before You Code</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Spend 5+ minutes planning. Bad code written fast is worse than good code written thoughtfully.</p>
+          </div>
+
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b;">🎯 Focus on Correctness First</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Get a working solution first. Optimization comes after you prove it's correct.</p>
+          </div>
+
+          <div style="background-color: rgba(168, 85, 247, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #a855f7;">
+            <strong style="color: #a855f7;">🧪 Test Edge Cases</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Always consider: empty, single element, all same, min/max values, duplicates.</p>
+          </div>
+
+          <div style="background-color: rgba(239, 68, 68, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <strong style="color: #ef4444;">🚫 Ask When Stuck</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Don't sit silent for 5+ minutes. Ask for hints. Interviewers prefer hearing your thought process over silence.</p>
+          </div>
+
+          <div style="background-color: rgba(34, 197, 94, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #22c55e;">
+            <strong style="color: #22c55e;">✨ Clean Code Matters</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Use meaningful variable names, proper indentation, and comments. Readability shows professionalism.</p>
+          </div>
+
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6;">🎓 Demonstrate Knowledge</strong>
+            <p style="margin: 5px 0; color: var(--text-secondary);">Explain your complexity analysis. Show you understand why your solution is efficient.</p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linked List Reversal - Amazon SDE Prep</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #1e293b;
+            --primary: #38bdf8;
+            --active: #facc15;
+            --prev: #fb923c;
+            --next: #22c55e;
+            --text: #e5e7eb;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.1);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 { margin: 0 0 10px 0; }
+        .subtitle { color: var(--text-muted); }
+
+        /* Visualization Area */
+        .viz-container {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            height: 300px;
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Nodes */
+        .node-rect {
+            fill: var(--panel);
+            stroke: var(--primary);
+            stroke-width: 2;
+            transition: all 0.5s ease;
+        }
+
+        .node-text {
+            fill: var(--text);
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 16px;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Pointers */
+        .pointer-arrow {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            fill: none;
+            transition: all 0.5s ease;
+        }
+
+        .label-text {
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.5s ease;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        
+        .legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 10px;
+        }
+        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
+        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
+        button.primary:hover { opacity: 0.9; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Linked List Reversal</h1>
+            <div class="subtitle">Iterative In-Place Reversal</div>
+        </header>
+
+        <div class="viz-container">
+            <svg id="ll-svg"></svg>
+        </div>
+
+        <div class="info-panel">
+            <div class="step-text" id="step-text">Ready to start...</div>
+            <div class="legend">
+                <span><span class="dot" style="background: var(--prev)"></span>Prev</span>
+                <span><span class="dot" style="background: var(--active)"></span>Curr</span>
+                <span><span class="dot" style="background: var(--next)"></span>NextTemp</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button onclick="reset()">Reset</button>
+            <button onclick="stepBackward()">Previous</button>
+            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
+            <button onclick="stepForward()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        const NODES = [1, 2, 3, 4, 5];
+        const NODE_WIDTH = 60;
+        const NODE_HEIGHT = 40;
+        const GAP = 50;
+        const START_X = 100;
+        const Y = 150;
+        const ANIMATION_SPEED = 1000;
+
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+
+        const svg = document.getElementById('ll-svg');
+        const stepText = document.getElementById('step-text');
+        const playBtn = document.getElementById('playBtn');
+
+        function init() {
+            generateSteps();
+            render(0);
+        }
+
+        function generateSteps() {
+            steps = [];
+            // Initial State
+            // We need to track:
+            // 1. Links (from -> to)
+            // 2. Pointer positions (prev, curr, nextTemp)
+            
+            let links = NODES.map((_, i) => (i < NODES.length - 1 ? i + 1 : null)); // 0->1, 1->2...
+            
+            steps.push({
+                links: [...links],
+                prev: null,
+                curr: 0,
+                next: null,
+                msg: "Start: prev=null, curr=head"
+            });
+
+            let prev = null;
+            let curr = 0;
+
+            while (curr !== null) {
+                let nextTemp = links[curr];
+                
+                // Step 1: Identify Next
+                steps.push({
+                    links: [...links],
+                    prev: prev,
+                    curr: curr,
+                    next: nextTemp,
+                    msg: `Save next node: nextTemp = ${nextTemp !== null ? NODES[nextTemp] : 'null'}`
+                });
+
+                // Step 2: Reverse Link
+                links[curr] = prev;
+                steps.push({
+                    links: [...links],
+                    prev: prev,
+                    curr: curr,
+                    next: nextTemp,
+                    msg: `Reverse pointer: curr.next = prev (${prev !== null ? NODES[prev] : 'null'})`
+                });
+
+                // Step 3: Move Prev
+                prev = curr;
+                steps.push({
+                    links: [...links],
+                    prev: prev,
+                    curr: curr,
+                    next: nextTemp,
+                    msg: `Move prev: prev = curr (${NODES[curr]})`
+                });
+
+                // Step 4: Move Curr
+                curr = nextTemp;
+                steps.push({
+                    links: [...links],
+                    prev: prev,
+                    curr: curr,
+                    next: nextTemp,
+                    msg: `Move curr: curr = nextTemp (${curr !== null ? NODES[curr] : 'null'})`
+                });
+            }
+
+            steps.push({
+                links: [...links],
+                prev: prev,
+                curr: null,
+                next: null,
+                msg: "Finished! New head is prev."
+            });
+        }
+
+        function render(stepIndex) {
+            const state = steps[stepIndex];
+            svg.innerHTML = '';
+
+            // Draw Nodes
+            NODES.forEach((val, i) => {
+                const x = START_X + i * (NODE_WIDTH + GAP);
+                
+                // Rect
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", x);
+                rect.setAttribute("y", Y - NODE_HEIGHT/2);
+                rect.setAttribute("width", NODE_WIDTH);
+                rect.setAttribute("height", NODE_HEIGHT);
+                rect.setAttribute("rx", 5);
+                rect.setAttribute("class", "node-rect");
+                svg.appendChild(rect);
+
+                // Text
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", x + NODE_WIDTH/2);
+                text.setAttribute("y", Y);
+                text.setAttribute("class", "node-text");
+                text.textContent = val;
+                svg.appendChild(text);
+
+                // Labels
+                if (state.prev === i) drawLabel(x, Y + 40, "Prev", "var(--prev)");
+                if (state.curr === i) drawLabel(x, Y - 40, "Curr", "var(--active)");
+                if (state.next === i) drawLabel(x, Y + 40, "Next", "var(--next)");
+            });
+
+            // Draw Links
+            state.links.forEach((target, source) => {
+                if (target !== null) {
+                    const x1 = START_X + source * (NODE_WIDTH + GAP) + NODE_WIDTH;
+                    const x2 = START_X + target * (NODE_WIDTH + GAP);
+                    
+                    // If reversing (target < source), curve below
+                    const isReverse = target < source;
+                    const yOffset = isReverse ? 20 : 0;
+                    
+                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                    line.setAttribute("x1", isReverse ? x1 - NODE_WIDTH : x1);
+                    line.setAttribute("y1", Y + yOffset);
+                    line.setAttribute("x2", isReverse ? x2 + NODE_WIDTH : x2);
+                    line.setAttribute("y2", Y + yOffset);
+                    line.setAttribute("stroke", isReverse ? "var(--active)" : "var(--text-muted)");
+                    line.setAttribute("stroke-width", "2");
+                    line.setAttribute("marker-end", "url(#arrow)");
+                    svg.appendChild(line);
+                }
+            });
+
+            // Arrow Marker
+            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+            defs.innerHTML = `<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" /></marker>`;
+            svg.appendChild(defs);
+
+            stepText.textContent = state.msg;
+        }
+
+        function drawLabel(x, y, text, color) {
+            const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            label.setAttribute("x", x + NODE_WIDTH/2);
+            label.setAttribute("y", y);
+            label.setAttribute("fill", color);
+            label.setAttribute("class", "label-text");
+            label.setAttribute("text-anchor", "middle");
+            label.textContent = text;
+            svg.appendChild(label);
+        }
+
+        // Controls (Same as other visualizers)
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        render(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                render(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            render(0);
+        }
+
+        init();
+    </script>
+</body>
+</html>
