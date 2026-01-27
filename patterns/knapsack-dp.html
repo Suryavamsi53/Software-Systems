@@ -4,55 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Knapsack DP Visualization - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;   /* Yellow for current cell */
-            --compare: #fb923c;  /* Orange for comparison source */
-            --success: #22c55e;  /* Green for final value */
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
         /* DP Table */
         .table-container {
             overflow-x: auto;
-            margin-bottom: 20px;
+            padding: 20px;
             display: flex;
             justify-content: center;
+            flex: 1;
         }
 
         table {
             border-collapse: collapse;
-            background-color: var(--panel);
+            background-color: var(--bg-tertiary);
             border-radius: 8px;
             overflow: hidden;
         }
@@ -60,34 +26,36 @@
         th, td {
             padding: 12px 15px;
             text-align: center;
-            border: 1px solid var(--border);
+            border: 1px solid var(--border-color);
             min-width: 40px;
         }
 
         th {
-            background-color: rgba(255,255,255,0.05);
-            color: var(--primary);
+            background-color: var(--bg-secondary);
+            color: var(--accent-color);
         }
 
         td {
             transition: background-color 0.3s;
         }
 
-        .cell-active { background-color: var(--active) !important; color: var(--bg); font-weight: bold; }
-        .cell-compare { background-color: var(--compare) !important; color: var(--bg); }
-        .cell-final { background-color: var(--success) !important; color: var(--bg); font-weight: bold; }
+        .cell-active { background-color: #facc15 !important; color: #000; font-weight: bold; }
+        .cell-compare { background-color: #fb923c !important; color: #000; }
+        .cell-final { background-color: #22c55e !important; color: #000; font-weight: bold; }
 
         /* Items List */
         .items-container {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .item-card {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
             padding: 10px 15px;
             border-radius: 6px;
             text-align: center;
@@ -95,79 +63,56 @@
         }
 
         .item-card.active {
-            border-color: var(--active);
+            border-color: #facc15;
             box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
         }
 
-        .item-val { color: var(--success); font-weight: bold; }
-        .item-wt { color: var(--text-muted); font-size: 0.9em; }
-
-        /* Info Panel */
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
+        .item-val { color: #22c55e; font-weight: bold; }
+        .item-wt { color: var(--text-secondary); font-size: 0.9em; }
+        
         .formula { font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 10px; }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>0/1 Knapsack Visualization</h1>
-            <div class="subtitle">Max Capacity: 7</div>
-        </header>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>DP Knapsack</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
+                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                </div>
+            </div>
+        </aside>
 
-        <div class="items-container" id="items-list">
-            <!-- Items injected here -->
-        </div>
-
-        <div class="table-container">
-            <table id="dp-table">
-                <!-- Table injected here -->
-            </table>
-        </div>
-
-        <div class="info-panel">
-            <div class="step-text" id="step-text">Ready to start...</div>
-            <div class="formula" id="formula-text">dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])</div>
-        </div>
-
-        <div class="controls">
-            <button onclick="reset()">Reset</button>
-            <button onclick="stepBackward()">Previous</button>
-            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
-            <button onclick="stepForward()">Next</button>
-        </div>
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
+                </div>
+                <div class="items-container" id="items-list">
+                    <!-- Items injected here -->
+                </div>
+                <div class="table-container">
+                    <table id="dp-table">
+                        <!-- Table injected here -->
+                    </table>
+                </div>
+                <div style="padding: 10px; text-align: center; background: var(--bg-secondary);">
+                    <div class="formula" id="formula-text">dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])</div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>

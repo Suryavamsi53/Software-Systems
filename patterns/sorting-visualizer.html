@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithms Visualizer - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
+    <style>
+        .bar {
+            position: absolute;
+            bottom: 20px;
+            width: 30px;
+            background-color: var(--accent-color);
+            border-radius: 4px 4px 0 0;
+            transition: left 0.3s ease-in-out, background-color 0.3s ease, height 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            color: var(--bg-primary);
+            font-weight: bold;
+            font-size: 10px;
+            padding-top: 2px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .bar-value { margin-top: -25px; color: var(--text-primary); }
+        .bar.compare { background-color: #fb923c; }
+        .bar.swap { background-color: #facc15; }
+        .bar.sorted { background-color: #22c55e; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>Sorting Visualizer</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <label>Algorithm</label>
+                    <select id="algo-select" class="control-input" onchange="changeAlgo()">
+                        <option value="bubble">Bubble Sort</option>
+                        <option value="selection">Selection Sort</option>
+                        <option value="insertion">Insertion Sort</option>
+                        <option value="merge">Merge Sort</option>
+                        <option value="quick">Quick Sort</option>
+                        <option value="heap">Heap Sort</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+                    <button class="action-btn warning" onclick="reset()">Reset / Randomize</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready.</div>
+                </div>
+                
+                <div class="split-view">
+                    <!-- Canvas -->
+                    <div class="canvas-section" id="viz-container" style="display: flex; justify-content: center; align-items: flex-end;">
+                        <!-- Bars injected here -->
+                    </div>
+
+                    <!-- Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <span>Algorithm Code</span>
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+
+                        <!-- Bubble Sort Code -->
+                        <div id="code-bubble" class="algo-code active">
+                            <div id="code-bubble-go" class="lang-code active">
+<div class="code-line" id="bubble-go-1"><span class="kwd">func</span> <span class="func">bubbleSort</span>(arr []<span class="type">int</span>) {</div>
+<div class="code-line" id="bubble-go-2">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < <span class="func">len</span>(arr); i++ {</div>
+<div class="code-line" id="bubble-go-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j := <span class="num">0</span>; j < <span class="func">len</span>(arr)-i-<span class="num">1</span>; j++ {</div>
+<div class="code-line" id="bubble-go-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> arr[j] > arr[j+<span class="num">1</span>] {</div>
+<div class="code-line" id="bubble-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j], arr[j+<span class="num">1</span>] = arr[j+<span class="num">1</span>], arr[j]</div>
+<div class="code-line" id="bubble-go-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-go-7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-go-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-go-9">}</div>
+                            </div>
+                            <div id="code-bubble-java" class="lang-code">
+<div class="code-line" id="bubble-java-1"><span class="kwd">void</span> <span class="func">bubbleSort</span>(<span class="type">int</span>[] arr) {</div>
+<div class="code-line" id="bubble-java-2">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < arr.length; i++) {</div>
+<div class="code-line" id="bubble-java-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j < arr.length - i - <span class="num">1</span>; j++) {</div>
+<div class="code-line" id="bubble-java-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (arr[j] > arr[j+<span class="num">1</span>]) {</div>
+<div class="code-line" id="bubble-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">swap</span>(arr, j, j+<span class="num">1</span>);</div>
+<div class="code-line" id="bubble-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-java-7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bubble-java-9">}</div>
+                            </div>
+                            <div id="code-bubble-python" class="lang-code">
+<div class="code-line" id="bubble-python-1"><span class="kwd">def</span> <span class="func">bubble_sort</span>(arr):</div>
+<div class="code-line" id="bubble-python-2">&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(<span class="func">len</span>(arr)):</div>
+<div class="code-line" id="bubble-python-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j <span class="kwd">in</span> <span class="func">range</span>(<span class="func">len</span>(arr) - i - <span class="num">1</span>):</div>
+<div class="code-line" id="bubble-python-4">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> arr[j] > arr[j+<span class="num">1</span>]:</div>
+<div class="code-line" id="bubble-python-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j], arr[j+<span class="num">1</span>] = arr[j+<span class="num">1</span>], arr[j]</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Selection Sort Code -->
+                        <div id="code-selection" class="algo-code">
+                            <div id="code-selection-go" class="lang-code active">
+<div class="code-line" id="selection-go-1"><span class="kwd">func</span> <span class="func">selectionSort</span>(arr []<span class="type">int</span>) {</div>
+<div class="code-line" id="selection-go-2">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < <span class="func">len</span>(arr); i++ {</div>
+<div class="code-line" id="selection-go-3">&nbsp;&nbsp;&nbsp;&nbsp;minIdx := i</div>
+<div class="code-line" id="selection-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j := i + <span class="num">1</span>; j < <span class="func">len</span>(arr); j++ {</div>
+<div class="code-line" id="selection-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> arr[j] < arr[minIdx] { minIdx = j }</div>
+<div class="code-line" id="selection-go-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="selection-go-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[i], arr[minIdx] = arr[minIdx], arr[i]</div>
+<div class="code-line" id="selection-go-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="selection-go-9">}</div>
+                            </div>
+                            <div id="code-selection-java" class="lang-code">
+<div class="code-line" id="selection-java-1"><span class="kwd">void</span> <span class="func">selectionSort</span>(<span class="type">int</span>[] arr) {</div>
+<div class="code-line" id="selection-java-2">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < arr.length; i++) {</div>
+<div class="code-line" id="selection-java-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> minIdx = i;</div>
+<div class="code-line" id="selection-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> j = i + <span class="num">1</span>; j < arr.length; j++) {</div>
+<div class="code-line" id="selection-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (arr[j] < arr[minIdx]) minIdx = j;</div>
+<div class="code-line" id="selection-java-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="selection-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">swap</span>(arr, i, minIdx);</div>
+<div class="code-line" id="selection-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="selection-java-9">}</div>
+                            </div>
+                            <div id="code-selection-python" class="lang-code">
+<div class="code-line" id="selection-python-1"><span class="kwd">def</span> <span class="func">selection_sort</span>(arr):</div>
+<div class="code-line" id="selection-python-2">&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(<span class="func">len</span>(arr)):</div>
+<div class="code-line" id="selection-python-3">&nbsp;&nbsp;&nbsp;&nbsp;min_idx = i</div>
+<div class="code-line" id="selection-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j <span class="kwd">in</span> <span class="func">range</span>(i + <span class="num">1</span>, <span class="func">len</span>(arr)):</div>
+<div class="code-line" id="selection-python-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> arr[j] < arr[min_idx]: min_idx = j</div>
+<div class="code-line" id="selection-python-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[i], arr[min_idx] = arr[min_idx], arr[i]</div>
+                            </div>
+                        </div>
+
+                        <!-- Insertion Sort Code -->
+                        <div id="code-insertion" class="algo-code">
+                            <div id="code-insertion-go" class="lang-code active">
+<div class="code-line" id="insertion-go-1"><span class="kwd">func</span> <span class="func">insertionSort</span>(arr []<span class="type">int</span>) {</div>
+<div class="code-line" id="insertion-go-2">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">1</span>; i < <span class="func">len</span>(arr); i++ {</div>
+<div class="code-line" id="insertion-go-3">&nbsp;&nbsp;&nbsp;&nbsp;key := arr[i]; j := i - <span class="num">1</span></div>
+<div class="code-line" id="insertion-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">while</span> j >= <span class="num">0</span> && arr[j] > key {</div>
+<div class="code-line" id="insertion-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = arr[j]; j--</div>
+<div class="code-line" id="insertion-go-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="insertion-go-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = key</div>
+<div class="code-line" id="insertion-go-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="insertion-go-9">}</div>
+                            </div>
+                            <div id="code-insertion-java" class="lang-code">
+<div class="code-line" id="insertion-java-1"><span class="kwd">void</span> <span class="func">insertionSort</span>(<span class="type">int</span>[] arr) {</div>
+<div class="code-line" id="insertion-java-2">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">1</span>; i < arr.length; i++) {</div>
+<div class="code-line" id="insertion-java-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> key = arr[i]; <span class="type">int</span> j = i - <span class="num">1</span>;</div>
+<div class="code-line" id="insertion-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">while</span> (j >= <span class="num">0</span> && arr[j] > key) {</div>
+<div class="code-line" id="insertion-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = arr[j]; j--;</div>
+<div class="code-line" id="insertion-java-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="insertion-java-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = key;</div>
+<div class="code-line" id="insertion-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="insertion-java-9">}</div>
+                            </div>
+                            <div id="code-insertion-python" class="lang-code">
+<div class="code-line" id="insertion-python-1"><span class="kwd">def</span> <span class="func">insertion_sort</span>(arr):</div>
+<div class="code-line" id="insertion-python-2">&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(<span class="num">1</span>, <span class="func">len</span>(arr)):</div>
+<div class="code-line" id="insertion-python-3">&nbsp;&nbsp;&nbsp;&nbsp;key = arr[i]; j = i - <span class="num">1</span></div>
+<div class="code-line" id="insertion-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">while</span> j >= <span class="num">0</span> <span class="kwd">and</span> arr[j] > key:</div>
+<div class="code-line" id="insertion-python-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = arr[j]; j -= <span class="num">1</span></div>
+<div class="code-line" id="insertion-python-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[j+<span class="num">1</span>] = key</div>
+                            </div>
+                        </div>
+
+                        <!-- Merge Sort Code -->
+                        <div id="code-merge" class="algo-code">
+                            <div id="code-merge-go" class="lang-code active">
+<div class="code-line" id="merge-go-1"><span class="kwd">func</span> <span class="func">mergeSort</span>(arr []<span class="type">int</span>) []<span class="type">int</span> {</div>
+<div class="code-line" id="merge-go-2">&nbsp;&nbsp;<span class="kwd">if</span> <span class="func">len</span>(arr) <= <span class="num">1</span> { <span class="kwd">return</span> arr }</div>
+<div class="code-line" id="merge-go-3">&nbsp;&nbsp;mid := <span class="func">len</span>(arr) / <span class="num">2</span></div>
+<div class="code-line" id="merge-go-4">&nbsp;&nbsp;left := <span class="func">mergeSort</span>(arr[:mid])</div>
+<div class="code-line" id="merge-go-5">&nbsp;&nbsp;right := <span class="func">mergeSort</span>(arr[mid:])</div>
+<div class="code-line" id="merge-go-6">&nbsp;&nbsp;<span class="kwd">return</span> <span class="func">merge</span>(left, right)</div>
+<div class="code-line" id="merge-go-7">}</div>
+<div class="code-line" id="merge-go-8"><span class="kwd">func</span> <span class="func">merge</span>(left, right []<span class="type">int</span>) []<span class="type">int</span> {</div>
+<div class="code-line" id="merge-go-9">&nbsp;&nbsp;<span class="com">// Merge sorted arrays</span></div>
+<div class="code-line" id="merge-go-10">}</div>
+                            </div>
+                            <div id="code-merge-java" class="lang-code">
+<div class="code-line" id="merge-java-1"><span class="kwd">void</span> <span class="func">mergeSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> l, <span class="type">int</span> r) {</div>
+<div class="code-line" id="merge-java-2">&nbsp;&nbsp;<span class="kwd">if</span> (l < r) {</div>
+<div class="code-line" id="merge-java-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> m = (l + r) / <span class="num">2</span>;</div>
+<div class="code-line" id="merge-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">mergeSort</span>(arr, l, m);</div>
+<div class="code-line" id="merge-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">mergeSort</span>(arr, m + <span class="num">1</span>, r);</div>
+<div class="code-line" id="merge-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">merge</span>(arr, l, m, r);</div>
+<div class="code-line" id="merge-java-7">&nbsp;&nbsp;}</div>
+<div class="code-line" id="merge-java-8">}</div>
+<div class="code-line" id="merge-java-9"><span class="kwd">void</span> <span class="func">merge</span>(<span class="type">int</span>[] arr, <span class="type">int</span> l, <span class="type">int</span> m, <span class="type">int</span> r) { <span class="com">/*...*/</span> }</div>
+                            </div>
+                            <div id="code-merge-python" class="lang-code">
+<div class="code-line" id="merge-python-1"><span class="kwd">def</span> <span class="func">merge_sort</span>(arr):</div>
+<div class="code-line" id="merge-python-2">&nbsp;&nbsp;<span class="kwd">if</span> <span class="func">len</span>(arr) > <span class="num">1</span>:</div>
+<div class="code-line" id="merge-python-3">&nbsp;&nbsp;&nbsp;&nbsp;mid = <span class="func">len</span>(arr) // <span class="num">2</span></div>
+<div class="code-line" id="merge-python-4">&nbsp;&nbsp;&nbsp;&nbsp;L = arr[:mid]; R = arr[mid:]</div>
+<div class="code-line" id="merge-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">merge_sort</span>(L)</div>
+<div class="code-line" id="merge-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">merge_sort</span>(R)</div>
+<div class="code-line" id="merge-python-9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="com"># Merge L and R</span></div>
+<div class="code-line" id="merge-python-10"></div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Sort Code -->
+                        <div id="code-quick" class="algo-code">
+                            <div id="code-quick-go" class="lang-code active">
+<div class="code-line" id="quick-go-1"><span class="kwd">func</span> <span class="func">quickSort</span>(arr []<span class="type">int</span>, low, high <span class="type">int</span>) {</div>
+<div class="code-line" id="quick-go-2">&nbsp;&nbsp;<span class="kwd">if</span> low < high {</div>
+<div class="code-line" id="quick-go-3">&nbsp;&nbsp;&nbsp;&nbsp;p := <span class="func">partition</span>(arr, low, high)</div>
+<div class="code-line" id="quick-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quickSort</span>(arr, low, p-<span class="num">1</span>)</div>
+<div class="code-line" id="quick-go-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quickSort</span>(arr, p+<span class="num">1</span>, high)</div>
+<div class="code-line" id="quick-go-6">&nbsp;&nbsp;}</div>
+<div class="code-line" id="quick-go-7">}</div>
+<div class="code-line" id="quick-go-8"><span class="kwd">func</span> <span class="func">partition</span>(arr []<span class="type">int</span>, low, high <span class="type">int</span>) <span class="type">int</span> {</div>
+<div class="code-line" id="quick-go-9">&nbsp;&nbsp;pivot := arr[high]; i := low</div>
+<div class="code-line" id="quick-go-10">&nbsp;&nbsp;<span class="kwd">for</span> j := low; j < high; j++ {</div>
+<div class="code-line" id="quick-go-11">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> arr[j] < pivot {</div>
+<div class="code-line" id="quick-go-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;arr[i], arr[j] = arr[j], arr[i]; i++</div>
+<div class="code-line" id="quick-go-13">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="quick-go-14">&nbsp;&nbsp;}</div>
+<div class="code-line" id="quick-go-15">&nbsp;&nbsp;arr[i], arr[high] = arr[high], arr[i]</div>
+<div class="code-line" id="quick-go-16">&nbsp;&nbsp;<span class="kwd">return</span> i</div>
+<div class="code-line" id="quick-go-17">}</div>
+                            </div>
+                            <div id="code-quick-java" class="lang-code">
+<div class="code-line" id="quick-java-1"><span class="kwd">void</span> <span class="func">quickSort</span>(<span class="type">int</span>[] arr, <span class="type">int</span> low, <span class="type">int</span> high) {</div>
+<div class="code-line" id="quick-java-2">&nbsp;&nbsp;<span class="kwd">if</span> (low < high) {</div>
+<div class="code-line" id="quick-java-3">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> pi = <span class="func">partition</span>(arr, low, high);</div>
+<div class="code-line" id="quick-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quickSort</span>(arr, low, pi - <span class="num">1</span>);</div>
+<div class="code-line" id="quick-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quickSort</span>(arr, pi + <span class="num">1</span>, high);</div>
+<div class="code-line" id="quick-java-6">&nbsp;&nbsp;}</div>
+<div class="code-line" id="quick-java-7">}</div>
+<div class="code-line" id="quick-java-8"><span class="type">int</span> <span class="func">partition</span>(<span class="type">int</span>[] arr, <span class="type">int</span> low, <span class="type">int</span> high) { <span class="com">/*...*/</span> }</div>
+                            </div>
+                            <div id="code-quick-python" class="lang-code">
+<div class="code-line" id="quick-python-1"><span class="kwd">def</span> <span class="func">quick_sort</span>(arr, low, high):</div>
+<div class="code-line" id="quick-python-2">&nbsp;&nbsp;<span class="kwd">if</span> low < high:</div>
+<div class="code-line" id="quick-python-3">&nbsp;&nbsp;&nbsp;&nbsp;pi = <span class="func">partition</span>(arr, low, high)</div>
+<div class="code-line" id="quick-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quick_sort</span>(arr, low, pi - <span class="num">1</span>)</div>
+<div class="code-line" id="quick-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">quick_sort</span>(arr, pi + <span class="num">1</span>, high)</div>
+<div class="code-line" id="quick-python-8"><span class="kwd">def</span> <span class="func">partition</span>(arr, low, high):</div>
+<div class="code-line" id="quick-python-9">&nbsp;&nbsp;<span class="com"># Partition logic</span></div>
+<div class="code-line" id="quick-python-10"></div>
+                            </div>
+                        </div>
+
+                        <!-- Heap Sort Code -->
+                        <div id="code-heap" class="algo-code">
+                            <div id="code-heap-go" class="lang-code active">
+<div class="code-line" id="heap-go-1"><span class="kwd">func</span> <span class="func">heapSort</span>(arr []<span class="type">int</span>) {</div>
+<div class="code-line" id="heap-go-2">&nbsp;&nbsp;n := <span class="func">len</span>(arr)</div>
+<div class="code-line" id="heap-go-3">&nbsp;&nbsp;<span class="kwd">for</span> i := n/<span class="num">2</span> - <span class="num">1</span>; i >= <span class="num">0</span>; i-- {</div>
+<div class="code-line" id="heap-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">heapify</span>(arr, n, i)</div>
+<div class="code-line" id="heap-go-5">&nbsp;&nbsp;}</div>
+<div class="code-line" id="heap-go-6">&nbsp;&nbsp;<span class="kwd">for</span> i := n - <span class="num">1</span>; i > <span class="num">0</span>; i-- {</div>
+<div class="code-line" id="heap-go-7">&nbsp;&nbsp;&nbsp;&nbsp;arr[<span class="num">0</span>], arr[i] = arr[i], arr[<span class="num">0</span>]</div>
+<div class="code-line" id="heap-go-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">heapify</span>(arr, i, <span class="num">0</span>)</div>
+<div class="code-line" id="heap-go-9">&nbsp;&nbsp;}</div>
+<div class="code-line" id="heap-go-10">}</div>
+<div class="code-line" id="heap-go-11"><span class="kwd">func</span> <span class="func">heapify</span>(arr []<span class="type">int</span>, n, i <span class="type">int</span>) {</div>
+<div class="code-line" id="heap-go-12">&nbsp;&nbsp;largest := i; l := <span class="num">2</span>*i + <span class="num">1</span>; r := <span class="num">2</span>*i + <span class="num">2</span></div>
+<div class="code-line" id="heap-go-13">&nbsp;&nbsp;<span class="kwd">if</span> l < n && arr[l] > arr[largest] { largest = l }</div>
+<div class="code-line" id="heap-go-14">&nbsp;&nbsp;<span class="kwd">if</span> r < n && arr[r] > arr[largest] { largest = r }</div>
+<div class="code-line" id="heap-go-15">&nbsp;&nbsp;<span class="kwd">if</span> largest != i {</div>
+<div class="code-line" id="heap-go-16">&nbsp;&nbsp;&nbsp;&nbsp;arr[i], arr[largest] = arr[largest], arr[i]</div>
+<div class="code-line" id="heap-go-17">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">heapify</span>(arr, n, largest)</div>
+<div class="code-line" id="heap-go-18">&nbsp;&nbsp;}</div>
+<div class="code-line" id="heap-go-19">}</div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Configuration
+        const BAR_WIDTH = 40;
+        const BAR_GAP = 5;
+        const ANIMATION_SPEED = 400;
+        let array = [15, 8, 20, 5, 12, 3, 10, 18];
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        let currentLang = 'go';
+
+        function init() {
+            reset();
+        }
+
+        function generateSteps(type) {
+            steps = [];
+            let arr = [...array];
+            
+            if (type === 'bubble') {
+                for (let i = 0; i < arr.length; i++) {
+                    for (let j = 0; j < arr.length - i - 1; j++) {
+                        steps.push({ arr: [...arr], compare: [j, j+1], msg: `Compare ${arr[j]} > ${arr[j+1]}?`, lines: {go: 4, java: 4, python: 4} });
+                        if (arr[j] > arr[j+1]) {
+                            [arr[j], arr[j+1]] = [arr[j+1], arr[j]];
+                            steps.push({ arr: [...arr], swap: [j, j+1], msg: 'Swap!', lines: {go: 5, java: 5, python: 5} });
+                        }
+                    }
+                    steps.push({ arr: [...arr], sorted: Array.from({length: i+1}, (_, k) => arr.length-1-k), msg: 'Element sorted', lines: {go: 2, java: 2, python: 2} });
+                }
+            } else if (type === 'selection') {
+                for (let i = 0; i < arr.length; i++) {
+                    let minIdx = i;
+                    steps.push({ arr: [...arr], active: [i], msg: `Current min index: ${i}`, lines: {go: 3, java: 3, python: 3} });
+                    for (let j = i + 1; j < arr.length; j++) {
+                        steps.push({ arr: [...arr], active: [i], compare: [j, minIdx], msg: `Check ${arr[j]} < ${arr[minIdx]}?`, lines: {go: 5, java: 5, python: 5} });
+                        if (arr[j] < arr[minIdx]) {
+                            minIdx = j;
+                            steps.push({ arr: [...arr], active: [i], swap: [minIdx], msg: `New min found: ${arr[minIdx]}`, lines: {go: 5} });
+                        }
+                    }
+                    if (minIdx !== i) {
+                        [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                        steps.push({ arr: [...arr], swap: [i, minIdx], msg: `Swap min ${arr[i]} to position ${i}`, lines: {go: 7, java: 7, python: 7} });
+                    }
+                }
+            } else if (type === 'insertion') {
+                for (let i = 1; i < arr.length; i++) {
+                    let key = arr[i];
+                    let j = i - 1;
+                    steps.push({ arr: [...arr], active: [i], msg: `Insert ${key}`, lines: {go: 3, java: 3, python: 3} });
+                    while (j >= 0 && arr[j] > key) {
+                        steps.push({ arr: [...arr], compare: [j], msg: `${arr[j]} > ${key}, shift right`, lines: {go: 4, java: 4, python: 4} });
+                        arr[j + 1] = arr[j];
+                        j = j - 1;
+                        steps.push({ arr: [...arr], swap: [j+1], msg: 'Shifted', lines: {go: 5, java: 5, python: 5} });
+                    }
+                    arr[j + 1] = key;
+                    steps.push({ arr: [...arr], sorted: [j+1], msg: `Placed ${key}`, lines: {go: 7, java: 7, python: 7} });
+                }
+            } else if (type === 'merge') {
+                function mergeSortHelper(arr, start, end) {
+                    if (start >= end) return;
+                    const mid = Math.floor((start + end) / 2);
+                    steps.push({ arr: [...array], active: [mid], msg: `Split at index ${mid}`, lines: {go: 3} });
+                    
+                    mergeSortHelper(arr, start, mid);
+                    mergeSortHelper(arr, mid + 1, end);
+                    merge(arr, start, mid, end);
+                }
+
+                function merge(arr, start, mid, end) {
+                    let left = arr.slice(start, mid + 1);
+                    let right = arr.slice(mid + 1, end + 1);
+                    let i = 0, j = 0, k = start;
+                    
+                    steps.push({ arr: [...arr], active: Array.from({length: end-start+1}, (_, idx) => start+idx), msg: `Merging range [${start}, ${end}]`, lines: {go: 6, java: 6, python: 5} });
+
+                    while (i < left.length && j < right.length) {
+                        steps.push({ arr: [...arr], compare: [start+i, mid+1+j], msg: `Compare ${left[i]} vs ${right[j]}`, lines: {go: 9, java: 9, python: 9} });
+                        if (left[i] <= right[j]) {
+                            array[k] = left[i];
+                            i++;
+                        } else {
+                            array[k] = right[j];
+                            j++;
+                        }
+                        steps.push({ arr: [...arr], sorted: [k], msg: `Placed ${array[k]}`, lines: {go: 9, java: 9, python: 9} });
+                        k++;
+                    }
+                    while (i < left.length) {
+                        array[k] = left[i];
+                        steps.push({ arr: [...arr], sorted: [k], msg: `Placed remaining ${array[k]}`, lines: {go: 9, java: 9, python: 9} });
+                        i++; k++;
+                    }
+                    while (j < right.length) {
+                        array[k] = right[j];
+                        steps.push({ arr: [...arr], sorted: [k], msg: `Placed remaining ${array[k]}`, lines: {go: 9, java: 9, python: 9} });
+                        j++; k++;
+                    }
+                }
+                mergeSortHelper(array, 0, array.length - 1);
+
+            } else if (type === 'quick') {
+                function quickSortHelper(arr, low, high) {
+                    if (low < high) {
+                        let pi = partition(arr, low, high);
+                        quickSortHelper(arr, low, pi - 1);
+                        quickSortHelper(arr, pi + 1, high);
+                    }
+                }
+
+                function partition(arr, low, high) {
+                    let pivot = arr[high];
+                    let i = (low - 1);
+                    steps.push({ arr: [...arr], active: [high], msg: `Pivot chosen: ${pivot}`, lines: {go: 9, java: 8, python: 8} });
+
+                    for (let j = low; j <= high - 1; j++) {
+                        steps.push({ arr: [...arr], compare: [j, high], msg: `Compare ${arr[j]} < ${pivot}?`, lines: {go: 11, java: 8, python: 8} });
+                        if (arr[j] < pivot) {
+                            i++;
+                            [arr[i], arr[j]] = [arr[j], arr[i]];
+                            steps.push({ arr: [...arr], swap: [i, j], msg: `Swap ${arr[i]} and ${arr[j]}`, lines: {go: 12, java: 8, python: 8} });
+                        }
+                    }
+                    [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+                    steps.push({ arr: [...arr], swap: [i+1, high], sorted: [i+1], msg: `Pivot placed at ${i+1}`, lines: {go: 15, java: 8, python: 8} });
+                    return (i + 1);
+                }
+                quickSortHelper(array, 0, array.length - 1);
+            } else if (type === 'heap') {
+                function heapify(arr, n, i) {
+                    let largest = i;
+                    let l = 2 * i + 1;
+                    let r = 2 * i + 2;
+
+                    if (l < n) {
+                        steps.push({ arr: [...arr], compare: [l, largest], msg: `Compare left child ${arr[l]} > ${arr[largest]}?`, lines: {go: 13, java: 12, python: 12} });
+                        if (arr[l] > arr[largest]) largest = l;
+                    }
+
+                    if (r < n) {
+                        steps.push({ arr: [...arr], compare: [r, largest], msg: `Compare right child ${arr[r]} > ${arr[largest]}?`, lines: {go: 14, java: 13, python: 13} });
+                        if (arr[r] > arr[largest]) largest = r;
+                    }
+
+                    if (largest !== i) {
+                        [arr[i], arr[largest]] = [arr[largest], arr[i]];
+                        steps.push({ arr: [...arr], swap: [i, largest], msg: `Swap root ${arr[largest]} with largest child ${arr[i]}`, lines: {go: 16, java: 15, python: 15} });
+                        heapify(arr, n, largest);
+                    }
+                }
+
+                let n = arr.length;
+                for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+                    steps.push({ arr: [...arr], active: [i], msg: `Building heap from index ${i}`, lines: {go: 4, java: 4, python: 4} });
+                    heapify(arr, n, i);
+                }
+
+                for (let i = n - 1; i > 0; i--) {
+                    [arr[0], arr[i]] = [arr[i], arr[0]];
+                    steps.push({ arr: [...arr], swap: [0, i], sorted: [i], msg: `Move max ${arr[i]} to end`, lines: {go: 7, java: 7, python: 7} });
+                    heapify(arr, i, 0);
+                }
+            } else if (type === 'counting') {
+                let max = Math.max(...arr);
+                let count = new Array(max + 1).fill(0);
+                
+                steps.push({ arr: [...arr], msg: `Find max value: ${max}`, lines: {go: 2} });
+                
+                for (let i = 0; i < arr.length; i++) {
+                    count[arr[i]]++;
+                    steps.push({ arr: [...arr], active: [i], msg: `Count ${arr[i]}: ${count[arr[i]]}`, lines: {go: 4} });
+                }
+                
+                let idx = 0;
+                for (let i = 0; i <= max; i++) {
+                    while (count[i] > 0) {
+                        arr[idx] = i;
+                        steps.push({ arr: [...arr], sorted: [idx], msg: `Place ${i} at index ${idx}`, lines: {go: 8} });
+                        idx++;
+                        count[i]--;
+                    }
+                }
+            } else if (type === 'radix') {
+                let max = Math.max(...arr);
+                for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
+                    steps.push({ arr: [...arr], msg: `Sorting by digit at ${exp}`, lines: {go: 3, java: 3, python: 4} });
+                    
+                    let output = new Array(arr.length).fill(0);
+                    let count = new Array(10).fill(0);
+                    
+                    for (let i = 0; i < arr.length; i++) {
+                        count[Math.floor(arr[i] / exp) % 10]++;
+                    }
+                    for (let i = 1; i < 10; i++) {
+                        count[i] += count[i - 1];
+                    }
+                    for (let i = arr.length - 1; i >= 0; i--) {
+                        let digit = Math.floor(arr[i] / exp) % 10;
+                        output[count[digit] - 1] = arr[i];
+                        count[digit]--;
+                    }
+                    for (let i = 0; i < arr.length; i++) {
+                        arr[i] = output[i];
+                        steps.push({ arr: [...arr], active: [i], msg: `Update index ${i} with ${arr[i]}`, lines: {go: 16, java: 7, python: 5} });
+                    }
+                }
+            } else if (type === 'bucket') {
+                // Normalize array to 0-1 range for visualization logic, but keep original values for display
+                // For simplicity, let's assume input is scaled down or we use buckets based on max value
+                let max = Math.max(...arr);
+                let n = arr.length;
+                let buckets = Array.from({length: n}, () => []);
+                
+                steps.push({ arr: [...arr], msg: `Create ${n} buckets`, lines: {go: 2, java: 3, python: 2} });
+                
+                for (let i = 0; i < n; i++) {
+                    let idx = Math.floor((arr[i] / (max + 1)) * n);
+                    buckets[idx].push(arr[i]);
+                    steps.push({ arr: [...arr], active: [i], msg: `Place ${arr[i]} into bucket ${idx}`, lines: {go: 5, java: 7, python: 5} });
+                }
+                
+                let idx = 0;
+                for (let i = 0; i < n; i++) {
+                    if (buckets[i].length > 0) {
+                        buckets[i].sort((a, b) => a - b);
+                        steps.push({ arr: [...arr], msg: `Sort bucket ${i}: [${buckets[i].join(', ')}]`, lines: {go: 8, java: 9, python: 7} });
+                        for (let val of buckets[i]) {
+                            arr[idx] = val;
+                            steps.push({ arr: [...arr], sorted: [idx], msg: `Place ${val} back into array`, lines: {go: 12, java: 12, python: 11} });
+                            idx++;
+                        }
+                    }
+                }
+            } else if (type === 'shell') {
+                let n = arr.length;
+                for (let gap = Math.floor(n/2); gap > 0; gap = Math.floor(gap/2)) {
+                    steps.push({ arr: [...arr], msg: `Gap size: ${gap}`, lines: {go: 3, java: 3, python: 3} });
+                    
+                    for (let i = gap; i < n; i++) {
+                        let temp = arr[i];
+                        let j;
+                        steps.push({ arr: [...arr], active: [i], msg: `Insert ${temp} into gap-sorted subarray`, lines: {go: 5, java: 5, python: 5} });
+                        for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                            steps.push({ arr: [...arr], compare: [j, j-gap], msg: `${arr[j-gap]} > ${temp}, shift right`, lines: {go: 6, java: 6, python: 6} });
+                            arr[j] = arr[j - gap];
+                            steps.push({ arr: [...arr], swap: [j], msg: `Shifted ${arr[j]}`, lines: {go: 7, java: 7, python: 7} });
+                        }
+                        arr[j] = temp;
+                        steps.push({ arr: [...arr], sorted: [j], msg: `Placed ${temp} at index ${j}`, lines: {go: 9, java: 9, python: 9} });
+                    }
+                }
+            }
+            
+            steps.push({ arr: [...arr], sorted: arr.map((_, i) => i), msg: 'Sorted!', lines: {go: 9, java: 9, python: 9} });
+        }
+
+        function render(stepIndex) {
+            const state = steps[stepIndex];
+            const container = document.getElementById('viz-container');
+            container.innerHTML = '';
+            
+            // Center bars
+            const totalWidth = (state.arr.length * BAR_WIDTH) + ((state.arr.length - 1) * BAR_GAP);
+            const startX = (container.clientWidth - totalWidth) / 2;
+
+            state.arr.forEach((val, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${val * 10}px`;
+                bar.style.left = `${startX + idx * (BAR_WIDTH + BAR_GAP)}px`;
+                
+                if (state.swap && state.swap.includes(idx)) bar.classList.add('swap');
+                else if (state.compare && state.compare.includes(idx)) bar.classList.add('compare');
+                else if (state.sorted && state.sorted.includes(idx)) bar.classList.add('sorted');
+                else if (state.active && state.active.includes(idx)) bar.style.backgroundColor = '#3b82f6';
+
+                const label = document.createElement('div');
+                label.className = 'bar-value';
+                label.textContent = val;
+                bar.appendChild(label);
+                container.appendChild(bar);
+            });
+
+            document.getElementById('status-text').textContent = state.msg;
+            
+            // Highlight Code
+            if (state.lines) {
+                document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+                const algo = document.getElementById('algo-select').value;
+                const lineNum = state.lines[currentLang];
+                if (lineNum) {
+                    const el = document.getElementById(`${algo}-${currentLang}-${lineNum}`);
+                    if (el) el.classList.add('active');
+                }
+            }
+        }
+
+        function changeAlgo() {
+            reset();
+            const algo = document.getElementById('algo-select').value;
+            document.querySelectorAll('.algo-code').forEach(el => el.classList.remove('active'));
+            document.getElementById(`code-${algo}`).classList.add('active');
+        }
+
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                document.getElementById('playBtn').textContent = "▶ Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                document.getElementById('playBtn').textContent = "⏸ Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        render(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            array = Array.from({length: 15}, () => Math.floor(Math.random() * 25) + 2);
+            currentStep = 0;
+            generateSteps(document.getElementById('algo-select').value);
+            render(0);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.lang-code').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll(`[id$="-${lang}"]`).forEach(el => el.classList.add('active'));
+        }
+
+        window.onload = init;
+        window.onresize = () => render(currentStep);
+    </script>
+</body>
+</html>

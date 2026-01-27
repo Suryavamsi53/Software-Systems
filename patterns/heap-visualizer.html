@@ -4,187 +4,96 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Min-Heap Visualization - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;
-            --compare: #fb923c;
-            --success: #22c55e;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 400px;
-            position: relative;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        circle {
-            fill: var(--panel);
-            stroke: var(--primary);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
-        line {
-            stroke: var(--text-muted);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
-        text {
-            fill: var(--text);
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 14px;
-            pointer-events: none;
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
         /* Array View */
         .array-view {
             display: flex;
             justify-content: center;
             gap: 5px;
-            margin-bottom: 20px;
+            padding: 20px;
             flex-wrap: wrap;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
         }
 
         .array-cell {
             width: 40px;
             height: 40px;
-            border: 1px solid var(--border);
-            background-color: var(--panel);
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-tertiary);
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
             position: relative;
             transition: all 0.3s;
+            color: var(--text-primary);
         }
 
         .array-index {
             position: absolute;
             bottom: -20px;
             font-size: 10px;
-            color: var(--text-muted);
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        input {
-            background-color: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px;
-            border-radius: 6px;
-            width: 80px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            min-height: 60px;
+            color: var(--text-secondary);
         }
 
         /* Animation Classes */
-        .highlight { stroke: var(--active) !important; fill: rgba(250, 204, 21, 0.1); }
-        .compare { stroke: var(--compare) !important; }
-        .cell-active { background-color: var(--active); color: var(--bg); }
-        .cell-compare { background-color: var(--compare); color: var(--bg); }
-
+        .highlight { stroke: #facc15 !important; fill: rgba(250, 204, 21, 0.2) !important; }
+        .compare { stroke: #fb923c !important; }
+        .cell-active { background-color: #facc15; color: #000; }
+        .cell-compare { background-color: #fb923c; color: #000; }
+        
+        .control-input {
+            width: 100%;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Min-Heap Visualization</h1>
-            <div class="subtitle">Tree and Array Representation</div>
-        </header>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>Heap Visualizer</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <label>Value</label>
+                    <input type="number" id="val-input" class="control-input" placeholder="Enter number..." max="999">
+                    <button class="action-btn" onclick="insertVal()">Insert</button>
+                    <button class="action-btn" onclick="extractMin()">Extract Min</button>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn warning" onclick="resetHeap()">Reset Heap</button>
+                </div>
+            </div>
+        </aside>
 
-        <div class="viz-container">
-            <svg id="heap-svg"></svg>
-        </div>
-
-        <div class="array-view" id="array-view">
-            <!-- Array cells injected here -->
-        </div>
-
-        <div class="controls">
-            <input type="number" id="val-input" placeholder="Value" max="999">
-            <button class="primary" onclick="insertVal()">Insert</button>
-            <button onclick="extractMin()">Extract Min</button>
-            <button onclick="resetHeap()">Reset</button>
-        </div>
-
-        <div class="info-panel" id="status-text">
-            Ready. Min-Heap property: Parent <= Children.
-        </div>
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Min-Heap property: Parent <= Children.</div>
+                </div>
+                <div class="canvas-wrapper">
+                    <svg id="heap-svg" width="100%" height="100%"></svg>
+                </div>
+                <div class="array-view" id="array-view">
+                    <!-- Array cells injected here -->
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>

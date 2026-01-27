@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph Algorithms Visualizer - Amazon SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <link rel="stylesheet" href="graph-visualizer.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Graph Visualizer</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back</div>
+        <a href="../patterns/graphs.html" class="nav-item">← Back to Graphs</a>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Graph Controls</div>
+        <div class="control-group">
+          <label>Mode</label>
+          <div class="btn-group">
+            <button id="mode-move" class="tool-btn active" title="Move Nodes (Drag)">✋</button>
+            <button id="mode-node" class="tool-btn" title="Add Node (Click empty space)">➕⚪</button>
+            <button id="mode-edge" class="tool-btn" title="Add Edge (Drag node to node)">🔗</button>
+            <button id="mode-delete" class="tool-btn" title="Delete (Click node/edge)">❌</button>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <label>Type</label>
+          <div class="toggle-row">
+            <span>Directed</span>
+            <label class="switch">
+              <input type="checkbox" id="is-directed">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span>Weighted</span>
+            <label class="switch">
+              <input type="checkbox" id="is-weighted">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <div class="toggle-row">
+            <span>Grid Mode</span>
+            <label class="switch">
+              <input type="checkbox" id="is-grid-mode">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <button id="clear-graph" class="action-btn danger">Clear Graph</button>
+          <button id="generate-maze" class="action-btn" style="display: none;">Generate Maze</button>
+          <button id="reset-algo" class="action-btn warning">Reset Algo</button>
+        </div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Examples</div>
+        <div class="example-grid">
+          <button class="ex-btn" data-type="random">Random</button>
+          <button class="ex-btn" data-type="tree">Tree</button>
+          <button class="ex-btn" data-type="dag">DAG</button>
+          <button class="ex-btn" data-type="cycle">Cycle</button>
+          <button class="ex-btn" data-type="complete">Complete</button>
+          <button class="ex-btn" data-type="bipartite">Bipartite</button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content no-padding">
+      <div class="viz-container">
+        <!-- Top Bar: Algorithm Selection -->
+        <div class="algo-toolbar">
+          <select id="algo-select">
+            <option value="bfs">Breadth-First Search (BFS)</option>
+            <option value="dfs">Depth-First Search (DFS)</option>
+            <option value="dijkstra">Dijkstra's Shortest Path</option>
+            <option value="topological">Topological Sort</option>
+            <option value="components">Connected Components</option>
+            <option value="cycle">Cycle Detection</option>
+            <option value="bipartite">Bipartite Check</option>
+            <option value="kruskal">Kruskal's MST</option>
+            <option value="prims">Prim's MST</option>
+            <option value="tarjan">SCC (Tarjan's)</option>
+            <option value="bellman">Bellman-Ford</option>
+            <option value="floyd">Floyd-Warshall</option>
+            <option value="astar">A* Pathfinding (Grid)</option>
+            <option value="bidirectional">Bidirectional Search</option>
+          </select>
+          
+          <div class="playback-controls">
+            <button id="btn-start">▶ Run</button>
+            <button id="btn-step">👟 Step</button>
+            <button id="btn-pause">⏸ Pause</button>
+            <input type="range" id="speed-range" min="1" max="10" value="5">
+          </div>
+          
+          <div id="status-msg">Ready</div>
+        </div>
+
+        <div class="split-view">
+          <!-- Main Canvas Area -->
+          <div class="canvas-section">
+            <svg id="graph-canvas" width="100%" height="100%"></svg>
+            
+            <!-- Floating Data Structure View -->
+            <div class="ds-overlay">
+              <div class="ds-header">Data Structures</div>
+              <div id="ds-content">
+                <div class="ds-item">
+                  <label>Queue / Stack</label>
+                  <div id="ds-queue" class="ds-viz-bar"></div>
+                </div>
+                <div class="ds-item">
+                  <label>Distances</label>
+                  <div id="ds-distances" class="ds-viz-grid"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Code Panel -->
+          <div class="code-section">
+            <div class="code-header">
+              <span>Algorithm Code</span>
+              <div class="btn-group">
+                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+              </div>
+            </div>
+
+            <!-- BFS Code -->
+            <div id="code-bfs" class="algo-code active">
+              <div id="code-bfs-go" class="lang-code active">
+<div class="code-line" id="bfs-go-1"><span class="kwd">func</span> <span class="func">bfs</span>(start <span class="type">int</span>) {</div>
+<div class="code-line" id="bfs-go-2">&nbsp;&nbsp;q := []<span class="type">int</span>{start}</div>
+<div class="code-line" id="bfs-go-3">&nbsp;&nbsp;visited[start] = <span class="kwd">true</span></div>
+<div class="code-line" id="bfs-go-4">&nbsp;&nbsp;<span class="kwd">for</span> <span class="func">len</span>(q) > <span class="num">0</span> {</div>
+<div class="code-line" id="bfs-go-5">&nbsp;&nbsp;&nbsp;&nbsp;node := q[<span class="num">0</span>]; q = q[<span class="num">1</span>:]</div>
+<div class="code-line" id="bfs-go-6">&nbsp;&nbsp;&nbsp;&nbsp;fmt.<span class="func">Println</span>(node)</div>
+<div class="code-line" id="bfs-go-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, n := <span class="kwd">range</span> graph[node] {</div>
+<div class="code-line" id="bfs-go-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> !visited[n] {</div>
+<div class="code-line" id="bfs-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visited[n] = <span class="kwd">true</span></div>
+<div class="code-line" id="bfs-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q = <span class="func">append</span>(q, n)</div>
+<div class="code-line" id="bfs-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-go-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-go-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-go-14">}</div>
+              </div>
+              <div id="code-bfs-java" class="lang-code">
+<div class="code-line" id="bfs-java-1"><span class="kwd">void</span> <span class="func">bfs</span>(<span class="type">int</span> start) {</div>
+<div class="code-line" id="bfs-java-2">&nbsp;&nbsp;<span class="type">Queue</span>&lt;<span class="type">Integer</span>&gt; q = <span class="kwd">new</span> <span class="type">LinkedList</span>&lt;&gt;();</div>
+<div class="code-line" id="bfs-java-3">&nbsp;&nbsp;q.<span class="func">add</span>(start); visited.<span class="func">add</span>(start);</div>
+<div class="code-line" id="bfs-java-4">&nbsp;&nbsp;<span class="kwd">while</span> (!q.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="bfs-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> node = q.<span class="func">poll</span>();</div>
+<div class="code-line" id="bfs-java-6">&nbsp;&nbsp;&nbsp;&nbsp;System.out.<span class="func">println</span>(node);</div>
+<div class="code-line" id="bfs-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> n : graph.<span class="func">get</span>(node)) {</div>
+<div class="code-line" id="bfs-java-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (!visited.<span class="func">contains</span>(n)) {</div>
+<div class="code-line" id="bfs-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visited.<span class="func">add</span>(n);</div>
+<div class="code-line" id="bfs-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.<span class="func">add</span>(n);</div>
+<div class="code-line" id="bfs-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-java-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-java-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bfs-java-14">}</div>
+              </div>
+              <div id="code-bfs-python" class="lang-code">
+<div class="code-line" id="bfs-python-1"><span class="kwd">def</span> <span class="func">bfs</span>(start):</div>
+<div class="code-line" id="bfs-python-2">&nbsp;&nbsp;q = <span class="func">deque</span>([start])</div>
+<div class="code-line" id="bfs-python-3">&nbsp;&nbsp;visited.<span class="func">add</span>(start)</div>
+<div class="code-line" id="bfs-python-4">&nbsp;&nbsp;<span class="kwd">while</span> q:</div>
+<div class="code-line" id="bfs-python-5">&nbsp;&nbsp;&nbsp;&nbsp;node = q.<span class="func">popleft</span>()</div>
+<div class="code-line" id="bfs-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">print</span>(node)</div>
+<div class="code-line" id="bfs-python-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> n <span class="kwd">in</span> graph[node]:</div>
+<div class="code-line" id="bfs-python-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> n <span class="kwd">not in</span> visited:</div>
+<div class="code-line" id="bfs-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visited.<span class="func">add</span>(n)</div>
+<div class="code-line" id="bfs-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;q.<span class="func">append</span>(n)</div>
+              </div>
+            </div>
+
+            <!-- DFS Code -->
+            <div id="code-dfs" class="algo-code">
+              <div id="code-dfs-go" class="lang-code active">
+<div class="code-line" id="dfs-go-1"><span class="kwd">func</span> <span class="func">dfs</span>(node <span class="type">int</span>, visited <span class="type">map</span>[<span class="type">int</span>]<span class="type">bool</span>) {</div>
+<div class="code-line" id="dfs-go-2">&nbsp;&nbsp;<span class="kwd">if</span> visited[node] { <span class="kwd">return</span> }</div>
+<div class="code-line" id="dfs-go-3">&nbsp;&nbsp;visited[node] = <span class="kwd">true</span></div>
+<div class="code-line" id="dfs-go-4">&nbsp;&nbsp;fmt.<span class="func">Println</span>(node)</div>
+<div class="code-line" id="dfs-go-5">&nbsp;&nbsp;<span class="kwd">for</span> _, n := <span class="kwd">range</span> graph[node] {</div>
+<div class="code-line" id="dfs-go-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(n, visited)</div>
+<div class="code-line" id="dfs-go-7">&nbsp;&nbsp;}</div>
+<div class="code-line" id="dfs-go-8">}</div>
+              </div>
+              <div id="code-dfs-java" class="lang-code">
+<div class="code-line" id="dfs-java-1"><span class="kwd">void</span> <span class="func">dfs</span>(<span class="type">int</span> node, <span class="type">Set</span>&lt;<span class="type">Integer</span>&gt; visited) {</div>
+<div class="code-line" id="dfs-java-2">&nbsp;&nbsp;<span class="kwd">if</span> (visited.<span class="func">contains</span>(node)) <span class="kwd">return</span>;</div>
+<div class="code-line" id="dfs-java-3">&nbsp;&nbsp;visited.<span class="func">add</span>(node);</div>
+<div class="code-line" id="dfs-java-4">&nbsp;&nbsp;System.out.<span class="func">println</span>(node);</div>
+<div class="code-line" id="dfs-java-5">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> n : graph.<span class="func">get</span>(node)) {</div>
+<div class="code-line" id="dfs-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(n, visited);</div>
+<div class="code-line" id="dfs-java-7">&nbsp;&nbsp;}</div>
+<div class="code-line" id="dfs-java-8">}</div>
+              </div>
+              <div id="code-dfs-python" class="lang-code">
+<div class="code-line" id="dfs-python-1"><span class="kwd">def</span> <span class="func">dfs</span>(node, visited):</div>
+<div class="code-line" id="dfs-python-2">&nbsp;&nbsp;<span class="kwd">if</span> node <span class="kwd">in</span> visited: <span class="kwd">return</span></div>
+<div class="code-line" id="dfs-python-3">&nbsp;&nbsp;visited.<span class="func">add</span>(node)</div>
+<div class="code-line" id="dfs-python-4">&nbsp;&nbsp;<span class="func">print</span>(node)</div>
+<div class="code-line" id="dfs-python-5">&nbsp;&nbsp;<span class="kwd">for</span> n <span class="kwd">in</span> graph[node]:</div>
+<div class="code-line" id="dfs-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(n, visited)</div>
+              </div>
+            </div>
+
+            <!-- Dijkstra Code -->
+            <div id="code-dijkstra" class="algo-code">
+              <div id="code-dijkstra-go" class="lang-code active">
+<div class="code-line" id="dijkstra-go-1"><span class="kwd">func</span> <span class="func">dijkstra</span>(start <span class="type">int</span>) {</div>
+<div class="code-line" id="dijkstra-go-2">&nbsp;&nbsp;dist := <span class="func">make</span>(<span class="type">map</span>[<span class="type">int</span>]<span class="type">int</span>) <span class="com">// init infinity</span></div>
+<div class="code-line" id="dijkstra-go-3">&nbsp;&nbsp;pq := &MinHeap{{start, <span class="num">0</span>}}</div>
+<div class="code-line" id="dijkstra-go-4">&nbsp;&nbsp;dist[start] = <span class="num">0</span></div>
+<div class="code-line" id="dijkstra-go-5">&nbsp;&nbsp;<span class="kwd">for</span> pq.<span class="func">Len</span>() > <span class="num">0</span> {</div>
+<div class="code-line" id="dijkstra-go-6">&nbsp;&nbsp;&nbsp;&nbsp;u := heap.<span class="func">Pop</span>(pq)</div>
+<div class="code-line" id="dijkstra-go-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> u.dist > dist[u.id] { <span class="kwd">continue</span> }</div>
+<div class="code-line" id="dijkstra-go-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v, w := <span class="kwd">range</span> graph[u] {</div>
+<div class="code-line" id="dijkstra-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> newD := u.dist + w; newD < dist[v] {</div>
+<div class="code-line" id="dijkstra-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = newD</div>
+<div class="code-line" id="dijkstra-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heap.<span class="func">Push</span>(pq, {v, newD})</div>
+<div class="code-line" id="dijkstra-go-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-go-13">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-go-14">&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-go-15">}</div>
+              </div>
+              <div id="code-dijkstra-java" class="lang-code">
+<div class="code-line" id="dijkstra-java-1"><span class="kwd">void</span> <span class="func">dijkstra</span>(<span class="type">int</span> start) {</div>
+<div class="code-line" id="dijkstra-java-2">&nbsp;&nbsp;<span class="type">PriorityQueue</span>&lt;<span class="type">Node</span>&gt; pq = <span class="kwd">new</span> <span class="type">PriorityQueue</span>&lt;&gt;();</div>
+<div class="code-line" id="dijkstra-java-3">&nbsp;&nbsp;pq.<span class="func">add</span>(<span class="kwd">new</span> <span class="type">Node</span>(start, <span class="num">0</span>));</div>
+<div class="code-line" id="dijkstra-java-4">&nbsp;&nbsp;dist.<span class="func">put</span>(start, <span class="num">0</span>);</div>
+<div class="code-line" id="dijkstra-java-5">&nbsp;&nbsp;<span class="kwd">while</span> (!pq.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="dijkstra-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">Node</span> u = pq.<span class="func">poll</span>();</div>
+<div class="code-line" id="dijkstra-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (u.dist > dist.<span class="func">get</span>(u.id)) <span class="kwd">continue</span>;</div>
+<div class="code-line" id="dijkstra-java-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">Edge</span> e : graph.<span class="func">get</span>(u.id)) {</div>
+<div class="code-line" id="dijkstra-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (u.dist + e.w < dist.<span class="func">get</span>(e.to)) {</div>
+<div class="code-line" id="dijkstra-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist.<span class="func">put</span>(e.to, u.dist + e.w);</div>
+<div class="code-line" id="dijkstra-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pq.<span class="func">add</span>(<span class="kwd">new</span> <span class="type">Node</span>(e.to, newDist));</div>
+<div class="code-line" id="dijkstra-java-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-java-13">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-java-14">&nbsp;&nbsp;}</div>
+<div class="code-line" id="dijkstra-java-15">}</div>
+              </div>
+              <div id="code-dijkstra-python" class="lang-code">
+<div class="code-line" id="dijkstra-python-1"><span class="kwd">def</span> <span class="func">dijkstra</span>(start):</div>
+<div class="code-line" id="dijkstra-python-2">&nbsp;&nbsp;pq = [(<span class="num">0</span>, start)]</div>
+<div class="code-line" id="dijkstra-python-3">&nbsp;&nbsp;dist[start] = <span class="num">0</span></div>
+<div class="code-line" id="dijkstra-python-4">&nbsp;&nbsp;<span class="kwd">while</span> pq:</div>
+<div class="code-line" id="dijkstra-python-5">&nbsp;&nbsp;&nbsp;&nbsp;d, u = heapq.<span class="func">heappop</span>(pq)</div>
+<div class="code-line" id="dijkstra-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> d > dist[u]: <span class="kwd">continue</span></div>
+<div class="code-line" id="dijkstra-python-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v, w <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="dijkstra-python-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> d + w < dist[v]:</div>
+<div class="code-line" id="dijkstra-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = d + w</div>
+<div class="code-line" id="dijkstra-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapq.<span class="func">heappush</span>(pq, (dist[v], v))</div>
+              </div>
+            </div>
+
+            <!-- Topological Sort Code -->
+            <div id="code-topological" class="algo-code">
+              <div id="code-topological-go" class="lang-code active">
+<div class="code-line" id="topological-go-1"><span class="kwd">func</span> <span class="func">topologicalSort</span>(n <span class="type">int</span>) {</div>
+<div class="code-line" id="topological-go-2">&nbsp;&nbsp;inDegree := <span class="func">make</span>([]<span class="type">int</span>, n)</div>
+<div class="code-line" id="topological-go-3">&nbsp;&nbsp;<span class="kwd">for</span> u := <span class="kwd">range</span> graph { <span class="kwd">for</span> _, v := <span class="kwd">range</span> graph[u] { inDegree[v]++ } }</div>
+<div class="code-line" id="topological-go-4">&nbsp;&nbsp;q := []<span class="type">int</span>{}; <span class="kwd">for</span> i, d := <span class="kwd">range</span> inDegree { <span class="kwd">if</span> d == <span class="num">0</span> { q = <span class="func">append</span>(q, i) } }</div>
+<div class="code-line" id="topological-go-5">&nbsp;&nbsp;<span class="kwd">for</span> <span class="func">len</span>(q) > <span class="num">0</span> {</div>
+<div class="code-line" id="topological-go-6">&nbsp;&nbsp;&nbsp;&nbsp;u := q[<span class="num">0</span>]; q = q[<span class="num">1</span>:]</div>
+<div class="code-line" id="topological-go-7">&nbsp;&nbsp;&nbsp;&nbsp;fmt.<span class="func">Println</span>(u)</div>
+<div class="code-line" id="topological-go-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, v := <span class="kwd">range</span> graph[u] {</div>
+<div class="code-line" id="topological-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inDegree[v]--</div>
+<div class="code-line" id="topological-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> inDegree[v] == <span class="num">0</span> { q = <span class="func">append</span>(q, v) }</div>
+<div class="code-line" id="topological-go-11">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="topological-go-12">&nbsp;&nbsp;}</div>
+<div class="code-line" id="topological-go-13">}</div>
+              </div>
+              <div id="code-topological-java" class="lang-code">
+<div class="code-line" id="topological-java-1"><span class="kwd">void</span> <span class="func">topologicalSort</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="topological-java-2">&nbsp;&nbsp;<span class="type">int</span>[] inDegree = <span class="kwd">new</span> <span class="type">int</span>[n];</div>
+<div class="code-line" id="topological-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> u : graph.keySet()) <span class="kwd">for</span> (<span class="type">int</span> v : graph.get(u)) inDegree[v]++;</div>
+<div class="code-line" id="topological-java-4">&nbsp;&nbsp;<span class="type">Queue</span>&lt;<span class="type">Integer</span>&gt; q = <span class="kwd">new</span> <span class="type">LinkedList</span>&lt;&gt;();</div>
+<div class="code-line" id="topological-java-5">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) <span class="kwd">if</span> (inDegree[i] == <span class="num">0</span>) q.<span class="func">add</span>(i);</div>
+<div class="code-line" id="topological-java-6">&nbsp;&nbsp;<span class="kwd">while</span> (!q.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="topological-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> u = q.<span class="func">poll</span>();</div>
+<div class="code-line" id="topological-java-8">&nbsp;&nbsp;&nbsp;&nbsp;System.out.<span class="func">println</span>(u);</div>
+<div class="code-line" id="topological-java-9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> v : graph.get(u)) {</div>
+<div class="code-line" id="topological-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inDegree[v]--;</div>
+<div class="code-line" id="topological-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (inDegree[v] == <span class="num">0</span>) q.<span class="func">add</span>(v);</div>
+<div class="code-line" id="topological-java-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="topological-java-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="topological-java-14">}</div>
+              </div>
+              <div id="code-topological-python" class="lang-code">
+<div class="code-line" id="topological-python-1"><span class="kwd">def</span> <span class="func">topological_sort</span>(n):</div>
+<div class="code-line" id="topological-python-2">&nbsp;&nbsp;in_degree = {i: <span class="num">0</span> <span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(n)}</div>
+<div class="code-line" id="topological-python-3">&nbsp;&nbsp;<span class="kwd">for</span> u <span class="kwd">in</span> graph:</div>
+<div class="code-line" id="topological-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v <span class="kwd">in</span> graph[u]: in_degree[v] += <span class="num">1</span></div>
+<div class="code-line" id="topological-python-5">&nbsp;&nbsp;q = <span class="func">deque</span>([i <span class="kwd">for</span> i <span class="kwd">in</span> in_degree <span class="kwd">if</span> in_degree[i] == <span class="num">0</span>])</div>
+<div class="code-line" id="topological-python-6">&nbsp;&nbsp;<span class="kwd">while</span> q:</div>
+<div class="code-line" id="topological-python-7">&nbsp;&nbsp;&nbsp;&nbsp;u = q.<span class="func">popleft</span>()</div>
+<div class="code-line" id="topological-python-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">print</span>(u)</div>
+<div class="code-line" id="topological-python-9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="topological-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in_degree[v] -= <span class="num">1</span></div>
+<div class="code-line" id="topological-python-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> in_degree[v] == <span class="num">0</span>: q.<span class="func">append</span>(v)</div>
+              </div>
+            </div>
+
+            <!-- Connected Components Code -->
+            <div id="code-components" class="algo-code">
+              <div id="code-components-go" class="lang-code active">
+<div class="code-line" id="components-go-1"><span class="kwd">func</span> <span class="func">countComponents</span>(n <span class="type">int</span>) <span class="type">int</span> {</div>
+<div class="code-line" id="components-go-2">&nbsp;&nbsp;count := <span class="num">0</span>; visited := <span class="func">make</span>([]<span class="type">bool</span>, n)</div>
+<div class="code-line" id="components-go-3">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < n; i++ {</div>
+<div class="code-line" id="components-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> !visited[i] {</div>
+<div class="code-line" id="components-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++; <span class="func">dfs</span>(i, visited)</div>
+<div class="code-line" id="components-go-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="components-go-7">&nbsp;&nbsp;}</div>
+<div class="code-line" id="components-go-8">&nbsp;&nbsp;<span class="kwd">return</span> count</div>
+<div class="code-line" id="components-go-9">}</div>
+              </div>
+              <div id="code-components-java" class="lang-code">
+<div class="code-line" id="components-java-1"><span class="kwd">int</span> <span class="func">countComponents</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="components-java-2">&nbsp;&nbsp;<span class="type">int</span> count = <span class="num">0</span>; <span class="type">boolean</span>[] visited = <span class="kwd">new</span> <span class="type">boolean</span>[n];</div>
+<div class="code-line" id="components-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) {</div>
+<div class="code-line" id="components-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (!visited[i]) {</div>
+<div class="code-line" id="components-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count++; <span class="func">dfs</span>(i, visited);</div>
+<div class="code-line" id="components-java-6">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="components-java-7">&nbsp;&nbsp;}</div>
+<div class="code-line" id="components-java-8">&nbsp;&nbsp;<span class="kwd">return</span> count;</div>
+<div class="code-line" id="components-java-9">}</div>
+              </div>
+              <div id="code-components-python" class="lang-code">
+<div class="code-line" id="components-python-1"><span class="kwd">def</span> <span class="func">count_components</span>(n):</div>
+<div class="code-line" id="components-python-2">&nbsp;&nbsp;count = <span class="num">0</span>; visited = <span class="func">set</span>()</div>
+<div class="code-line" id="components-python-3">&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(n):</div>
+<div class="code-line" id="components-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> i <span class="kwd">not in</span> visited:</div>
+<div class="code-line" id="components-python-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count += <span class="num">1</span>; <span class="func">dfs</span>(i, visited)</div>
+<div class="code-line" id="components-python-6">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line" id="components-python-7">&nbsp;&nbsp;</div>
+<div class="code-line" id="components-python-8">&nbsp;&nbsp;<span class="kwd">return</span> count</div>
+<div class="code-line" id="components-python-9"></div>
+              </div>
+            </div>
+
+            <!-- Cycle Detection Code -->
+            <div id="code-cycle" class="algo-code">
+              <div id="code-cycle-go" class="lang-code active">
+<div class="code-line" id="cycle-go-1"><span class="kwd">func</span> <span class="func">hasCycle</span>(u <span class="type">int</span>) <span class="type">bool</span> {</div>
+<div class="code-line" id="cycle-go-2">&nbsp;&nbsp;visiting[u] = <span class="kwd">true</span>; visited[u] = <span class="kwd">true</span></div>
+<div class="code-line" id="cycle-go-3">&nbsp;&nbsp;<span class="kwd">for</span> _, v := <span class="kwd">range</span> graph[u] {</div>
+<div class="code-line" id="cycle-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> visiting[v] { <span class="kwd">return</span> <span class="kwd">true</span> }</div>
+<div class="code-line" id="cycle-go-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> !visited[v] && <span class="func">hasCycle</span>(v) {</div>
+<div class="code-line" id="cycle-go-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">true</span></div>
+<div class="code-line" id="cycle-go-7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="cycle-go-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="cycle-go-9">&nbsp;&nbsp;visiting[u] = <span class="kwd">false</span></div>
+<div class="code-line" id="cycle-go-10">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">false</span></div>
+<div class="code-line" id="cycle-go-11">}</div>
+              </div>
+              <div id="code-cycle-java" class="lang-code">
+<div class="code-line" id="cycle-java-1"><span class="type">boolean</span> <span class="func">hasCycle</span>(<span class="type">int</span> u) {</div>
+<div class="code-line" id="cycle-java-2">&nbsp;&nbsp;visiting.add(u); visited.add(u);</div>
+<div class="code-line" id="cycle-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> v : graph.get(u)) {</div>
+<div class="code-line" id="cycle-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (visiting.contains(v)) <span class="kwd">return</span> <span class="kwd">true</span>;</div>
+<div class="code-line" id="cycle-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (!visited.contains(v) && <span class="func">hasCycle</span>(v)) {</div>
+<div class="code-line" id="cycle-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">true</span>;</div>
+<div class="code-line" id="cycle-java-7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="cycle-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="cycle-java-9">&nbsp;&nbsp;visiting.remove(u);</div>
+<div class="code-line" id="cycle-java-10">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">false</span>;</div>
+<div class="code-line" id="cycle-java-11">}</div>
+              </div>
+              <div id="code-cycle-python" class="lang-code">
+<div class="code-line" id="cycle-python-1"><span class="kwd">def</span> <span class="func">has_cycle</span>(u):</div>
+<div class="code-line" id="cycle-python-2">&nbsp;&nbsp;visiting.add(u); visited.add(u)</div>
+<div class="code-line" id="cycle-python-3">&nbsp;&nbsp;<span class="kwd">for</span> v <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="cycle-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">in</span> visiting: <span class="kwd">return</span> <span class="kwd">True</span></div>
+<div class="code-line" id="cycle-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">not in</span> visited <span class="kwd">and</span> <span class="func">has_cycle</span>(v):</div>
+<div class="code-line" id="cycle-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">True</span></div>
+<div class="code-line" id="cycle-python-7">&nbsp;&nbsp;</div>
+<div class="code-line" id="cycle-python-8">&nbsp;&nbsp;</div>
+<div class="code-line" id="cycle-python-9">&nbsp;&nbsp;visiting.remove(u)</div>
+<div class="code-line" id="cycle-python-10">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">False</span></div>
+<div class="code-line" id="cycle-python-11"></div>
+              </div>
+            </div>
+
+            <!-- Bipartite Check Code -->
+            <div id="code-bipartite" class="algo-code">
+              <div id="code-bipartite-go" class="lang-code active">
+<div class="code-line" id="bipartite-go-1"><span class="kwd">func</span> <span class="func">isBipartite</span>(n <span class="type">int</span>) <span class="type">bool</span> {</div>
+<div class="code-line" id="bipartite-go-2">&nbsp;&nbsp;colors := <span class="func">make</span>(<span class="type">map</span>[<span class="type">int</span>]<span class="type">int</span>)</div>
+<div class="code-line" id="bipartite-go-3">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < n; i++ { <span class="kwd">if</span> _, ex := colors[i]; ex { <span class="kwd">continue</span> }</div>
+<div class="code-line" id="bipartite-go-4">&nbsp;&nbsp;&nbsp;&nbsp;colors[i] = <span class="num">0</span>; q := []<span class="type">int</span>{i}</div>
+<div class="code-line" id="bipartite-go-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> <span class="func">len</span>(q) > <span class="num">0</span> {</div>
+<div class="code-line" id="bipartite-go-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u := q[<span class="num">0</span>]; q = q[<span class="num">1</span>:]</div>
+<div class="code-line" id="bipartite-go-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, v := <span class="kwd">range</span> graph[u] {</div>
+<div class="code-line" id="bipartite-go-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> _, ex := colors[v]; !ex {</div>
+<div class="code-line" id="bipartite-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors[v] = <span class="num">1</span> - colors[u]; q = <span class="func">append</span>(q, v)</div>
+<div class="code-line" id="bipartite-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <span class="kwd">else if</span> colors[v] == colors[u] { <span class="kwd">return</span> <span class="kwd">false</span> }</div>
+<div class="code-line" id="bipartite-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-go-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-go-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-go-14">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">true</span></div>
+<div class="code-line" id="bipartite-go-15">}</div>
+              </div>
+              <div id="code-bipartite-java" class="lang-code">
+<div class="code-line" id="bipartite-java-1"><span class="type">boolean</span> <span class="func">isBipartite</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="bipartite-java-2">&nbsp;&nbsp;<span class="type">int</span>[] colors = <span class="kwd">new</span> <span class="type">int</span>[n]; Arrays.<span class="func">fill</span>(colors, -<span class="num">1</span>);</div>
+<div class="code-line" id="bipartite-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) { <span class="kwd">if</span> (colors[i] != -<span class="num">1</span>) <span class="kwd">continue</span>;</div>
+<div class="code-line" id="bipartite-java-4">&nbsp;&nbsp;&nbsp;&nbsp;colors[i] = <span class="num">0</span>; <span class="type">Queue</span>&lt;<span class="type">Integer</span>&gt; q = <span class="kwd">new</span> <span class="type">LinkedList</span>&lt;&gt;(); q.<span class="func">add</span>(i);</div>
+<div class="code-line" id="bipartite-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">while</span> (!q.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="bipartite-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> u = q.<span class="func">poll</span>();</div>
+<div class="code-line" id="bipartite-java-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> v : graph.<span class="func">get</span>(u)) {</div>
+<div class="code-line" id="bipartite-java-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (colors[v] == -<span class="num">1</span>) {</div>
+<div class="code-line" id="bipartite-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors[v] = <span class="num">1</span> - colors[u]; q.<span class="func">add</span>(v);</div>
+<div class="code-line" id="bipartite-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <span class="kwd">else if</span> (colors[v] == colors[u]) <span class="kwd">return</span> <span class="kwd">false</span>;</div>
+<div class="code-line" id="bipartite-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-java-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-java-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bipartite-java-14">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">true</span>;</div>
+<div class="code-line" id="bipartite-java-15">}</div>
+              </div>
+              <div id="code-bipartite-python" class="lang-code">
+<div class="code-line" id="bipartite-python-1"><span class="kwd">def</span> <span class="func">is_bipartite</span>(n):</div>
+<div class="code-line" id="bipartite-python-2">&nbsp;&nbsp;colors = {}</div>
+<div class="code-line" id="bipartite-python-3">&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(n): <span class="kwd">if</span> i <span class="kwd">in</span> colors: <span class="kwd">continue</span></div>
+<div class="code-line" id="bipartite-python-4">&nbsp;&nbsp;&nbsp;&nbsp;colors[i] = <span class="num">0</span>; q = <span class="func">deque</span>([i])</div>
+<div class="code-line" id="bipartite-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">while</span> q:</div>
+<div class="code-line" id="bipartite-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u = q.<span class="func">popleft</span>()</div>
+<div class="code-line" id="bipartite-python-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="bipartite-python-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">not in</span> colors:</div>
+<div class="code-line" id="bipartite-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;colors[v] = <span class="num">1</span> - colors[u]; q.<span class="func">append</span>(v)</div>
+<div class="code-line" id="bipartite-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">elif</span> colors[v] == colors[u]: <span class="kwd">return</span> <span class="kwd">False</span></div>
+<div class="code-line" id="bipartite-python-11">&nbsp;&nbsp;</div>
+<div class="code-line" id="bipartite-python-12">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">True</span></div>
+              </div>
+            </div>
+
+            <!-- Kruskal's Code -->
+            <div id="code-kruskal" class="algo-code">
+              <div id="code-kruskal-go" class="lang-code active">
+<div class="code-line" id="kruskal-go-1"><span class="kwd">func</span> <span class="func">kruskal</span>(n <span class="type">int</span>, edges [][]<span class="type">int</span>) <span class="type">int</span> {</div>
+<div class="code-line" id="kruskal-go-2">&nbsp;&nbsp;sort.<span class="func">Slice</span>(edges, <span class="kwd">func</span>(i, j <span class="type">int</span>) <span class="type">bool</span> { <span class="kwd">return</span> edges[i][<span class="num">2</span>] < edges[j][<span class="num">2</span>] })</div>
+<div class="code-line" id="kruskal-go-3">&nbsp;&nbsp;uf := <span class="func">NewUnionFind</span>(n); cost := <span class="num">0</span></div>
+<div class="code-line" id="kruskal-go-4">&nbsp;&nbsp;<span class="kwd">for</span> _, e := <span class="kwd">range</span> edges {</div>
+<div class="code-line" id="kruskal-go-5">&nbsp;&nbsp;&nbsp;&nbsp;u, v, w := e[<span class="num">0</span>], e[<span class="num">1</span>], e[<span class="num">2</span>]</div>
+<div class="code-line" id="kruskal-go-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> uf.<span class="func">Union</span>(u, v) {</div>
+<div class="code-line" id="kruskal-go-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cost += w</div>
+<div class="code-line" id="kruskal-go-8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="kruskal-go-9">&nbsp;&nbsp;}</div>
+<div class="code-line" id="kruskal-go-10">&nbsp;&nbsp;<span class="kwd">return</span> cost</div>
+<div class="code-line" id="kruskal-go-11">}</div>
+              </div>
+              <div id="code-kruskal-java" class="lang-code">
+<div class="code-line" id="kruskal-java-1"><span class="kwd">int</span> <span class="func">kruskal</span>(<span class="type">int</span> n, <span class="type">int</span>[][] edges) {</div>
+<div class="code-line" id="kruskal-java-2">&nbsp;&nbsp;Arrays.<span class="func">sort</span>(edges, (a, b) -> a[<span class="num">2</span>] - b[<span class="num">2</span>]);</div>
+<div class="code-line" id="kruskal-java-3">&nbsp;&nbsp;<span class="type">UnionFind</span> uf = <span class="kwd">new</span> <span class="type">UnionFind</span>(n); <span class="type">int</span> cost = <span class="num">0</span>;</div>
+<div class="code-line" id="kruskal-java-4">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span>[] e : edges) {</div>
+<div class="code-line" id="kruskal-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (uf.<span class="func">union</span>(e[<span class="num">0</span>], e[<span class="num">1</span>])) {</div>
+<div class="code-line" id="kruskal-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cost += e[<span class="num">2</span>];</div>
+<div class="code-line" id="kruskal-java-7">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="kruskal-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="kruskal-java-9">&nbsp;&nbsp;<span class="kwd">return</span> cost;</div>
+<div class="code-line" id="kruskal-java-10">}</div>
+              </div>
+              <div id="code-kruskal-python" class="lang-code">
+<div class="code-line" id="kruskal-python-1"><span class="kwd">def</span> <span class="func">kruskal</span>(n, edges):</div>
+<div class="code-line" id="kruskal-python-2">&nbsp;&nbsp;edges.<span class="func">sort</span>(key=<span class="kwd">lambda</span> x: x[<span class="num">2</span>])</div>
+<div class="code-line" id="kruskal-python-3">&nbsp;&nbsp;uf = <span class="func">UnionFind</span>(n); cost = <span class="num">0</span></div>
+<div class="code-line" id="kruskal-python-4">&nbsp;&nbsp;<span class="kwd">for</span> u, v, w <span class="kwd">in</span> edges:</div>
+<div class="code-line" id="kruskal-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> uf.<span class="func">union</span>(u, v):</div>
+<div class="code-line" id="kruskal-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cost += w</div>
+<div class="code-line" id="kruskal-python-7">&nbsp;&nbsp;<span class="kwd">return</span> cost</div>
+              </div>
+            </div>
+
+            <!-- Prim's Code -->
+            <div id="code-prims" class="algo-code">
+              <div id="code-prims-go" class="lang-code active">
+<div class="code-line" id="prims-go-1"><span class="kwd">func</span> <span class="func">prims</span>(n <span class="type">int</span>) <span class="type">int</span> {</div>
+<div class="code-line" id="prims-go-2">&nbsp;&nbsp;dist := <span class="func">make</span>([]<span class="type">int</span>, n); visited := <span class="func">make</span>([]<span class="type">bool</span>, n)</div>
+<div class="code-line" id="prims-go-3">&nbsp;&nbsp;pq := &MinHeap{{<span class="num">0</span>, <span class="num">0</span>}}; cost := <span class="num">0</span></div>
+<div class="code-line" id="prims-go-4">&nbsp;&nbsp;<span class="kwd">for</span> pq.<span class="func">Len</span>() > <span class="num">0</span> {</div>
+<div class="code-line" id="prims-go-5">&nbsp;&nbsp;&nbsp;&nbsp;u := heap.<span class="func">Pop</span>(pq)</div>
+<div class="code-line" id="prims-go-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> visited[u.id] { <span class="kwd">continue</span> }</div>
+<div class="code-line" id="prims-go-7">&nbsp;&nbsp;&nbsp;&nbsp;visited[u.id] = <span class="kwd">true</span>; cost += u.dist</div>
+<div class="code-line" id="prims-go-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v, w := <span class="kwd">range</span> graph[u.id] {</div>
+<div class="code-line" id="prims-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> !visited[v] && w < dist[v] {</div>
+<div class="code-line" id="prims-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = w; heap.<span class="func">Push</span>(pq, {w, v})</div>
+<div class="code-line" id="prims-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-go-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-go-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-go-14">&nbsp;&nbsp;<span class="kwd">return</span> cost</div>
+<div class="code-line" id="prims-go-15">}</div>
+              </div>
+              <div id="code-prims-java" class="lang-code">
+<div class="code-line" id="prims-java-1"><span class="kwd">int</span> <span class="func">prims</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="prims-java-2">&nbsp;&nbsp;<span class="type">int</span>[] dist = <span class="kwd">new</span> <span class="type">int</span>[n]; <span class="type">boolean</span>[] visited = <span class="kwd">new</span> <span class="type">boolean</span>[n];</div>
+<div class="code-line" id="prims-java-3">&nbsp;&nbsp;<span class="type">PriorityQueue</span>&lt;<span class="type">Node</span>&gt; pq = <span class="kwd">new</span> <span class="type">PriorityQueue</span>&lt;&gt;(); pq.<span class="func">add</span>(<span class="kwd">new</span> <span class="type">Node</span>(<span class="num">0</span>, <span class="num">0</span>));</div>
+<div class="code-line" id="prims-java-4">&nbsp;&nbsp;<span class="kwd">while</span> (!pq.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="prims-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">Node</span> u = pq.<span class="func">poll</span>();</div>
+<div class="code-line" id="prims-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (visited[u.id]) <span class="kwd">continue</span>;</div>
+<div class="code-line" id="prims-java-7">&nbsp;&nbsp;&nbsp;&nbsp;visited[u.id] = <span class="kwd">true</span>; cost += u.dist;</div>
+<div class="code-line" id="prims-java-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">Edge</span> e : graph.<span class="func">get</span>(u.id)) {</div>
+<div class="code-line" id="prims-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (!visited[e.to] && e.w < dist[e.to]) {</div>
+<div class="code-line" id="prims-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[e.to] = e.w; pq.<span class="func">add</span>(<span class="kwd">new</span> <span class="type">Node</span>(e.to, e.w));</div>
+<div class="code-line" id="prims-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-java-12">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-java-13">&nbsp;&nbsp;}</div>
+<div class="code-line" id="prims-java-14">&nbsp;&nbsp;<span class="kwd">return</span> cost;</div>
+<div class="code-line" id="prims-java-15">}</div>
+              </div>
+              <div id="code-prims-python" class="lang-code">
+<div class="code-line" id="prims-python-1"><span class="kwd">def</span> <span class="func">prims</span>(n):</div>
+<div class="code-line" id="prims-python-2">&nbsp;&nbsp;dist = {i: <span class="func">float</span>(<span class="str">'inf'</span>) <span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(n)}; visited = <span class="func">set</span>()</div>
+<div class="code-line" id="prims-python-3">&nbsp;&nbsp;pq = [(<span class="num">0</span>, <span class="num">0</span>)]; cost = <span class="num">0</span></div>
+<div class="code-line" id="prims-python-4">&nbsp;&nbsp;<span class="kwd">while</span> pq:</div>
+<div class="code-line" id="prims-python-5">&nbsp;&nbsp;&nbsp;&nbsp;d, u = heapq.<span class="func">heappop</span>(pq)</div>
+<div class="code-line" id="prims-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> u <span class="kwd">in</span> visited: <span class="kwd">continue</span></div>
+<div class="code-line" id="prims-python-7">&nbsp;&nbsp;&nbsp;&nbsp;visited.<span class="func">add</span>(u); cost += d</div>
+<div class="code-line" id="prims-python-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> v, w <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="prims-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">not in</span> visited <span class="kwd">and</span> w <span class="op"><</span> dist[v]:</div>
+<div class="code-line" id="prims-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = w; heapq.<span class="func">heappush</span>(pq, (w, v))</div>
+<div class="code-line" id="prims-python-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line" id="prims-python-12">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+<div class="code-line" id="prims-python-13">&nbsp;&nbsp;</div>
+<div class="code-line" id="prims-python-14">&nbsp;&nbsp;<span class="kwd">return</span> cost</div>
+              </div>
+            </div>
+
+            <!-- Tarjan's Code -->
+            <div id="code-tarjan" class="algo-code">
+              <div id="code-tarjan-go" class="lang-code active">
+<div class="code-line" id="tarjan-go-1"><span class="kwd">func</span> <span class="func">tarjan</span>(n <span class="type">int</span>) {</div>
+<div class="code-line" id="tarjan-go-2">&nbsp;&nbsp;ids := <span class="func">make</span>([]<span class="type">int</span>, n); low := <span class="func">make</span>([]<span class="type">int</span>, n)</div>
+<div class="code-line" id="tarjan-go-3">&nbsp;&nbsp;onStack := <span class="func">make</span>([]<span class="type">bool</span>, n); stack := []<span class="type">int</span>{}</div>
+<div class="code-line" id="tarjan-go-4">&nbsp;&nbsp;id := <span class="num">0</span></div>
+<div class="code-line" id="tarjan-go-5">&nbsp;&nbsp;<span class="kwd">var</span> dfs <span class="kwd">func</span>(at <span class="type">int</span>)</div>
+<div class="code-line" id="tarjan-go-6">&nbsp;&nbsp;dfs = <span class="kwd">func</span>(at <span class="type">int</span>) {</div>
+<div class="code-line" id="tarjan-go-7">&nbsp;&nbsp;&nbsp;&nbsp;stack = <span class="func">append</span>(stack, at); onStack[at] = <span class="kwd">true</span></div>
+<div class="code-line" id="tarjan-go-8">&nbsp;&nbsp;&nbsp;&nbsp;ids[at] = id; low[at] = id; id++</div>
+<div class="code-line" id="tarjan-go-9">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, to := <span class="kwd">range</span> graph[at] {</div>
+<div class="code-line" id="tarjan-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> ids[to] == -<span class="num">1</span> {</div>
+<div class="code-line" id="tarjan-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(to); low[at] = <span class="func">min</span>(low[at], low[to])</div>
+<div class="code-line" id="tarjan-go-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <span class="kwd">else if</span> onStack[to] {</div>
+<div class="code-line" id="tarjan-go-13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low[at] = <span class="func">min</span>(low[at], ids[to])</div>
+<div class="code-line" id="tarjan-go-14">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-go-15">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-go-16">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> ids[at] == low[at] {</div>
+<div class="code-line" id="tarjan-go-17">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">// Pop stack until 'at' -> SCC</span></div>
+<div class="code-line" id="tarjan-go-18">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-go-19">&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-go-20">}</div>
+              </div>
+              <div id="code-tarjan-java" class="lang-code">
+<div class="code-line" id="tarjan-java-1"><span class="kwd">void</span> <span class="func">tarjan</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="tarjan-java-2">&nbsp;&nbsp;<span class="type">int</span>[] ids = <span class="kwd">new</span> <span class="type">int</span>[n]; <span class="type">int</span>[] low = <span class="kwd">new</span> <span class="type">int</span>[n];</div>
+<div class="code-line" id="tarjan-java-3">&nbsp;&nbsp;<span class="type">boolean</span>[] onStack = <span class="kwd">new</span> <span class="type">boolean</span>[n]; <span class="type">Stack</span>&lt;<span class="type">Integer</span>&gt; stack = <span class="kwd">new</span> <span class="type">Stack</span><>();</div>
+<div class="code-line" id="tarjan-java-4">&nbsp;&nbsp;<span class="type">int</span> id = <span class="num">0</span>;</div>
+<div class="code-line" id="tarjan-java-5">&nbsp;&nbsp;<span class="kwd">void</span> <span class="func">dfs</span>(<span class="type">int</span> at) {</div>
+<div class="code-line" id="tarjan-java-6">&nbsp;&nbsp;&nbsp;&nbsp;stack.<span class="func">push</span>(at); onStack[at] = <span class="kwd">true</span>;</div>
+<div class="code-line" id="tarjan-java-7">&nbsp;&nbsp;&nbsp;&nbsp;ids[at] = low[at] = id++;</div>
+<div class="code-line" id="tarjan-java-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> to : graph.<span class="func">get</span>(at)) {</div>
+<div class="code-line" id="tarjan-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (ids[to] == -<span class="num">1</span>) {</div>
+<div class="code-line" id="tarjan-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(to); low[at] = Math.<span class="func">min</span>(low[at], low[to]);</div>
+<div class="code-line" id="tarjan-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} <span class="kwd">else if</span> (onStack[to]) {</div>
+<div class="code-line" id="tarjan-java-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low[at] = Math.<span class="func">min</span>(low[at], ids[to]);</div>
+<div class="code-line" id="tarjan-java-13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-java-14">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-java-15">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (ids[at] == low[at]) {</div>
+<div class="code-line" id="tarjan-java-16">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">// Pop stack until 'at' -> SCC</span></div>
+<div class="code-line" id="tarjan-java-17">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-java-18">&nbsp;&nbsp;}</div>
+<div class="code-line" id="tarjan-java-19">}</div>
+              </div>
+              <div id="code-tarjan-python" class="lang-code">
+<div class="code-line" id="tarjan-python-1"><span class="kwd">def</span> <span class="func">tarjan</span>(n):</div>
+<div class="code-line" id="tarjan-python-2">&nbsp;&nbsp;ids = [-<span class="num">1</span>] * n; low = [<span class="num">0</span>] * n</div>
+<div class="code-line" id="tarjan-python-3">&nbsp;&nbsp;on_stack = [<span class="kwd">False</span>] * n; stack = []</div>
+<div class="code-line" id="tarjan-python-4">&nbsp;&nbsp;id_counter = <span class="num">0</span></div>
+<div class="code-line" id="tarjan-python-5">&nbsp;&nbsp;<span class="kwd">def</span> <span class="func">dfs</span>(at):</div>
+<div class="code-line" id="tarjan-python-6">&nbsp;&nbsp;&nbsp;&nbsp;stack.<span class="func">append</span>(at); on_stack[at] = <span class="kwd">True</span></div>
+<div class="code-line" id="tarjan-python-7">&nbsp;&nbsp;&nbsp;&nbsp;ids[at] = low[at] = id_counter; id_counter += <span class="num">1</span></div>
+<div class="code-line" id="tarjan-python-8">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> to <span class="kwd">in</span> graph[at]:</div>
+<div class="code-line" id="tarjan-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> ids[to] == -<span class="num">1</span>:</div>
+<div class="code-line" id="tarjan-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="func">dfs</span>(to); low[at] = <span class="func">min</span>(low[at], low[to])</div>
+<div class="code-line" id="tarjan-python-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">elif</span> on_stack[to]:</div>
+<div class="code-line" id="tarjan-python-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;low[at] = <span class="func">min</span>(low[at], ids[to])</div>
+<div class="code-line" id="tarjan-python-13">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> ids[at] == low[at]:</div>
+<div class="code-line" id="tarjan-python-14">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="com"># Pop stack until 'at' -> SCC</span></div>
+              </div>
+            </div>
+
+            <!-- Bellman-Ford Code -->
+            <div id="code-bellman" class="algo-code">
+              <div id="code-bellman-go" class="lang-code active">
+<div class="code-line" id="bellman-go-1"><span class="kwd">func</span> <span class="func">bellmanFord</span>(start <span class="type">int</span>) {</div>
+<div class="code-line" id="bellman-go-2">&nbsp;&nbsp;dist := <span class="func">make</span>([]<span class="type">int</span>, n); dist[start] = <span class="num">0</span></div>
+<div class="code-line" id="bellman-go-3">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < n-<span class="num">1</span>; i++ {</div>
+<div class="code-line" id="bellman-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, e := <span class="kwd">range</span> edges {</div>
+<div class="code-line" id="bellman-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> dist[e.u] + e.w < dist[e.v] {</div>
+<div class="code-line" id="bellman-go-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[e.v] = dist[e.u] + e.w</div>
+<div class="code-line" id="bellman-go-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-go-8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-go-9">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-go-10">&nbsp;&nbsp;<span class="com">// Check negative cycle</span></div>
+<div class="code-line" id="bellman-go-11">}</div>
+              </div>
+              <div id="code-bellman-java" class="lang-code">
+<div class="code-line" id="bellman-java-1"><span class="kwd">void</span> <span class="func">bellmanFord</span>(<span class="type">int</span> start) {</div>
+<div class="code-line" id="bellman-java-2">&nbsp;&nbsp;<span class="type">int</span>[] dist = <span class="kwd">new</span> <span class="type">int</span>[n]; dist[start] = <span class="num">0</span>;</div>
+<div class="code-line" id="bellman-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n - <span class="num">1</span>; i++) {</div>
+<div class="code-line" id="bellman-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">Edge</span> e : edges) {</div>
+<div class="code-line" id="bellman-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (dist[e.u] + e.w < dist[e.v]) {</div>
+<div class="code-line" id="bellman-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[e.v] = dist[e.u] + e.w;</div>
+<div class="code-line" id="bellman-java-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-java-8">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-java-9">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bellman-java-10">&nbsp;&nbsp;<span class="com">// Check negative cycle</span></div>
+<div class="code-line" id="bellman-java-11">}</div>
+              </div>
+              <div id="code-bellman-python" class="lang-code">
+<div class="code-line" id="bellman-python-1"><span class="kwd">def</span> <span class="func">bellman_ford</span>(start):</div>
+<div class="code-line" id="bellman-python-2">&nbsp;&nbsp;dist = {i: <span class="func">float</span>(<span class="str">'inf'</span>) <span class="kwd">for</span> i <span class="kwd">in</span> nodes}</div>
+<div class="code-line" id="bellman-python-3">&nbsp;&nbsp;dist[start] = <span class="num">0</span></div>
+<div class="code-line" id="bellman-python-4">&nbsp;&nbsp;<span class="kwd">for</span> _ <span class="kwd">in</span> <span class="func">range</span>(n - <span class="num">1</span>):</div>
+<div class="code-line" id="bellman-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> u, v, w <span class="kwd">in</span> edges:</div>
+<div class="code-line" id="bellman-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> dist[u] + w < dist[v]:</div>
+<div class="code-line" id="bellman-python-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = dist[u] + w</div>
+              </div>
+            </div>
+
+            <!-- Floyd-Warshall Code -->
+            <div id="code-floyd" class="algo-code">
+              <div id="code-floyd-go" class="lang-code active">
+<div class="code-line" id="floyd-go-1"><span class="kwd">func</span> <span class="func">floydWarshall</span>(n <span class="type">int</span>) {</div>
+<div class="code-line" id="floyd-go-2">&nbsp;&nbsp;<span class="com">// dist[][] initialized to adj matrix</span></div>
+<div class="code-line" id="floyd-go-3">&nbsp;&nbsp;<span class="kwd">for</span> k := <span class="num">0</span>; k < n; k++ {</div>
+<div class="code-line" id="floyd-go-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="num">0</span>; i < n; i++ {</div>
+<div class="code-line" id="floyd-go-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j := <span class="num">0</span>; j < n; j++ {</div>
+<div class="code-line" id="floyd-go-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> dist[i][j] > dist[i][k] + dist[k][j] {</div>
+<div class="code-line" id="floyd-go-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[i][j] = dist[i][k] + dist[k][j]</div>
+<div class="code-line" id="floyd-go-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-go-10">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-go-11">&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-go-12">}</div>
+              </div>
+              <div id="code-floyd-java" class="lang-code">
+<div class="code-line" id="floyd-java-1"><span class="kwd">void</span> <span class="func">floydWarshall</span>(<span class="type">int</span> n) {</div>
+<div class="code-line" id="floyd-java-2">&nbsp;&nbsp;<span class="com">// dist[][] initialized</span></div>
+<div class="code-line" id="floyd-java-3">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> k = <span class="num">0</span>; k < n; k++) {</div>
+<div class="code-line" id="floyd-java-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < n; i++) {</div>
+<div class="code-line" id="floyd-java-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> j = <span class="num">0</span>; j < n; j++) {</div>
+<div class="code-line" id="floyd-java-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (dist[i][j] > dist[i][k] + dist[k][j]) {</div>
+<div class="code-line" id="floyd-java-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[i][j] = dist[i][k] + dist[k][j];</div>
+<div class="code-line" id="floyd-java-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-java-10">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-java-11">&nbsp;&nbsp;}</div>
+<div class="code-line" id="floyd-java-12">}</div>
+              </div>
+              <div id="code-floyd-python" class="lang-code">
+<div class="code-line" id="floyd-python-1"><span class="kwd">def</span> <span class="func">floyd_warshall</span>(n):</div>
+<div class="code-line" id="floyd-python-2">&nbsp;&nbsp;<span class="com"># dist[][] initialized</span></div>
+<div class="code-line" id="floyd-python-3">&nbsp;&nbsp;<span class="kwd">for</span> k <span class="kwd">in</span> <span class="func">range</span>(n):</div>
+<div class="code-line" id="floyd-python-4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(n):</div>
+<div class="code-line" id="floyd-python-5">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> j <span class="kwd">in</span> <span class="func">range</span>(n):</div>
+<div class="code-line" id="floyd-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> dist[i][j] > dist[i][k] + dist[k][j]:</div>
+<div class="code-line" id="floyd-python-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[i][j] = dist[i][k] + dist[k][j]</div>
+              </div>
+            </div>
+
+            <!-- A* Code -->
+            <div id="code-astar" class="algo-code">
+              <div id="code-astar-go" class="lang-code active">
+<div class="code-line" id="astar-go-1"><span class="kwd">func</span> <span class="func">astar</span>(start, end <span class="type">Node</span>) {</div>
+<div class="code-line" id="astar-go-2">&nbsp;&nbsp;openSet := &MinHeap{{start, <span class="num">0</span>}}</div>
+<div class="code-line" id="astar-go-3">&nbsp;&nbsp;gScore := <span class="func">make</span>(<span class="type">map</span>[<span class="type">Node</span>]<span class="type">int</span>); gScore[start] = <span class="num">0</span></div>
+<div class="code-line" id="astar-go-4">&nbsp;&nbsp;<span class="kwd">for</span> openSet.<span class="func">Len</span>() > <span class="num">0</span> {</div>
+<div class="code-line" id="astar-go-5">&nbsp;&nbsp;&nbsp;&nbsp;current := heap.<span class="func">Pop</span>(openSet)</div>
+<div class="code-line" id="astar-go-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> current == end { <span class="kwd">return</span> }</div>
+<div class="code-line" id="astar-go-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, neighbor := <span class="kwd">range</span> <span class="func">getNeighbors</span>(current) {</div>
+<div class="code-line" id="astar-go-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tentativeG := gScore[current] + <span class="func">dist</span>(current, neighbor)</div>
+<div class="code-line" id="astar-go-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> tentativeG < gScore[neighbor] {</div>
+<div class="code-line" id="astar-go-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gScore[neighbor] = tentativeG</div>
+<div class="code-line" id="astar-go-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fScore := tentativeG + <span class="func">heuristic</span>(neighbor, end)</div>
+<div class="code-line" id="astar-go-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heap.<span class="func">Push</span>(openSet, {neighbor, fScore})</div>
+<div class="code-line" id="astar-go-13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-go-14">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-go-15">&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-go-16">}</div>
+              </div>
+              <div id="code-astar-java" class="lang-code">
+                 <div style="padding: 20px; color: var(--text-secondary);">Java implementation coming soon...</div>
+              </div>
+              <div id="code-astar-python" class="lang-code">
+                 <div style="padding: 20px; color: var(--text-secondary);">Python implementation coming soon...</div>
+              </div>
+            </div>
+
+            <!-- Bidirectional Search Code -->
+            <div id="code-bidirectional" class="algo-code">
+              <div id="code-bidirectional-go" class="lang-code active">
+<div class="code-line" id="bidirectional-go-1"><span class="kwd">func</span> <span class="func">bidirectionalSearch</span>(start, end <span class="type">int</span>) {</div>
+<div class="code-line" id="bidirectional-go-2">&nbsp;&nbsp;q1 := []<span class="type">int</span>{start}; q2 := []<span class="type">int</span>{end}</div>
+<div class="code-line" id="bidirectional-go-3">&nbsp;&nbsp;vis1 := <span class="func">make</span>(<span class="type">map</span>[<span class="type">int</span>]<span class="type">bool</span>); vis2 := <span class="func">make</span>(<span class="type">map</span>[<span class="type">int</span>]<span class="type">bool</span>)</div>
+<div class="code-line" id="bidirectional-go-4">&nbsp;&nbsp;vis1[start] = <span class="kwd">true</span>; vis2[end] = <span class="kwd">true</span></div>
+<div class="code-line" id="bidirectional-go-5">&nbsp;&nbsp;<span class="kwd">for</span> <span class="func">len</span>(q1) > <span class="num">0</span> && <span class="func">len</span>(q2) > <span class="num">0</span> {</div>
+<div class="code-line" id="bidirectional-go-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="func">bfsStep</span>(q1, vis1, vis2) { <span class="kwd">return</span> }</div>
+<div class="code-line" id="bidirectional-go-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> <span class="func">bfsStep</span>(q2, vis2, vis1) { <span class="kwd">return</span> }</div>
+<div class="code-line" id="bidirectional-go-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bidirectional-go-9">}</div>
+<div class="code-line" id="bidirectional-go-10"><span class="kwd">func</span> <span class="func">bfsStep</span>(q, visited, otherVisited) <span class="type">bool</span> {</div>
+<div class="code-line" id="bidirectional-go-11">&nbsp;&nbsp;u := q[<span class="num">0</span>]; q = q[<span class="num">1</span>:]</div>
+<div class="code-line" id="bidirectional-go-12">&nbsp;&nbsp;<span class="kwd">for</span> _, v := <span class="kwd">range</span> graph[u] {</div>
+<div class="code-line" id="bidirectional-go-13">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> otherVisited[v] { <span class="kwd">return</span> <span class="kwd">true</span> }</div>
+<div class="code-line" id="bidirectional-go-14">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> !visited[v] { visited[v] = <span class="kwd">true</span>; q = <span class="func">append</span>(q, v) }</div>
+<div class="code-line" id="bidirectional-go-15">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bidirectional-go-16">&nbsp;&nbsp;<span class="kwd">return</span> <span class="kwd">false</span></div>
+<div class="code-line" id="bidirectional-go-17">}</div>
+              </div>
+              <div id="code-bidirectional-java" class="lang-code">
+                 <div style="padding: 20px; color: var(--text-secondary);">Java implementation coming soon...</div>
+              </div>
+              <div id="code-bidirectional-python" class="lang-code">
+                 <div style="padding: 20px; color: var(--text-secondary);">Python implementation coming soon...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Bottom Panel: Representations & Properties -->
+        <div class="info-panel">
+          <div class="tabs">
+            <button class="tab active" data-target="tab-adj-list">Adjacency List</button>
+            <button class="tab" data-target="tab-adj-matrix">Adjacency Matrix</button>
+            <button class="tab" data-target="tab-edge-list">Edge List</button>
+            <button class="tab" data-target="tab-properties">Properties</button>
+          </div>
+          
+          <div class="tab-content active" id="tab-adj-list">
+            <pre id="adj-list-display">// Graph is empty</pre>
+          </div>
+          
+          <div class="tab-content" id="tab-adj-matrix">
+            <div id="adj-matrix-display" class="matrix-grid"></div>
+          </div>
+          
+          <div class="tab-content" id="tab-edge-list">
+            <pre id="edge-list-display">// No edges</pre>
+          </div>
+          
+          <div class="tab-content" id="tab-properties">
+            <div class="props-grid">
+              <div class="prop-item">
+                <span class="prop-label">Vertices (V)</span>
+                <span class="prop-val" id="prop-v">0</span>
+              </div>
+              <div class="prop-item">
+                <span class="prop-label">Edges (E)</span>
+                <span class="prop-val" id="prop-e">0</span>
+              </div>
+              <div class="prop-item">
+                <span class="prop-label">Connected?</span>
+                <span class="prop-val" id="prop-connected">-</span>
+              </div>
+              <div class="prop-item">
+                <span class="prop-label">Has Cycle?</span>
+                <span class="prop-val" id="prop-cycle">-</span>
+              </div>
+              <div class="prop-item">
+                <span class="prop-label">Is Tree?</span>
+                <span class="prop-val" id="prop-tree">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="graph-visualizer.js"></script>
+</body>
+</html>

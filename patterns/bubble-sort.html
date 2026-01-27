@@ -4,70 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bubble Sort Visualization - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;   /* Yellow for active/swapping */
-            --compare: #fb923c;  /* Orange for comparison */
-            --success: #22c55e;  /* Green for sorted */
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 300px;
-            position: relative;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            padding: 20px;
-            overflow: hidden;
-        }
-
         .bar {
             position: absolute;
             bottom: 20px;
             width: 50px;
-            background-color: var(--primary);
+            background-color: var(--accent-color);
             border-radius: 4px 4px 0 0;
             transition: left 0.5s ease-in-out, background-color 0.3s ease, height 0.5s ease;
             display: flex;
             justify-content: center;
             align-items: flex-start;
-            color: var(--bg);
+            color: #000;
             font-weight: bold;
             font-size: 14px;
             padding-top: 5px;
@@ -76,40 +26,7 @@
 
         .bar-value {
             margin-top: -25px;
-            color: var(--text);
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
-        /* Info Panel */
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
+            color: var(--text-primary);
         }
 
         .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
@@ -118,7 +35,7 @@
             display: flex;
             gap: 15px;
             font-size: 0.9rem;
-            color: var(--text-muted);
+            color: var(--text-secondary);
             margin-top: 10px;
         }
         .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
@@ -128,56 +45,62 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
         }
         .card {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
             padding: 15px;
             border-radius: 8px;
         }
-        .card h3 { margin-top: 0; color: var(--primary); font-size: 1rem; }
+        .card h3 { margin-top: 0; color: var(--accent-color); font-size: 1rem; }
         code { background: rgba(0,0,0,0.3); padding: 2px 5px; border-radius: 4px; font-family: monospace; }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Bubble Sort Visualization</h1>
-            <div class="subtitle">Repeatedly swapping adjacent elements until sorted</div>
-        </header>
-
-        <div class="viz-container" id="viz-container">
-            <!-- Bars will be injected here -->
-        </div>
-
-        <div class="info-panel">
-            <div class="step-text" id="step-text">Ready to start...</div>
-            <div class="legend">
-                <span><span class="dot" style="background: var(--compare)"></span>Compare</span>
-                <span><span class="dot" style="background: var(--active)"></span>Swap</span>
-                <span><span class="dot" style="background: var(--success)"></span>Sorted</span>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>Bubble Sort</p>
             </div>
-        </div>
-
-        <div class="controls">
-            <button onclick="reset()">Reset</button>
-            <button onclick="stepBackward()">Previous</button>
-            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
-            <button onclick="stepForward()">Next</button>
-        </div>
-
-        <div class="complexity-grid">
-            <div class="card">
-                <h3>Time Complexity</h3>
-                <p><strong>Worst/Average:</strong> <code>O(n²)</code><br>Nested loops comparing every pair.</p>
-                <p><strong>Best:</strong> <code>O(n)</code><br>If array is already sorted (with flag).</p>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
             </div>
-            <div class="card">
-                <h3>Space Complexity</h3>
-                <p><strong>Worst:</strong> <code>O(1)</code><br>In-place sorting. No extra memory needed.</p>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
+                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                </div>
             </div>
-        </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
+                </div>
+                <div class="canvas-wrapper" id="viz-container" style="display: flex; justify-content: center; align-items: flex-end;">
+                    <!-- Bars will be injected here -->
+                </div>
+                <div class="complexity-grid">
+                    <div class="card">
+                        <h3>Time Complexity</h3>
+                        <p><strong>Worst/Average:</strong> <code>O(n²)</code></p>
+                    </div>
+                    <div class="card">
+                        <h3>Space Complexity</h3>
+                        <p><strong>Worst:</strong> <code>O(1)</code></p>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>

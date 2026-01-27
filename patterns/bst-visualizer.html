@@ -4,150 +4,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BST Visualization - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;
-            --success: #22c55e;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
+        /* Specific overrides for BST */
+        .highlight { stroke: var(--accent-color) !important; fill: rgba(59, 130, 246, 0.2) !important; }
+        .found { stroke: #22c55e !important; fill: rgba(34, 197, 94, 0.2) !important; }
+        
+        .control-input {
             width: 100%;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 400px;
-            position: relative;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        circle {
-            fill: var(--panel);
-            stroke: var(--primary);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
-        line {
-            stroke: var(--text-muted);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
-        text {
-            fill: var(--text);
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 14px;
-            pointer-events: none;
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        input {
-            background-color: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px;
-            border-radius: 6px;
-            width: 80px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            min-height: 60px;
-        }
-
-        .highlight { stroke: var(--active); fill: rgba(250, 204, 21, 0.1); }
-        .found { stroke: var(--success); fill: rgba(34, 197, 94, 0.1); }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Binary Search Tree Visualization</h1>
-            <div class="subtitle">Insert and Search Operations</div>
-        </header>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>BST Visualizer</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <label>Value</label>
+                    <input type="number" id="val-input" class="control-input" placeholder="Enter number...">
+                    <button class="action-btn" onclick="insertValue()">Insert Node</button>
+                    <button class="action-btn" onclick="searchValue()">Search Node</button>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn warning" onclick="resetTree()">Reset Tree</button>
+                </div>
+                <div class="control-group">
+                    <label>Interview Mode</label>
+                    <button class="action-btn" id="interview-toggle" onclick="toggleInterviewMode()">👁️ Hide Hints</button>
+                </div>
+            </div>
+        </aside>
 
-        <div class="viz-container">
-            <svg id="tree-svg"></svg>
-        </div>
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready.</div>
+                </div>
+                
+                <div class="split-view">
+                    <!-- Left: Canvas -->
+                    <div class="canvas-section">
+                        <svg id="tree-svg" width="100%" height="100%"></svg>
+                        <div style="position: absolute; bottom: 20px; left: 20px; display: flex; gap: 10px;">
+                            <button class="ex-btn" onclick="startTraversal('inorder')">Inorder</button>
+                            <button class="ex-btn" onclick="startTraversal('preorder')">Preorder</button>
+                            <button class="ex-btn" onclick="startTraversal('postorder')">Postorder</button>
+                        </div>
+                    </div>
 
-        <div class="controls">
-            <input type="number" id="val-input" placeholder="Value">
-            <button class="primary" onclick="insertValue()">Insert</button>
-            <button onclick="searchValue()">Search</button>
-            <button onclick="resetTree()">Reset</button>
-        </div>
+                    <!-- Right: Code Panel -->
+                    <div class="code-section" id="code-panel">
+                        <div class="code-tabs">
+                            <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                            <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                            <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                        </div>
+                        
+                        <!-- Go Code -->
+                        <div id="code-go" class="code-display active">
+<div class="code-line" id="go-1">func insert(root *Node, val int) *Node {</div>
+<div class="code-line" id="go-2">    if root == nil {</div>
+<div class="code-line" id="go-3">        return &Node{Val: val}</div>
+<div class="code-line" id="go-4">    }</div>
+<div class="code-line" id="go-5">    if val < root.Val {</div>
+<div class="code-line" id="go-6">        root.Left = insert(root.Left, val)</div>
+<div class="code-line" id="go-7">    } else {</div>
+<div class="code-line" id="go-8">        root.Right = insert(root.Right, val)</div>
+<div class="code-line" id="go-9">    }</div>
+<div class="code-line" id="go-10">    return root</div>
+<div class="code-line" id="go-11">}</div>
+                        </div>
 
-        <div class="info-panel" id="status-text">
-            Enter a value to insert or search.
-        </div>
+                        <!-- Java Code -->
+                        <div id="code-java" class="code-display" style="display: none;">
+<div class="code-line" id="java-1">public TreeNode insert(TreeNode root, int val) {</div>
+<div class="code-line" id="java-2">    if (root == null) {</div>
+<div class="code-line" id="java-3">        return new TreeNode(val);</div>
+<div class="code-line" id="java-4">    }</div>
+<div class="code-line" id="java-5">    if (val < root.val) {</div>
+<div class="code-line" id="java-6">        root.left = insert(root.left, val);</div>
+<div class="code-line" id="java-7">    } else {</div>
+<div class="code-line" id="java-8">        root.right = insert(root.right, val);</div>
+<div class="code-line" id="java-9">    }</div>
+<div class="code-line" id="java-10">    return root;</div>
+<div class="code-line" id="java-11">}</div>
+                        </div>
+
+                        <!-- Python Code -->
+                        <div id="code-python" class="code-display" style="display: none;">
+<div class="code-line" id="py-1">def insert(root, val):</div>
+<div class="code-line" id="py-2">    if not root:</div>
+<div class="code-line" id="py-3">        return TreeNode(val)</div>
+<div class="code-line" id="py-4">    </div>
+<div class="code-line" id="py-5">    if val < root.val:</div>
+<div class="code-line" id="py-6">        root.left = insert(root.left, val)</div>
+<div class="code-line" id="py-7">    else:</div>
+<div class="code-line" id="py-8">        root.right = insert(root.right, val)</div>
+<div class="code-line" id="py-9">    return root</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -167,6 +141,7 @@
         const input = document.getElementById('val-input');
         const NODE_RADIUS = 20;
         const VERTICAL_SPACING = 60;
+        let currentLang = 'go';
 
         // Initial Tree
         [50, 30, 70, 20, 40, 60, 80].forEach(v => insertNode(v));
@@ -291,12 +266,18 @@
             svg.appendChild(line);
         }
 
-        // Animation Logic
+        // ==========================================
+        // ANIMATION & CODE MAPPING
+        // ==========================================
+
         async function animateOperation(val, type) {
             if (type === 'insert' && !root) {
+                highlightLine(1); await sleep(500);
+                highlightLine(3); await sleep(500);
                 insertNode(val);
                 drawTree();
                 statusText.textContent = `Inserted root ${val}`;
+                unhighlightLines();
                 return;
             }
 
@@ -313,8 +294,11 @@
 
             // Animate traversal
             for (let node of path) {
+                highlightLine(1); // Function entry
                 highlightNode(node.val, 'highlight');
                 statusText.textContent = `Comparing ${val} with ${node.val}...`;
+                
+                highlightLine(2); // Check null
                 await sleep(800);
                 
                 if (val === node.val) {
@@ -329,12 +313,22 @@
                     }
                 }
                 
+                highlightLine(5); // Compare val < root.val
+                await sleep(500);
+                
+                if (val < node.val) {
+                    highlightLine(6); // Recurse Left
+                } else {
+                    highlightLine(7); // Else
+                    highlightLine(8); // Recurse Right
+                }
                 unhighlightNode(node.val);
             }
 
             if (type === 'insert') {
                 insertNode(val);
                 drawTree();
+                highlightLine(3); // Create Node
                 // Highlight new node
                 setTimeout(() => {
                     highlightNode(val, 'found');

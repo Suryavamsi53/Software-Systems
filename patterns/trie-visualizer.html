@@ -4,156 +4,64 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trie Visualization - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;
-            --success: #22c55e;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 500px;
-            position: relative;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-
-        circle {
-            fill: var(--panel);
-            stroke: var(--primary);
-            stroke-width: 2;
-            transition: all 0.4s ease;
-        }
-
         circle.is-end {
-            stroke: var(--success);
+            stroke: #22c55e;
             stroke-width: 3;
         }
 
-        line {
-            stroke: var(--text-muted);
-            stroke-width: 2;
-            transition: all 0.4s ease;
+        .highlight { stroke: #facc15 !important; fill: rgba(250, 204, 21, 0.2) !important; }
+        .found { stroke: #22c55e !important; fill: rgba(34, 197, 94, 0.2) !important; }
+        .path-active { stroke: #facc15; stroke-width: 3; }
+        
+        .control-input {
+            width: 100%;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            margin-bottom: 10px;
         }
-
-        text {
-            fill: var(--text);
-            font-family: monospace;
-            font-weight: bold;
-            font-size: 14px;
-            pointer-events: none;
-            text-anchor: middle;
-            dominant-baseline: middle;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        input {
-            background-color: var(--bg);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px;
-            border-radius: 6px;
-            width: 150px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            min-height: 60px;
-        }
-
-        .highlight { stroke: var(--active) !important; fill: rgba(250, 204, 21, 0.1); }
-        .found { stroke: var(--success) !important; fill: rgba(34, 197, 94, 0.1); }
-        .path-active { stroke: var(--active); stroke-width: 3; }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Trie (Prefix Tree) Visualization</h1>
-            <div class="subtitle">Insert and Search Operations</div>
-        </header>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>Trie Visualizer</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <label>Word</label>
+                    <input type="text" id="word-input" class="control-input" placeholder="Enter word..." maxlength="8">
+                    <button class="action-btn" onclick="insertWord()">Insert Word</button>
+                    <button class="action-btn" onclick="searchWord()">Search Word</button>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn warning" onclick="resetTrie()">Reset Trie</button>
+                </div>
+            </div>
+        </aside>
 
-        <div class="viz-container">
-            <svg id="trie-svg"></svg>
-        </div>
-
-        <div class="controls">
-            <input type="text" id="word-input" placeholder="Enter word..." maxlength="8">
-            <button class="primary" onclick="insertWord()">Insert</button>
-            <button onclick="searchWord()">Search</button>
-            <button onclick="resetTrie()">Reset</button>
-        </div>
-
-        <div class="info-panel" id="status-text">
-            Enter a word to insert or search.
-        </div>
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready.</div>
+                </div>
+                <div class="canvas-wrapper">
+                    <svg id="trie-svg" width="100%" height="100%"></svg>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>

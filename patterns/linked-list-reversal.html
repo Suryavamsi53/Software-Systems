@@ -4,73 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linked List Reversal - Amazon SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
     <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;
-            --prev: #fb923c;
-            --next: #22c55e;
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 300px;
-            position: relative;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        svg {
-            width: 100%;
-            height: 100%;
-        }
-
         /* Nodes */
         .node-rect {
-            fill: var(--panel);
-            stroke: var(--primary);
+            fill: var(--bg-tertiary);
+            stroke: var(--accent-color);
             stroke-width: 2;
             transition: all 0.5s ease;
         }
 
         .node-text {
-            fill: var(--text);
+            fill: var(--text-primary);
             font-family: monospace;
             font-weight: bold;
             font-size: 16px;
@@ -80,7 +26,7 @@
 
         /* Pointers */
         .pointer-arrow {
-            stroke: var(--text-muted);
+            stroke: var(--text-secondary);
             stroke-width: 2;
             fill: none;
             transition: all 0.5s ease;
@@ -92,79 +38,55 @@
             transition: all 0.5s ease;
         }
 
-        /* Info Panel */
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .step-text { font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4em; }
-        
         .legend {
             display: flex;
             gap: 15px;
             justify-content: center;
             font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 10px;
+            color: var(--text-secondary);
+            padding: 10px;
+            background: var(--bg-secondary);
         }
         .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Linked List Reversal</h1>
-            <div class="subtitle">Iterative In-Place Reversal</div>
-        </header>
-
-        <div class="viz-container">
-            <svg id="ll-svg"></svg>
-        </div>
-
-        <div class="info-panel">
-            <div class="step-text" id="step-text">Ready to start...</div>
-            <div class="legend">
-                <span><span class="dot" style="background: var(--prev)"></span>Prev</span>
-                <span><span class="dot" style="background: var(--active)"></span>Curr</span>
-                <span><span class="dot" style="background: var(--next)"></span>NextTemp</span>
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Amazon SDE</h1>
+                <p>Linked List</p>
             </div>
-        </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
+                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                </div>
+            </div>
+        </aside>
 
-        <div class="controls">
-            <button onclick="reset()">Reset</button>
-            <button onclick="stepBackward()">Previous</button>
-            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
-            <button onclick="stepForward()">Next</button>
-        </div>
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
+                </div>
+                <div class="canvas-wrapper">
+                    <svg id="ll-svg" width="100%" height="100%"></svg>
+                </div>
+                <div class="legend">
+                    <span><span class="dot" style="background: #fb923c"></span>Prev</span>
+                    <span><span class="dot" style="background: #facc15"></span>Curr</span>
+                    <span><span class="dot" style="background: #22c55e"></span>NextTemp</span>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
@@ -289,9 +211,9 @@
                 svg.appendChild(text);
 
                 // Labels
-                if (state.prev === i) drawLabel(x, Y + 40, "Prev", "var(--prev)");
-                if (state.curr === i) drawLabel(x, Y - 40, "Curr", "var(--active)");
-                if (state.next === i) drawLabel(x, Y + 40, "Next", "var(--next)");
+                if (state.prev === i) drawLabel(x, Y + 40, "Prev", "#fb923c");
+                if (state.curr === i) drawLabel(x, Y - 40, "Curr", "#facc15");
+                if (state.next === i) drawLabel(x, Y + 40, "Next", "#22c55e");
             });
 
             // Draw Links
@@ -309,7 +231,7 @@
                     line.setAttribute("y1", Y + yOffset);
                     line.setAttribute("x2", isReverse ? x2 + NODE_WIDTH : x2);
                     line.setAttribute("y2", Y + yOffset);
-                    line.setAttribute("stroke", isReverse ? "var(--active)" : "var(--text-muted)");
+                    line.setAttribute("stroke", isReverse ? "#facc15" : "var(--text-secondary)");
                     line.setAttribute("stroke-width", "2");
                     line.setAttribute("marker-end", "url(#arrow)");
                     svg.appendChild(line);
