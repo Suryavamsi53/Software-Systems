@@ -1,20 +1,20 @@
-# 🌑 Amazon SDE Coding Interview Patterns
+# 🌑 Software System 
 
-**Your Daily Revision Hub for Amazon SDE-1 / SDE-2 Coding Interviews**
+**Your Daily Revision Hub for Software Engineer in Go Lang & Coding Interviews**
 
-A dark-themed, self-hosted interview preparation website focused on 18 essential DSA patterns used in real Amazon coding interviews. Built for pattern recognition, deep learning, and practical problem-solving.
+A dark-themed, self-hosted interview preparation website focused on 18 essential DSA patterns used in real FANG Company coding interviews. Built for pattern recognition, deep learning, and practical problem-solving.
 
 ---
 
 ## 🎯 Features
 
-- **Dark Theme Only**: Easy on eyes, professional design inspired by Amazon internal tools
+- **Dark Theme Only**: Easy on eyes, professional design 
 - **18 DSA Patterns**: Comprehensive coverage of all interview-critical patterns
-- **Interview-Grade Content**: Written from an Amazon interviewer's perspective
+- **Interview-Grade Content**: Written from an interviewer's perspective
 - **Real-World Scenarios**: Business context for each pattern (not just textbook theory)
 - **Go + Python**: Primary implementations in Go, with Python snippets
 - **Colored Callout System**:
-  - 🟢 **Green**: What Amazon Expects
+  - 🟢 **Green**: What Companies Expects
   - 🔵 **Blue**: Key Intuition & Core Concepts
   - 🟡 **Yellow**: Interview Tips & Real-World Examples
   - 🔴 **Red**: Common Mistakes to Avoid
@@ -58,7 +58,7 @@ A dark-themed, self-hosted interview preparation website focused on 18 essential
 ## 🏗️ Project Structure
 
 ```
-amazon-coding-patterns/
+Company-coding-patterns/
 │
 ├── index.html                    # Landing page with navigation
 ├── styles.css                    # Dark theme + colored callouts
@@ -94,9 +94,9 @@ amazon-coding-patterns/
 
 ### 10 Comprehensive Sections:
 
-1. **✅ What Amazon EXPECTS** (Green)
+1. **✅ What Company EXPECTS** (Green)
    - Interviewer's exact checklist
-   - Communication signals Amazon values
+   - Communication signals Company values
    - When interviewer is satisfied
 
 2. **🧠 Core Concept Theory** (Blue)
@@ -104,9 +104,9 @@ amazon-coding-patterns/
    - Recognition keywords
    - When NOT to use this pattern
 
-3. **🎯 Real-World Amazon Scenario** (Yellow)
+3. **🎯 Real-World Company Scenario** (Yellow)
    - Business context (not just DSA terms)
-   - Why Amazon uses this at scale
+   - Why Company uses this at scale
    - Examples: rate limiting, ranking, microservices
 
 4. **🖼️ Visual / Image Explanation**
@@ -114,15 +114,15 @@ amazon-coding-patterns/
    - Step-by-step pointer movement
    - State changes during algorithm
 
-5. **🧩 Canonical Amazon Problem**
+5. **🧩 Canonical Company Problem**
    - Official problem statement
    - Constraints & examples
-   - Why Amazon loves this problem
+   - Why Company loves this problem
 
 6. **🔴 Brute Force → Why It Fails**
    - Naive approach
    - Time/space complexity
-   - Why Amazon rejects it
+   - Why Company rejects it
 
 7. **🟢 Optimized Solution (Go)**
    - Interview-quality code
@@ -137,9 +137,9 @@ amazon-coding-patterns/
 9. **⚙️ Complexity Analysis**
    - Time complexity proof
    - Space complexity breakdown
-   - Why it meets Amazon's bar
+   - Why it meets Company's bar
 
-10. **🟣 Amazon Follow-up Questions** (Purple)
+10. **🟣 Company Follow-up Questions** (Purple)
     - Streaming data variant
     - Memory-constrained version
     - Parallelization approach
@@ -151,7 +151,7 @@ amazon-coding-patterns/
 
 ### Option 1: Open in Browser (Local)
 ```bash
-cd /home/suryavamsivaggu/Amazon/amazon-coding-patterns
+cd /home/suryavamsivaggu/Company/Company-coding-patterns
 python -m http.server 8000
 # Then open: http://localhost:8000
 ```
@@ -177,7 +177,7 @@ google-chrome index.html
 
 ### Daily Revision Mode (30 minutes)
 1. Pick one pattern from sidebar
-2. Read "What Amazon Expects" section (2 min)
+2. Read "What Company Expects" section (2 min)
 3. Review canonical problem + solution (5 min)
 4. Walk through complexity analysis (3 min)
 5. Implement from scratch in Go (20 min)
@@ -204,7 +204,7 @@ This site follows **ByteByteGo** methodology:
 - ✅ Pattern-based (not problem-based)
 - ✅ Deep concepts (not memorization)
 - ✅ Why > How (reasoning before coding)
-- ✅ Interview-realistic (what Amazon actually asks)
+- ✅ Interview-realistic (what Company actually asks)
 - ✅ Scalable thinking (works for 10^5 inputs)
 
 ---
@@ -215,10 +215,10 @@ This site follows **ByteByteGo** methodology:
 |--------|-----------|------------------|
 | Theme | Dark only | Generic light |
 | Language | Go + Python | All languages |
-| Context | Amazon-specific | Generic |
+| Context | Company-specific | Generic |
 | Depth | 10 sections per pattern | Brief explanation |
 | Real-world | Business scenarios | DSA terminology |
-| Follow-ups | Amazon interview questions | N/A |
+| Follow-ups | Company interview questions | N/A |
 | Complexity | Explained + proved | Sometimes stated |
 | Code quality | Interview-grade | Mixed quality |
 
@@ -286,7 +286,7 @@ If you:
 3. Answer **follow-up questions** without looking
 4. **Explain aloud** like a real interview
 
-**Result**: You'll recognize patterns instantly, code confidently, and crush Amazon interviews.
+**Result**: You'll recognize patterns instantly, code confidently, and crush Company interviews.
 
 ---
 
@@ -324,7 +324,7 @@ This is a personal study tool. For issues:
 
 ## 💡 Why This Exists
 
-Most interview prep is generic or memorization-based. Real interviews at Amazon require:
+Most interview prep is generic or memorization-based. Real interviews at Company require:
 - **Pattern recognition** (immediate identification)
 - **Deep reasoning** (why this approach)
 - **Real-world context** (business impact)
@@ -334,7 +334,7 @@ This guide fills that gap. 🚀
 
 ---
 
-**Built with 💚 for Amazon SDE candidates**
+**Built with 💚 for Company SDE candidates**
 
 *Last Updated: January 25, 2026*
 *Study Mode: Daily Revision + Deep Dives*
