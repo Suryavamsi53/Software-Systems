@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Algorithms Visualizer - Amazon SDE Prep</title>
+  <title>Graph Algorithms Visualizer - Software Systems Prep</title>
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="graph-visualizer.css">
 </head>
@@ -11,7 +11,7 @@
   <div class="container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🌑 Amazon SDE</h1>
+        <h1>🌑 Software Systems</h1>
         <p>Graph Visualizer</p>
       </div>
       <div class="nav-section">
@@ -132,6 +132,7 @@
           <!-- Code Panel -->
           <div class="code-section">
             <div class="code-header">
+              <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
               <span>Algorithm Code</span>
               <div class="btn-group">
                 <button class="tab-btn active" onclick="switchLang('go')">Go</button>
@@ -794,6 +795,14 @@
       </div>
     </main>
   </div>
+  <script>
+    function copyCode() {
+      const activeCodeBlock = document.querySelector('.algo-code.active .lang-code.active');
+      if (activeCodeBlock) {
+        navigator.clipboard.writeText(activeCodeBlock.innerText);
+      }
+    }
+  </script>
 
   <script src="graph-visualizer.js"></script>
 </body>

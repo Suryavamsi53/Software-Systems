@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Two Pointers Pattern - Amazon SDE Interview</title>
+  <title>Two Pointers Pattern - Software Systems Interview</title>
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
@@ -11,7 +11,7 @@
     <!-- SIDEBAR NAVIGATION -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🌑 Amazon SDE</h1>
+        <h1>🌑 Software Systems</h1>
         <p>Coding Interview Prep</p>
       </div>
 
@@ -159,9 +159,9 @@
 
       <!-- SECTION 1: WHAT AMAZON EXPECTS -->
       <div class="section" id="amazon-expects">
-        <div class="section-title">
-          <span class="emoji">✅</span> 1. What Amazon EXPECTS
-        </div>
+      <div class="section-title">
+        <span class="emoji">✅</span> 1. What Software Systems EXPECTS
+      </div>
         <div class="callout amazon-expects">
           <div class="callout-title">✅ Interviewer's Checklist</div>
           <div class="callout-content">
@@ -232,13 +232,13 @@
       <!-- SECTION 3: REAL-WORLD AMAZON SCENARIO -->
       <div class="section" id="real-world">
         <div class="section-title">
-          <span class="emoji">🎯</span> 3. Real-World Amazon Scenario
+          <span class="emoji">🎯</span> 3. Real-World Software Systems Scenario
         </div>
         
         <div class="callout interview-tip">
-          <div class="callout-title">⭐ Request Rate Limiting (Real Amazon Use Case)</div>
+          <div class="callout-title">⭐ Request Rate Limiting (Real Software Systems Use Case)</div>
           <div class="callout-content">
-            <p><strong>Scenario:</strong> Amazon has request logs from millions of users. For each minute, you need to find if any two requests from the SAME user are closer than 5 seconds apart (rate limit violation).</p>
+            <p><strong>Scenario:</strong> Software Systems has request logs from millions of users. For each minute, you need to find if any two requests from the SAME user are closer than 5 seconds apart (rate limit violation).</p>
             <p style="margin-top: 12px;"><strong>Input:</strong> Array of (user_id, timestamp) pairs, already sorted by user_id, then timestamp</p>
             <p style="margin-top: 12px;"><strong>Output:</strong> Boolean: Are there any violations?</p>
             <p style="margin-top: 12px;"><strong>Why two pointers works:</strong></p>
@@ -252,7 +252,7 @@
         </div>
 
         <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
-          <strong style="color: var(--callout-yellow);">Other Amazon Real-World Examples:</strong>
+          <strong style="color: var(--callout-yellow);">Other Software Systems Real-World Examples:</strong>
           <ul style="margin-top: 12px; margin-left: 20px;">
             <li><strong>Matching Delivery Partners:</strong> Match cheapest and fastest delivery pairs from sorted list</li>
             <li><strong>Payment Processing:</strong> Find if two transactions match (expected vs actual) in O(n) time</li>
@@ -336,11 +336,11 @@ Final: ['o', 'l', 'l', 'e', 'h']
       <!-- SECTION 5: CANONICAL AMAZON PROBLEM -->
       <div class="section" id="canonical-problem">
         <div class="section-title">
-          <span class="emoji">🧩</span> 5. Canonical Amazon Problem
+          <span class="emoji">🧩</span> 5. Canonical Software Systems Problem
         </div>
         
         <div class="callout amazon-expects">
-          <div class="callout-title">✅ Container With Most Water (LeetCode 11 - VERY Common at Amazon)</div>
+          <div class="callout-title">✅ Container With Most Water (LeetCode 11 - VERY Common at Software Systems)</div>
           <div class="callout-content">
             <p><strong>Problem Statement:</strong></p>
             <p style="margin-top: 10px;">You are given an integer array <code>height</code> of length <code>n</code>. There are n vertical lines drawn such that the two endpoints of the i-th line are (i, 0) and (i, height[i]).</p>
@@ -360,7 +360,7 @@ Final: ['o', 'l', 'l', 'e', 'h']
               Water capacity = min(8, 7) × (8 - 1) = 7 × 7 = 49
             </div>
 
-            <p style="margin-top: 15px;"><strong>Why Amazon Likes This:</strong></p>
+            <p style="margin-top: 15px;"><strong>Why Software Systems Likes This:</strong></p>
             <ul style="margin-left: 20px; margin-top: 8px;">
               <li>Tests understanding of constraint optimization</li>
               <li>Two pointers is optimal; brute force is obvious but too slow</li>
@@ -381,7 +381,7 @@ Final: ['o', 'l', 'l', 'e', 'h']
         <div class="callout common-mistakes">
           <div class="callout-title">🔴 Naive Nested Loop Approach</div>
           <div class="callout-content">
-            <div class="code-block"><pre>// Brute Force - WRONG for Amazon
+            <div class="code-block"><pre>// Brute Force - WRONG for Software Systems
 // Check every pair (i, j)
 func maxArea(height []int) int {
     maxWater := 0
@@ -402,7 +402,7 @@ func maxArea(height []int) int {
 // Time: O(n²) - For n=10^5, this is 10^10 operations!
 // Space: O(1)</pre></div>
 
-            <p style="margin-top: 15px;"><strong>🔴 Why Amazon Rejects This:</strong></p>
+            <p style="margin-top: 15px;"><strong>🔴 Why Software Systems Rejects This:</strong></p>
             <ul style="margin-left: 20px; margin-top: 8px;">
               <li><strong>Timeout:</strong> With n up to 100,000, O(n²) will TLE (Time Limit Exceeded)</li>
               <li><strong>Signals:</strong> Shows you didn't think about optimization</li>
@@ -662,12 +662,12 @@ func main() {
         </div>
 
         <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 20px;">
-          <strong style="color: var(--callout-blue);">Why This Meets Amazon's Bar:</strong>
+          <strong style="color: var(--callout-blue);">Why This Meets Software Systems's Bar:</strong>
           <ul style="margin-top: 12px; margin-left: 20px;">
             <li><strong>Linear time:</strong> Processes data in single pass</li>
             <li><strong>Constant space:</strong> Works with huge datasets without memory overhead</li>
             <li><strong>Scalable:</strong> 100,000 elements → 1,000,000 elements, performance barely changes</li>
-            <li><strong>Production-ready:</strong> Amazon can use this in actual microservices</li>
+            <li><strong>Production-ready:</strong> Software Systems can use this in actual microservices</li>
           </ul>
         </div>
       </div>
@@ -675,11 +675,11 @@ func main() {
       <!-- SECTION 10: AMAZON FOLLOW-UP QUESTIONS -->
       <div class="section" id="followups">
         <div class="section-title">
-          <span class="emoji">🟣</span> 10. Amazon Follow-Up Questions
+          <span class="emoji">🟣</span> 10. Software Systems Follow-Up Questions
         </div>
         
         <div class="callout advanced-followup">
-          <div class="callout-title">🟣 Advanced Questions Amazon Will Ask</div>
+          <div class="callout-title">🟣 Advanced Questions Software Systems Will Ask</div>
           <div class="callout-content">
             <p><strong>Q1: "What if the input is a stream (you can't see all data upfront)?"</strong></p>
             <div style="background-color: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; margin-top: 8px; margin-bottom: 15px;">

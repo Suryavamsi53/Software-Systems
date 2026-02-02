@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeLanguageTabs();
   initializeSearch();
   initializeBackToTop();
+  addPageNavigation();
 });
 
 // ============================================================
@@ -34,6 +35,95 @@ function initializeNavigation() {
       }
     });
   });
+}
+
+// ============================================================
+// PAGE NAVIGATION (NEXT/PREV)
+// ============================================================
+
+function addPageNavigation() {
+  const path = window.location.pathname;
+  const page = path.split('/').pop();
+  const isPattern = path.includes('/patterns/');
+  
+  // Define study sequence
+  const studySequence = [
+    'interview-approach.html',
+    'complexity-guide.html',
+    'patterns/two-pointers.html',
+    'patterns/sliding-window.html',
+    'patterns/binary-search.html',
+    'patterns/hash-maps.html',
+    'patterns/linked-lists.html',
+    'patterns/stack.html',
+    'patterns/heap.html',
+    'patterns/trees.html',
+    'patterns/tries.html',
+    'patterns/graphs.html',
+    'patterns/backtracking.html',
+    'patterns/dynamic-programming.html',
+    'patterns/greedy.html',
+    'patterns/fast-slow-pointers.html',
+    'patterns/intervals.html',
+    'patterns/prefix-sum.html',
+    'patterns/bit-manipulation.html',
+    'patterns/math-geometry.html',
+    'patterns/sort-search.html'
+  ];
+
+  // Find current index
+  let currentIndex = -1;
+  if (isPattern) {
+    currentIndex = studySequence.indexOf('patterns/' + page);
+  } else {
+    currentIndex = studySequence.indexOf(page);
+  }
+
+  if (currentIndex === -1) return;
+
+  // Inject Styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .page-navigation { display: flex; justify-content: space-between; margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color, #334155); }
+    .nav-btn { display: inline-flex; align-items: center; padding: 0.75rem 1.5rem; background-color: var(--bg-secondary, #1e293b); color: var(--text-primary, #e5e7eb); text-decoration: none; border-radius: 0.5rem; border: 1px solid var(--border-color, #334155); transition: all 0.2s; font-weight: 500; font-size: 0.95rem; }
+    .nav-btn:hover { background-color: var(--bg-tertiary, #334155); border-color: var(--callout-blue, #38bdf8); color: var(--callout-blue, #38bdf8); transform: translateY(-2px); }
+  `;
+  document.head.appendChild(style);
+
+  const navContainer = document.createElement('div');
+  navContainer.className = 'page-navigation';
+
+  // Prev Button
+  if (currentIndex > 0) {
+    const prevPath = studySequence[currentIndex - 1];
+    const link = getRelativeLink(isPattern, prevPath);
+    const name = formatPageName(prevPath);
+    navContainer.innerHTML += `<a href="${link}" class="nav-btn prev">← ${name}</a>`;
+  } else {
+    navContainer.innerHTML += `<div></div>`;
+  }
+
+  // Next Button
+  if (currentIndex < studySequence.length - 1) {
+    const nextPath = studySequence[currentIndex + 1];
+    const link = getRelativeLink(isPattern, nextPath);
+    const name = formatPageName(nextPath);
+    navContainer.innerHTML += `<a href="${link}" class="nav-btn next">${name} →</a>`;
+  }
+
+  const mainContent = document.querySelector('.main-content') || document.querySelector('main') || document.body;
+  mainContent.appendChild(navContainer);
+}
+
+function getRelativeLink(imInPatterns, targetPath) {
+  if (imInPatterns) {
+    return targetPath.startsWith('patterns/') ? targetPath.replace('patterns/', '') : '../' + targetPath;
+  }
+  return targetPath;
+}
+
+function formatPageName(path) {
+  return path.split('/').pop().replace('.html', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 }
 
 // ============================================================

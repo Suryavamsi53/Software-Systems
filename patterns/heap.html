@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Heap (Priority Queue) Pattern - Amazon SDE Interview</title>
+  <title>Heap (Priority Queue) Pattern - Software Systems Interview</title>
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
   <div class="container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🌑 Amazon SDE</h1>
+        <h1>🌑 Software Systems</h1>
         <p>Coding Interview Prep</p>
       </div>
       <div class="nav-section">
@@ -167,11 +167,11 @@
 
       <!-- 3. Real-World Scenario -->
       <div class="section">
-        <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+        <div class="section-title">🎯 3. Real-World Software Systems Scenario</div>
         <div class="callout interview-tip">
           <div class="callout-title">Log Analysis & Top-K Errors</div>
           <div class="callout-content">
-            <p><strong>Scenario:</strong> Amazon CloudWatch processes millions of error logs per second. You need to display the "Top 10 Most Frequent Error Types" in real-time on a dashboard.</p>
+            <p><strong>Scenario:</strong> Software Systems CloudWatch processes millions of error logs per second. You need to display the "Top 10 Most Frequent Error Types" in real-time on a dashboard.</p>
             <p><strong>Solution:</strong> Use a Min-Heap of size K (10). For every new error count coming in:</p>
             <ul>
               <li>If heap size < K, add it.</li>
@@ -192,7 +192,7 @@
             <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive Heap Visualizer</strong>
             <p style="margin-top: 5px; color: var(--text-secondary);">Watch Insert (Bubble Up) and Extract-Min (Bubble Down) operations.</p>
           </div>
-          <a href="../visualizers/heap-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+          <a href="heap-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
         </div>
 
         <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
@@ -207,14 +207,14 @@
 
       <!-- 5. Canonical Problem -->
       <div class="section">
-        <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+        <div class="section-title">🧩 5. Canonical Software Systems Problem</div>
         <div class="callout amazon-expects">
           <div class="callout-title">Kth Largest Element in an Array (LeetCode 215)</div>
           <div class="callout-content">
             <p><strong>Problem:</strong> Given an integer array <code>nums</code> and an integer <code>k</code>, return the <code>k</code>th largest element in the array.</p>
             <p><strong>Input:</strong> nums = [3,2,1,5,6,4], k = 2<br>
             <strong>Output:</strong> 5</p>
-            <p><strong>Why Amazon Loves It:</strong> It tests if you know the difference between sorting (O(N log N)) and using a heap (O(N log K)).</p>
+            <p><strong>Why Software Systems Loves It:</strong> It tests if you know the difference between sorting (O(N log N)) and using a heap (O(N log K)).</p>
           </div>
         </div>
       </div>
@@ -360,7 +360,7 @@ Top of heap (min) is 5.
 
       <!-- 10. Follow-ups -->
       <div class="section">
-        <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+        <div class="section-title">🟣 10. Software Systems Follow-up Questions</div>
         <div class="callout advanced-followup">
           <div class="callout-title">Variations</div>
           <div class="callout-content">

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS Dashboard - Data Structures & Algorithms</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .course-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    .course-card {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .course-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-color);
+    }
+    .card-header {
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-body {
+      padding: 20px;
+    }
+    .module-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .module-item {
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .module-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: color 0.2s;
+    }
+    .module-link:hover {
+      color: var(--accent-color);
+    }
+    .status-badge {
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .status-badge.wip {
+      background: rgba(234, 179, 8, 0.1);
+      color: #eab308;
+      border-color: rgba(234, 179, 8, 0.2);
+    }
+    .progress-bar-container {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      margin-top: 15px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent-color);
+      width: 0%;
+      transition: width 1s ease;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>LMS Dashboard</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item">← Main Dashboard</a>
+        <a href="lms-dashboard.html" class="nav-item active">📚 Course Curriculum</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🎓 Data Structures & Algorithms Masterclass</h1>
+        <p>Structured learning paths with interactive visualizations and code synchronization.</p>
+      </div>
+
+      <!-- Category 1: Linear -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📏</span> Category 1: Linear Data Structures
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+          Structures where data elements are arranged sequentially or linearly. 
+          Focus on memory layout, access patterns, and time/space trade-offs.
+        </p>
+        
+        <div class="course-grid">
+          <!-- Arrays & Strings -->
+          <div class="course-card">
+            <div class="card-header">
+              <div class="card-title"><span>📦</span> Arrays & Strings</div>
+              <div class="progress-bar-container"><div class="progress-fill" style="width: 80%"></div></div>
+            </div>
+            <div class="card-body">
+              <ul class="module-list">
+                <li class="module-item"><a href="patterns/two-pointers.html" class="module-link"><span>▶</span> Two Pointers Technique</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/sliding-window.html" class="module-link"><span>▶</span> Sliding Window</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/prefix-sum.html" class="module-link"><span>▶</span> Prefix Sum Arrays</a> <span class="status-badge">Done</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Linked Lists -->
+          <div class="course-card">
+            <div class="card-header">
+              <div class="card-title"><span>🔗</span> Linked Lists</div>
+              <div class="progress-bar-container"><div class="progress-fill" style="width: 60%"></div></div>
+            </div>
+            <div class="card-body">
+              <ul class="module-list">
+                <li class="module-item"><a href="patterns/linked-lists.html" class="module-link"><span>📄</span> Concept & Operations</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/linked-list-reversal.html" class="module-link"><span>🚀</span> Interactive Reversal</a> <span class="status-badge">Visual</span></li>
+                <li class="module-item"><a href="patterns/fast-slow-pointers.html" class="module-link"><span>▶</span> Fast & Slow Pointers</a> <span class="status-badge">Done</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Stacks & Queues -->
+          <div class="course-card">
+            <div class="card-header">
+              <div class="card-title"><span>📚</span> Stacks & Queues</div>
+              <div class="progress-bar-container"><div class="progress-fill" style="width: 100%"></div></div>
+            </div>
+            <div class="card-body">
+              <ul class="module-list">
+                <li class="module-item"><a href="patterns/stack.html" class="module-link"><span>📄</span> Stack Concept (LIFO)</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/stack-visualizer.html" class="module-link"><span>🚀</span> <strong>Stack Visualizer</strong></a> <span class="status-badge" style="background: #3b82f6; color: white;">New</span></li>
+                <li class="module-item"><a href="#" class="module-link"><span>📄</span> Queue Concept (FIFO)</a> <span class="status-badge wip">Coming Soon</span></li>
+                <li class="module-item"><a href="patterns/queue-visualizer.html" class="module-link"><span>🚀</span> <strong>Queue Visualizer</strong></a> <span class="status-badge" style="background: #3b82f6; color: white;">New</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category 2: Non-Linear -->
+      <div class="section" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🌳</span> Category 2: Non-Linear Data Structures
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+          Hierarchical and network-based structures. Essential for representing relationships and complex data.
+        </p>
+        
+        <div class="course-grid">
+          <!-- Trees -->
+          <div class="course-card">
+            <div class="card-header">
+              <div class="card-title"><span>🌲</span> Trees & Graphs</div>
+              <div class="progress-bar-container"><div class="progress-fill" style="width: 40%"></div></div>
+            </div>
+            <div class="card-body">
+              <ul class="module-list">
+                <li class="module-item"><a href="patterns/trees.html" class="module-link"><span>📄</span> Tree Fundamentals</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/bst-visualizer.html" class="module-link"><span>🚀</span> BST Visualizer</a> <span class="status-badge">Visual</span></li>
+                <li class="module-item"><a href="patterns/graphs.html" class="module-link"><span>📄</span> Graph Algorithms</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/graph-visualizer.html" class="module-link"><span>🚀</span> Graph Visualizer</a> <span class="status-badge">Visual</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Heaps & Hashing -->
+          <div class="course-card">
+            <div class="card-header">
+              <div class="card-title"><span>⚡</span> Heaps & Hashing</div>
+              <div class="progress-bar-container"><div class="progress-fill" style="width: 70%"></div></div>
+            </div>
+            <div class="card-body">
+              <ul class="module-list">
+                <li class="module-item"><a href="patterns/heap.html" class="module-link"><span>📄</span> Heap (Priority Queue)</a> <span class="status-badge">Done</span></li>
+                <li class="module-item"><a href="patterns/heap-visualizer.html" class="module-link"><span>🚀</span> Heap Visualizer</a> <span class="status-badge">Visual</span></li>
+                <li class="module-item"><a href="patterns/hash-maps.html" class="module-link"><span>📄</span> Hash Maps</a> <span class="status-badge">Done</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</body>
+</html>

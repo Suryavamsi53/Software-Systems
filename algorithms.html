@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Algorithms Master List - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Page specific styles */
+    .algo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    .algo-card {
+      background-color: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      transition: transform 0.2s, border-color 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .algo-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--accent-color);
+    }
+    .algo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .algo-title {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .algo-complexity {
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: var(--callout-blue);
+      background: rgba(59, 130, 246, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .algo-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+      flex-grow: 1;
+      line-height: 1.5;
+    }
+    .algo-link {
+      text-decoration: none;
+      color: var(--accent-color);
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .algo-link:hover {
+      text-decoration: underline;
+    }
+    .category-section {
+      margin-bottom: 50px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .category-icon {
+      font-size: 1.5rem;
+    }
+    .category-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--text-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay"></div>
+  <button class="hamburger-btn" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <div class="sidebar-controls">
+        <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
+        <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
+        <a href="algorithms.html" class="nav-item active">🧮 Algorithms List</a>
+        
+        <!-- Section 1: Preparation -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Preparation</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+          <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+          <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+          <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+          <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+          <a href="go-interview-plan.html" class="nav-item">📅 14-Day Interview Plan</a>
+        </details>
+
+        <!-- Section 2: System Design -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>System Design</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="system-design.html" class="nav-item">System Design Basics</a>
+          <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        </details>
+
+        <!-- Section 3: DSA Patterns -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>DSA Patterns</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+          <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+          <a href="patterns/fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+          <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+          <a href="patterns/intervals.html" class="nav-item">Intervals</a>
+          <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
+        </details>
+
+        <!-- Section 4: Data Structures -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Data Structures</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/hash-maps.html" class="nav-item">Hash Maps & Sets</a>
+          <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+          <a href="patterns/stack.html" class="nav-item">Stack</a>
+          <a href="patterns/heap.html" class="nav-item">Heap (Priority Queue)</a>
+          <a href="patterns/trees.html" class="nav-item">Trees</a>
+          <a href="patterns/tries.html" class="nav-item">Tries</a>
+          <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+        </details>
+
+        <!-- Section 5: Algorithms -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Algorithms</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+          <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+          <a href="patterns/greedy.html" class="nav-item">Greedy</a>
+          <a href="patterns/sort-search.html" class="nav-item">Sort & Search</a>
+          <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+        </details>
+
+        <!-- Section 6: Math -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Math</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
+        </details>
+
+        <!-- Section 7: Interactive Visualizers -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Interactive Visualizers</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="patterns/graph-visualizer.html" class="nav-item">Graph Algorithms</a>
+          <a href="patterns/bfs-graph.html" class="nav-item">BFS Visualization</a>
+          <a href="patterns/bst-visualizer.html" class="nav-item">BST Operations</a>
+          <a href="patterns/heap-visualizer.html" class="nav-item">Heap Operations</a>
+          <a href="patterns/trie-visualizer.html" class="nav-item">Trie Operations</a>
+          <a href="patterns/sorting-visualizer.html" class="nav-item">Sorting Algorithms</a>
+          <a href="patterns/stack-visualizer.html" class="nav-item">Stack Operations</a>
+          <a href="patterns/queue-visualizer.html" class="nav-item">Queue Operations</a>
+          <a href="patterns/knapsack-dp.html" class="nav-item">DP Knapsack</a>
+          <a href="patterns/linked-list-reversal.html" class="nav-item">Linked List Reversal</a>
+          <a href="patterns/n-queens.html" class="nav-item">N-Queens Backtracking</a>
+        </details>
+
+        <!-- Section 8: Guides & Tools -->
+        <details class="nav-section">
+          <summary class="nav-section-title">
+            <span>Guides & Tools</span>
+            <div class="progress-indicator"><div class="progress-bar"></div></div>
+          </summary>
+          <a href="cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
+          <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+          <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+          <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+          <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+          <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        </details>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🧮 Algorithms Master List</h1>
+        <p>A categorized catalog of essential algorithms for technical interviews.</p>
+      </div>
+
+      <!-- 1. Sorting & Searching -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">🔍</span>
+          <span class="category-name">Sorting & Searching</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Binary Search</h3>
+              <span class="algo-complexity">O(log n)</span>
+            </div>
+            <p class="algo-desc">Efficiently find an element in a sorted array by repeatedly dividing the search interval in half.</p>
+            <a href="patterns/binary-search.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Merge Sort</h3>
+              <span class="algo-complexity">O(n log n)</span>
+            </div>
+            <p class="algo-desc">Divide and conquer algorithm that divides the input array into two halves, calls itself for the two halves, and then merges the two sorted halves.</p>
+            <a href="patterns/sort-search.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Quick Sort</h3>
+              <span class="algo-complexity">O(n log n)</span>
+            </div>
+            <p class="algo-desc">Divide and conquer algorithm that picks an element as pivot and partitions the given array around the picked pivot.</p>
+            <a href="patterns/sort-search.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Heap Sort</h3>
+              <span class="algo-complexity">O(n log n)</span>
+            </div>
+            <p class="algo-desc">Comparison-based sorting technique based on Binary Heap data structure.</p>
+            <a href="patterns/heap.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Graph Algorithms -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">🕸️</span>
+          <span class="category-name">Graph Algorithms</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Breadth-First Search (BFS)</h3>
+              <span class="algo-complexity">O(V + E)</span>
+            </div>
+            <p class="algo-desc">Traverses a graph layer by layer. Used for shortest path in unweighted graphs.</p>
+            <a href="patterns/graphs.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Depth-First Search (DFS)</h3>
+              <span class="algo-complexity">O(V + E)</span>
+            </div>
+            <p class="algo-desc">Explores as far as possible along each branch before backtracking. Used for topological sorting, cycle detection.</p>
+            <a href="patterns/graphs.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Dijkstra's Algorithm</h3>
+              <span class="algo-complexity">O(E log V)</span>
+            </div>
+            <p class="algo-desc">Finds the shortest path from a source node to all other nodes in a weighted graph (non-negative weights).</p>
+            <a href="patterns/graphs.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Topological Sort</h3>
+              <span class="algo-complexity">O(V + E)</span>
+            </div>
+            <p class="algo-desc">Linear ordering of vertices in a DAG such that for every directed edge u-v, vertex u comes before v.</p>
+            <a href="patterns/graphs.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Union-Find (Disjoint Set)</h3>
+              <span class="algo-complexity">O(α(n))</span>
+            </div>
+            <p class="algo-desc">Data structure that tracks a set of elements partitioned into a number of disjoint (non-overlapping) subsets.</p>
+            <a href="patterns/graphs.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Tree Algorithms -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">🌳</span>
+          <span class="category-name">Tree Algorithms</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Tree Traversals</h3>
+              <span class="algo-complexity">O(n)</span>
+            </div>
+            <p class="algo-desc">Inorder (Left-Root-Right), Preorder (Root-Left-Right), Postorder (Left-Right-Root).</p>
+            <a href="patterns/trees.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Level Order Traversal</h3>
+              <span class="algo-complexity">O(n)</span>
+            </div>
+            <p class="algo-desc">Traverse the tree level by level (BFS).</p>
+            <a href="patterns/trees.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Trie Operations</h3>
+              <span class="algo-complexity">O(L)</span>
+            </div>
+            <p class="algo-desc">Insert, Search, and StartsWith operations in a Prefix Tree.</p>
+            <a href="patterns/tries.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Optimization & Dynamic Programming -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">⚡</span>
+          <span class="category-name">Optimization & DP</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">0/1 Knapsack</h3>
+              <span class="algo-complexity">O(n*W)</span>
+            </div>
+            <p class="algo-desc">Maximize value given weight constraints. Classic DP problem.</p>
+            <a href="patterns/dynamic-programming.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Longest Common Subsequence</h3>
+              <span class="algo-complexity">O(n*m)</span>
+            </div>
+            <p class="algo-desc">Find the longest subsequence present in two sequences.</p>
+            <a href="patterns/dynamic-programming.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Kadane's Algorithm</h3>
+              <span class="algo-complexity">O(n)</span>
+            </div>
+            <p class="algo-desc">Find the contiguous subarray within a one-dimensional numeric array which has the largest sum.</p>
+            <a href="patterns/prefix-sum.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Greedy Interval Scheduling</h3>
+              <span class="algo-complexity">O(n log n)</span>
+            </div>
+            <p class="algo-desc">Select the maximum number of mutually compatible activities.</p>
+            <a href="patterns/greedy.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Backtracking -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">🔄</span>
+          <span class="category-name">Backtracking</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Permutations / Subsets</h3>
+              <span class="algo-complexity">O(n!) / O(2^n)</span>
+            </div>
+            <p class="algo-desc">Generating all possible arrangements or subsets of a set.</p>
+            <a href="patterns/backtracking.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">N-Queens</h3>
+              <span class="algo-complexity">O(n!)</span>
+            </div>
+            <p class="algo-desc">Place N queens on an NxN chessboard such that no two queens attack each other.</p>
+            <a href="patterns/backtracking.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Math & Others -->
+      <div class="category-section">
+        <div class="category-header">
+          <span class="category-icon">🧮</span>
+          <span class="category-name">Math & Others</span>
+        </div>
+        <div class="algo-grid">
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Euclidean Algorithm (GCD)</h3>
+              <span class="algo-complexity">O(log(min(a,b)))</span>
+            </div>
+            <p class="algo-desc">Efficient method for computing the greatest common divisor (GCD) of two integers.</p>
+            <a href="patterns/math-geometry.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Sieve of Eratosthenes</h3>
+              <span class="algo-complexity">O(n log log n)</span>
+            </div>
+            <p class="algo-desc">Ancient algorithm for finding all prime numbers up to any given limit.</p>
+            <a href="patterns/math-geometry.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Floyd's Cycle Detection</h3>
+              <span class="algo-complexity">O(n)</span>
+            </div>
+            <p class="algo-desc">Fast & Slow pointers to detect cycles in a linked list or sequence.</p>
+            <a href="patterns/fast-slow-pointers.html" class="algo-link">View Pattern →</a>
+          </div>
+          <div class="algo-card">
+            <div class="algo-header">
+              <h3 class="algo-title">Boyer-Moore Voting</h3>
+              <span class="algo-complexity">O(n)</span>
+            </div>
+            <p class="algo-desc">Find the majority element (appears more than n/2 times) in linear time and constant space.</p>
+            <a href="patterns/hash-maps.html" class="algo-link">View Pattern →</a>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

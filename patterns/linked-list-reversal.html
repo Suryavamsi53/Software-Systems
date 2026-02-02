@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linked List Reversal - Amazon SDE Prep</title>
+    <title>Linked List Reversal - Software Systems Prep</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="graph-visualizer.css">
     <style>
@@ -48,13 +48,67 @@
             background: var(--bg-secondary);
         }
         .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Split View & Code Panel */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+        }
+        .canvas-section {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .code-section {
+            flex: 2;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line {
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            color: var(--accent-color);
+            border-left: 3px solid var(--accent-color);
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .func { color: #60a5fa; } .com { color: #6b7280; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🌑 Amazon SDE</h1>
+                <h1>🌑 Software Systems</h1>
                 <p>Linked List</p>
             </div>
             <div class="nav-section">
@@ -77,13 +131,29 @@
                 <div class="algo-toolbar">
                     <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
                 </div>
-                <div class="canvas-wrapper">
-                    <svg id="ll-svg" width="100%" height="100%"></svg>
-                </div>
-                <div class="legend">
-                    <span><span class="dot" style="background: #fb923c"></span>Prev</span>
-                    <span><span class="dot" style="background: #facc15"></span>Curr</span>
-                    <span><span class="dot" style="background: #22c55e"></span>NextTemp</span>
+                
+                <div class="split-view">
+                    <div class="canvas-section">
+                        <div class="canvas-wrapper" style="flex: 1; position: relative;">
+                            <svg id="ll-svg" width="100%" height="100%"></svg>
+                        </div>
+                        <div class="legend">
+                            <span><span class="dot" style="background: #fb923c"></span>Prev</span>
+                            <span><span class="dot" style="background: #facc15"></span>Curr</span>
+                            <span><span class="dot" style="background: #22c55e"></span>NextTemp</span>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-header">
+                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div id="code-display" class="algo-code"></div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -102,12 +172,48 @@
         let currentStep = 0;
         let isPlaying = false;
         let intervalId = null;
+        let currentLang = 'go';
 
         const svg = document.getElementById('ll-svg');
         const stepText = document.getElementById('step-text');
         const playBtn = document.getElementById('playBtn');
 
+        const ALGO_CODES = {
+            go: `func reverseList(head *ListNode) *ListNode {
+    var prev *ListNode // Init prev
+    curr := head       // Init curr
+    for curr != nil {  // Loop while curr exists
+        nextTemp := curr.Next // Save next
+        curr.Next = prev      // Reverse link
+        prev = curr           // Move prev
+        curr = nextTemp       // Move curr
+    }
+    return prev // New head
+}`,
+            java: `public ListNode reverseList(ListNode head) {
+    ListNode prev = null; // Init prev
+    ListNode curr = head; // Init curr
+    while (curr != null) { // Loop while curr exists
+        ListNode nextTemp = curr.next; // Save next
+        curr.next = prev;      // Reverse link
+        prev = curr;           // Move prev
+        curr = nextTemp;       // Move curr
+    }
+    return prev; // New head
+}`,
+            python: `def reverseList(head):
+    prev = None      # Init prev
+    curr = head      # Init curr
+    while curr:      # Loop while curr exists
+        next_temp = curr.next # Save next
+        curr.next = prev      # Reverse link
+        prev = curr           # Move prev
+        curr = next_temp      # Move curr
+    return prev      # New head`
+        };
+
         function init() {
+            renderCode('go');
             generateSteps();
             render(0);
         }
@@ -126,7 +232,8 @@
                 prev: null,
                 curr: 0,
                 next: null,
-                msg: "Start: prev=null, curr=head"
+                msg: "Start: prev=null, curr=head",
+                lines: [2, 3]
             });
 
             let prev = null;
@@ -141,7 +248,8 @@
                     prev: prev,
                     curr: curr,
                     next: nextTemp,
-                    msg: `Save next node: nextTemp = ${nextTemp !== null ? NODES[nextTemp] : 'null'}`
+                    msg: `Save next node: nextTemp = ${nextTemp !== null ? NODES[nextTemp] : 'null'}`,
+                    lines: [5]
                 });
 
                 // Step 2: Reverse Link
@@ -151,7 +259,8 @@
                     prev: prev,
                     curr: curr,
                     next: nextTemp,
-                    msg: `Reverse pointer: curr.next = prev (${prev !== null ? NODES[prev] : 'null'})`
+                    msg: `Reverse pointer: curr.next = prev (${prev !== null ? NODES[prev] : 'null'})`,
+                    lines: [6]
                 });
 
                 // Step 3: Move Prev
@@ -161,7 +270,8 @@
                     prev: prev,
                     curr: curr,
                     next: nextTemp,
-                    msg: `Move prev: prev = curr (${NODES[curr]})`
+                    msg: `Move prev: prev = curr (${NODES[curr]})`,
+                    lines: [7]
                 });
 
                 // Step 4: Move Curr
@@ -171,7 +281,8 @@
                     prev: prev,
                     curr: curr,
                     next: nextTemp,
-                    msg: `Move curr: curr = nextTemp (${curr !== null ? NODES[curr] : 'null'})`
+                    msg: `Move curr: curr = nextTemp (${curr !== null ? NODES[curr] : 'null'})`,
+                    lines: [8]
                 });
             }
 
@@ -180,7 +291,8 @@
                 prev: prev,
                 curr: null,
                 next: null,
-                msg: "Finished! New head is prev."
+                msg: "Finished! New head is prev.",
+                lines: [10]
             });
         }
 
@@ -244,6 +356,17 @@
             svg.appendChild(defs);
 
             stepText.textContent = state.msg;
+
+            // Highlight Code
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+            if (state.lines) {
+                state.lines.forEach(lineNum => {
+                    // Adjust line number for Python (it has 1 less line in loop usually, but here mapped 1:1 mostly)
+                    // Simple mapping: Go/Java lines match. Python is -1 for lines > 4 if we were strict, but let's keep it simple.
+                    const el = document.getElementById(`line-${lineNum}`);
+                    if (el) el.classList.add('active');
+                });
+            }
         }
 
         function drawLabel(x, y, text, color) {
@@ -255,6 +378,38 @@
             label.setAttribute("text-anchor", "middle");
             label.textContent = text;
             svg.appendChild(label);
+        }
+
+        function renderCode(lang) {
+            currentLang = lang;
+            const code = ALGO_CODES[lang];
+            const container = document.getElementById('code-display');
+            
+            let html = '';
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                // Basic syntax highlighting
+                let formatted = line
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
+                    .replace(/#.*/g, '<span class="com">$&</span>')
+                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void)\b/g, '<span class="kwd">$1</span>');
+                
+                html += `<div class="code-line" id="line-${i+1}"><span class="ln">${i+1}</span>${formatted}</div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        function copyCode() {
+            const code = ALGO_CODES[currentLang];
+            navigator.clipboard.writeText(code);
+        }
+
+        function switchLang(lang) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode(lang);
+            // Re-render current step to highlight correct lines
+            render(currentStep);
         }
 
         // Controls (Same as other visualizers)

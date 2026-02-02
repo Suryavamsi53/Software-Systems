@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Graph Algorithms - Amazon SDE Prep</title>
+  <title>Graph Algorithms - Software Systems Prep</title>
   <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
   <div class="container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1>🌑 Amazon SDE</h1>
+        <h1>🌑 Software Systems</h1>
         <p>Coding Interview Prep</p>
       </div>
       <div class="nav-section">
@@ -19,14 +19,48 @@
         <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
         <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
         <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
         <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="../go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="../golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="../mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="../dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item">Hash Maps & Sets</a>
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Data Structures</div>
         <a href="linked-lists.html" class="nav-item">Linked Lists</a>
+        <a href="stack.html" class="nav-item">Stack</a>
+        <a href="heap.html" class="nav-item">Heap (Priority Queue)</a>
         <a href="trees.html" class="nav-item">Trees</a>
+        <a href="tries.html" class="nav-item">Tries</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
         <a href="graphs.html" class="nav-item active">Graphs</a>
-        <a href="heap.html" class="nav-item">Heap</a>
+        <a href="backtracking.html" class="nav-item">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item">Greedy</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item">Math & Geometry</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item">Sort & Search</a>
       </div>
       <div class="nav-section">
         <div class="nav-section-title">Back to Home</div>
@@ -111,46 +145,86 @@
         <div class="section-title">
           <span class="emoji">💾</span> 2. Graph Representation
         </div>
-        <p style="color: var(--text-secondary); margin-bottom: 15px;">How do we store a graph in code? This is the first decision you make in an interview.</p>
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">A Graph is a non-linear data structure consisting of vertices (V) and edges (E). Here are the two most common ways to represent a graph.</p>
 
         <div class="collapsible">
-          <strong>1. Adjacency List (Preferred)</strong>
+          <strong>1. Adjacency Matrix</strong>
           <span class="collapsible-icon">▼</span>
         </div>
         <div class="collapsible-content">
-          <p style="color: var(--text-secondary);">An array of lists (or map of lists). Each node stores a list of its neighbors.</p>
+          <p style="color: var(--text-secondary);">An adjacency matrix is a 2D boolean matrix of size <code>V x V</code>. If there is an edge from vertex <code>i</code> to <code>j</code>, we mark <code>adjMat[i][j] = 1</code>, otherwise <code>0</code>.</p>
+          <ul style="margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Space:</strong> O(V²) - Heavy memory usage.</li>
+            <li><strong>Time (Check Edge):</strong> O(1) - Instant lookup.</li>
+            <li><strong>Verdict:</strong> Use only for dense graphs or when V is small.</li>
+          </ul>
+
+          <h4 style="color: var(--text-primary); margin-top: 15px;">Undirected Graph</h4>
+          <p style="color: var(--text-secondary);">Edges are bidirectional. If <code>0-1</code> exists, set <code>mat[0][1]=1</code> and <code>mat[1][0]=1</code>.</p>
+          <div class="code-block"><pre>
+func createUndirectedMatrix(n int, edges [][]int) [][]int {
+    mat := make([][]int, n)
+    for i := range mat { mat[i] = make([]int, n) }
+    
+    for _, e := range edges {
+        u, v := e[0], e[1]
+        mat[u][v] = 1
+        mat[v][u] = 1 // Symmetric
+    }
+    return mat
+}</pre></div>
+
+          <h4 style="color: var(--text-primary); margin-top: 15px;">Directed Graph</h4>
+          <p style="color: var(--text-secondary);">Edges are unidirectional. If <code>1->0</code> exists, set <code>mat[1][0]=1</code> only.</p>
+          <div class="code-block"><pre>
+func createDirectedMatrix(n int, edges [][]int) [][]int {
+    mat := make([][]int, n)
+    for i := range mat { mat[i] = make([]int, n) }
+    
+    for _, e := range edges {
+        u, v := e[0], e[1]
+        mat[u][v] = 1 // One way
+    }
+    return mat
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+          <strong>2. Adjacency List (Preferred)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);">An array of lists (or map of lists). Each index <code>i</code> stores a list of vertices adjacent to it.</p>
           <ul style="margin-left: 20px; color: var(--text-secondary);">
             <li><strong>Space:</strong> O(V + E) - Efficient for sparse graphs.</li>
             <li><strong>Time (Check Edge):</strong> O(Degree of V).</li>
             <li><strong>Verdict:</strong> Use this for 95% of interview problems.</li>
           </ul>
-          
-          <div style="background-color: var(--bg-tertiary); padding: 10px; border-radius: 8px; margin-top: 10px;">
-            <strong style="color: #3b82f6;">Go Implementation</strong>
-            <div class="code-block"><pre>
-// Map is easiest for generic keys (strings/ints)
-graph := make(map[int][]int)
 
-// Add Edge (0 -> 1)
-graph[0] = append(graph[0], 1)
+          <h4 style="color: var(--text-primary); margin-top: 15px;">Undirected Graph</h4>
+          <p style="color: var(--text-secondary);">For edge <code>0-1</code>, add <code>1</code> to <code>adj[0]</code> and <code>0</code> to <code>adj[1]</code>.</p>
+          <div class="code-block"><pre>
+func createUndirectedList(n int, edges [][]int) [][]int {
+    adj := make([][]int, n)
+    for _, e := range edges {
+        u, v := e[0], e[1]
+        adj[u] = append(adj[u], v)
+        adj[v] = append(adj[v], u) // Symmetric
+    }
+    return adj
+}</pre></div>
 
-// Add Undirected (0 <-> 1)
-graph[0] = append(graph[0], 1)
-graph[1] = append(graph[1], 0)</pre></div>
-          </div>
-        </div>
-
-        <div class="collapsible">
-          <strong>2. Adjacency Matrix</strong>
-          <span class="collapsible-icon">▼</span>
-        </div>
-        <div class="collapsible-content">
-          <p style="color: var(--text-secondary);">A 2D array <code>matrix[i][j]</code>. 1 if edge exists, 0 otherwise.</p>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><strong>Space:</strong> O(V²) - Heavy memory usage.</li>
-            <li><strong>Time (Check Edge):</strong> O(1) - Instant lookup.</li>
-            <li><strong>Verdict:</strong> Use only for dense graphs or when V is small (< 5000).</li>
-          </ul>
+          <h4 style="color: var(--text-primary); margin-top: 15px;">Directed Graph</h4>
+          <p style="color: var(--text-secondary);">For edge <code>1->0</code>, add <code>0</code> to <code>adj[1]</code> only.</p>
+          <div class="code-block"><pre>
+func createDirectedList(n int, edges [][]int) [][]int {
+    adj := make([][]int, n)
+    for _, e := range edges {
+        u, v := e[0], e[1]
+        adj[u] = append(adj[u], v)
+    }
+    return adj
+}</pre></div>
         </div>
       </div>
 

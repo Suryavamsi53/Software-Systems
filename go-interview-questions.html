@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Go Interview Questions - Amazon SDE Prep</title>
+  <title>Go Interview Questions - SDE Prep</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     .q-list { list-style: none; padding: 0; }
@@ -1247,6 +1247,774 @@
             <div class="q-header"><span class="q-question">200. Default case in select?</span><span class="q-tag intermediate">Intermediate</span></div>
             <div class="q-meta">Evaluates: CPU usage.</div>
             <div class="q-answer">Inside a loop, a default case causes a busy-wait spin loop (100% CPU). Avoid unless needed.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 21: LOGIC BUILDING -->
+      <div class="section">
+        <div class="category-header">21. Logic Building Problems (Coding)</div>
+        <ul class="q-list">
+          <!-- BASIC PROBLEMS -->
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">201. Check Even or Odd</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Check if a number is even or odd using bitwise operators.</p>
+              <div class="code-block"><pre>func checkEvenOdd(n int) string {
+    if n&1 == 0 { return "Even" }
+    return "Odd"
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">202. Multiplication Table</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Print multiplication table for <code>n</code>.</p>
+              <div class="code-block"><pre>func printTable(n int) {
+    for i := 1; i <= 10; i++ { fmt.Printf("%d * %d = %d\n", n, i, n*i) }
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">203. Sum of Naturals</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Sum of first <code>n</code> natural numbers using formula.</p>
+              <div class="code-block"><pre>func sumNaturals(n int) int {
+    return n * (n + 1) / 2
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">204. Sum of Squares of Naturals</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Sum of squares of first <code>n</code> natural numbers.</p>
+              <div class="code-block"><pre>func sumSquares(n int) int {
+    return (n * (n + 1) * (2*n + 1)) / 6
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">205. Swap Two Numbers</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Swap two variables without a temp variable (Go idiom).</p>
+              <div class="code-block"><pre>a, b = b, a</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">206. Closest Number</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Find number closest to <code>n</code> divisible by <code>m</code>.</p>
+              <div class="code-block"><pre>func closestNumber(n, m int) int {
+    q := n / m
+    n1 := m * q
+    n2 := m * (q + 1)
+    if n*m < 0 { n2 = m * (q - 1) }
+    if abs(n-n1) < abs(n-n2) { return n1 }
+    return n2
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">207. Dice Problem</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Find opposite face of a standard dice (Sum is 7).</p>
+              <div class="code-block"><pre>func oppositeFace(n int) int {
+    return 7 - n
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">208. Nth Term of AP</span><span class="q-tag beginner">Basic</span></div>
+            <div class="q-answer">
+              <p>Find nth term of Arithmetic Progression.</p>
+              <div class="code-block"><pre>func nthTermAP(a, d, n int) int {
+    return a + (n-1)*d
+}</pre></div>
+            </div>
+          </li>
+
+          <!-- EASY PROBLEMS -->
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">209. Sum of Digits</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Calculate sum of digits of a number.</p>
+              <div class="code-block"><pre>func sumDigits(n int) int {
+    sum := 0
+    for n > 0 { sum += n % 10; n /= 10 }
+    return sum
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">210. Reverse Digits</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Reverse a number mathematically.</p>
+              <div class="code-block"><pre>func reverse(n int) int {
+    rev := 0
+    for n > 0 { rev = rev*10 + n%10; n /= 10 }
+    return rev
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">211. Prime Testing</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Check if number is prime (O(sqrt(n))).</p>
+              <div class="code-block"><pre>func isPrime(n int) bool {
+    if n <= 1 { return false }
+    for i := 2; i*i <= n; i++ { if n%i == 0 { return false } }
+    return true
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">212. Check Power of Two</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Bitwise check: <code>n & (n-1) == 0</code>.</p>
+              <div class="code-block"><pre>func isPowerOfTwo(n int) bool {
+    return n > 0 && (n&(n-1)) == 0
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">213. Distance between Two Points</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Euclidean distance formula.</p>
+              <div class="code-block"><pre>func distance(x1, y1, x2, y2 float64) float64 {
+    return math.Sqrt(math.Pow(x2-x1, 2) + math.Pow(y2-y1, 2))
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">214. Valid Triangle</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Sum of any two sides > third side.</p>
+              <div class="code-block"><pre>func isValidTriangle(a, b, c int) bool {
+    return (a+b > c) && (a+c > b) && (b+c > a)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">215. Overlapping Rectangles</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Check if one is left/right/above/below the other.</p>
+              <div class="code-block"><pre>func isOverlap(l1, r1, l2, r2 Point) bool {
+    if l1.x > r2.x || l2.x > r1.x { return false }
+    if l1.y < r2.y || l2.y < r1.y { return false }
+    return true
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">216. Factorial</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Iterative factorial calculation.</p>
+              <div class="code-block"><pre>func factorial(n int) int {
+    res := 1
+    for i := 2; i <= n; i++ { res *= i }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">217. Pair Cube Count</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Find pairs (a, b) such that a³ + b³ = N.</p>
+              <div class="code-block"><pre>func pairCubeCount(n int) int {
+    count := 0
+    for a := 1; a*a*a <= n; a++ {
+        diff := n - a*a*a
+        cbrt := int(math.Cbrt(float64(diff)))
+        if cbrt*cbrt*cbrt == diff { count++ }
+    }
+    return count
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">218. GCD (HCF)</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Euclidean algorithm.</p>
+              <div class="code-block"><pre>func gcd(a, b int) int {
+    for b != 0 { a, b = b, a%b }
+    return a
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">219. LCM of Two Numbers</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Formula: <code>(a * b) / GCD(a, b)</code>.</p>
+              <div class="code-block"><pre>func lcm(a, b int) int {
+    if a == 0 || b == 0 { return 0 }
+    return (a * b) / gcd(a, b)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">220. Perfect Number</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Sum of proper divisors equals the number.</p>
+              <div class="code-block"><pre>func isPerfect(n int) bool {
+    sum := 1
+    for i := 2; i*i <= n; i++ {
+        if n%i == 0 {
+            sum += i
+            if i*i != n { sum += n/i }
+        }
+    }
+    return sum == n && n != 1
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">221. Add Two Fractions</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Add a/b + c/d.</p>
+              <div class="code-block"><pre>func addFractions(n1, d1, n2, d2 int) (int, int) {
+    d3 := gcd(d1, d2); d3 = (d1 * d2) / d3
+    n3 := (n1)*(d3/d1) + (n2)*(d3/d2)
+    common := gcd(n3, d3)
+    return n3/common, d3/common
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">222. Day of the Week</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Zeller's congruence.</p>
+              <div class="code-block"><pre>func dayOfWeek(d, m, y int) int {
+    t := []int{0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4}
+    if m < 3 { y-- }
+    return (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">223. Nth Fibonacci Number</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Iterative approach.</p>
+              <div class="code-block"><pre>func fib(n int) int {
+    if n <= 1 { return n }
+    a, b := 0, 1
+    for i := 2; i <= n; i++ { a, b = b, a+b }
+    return b
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">224. Decimal to Binary</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Using format string.</p>
+              <div class="code-block"><pre>func toBinary(n int) string {
+    return strconv.FormatInt(int64(n), 2)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">225. Nth term of series 1, 3, 6, 10...</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Triangular numbers formula.</p>
+              <div class="code-block"><pre>func triangularNum(n int) int {
+    return n * (n + 1) / 2
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">226. Armstrong Number</span><span class="q-tag intermediate">Easy</span></div>
+            <div class="q-answer">
+              <p>Sum of digits raised to power of count of digits.</p>
+              <div class="code-block"><pre>func isArmstrong(n int) bool {
+    sum, temp, digits := 0, n, 0
+    for temp > 0 { temp /= 10; digits++ }
+    temp = n
+    for temp > 0 {
+        sum += int(math.Pow(float64(temp%10), float64(digits)))
+        temp /= 10
+    }
+    return sum == n
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">227. Palindrome Number</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Check if number reads same forwards and backwards.</p>
+              <div class="code-block"><pre>func isPalindrome(n int) bool {
+    rev, temp := 0, n
+    for temp > 0 { rev = rev*10 + temp%10; temp /= 10 }
+    return rev == n
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">228. Digit Root</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Recursive sum of digits until single digit (Modulo 9).</p>
+              <div class="code-block"><pre>func digitRoot(n int) int {
+    if n == 0 { return 0 }
+    if n % 9 == 0 { return 9 }
+    return n % 9
+}</pre></div>
+            </div>
+          </li>
+
+          <!-- MEDIUM PROBLEMS -->
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">229. Square Root (Integer)</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Binary search for sqrt(x).</p>
+              <div class="code-block"><pre>func mySqrt(x int) int {
+    if x < 2 { return x }
+    l, r := 1, x/2
+    for l <= r {
+        mid := l + (r-l)/2
+        if mid*mid == x { return mid }
+        if mid*mid < x { l = mid + 1 } else { r = mid - 1 }
+    }
+    return r
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">230. 3 Divisors</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Number has exactly 3 divisors if it is a square of a prime.</p>
+              <div class="code-block"><pre>func isThree(n int) bool {
+    sq := int(math.Sqrt(float64(n)))
+    return sq*sq == n && isPrime(sq)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">231. Divisible by 4</span><span class="q-tag beginner">Easy</span></div>
+            <div class="q-answer">
+              <p>Last two digits divisible by 4.</p>
+              <div class="code-block"><pre>func divBy4(s string) bool {
+    n := len(s)
+    if n == 0 { return false }
+    if n == 1 { return (s[0]-'0')%4 == 0 }
+    return ((s[n-2]-'0')*10 + (s[n-1]-'0'))%4 == 0
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">232. Divisibility by 11</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Difference of sums of odd and even positions.</p>
+              <div class="code-block"><pre>func divBy11(s string) bool {
+    odd, even := 0, 0
+    for i, c := range s {
+        if i%2 == 0 { even += int(c-'0') } else { odd += int(c-'0') }
+    }
+    return (odd-even)%11 == 0
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">233. Divisibility by 13</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Simple modulo check.</p>
+              <div class="code-block"><pre>func divBy13(n int) bool {
+    return n % 13 == 0
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">234. K-th Digit in a^b</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Calculate power and extract digit.</p>
+              <div class="code-block"><pre>func kthDigit(a, b, k int) int {
+    p := int(math.Pow(float64(a), float64(b)))
+    for i := 0; i < k-1; i++ { p /= 10 }
+    return p % 10
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">235. Fraction to Recurring Decimal</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Use map to detect repeating remainders.</p>
+              <div class="code-block"><pre>// (Implementation omitted for brevity, uses map for remainders)</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">236. Recurring Sequence in Fraction</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Similar to above.</p>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">237. Compute nPr</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Permutations formula.</p>
+              <div class="code-block"><pre>func nPr(n, r int) int {
+    return factorial(n) / factorial(n-r)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">238. Compute nCr</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Combinations formula.</p>
+              <div class="code-block"><pre>func nCr(n, r int) int {
+    if r > n { return 0 }
+    if r == 0 || r == n { return 1 }
+    if r > n/2 { r = n - r }
+    res := 1
+    for i := 1; i <= r; i++ { res = res * (n - i + 1) / i }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">239. Pascal's Triangle</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Generate rows based on previous row.</p>
+              <div class="code-block"><pre>func generate(numRows int) [][]int {
+    res := [][]int{}
+    for i := 0; i < numRows; i++ {
+        row := make([]int, i+1)
+        row[0], row[i] = 1, 1
+        for j := 1; j < i; j++ {
+            row[j] = res[i-1][j-1] + res[i-1][j]
+        }
+        res = append(res, row)
+    }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">240. All Factors (Divisors)</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Iterate up to sqrt(n).</p>
+              <div class="code-block"><pre>func getFactors(n int) []int {
+    var f []int
+    for i := 1; i*i <= n; i++ {
+        if n%i == 0 {
+            f = append(f, i)
+            if i != n/i { f = append(f, n/i) }
+        }
+    }
+    return f
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">241. Prime Factorization</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Divide by 2, then odd numbers.</p>
+              <div class="code-block"><pre>func primeFactors(n int) []int {
+    var f []int
+    for n%2 == 0 { f = append(f, 2); n /= 2 }
+    for i := 3; i*i <= n; i += 2 {
+        for n%i == 0 { f = append(f, i); n /= i }
+    }
+    if n > 2 { f = append(f, n) }
+    return f
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">242. Largest Prime Factor</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Find max prime factor.</p>
+              <div class="code-block"><pre>func largestPrimeFactor(n int) int {
+    maxP := -1
+    for n%2 == 0 { maxP = 2; n /= 2 }
+    for i := 3; i*i <= n; i += 2 {
+        for n%i == 0 { maxP = i; n /= i }
+    }
+    if n > 2 { maxP = n }
+    return maxP
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">243. Modular Exponentiation</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Compute (a^b) % m efficiently.</p>
+              <div class="code-block"><pre>func modPow(base, exp, mod int) int {
+    res := 1
+    base %= mod
+    for exp > 0 {
+        if exp%2 == 1 { res = (res * base) % mod }
+        base = (base * base) % mod
+        exp /= 2
+    }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">244. Nth Catalan Number</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Formula: C(n) = (2n)! / ((n+1)!n!).</p>
+              <div class="code-block"><pre>func catalan(n int) int {
+    return nCr(2*n, n) / (n + 1)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">245. Binomial Coefficient</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Same as nCr.</p>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">246. Power Set</span><span class="q-tag intermediate">Medium</span></div>
+            <div class="q-answer">
+              <p>Generate all subsets using bit manipulation.</p>
+              <div class="code-block"><pre>func subsets(nums []int) [][]int {
+    res := [][]int{}
+    n := len(nums)
+    for i := 0; i < (1 << n); i++ {
+        subset := []int{}
+        for j := 0; j < n; j++ {
+            if (i>>j)&1 == 1 { subset = append(subset, nums[j]) }
+        }
+        res = append(res, subset)
+    }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">247. Next Permutation</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Find next lexicographical permutation.</p>
+            </div>
+          </li>
+
+          <!-- HARD PROBLEMS -->
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">248. Sieve of Eratosthenes</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Find all primes up to n.</p>
+              <div class="code-block"><pre>func sieve(n int) []int {
+    primes := make([]bool, n+1)
+    for i := 2; i <= n; i++ { primes[i] = true }
+    for p := 2; p*p <= n; p++ {
+        if primes[p] {
+            for i := p * p; i <= n; i += p { primes[i] = false }
+        }
+    }
+    var res []int
+    for i := 2; i <= n; i++ { if primes[i] { res = append(res, i) } }
+    return res
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">249. Super Prime</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Primes whose indices are also prime.</p>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">250. Clock Angle Problem</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Calculate angle between hour and minute hands.</p>
+              <div class="code-block"><pre>func angle(h, m int) float64 {
+    if h == 12 { h = 0 }
+    if m == 60 { m = 0; h += 1; if h > 12 { h -= 12 } }
+    hAngle := 0.5 * float64(h*60 + m)
+    mAngle := 6.0 * float64(m)
+    angle := math.Abs(hAngle - mAngle)
+    if angle > 180 { return 360 - angle }
+    return angle
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">251. Tower of Hanoi</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Recursive solution.</p>
+              <div class="code-block"><pre>func hanoi(n int, from, to, aux string) {
+    if n == 1 { fmt.Printf("Move 1 from %s to %s\n", from, to); return }
+    hanoi(n-1, from, aux, to)
+    fmt.Printf("Move %d from %s to %s\n", n, from, to)
+    hanoi(n-1, aux, to, from)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">252. Rat and Poisoned Problem</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Binary representation logic.</p>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">253. 8 Puzzle Problem</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>BFS/A* search.</p>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">254. Euler's Totient Function</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Count numbers coprime to n.</p>
+              <div class="code-block"><pre>func phi(n int) int {
+    res := float64(n)
+    for i := 2; i*i <= n; i++ {
+        if n%i == 0 {
+            for n%i == 0 { n /= i }
+            res *= (1.0 - (1.0 / float64(i)))
+        }
+    }
+    if n > 1 { res *= (1.0 - (1.0 / float64(n))) }
+    return int(res)
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">255. Josephus Problem</span><span class="q-tag advanced">Hard</span></div>
+            <div class="q-answer">
+              <p>Recursive solution for survivor.</p>
+              <div class="code-block"><pre>func josephus(n, k int) int {
+    if n == 1 { return 1 }
+    return (josephus(n-1, k) + k - 1) % n + 1
+}</pre></div>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 22: CONCURRENCY PATTERNS -->
+      <div class="section">
+        <div class="category-header">22. Go Concurrency Patterns</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">256. Worker Pool</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-answer">
+              <p><strong>Concept:</strong> A fixed number of workers pull tasks from a shared channel. Useful for controlling concurrency and resource usage.</p>
+              <div class="code-block"><pre>func worker(id int, jobs <-chan int, results chan<- int) {
+    for j := range jobs {
+        results <- j * 2 // Process job
+    }
+}
+
+func main() {
+    jobs := make(chan int, 100)
+    results := make(chan int, 100)
+
+    // Start 3 workers
+    for w := 1; w <= 3; w++ {
+        go worker(w, jobs, results)
+    }
+
+    // Send 5 jobs
+    for j := 1; j <= 5; j++ {
+        jobs <- j
+    }
+    close(jobs)
+
+    // Collect results
+    for a := 1; a <= 5; a++ {
+        <-results
+    }
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">257. Fan-Out / Fan-In</span><span class="q-tag advanced">Advanced</span></div>
+            <div class="q-answer">
+              <p><strong>Fan-Out:</strong> Multiple functions read from the same channel to distribute work. <strong>Fan-In:</strong> Multiple channels are multiplexed into a single output channel.</p>
+              <div class="code-block"><pre>func merge(cs ...<-chan int) <-chan int {
+    var wg sync.WaitGroup
+    out := make(chan int)
+
+    // Start an output goroutine for each input channel
+    output := func(c <-chan int) {
+        defer wg.Done()
+        for n := range c { out <- n }
+    }
+
+    wg.Add(len(cs))
+    for _, c := range cs {
+        go output(c)
+    }
+
+    // Close out channel when all inputs are done
+    go func() {
+        wg.Wait()
+        close(out)
+    }()
+    return out
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">258. Pipeline</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-answer">
+              <p><strong>Concept:</strong> A series of stages connected by channels, where each stage processes data and passes it to the next.</p>
+              <div class="code-block"><pre>func gen(nums ...int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for _, n := range nums { out <- n }
+        close(out)
+    }()
+    return out
+}
+
+func sq(in <-chan int) <-chan int {
+    out := make(chan int)
+    go func() {
+        for n := range in { out <- n * n }
+        close(out)
+    }()
+    return out
+}
+
+// Usage: for n := range sq(gen(2, 3)) { fmt.Println(n) }</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">259. Semaphore (Bounded Concurrency)</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-answer">
+              <p><strong>Concept:</strong> Using a buffered channel to limit the number of concurrent goroutines accessing a resource.</p>
+              <div class="code-block"><pre>func main() {
+    sem := make(chan struct{}, 5) // Max 5 concurrent
+    var wg sync.WaitGroup
+
+    for i := 0; i < 20; i++ {
+        wg.Add(1)
+        go func(id int) {
+            defer wg.Done()
+            sem <- struct{}{}        // Acquire token
+            defer func() { <-sem }() // Release token
+            
+            // Do work...
+            time.Sleep(time.Second)
+        }(i)
+    }
+    wg.Wait()
+}</pre></div>
+            </div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">260. Done Channel (Cancellation)</span><span class="q-tag intermediate">Intermediate</span></div>
+            <div class="q-answer">
+              <p><strong>Concept:</strong> Broadcasting a signal to stop multiple goroutines using a closed channel.</p>
+              <div class="code-block"><pre>func worker(done <-chan bool) {
+    for {
+        select {
+        case <-done:
+            return
+        default:
+            // Do work
+        }
+    }
+}
+
+func main() {
+    done := make(chan bool)
+    go worker(done)
+    time.Sleep(time.Second)
+    close(done) // Broadcasts cancellation to all listeners
+}</pre></div>
+            </div>
           </li>
         </ul>
       </div>

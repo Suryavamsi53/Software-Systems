@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hash Maps - Amazon Coding Patterns</title>
+    <title>Hash Maps - Software Systems Coding Patterns</title>
     <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
     <div class="container">
-        <nav class="sidebar">
+        <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>Amazon SDE</h1>
+                <h1>Software Systems</h1>
                 <p>Interview Prep</p>
             </div>
             <div class="nav-section">
@@ -19,29 +19,54 @@
                 <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
                 <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
                 <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+                <a href="../cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
                 <a href="../system-design.html" class="nav-item">System Design Basics</a>
                 <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
                 <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+                <a href="../go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+                <a href="../golang-guide.html" class="nav-item">Go Language Guide</a>
+                <a href="../mobile-access.html" class="nav-item">📱 Mobile Access</a>
+                <a href="../dashboard.html" class="nav-item">📊 My Dashboard</a>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Fundamental Patterns</div>
                 <a href="two-pointers.html" class="nav-item">Two Pointers</a>
                 <a href="sliding-window.html" class="nav-item">Sliding Window</a>
                 <a href="binary-search.html" class="nav-item">Binary Search</a>
-                <a href="hash-maps.html" class="nav-item active">Hash Maps</a>
+                <a href="hash-maps.html" class="nav-item active">Hash Maps & Sets</a>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Data Structures</div>
                 <a href="linked-lists.html" class="nav-item">Linked Lists</a>
+                <a href="stack.html" class="nav-item">Stack</a>
+                <a href="heap.html" class="nav-item">Heap (Priority Queue)</a>
                 <a href="trees.html" class="nav-item">Trees</a>
+                <a href="tries.html" class="nav-item">Tries</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Advanced Algorithms</div>
                 <a href="graphs.html" class="nav-item">Graphs</a>
-                <a href="heap.html" class="nav-item">Heap / Priority Queue</a>
+                <a href="backtracking.html" class="nav-item">Backtracking</a>
+                <a href="dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+                <a href="greedy.html" class="nav-item">Greedy</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Specialized Topics</div>
+                <a href="fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+                <a href="intervals.html" class="nav-item">Intervals</a>
+                <a href="prefix-sum.html" class="nav-item">Prefix Sum</a>
+                <a href="bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+                <a href="math-geometry.html" class="nav-item">Math & Geometry</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Reference</div>
+                <a href="sort-search.html" class="nav-item">Sort & Search</a>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Back to Home</div>
                 <a href="../index.html" class="nav-item">← Dashboard</a>
             </div>
-        </nav>
+        </aside>
 
         <main class="main-content">
             <div class="content-header">
@@ -83,12 +108,19 @@
 
             <!-- 3. Real-World Scenario -->
             <div class="section">
-                <div class="section-title">🎯 3. Real-World Amazon Scenario</div>
+                <div class="section-title">🎯 3. Real-World Software Systems Scenario</div>
                 <div class="callout interview-tip">
-                    <div class="callout-title">Product Deduplication</div>
+                    <div class="callout-title">Scenario 1: Product Deduplication & Counting</div>
                     <div class="callout-content">
-                        <p><strong>Scenario:</strong> You are processing a stream of product clicks. You want to count how many times each product (ASIN) was clicked to determine popularity.</p>
-                        <p><strong>Solution:</strong> Use a Hash Map where Key = ASIN (String) and Value = Count (Integer).</p>
+                        <p><strong>Context:</strong> Amazon processes billions of clickstream events. We need to aggregate clicks per product (ASIN) to calculate "Most Popular" lists in real-time.</p>
+                        <p><strong>Solution:</strong> Use a Hash Map (or distributed Key-Value store like Redis/DynamoDB) where <code>Key = ASIN</code> and <code>Value = ClickCount</code>. This allows O(1) updates.</p>
+                    </div>
+                </div>
+                <div class="callout interview-tip" style="margin-top: 15px;">
+                    <div class="callout-title">Scenario 2: Shopping Cart (Session Storage)</div>
+                    <div class="callout-content">
+                        <p><strong>Context:</strong> When a user adds items to their cart, we need to store this temporary state linked to their UserID.</p>
+                        <p><strong>Solution:</strong> A Hash Map allows instant retrieval of the user's cart using their UserID as the key. In a distributed system, this is often sharded (Consistent Hashing).</p>
                     </div>
                 </div>
             </div>
@@ -123,7 +155,7 @@ Step 2: Val = 7. Need = 9 - 7 = 2.
 
             <!-- 5. Canonical Problem -->
             <div class="section">
-                <div class="section-title">🧩 5. Canonical Amazon Problem</div>
+                <div class="section-title">🧩 5. Canonical Software Systems Problem</div>
                 <div class="callout amazon-expects">
                     <div class="callout-title">Two Sum (LeetCode 1)</div>
                     <div class="callout-content">
@@ -142,7 +174,7 @@ Step 2: Val = 7. Need = 9 - 7 = 2.
                     <div class="callout-content">
                         <p>Check every pair (i, j).</p>
                         <p><strong>Time Complexity:</strong> O(n²)</p>
-                        <p><strong>Why Amazon Rejects:</strong> O(n²) is unacceptable for large datasets. Hash Map reduces this to O(n).</p>
+                        <p><strong>Why Software Systems Rejects:</strong> O(n²) is unacceptable for large datasets. Hash Map reduces this to O(n).</p>
                     </div>
                 </div>
             </div>
@@ -276,7 +308,7 @@ class Solution:
 
             <!-- 10. Follow-ups -->
             <div class="section">
-                <div class="section-title">🟣 10. Amazon Follow-up Questions</div>
+                <div class="section-title">🟣 10. Software Systems Follow-up Questions</div>
                 <div class="callout advanced-followup">
                     <div class="callout-title">Variations</div>
                     <div class="callout-content">
@@ -285,6 +317,49 @@ class Solution:
                         <p><strong>Q: What if we need to return all unique pairs?</strong><br>
                         A: You need to handle duplicates carefully, perhaps by sorting first or using a Set to store result pairs.</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- 11. System Design Connection -->
+            <div class="section">
+                <div class="section-title">🏗️ 11. System Design Connection</div>
+                <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+                    <strong style="color: var(--text-primary);">Distributed Hash Tables (DHT) & Consistent Hashing</strong>
+                    <p style="margin-top: 10px; color: var(--text-secondary);">
+                        In System Design interviews (SDE-2+), Hash Maps scale horizontally via <strong>Sharding</strong>.
+                        Instead of <code>hash(key) % array_size</code>, we use <strong>Consistent Hashing</strong> to map keys to servers.
+                        This minimizes data movement when servers are added or removed (scaling).
+                        <br><br>
+                        <strong>Amazon DynamoDB</strong> is essentially a massive, distributed, persistent Hash Map.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 12. Knowledge Check -->
+            <div class="section">
+                <div class="section-title">🎓 12. Knowledge Check</div>
+                <div class="collapsible">
+                    <strong>Q1: Why is the worst-case time complexity of a Hash Map O(n)?</strong>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <p>If the hash function is poor, all keys might map to the same bucket (collision). If the collision resolution uses a linked list (chaining), searching becomes a linear scan of that list, which is O(n).</p>
+                </div>
+                
+                <div class="collapsible">
+                    <strong>Q2: How does a Hash Map handle resizing?</strong>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <p>When the load factor (elements / buckets) exceeds a threshold (e.g., 0.75), the map creates a new, larger array (usually double size) and re-hashes all existing elements into the new buckets. This is an O(n) operation but happens rarely (amortized O(1)).</p>
+                </div>
+
+                <div class="collapsible">
+                    <strong>Q3: Can we use a mutable object (like a List) as a Key?</strong>
+                    <span class="collapsible-icon">▼</span>
+                </div>
+                <div class="collapsible-content">
+                    <p>Generally, no. If the object changes after being inserted, its hash code changes. You won't be able to find it in the correct bucket anymore. In Python, lists cannot be keys; tuples can. In Java, you <em>can</em> but it's dangerous.</p>
                 </div>
             </div>
 

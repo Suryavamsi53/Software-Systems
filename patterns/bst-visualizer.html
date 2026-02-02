@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BST Visualization - Amazon SDE Prep</title>
+    <title>BST Visualization - Software Systems Prep</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="graph-visualizer.css">
     <style>
@@ -20,13 +20,65 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
+
+        /* Code Panel Styles */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+            min-height: 400px;
+        }
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .code-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-left: 3px solid #facc15;
+            color: #facc15;
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🌑 Amazon SDE</h1>
+                <h1>🌑 Software Systems</h1>
                 <p>BST Visualizer</p>
             </div>
             <div class="nav-section">
@@ -40,9 +92,11 @@
                     <input type="number" id="val-input" class="control-input" placeholder="Enter number...">
                     <button class="action-btn" onclick="insertValue()">Insert Node</button>
                     <button class="action-btn" onclick="searchValue()">Search Node</button>
+                    <button class="action-btn danger" onclick="deleteValue()">Delete Node</button>
                 </div>
                 <div class="control-group">
                     <button class="action-btn warning" onclick="resetTree()">Reset Tree</button>
+                    <button class="action-btn" onclick="balanceTree()">Balance Tree</button>
                 </div>
                 <div class="control-group">
                     <label>Interview Mode</label>
@@ -65,59 +119,19 @@
                             <button class="ex-btn" onclick="startTraversal('inorder')">Inorder</button>
                             <button class="ex-btn" onclick="startTraversal('preorder')">Preorder</button>
                             <button class="ex-btn" onclick="startTraversal('postorder')">Postorder</button>
+                            <button class="ex-btn" onclick="startTraversal('levelorder')">Level Order</button>
                         </div>
                     </div>
 
                     <!-- Right: Code Panel -->
                     <div class="code-section" id="code-panel">
-                        <div class="code-tabs">
+                        <div class="code-header">
+                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
                             <button class="tab-btn active" onclick="switchLang('go')">Go</button>
                             <button class="tab-btn" onclick="switchLang('java')">Java</button>
                             <button class="tab-btn" onclick="switchLang('python')">Python</button>
                         </div>
-                        
-                        <!-- Go Code -->
-                        <div id="code-go" class="code-display active">
-<div class="code-line" id="go-1">func insert(root *Node, val int) *Node {</div>
-<div class="code-line" id="go-2">    if root == nil {</div>
-<div class="code-line" id="go-3">        return &Node{Val: val}</div>
-<div class="code-line" id="go-4">    }</div>
-<div class="code-line" id="go-5">    if val < root.Val {</div>
-<div class="code-line" id="go-6">        root.Left = insert(root.Left, val)</div>
-<div class="code-line" id="go-7">    } else {</div>
-<div class="code-line" id="go-8">        root.Right = insert(root.Right, val)</div>
-<div class="code-line" id="go-9">    }</div>
-<div class="code-line" id="go-10">    return root</div>
-<div class="code-line" id="go-11">}</div>
-                        </div>
-
-                        <!-- Java Code -->
-                        <div id="code-java" class="code-display" style="display: none;">
-<div class="code-line" id="java-1">public TreeNode insert(TreeNode root, int val) {</div>
-<div class="code-line" id="java-2">    if (root == null) {</div>
-<div class="code-line" id="java-3">        return new TreeNode(val);</div>
-<div class="code-line" id="java-4">    }</div>
-<div class="code-line" id="java-5">    if (val < root.val) {</div>
-<div class="code-line" id="java-6">        root.left = insert(root.left, val);</div>
-<div class="code-line" id="java-7">    } else {</div>
-<div class="code-line" id="java-8">        root.right = insert(root.right, val);</div>
-<div class="code-line" id="java-9">    }</div>
-<div class="code-line" id="java-10">    return root;</div>
-<div class="code-line" id="java-11">}</div>
-                        </div>
-
-                        <!-- Python Code -->
-                        <div id="code-python" class="code-display" style="display: none;">
-<div class="code-line" id="py-1">def insert(root, val):</div>
-<div class="code-line" id="py-2">    if not root:</div>
-<div class="code-line" id="py-3">        return TreeNode(val)</div>
-<div class="code-line" id="py-4">    </div>
-<div class="code-line" id="py-5">    if val < root.val:</div>
-<div class="code-line" id="py-6">        root.left = insert(root.left, val)</div>
-<div class="code-line" id="py-7">    else:</div>
-<div class="code-line" id="py-8">        root.right = insert(root.right, val)</div>
-<div class="code-line" id="py-9">    return root</div>
-                        </div>
+                        <div id="code-display" class="algo-code" style="padding: 15px; font-family: monospace; font-size: 0.9rem; line-height: 1.5;"></div>
                     </div>
                 </div>
             </div>
@@ -142,12 +156,268 @@
         const NODE_RADIUS = 20;
         const VERTICAL_SPACING = 60;
         let currentLang = 'go';
+        let currentAlgo = 'insert';
+        let isAnimating = false;
+
+        const ALGO_CODES = {
+            insert: {
+                go: `func insert(root *Node, val int) *Node {
+    if root == nil {
+        return &Node{Val: val}
+    }
+    if val < root.Val {
+        root.Left = insert(root.Left, val)
+    } else {
+        root.Right = insert(root.Right, val)
+    }
+    return root
+}`,
+                java: `public TreeNode insert(TreeNode root, int val) {
+    if (root == null) {
+        return new TreeNode(val);
+    }
+    if (val < root.val) {
+        root.left = insert(root.left, val);
+    } else {
+        root.right = insert(root.right, val);
+    }
+    return root;
+}`,
+                python: `def insert(root, val):
+    if not root:
+        return TreeNode(val)
+    if val < root.val:
+        root.left = insert(root.left, val)
+    else:
+        root.right = insert(root.right, val)
+    return root`
+            },
+            search: {
+                go: `func search(root *Node, val int) *Node {
+    if root == nil || root.Val == val {
+        return root
+    }
+    if val < root.Val {
+        return search(root.Left, val)
+    }
+    return search(root.Right, val)
+}`,
+                java: `public TreeNode search(TreeNode root, int val) {
+    if (root == null || root.val == val) {
+        return root;
+    }
+    if (val < root.val) {
+        return search(root.left, val);
+    }
+    return search(root.right, val);
+}`,
+                python: `def search(root, val):
+    if not root or root.val == val:
+        return root
+    if val < root.val:
+        return search(root.left, val)
+    return search(root.right, val)`
+            },
+            delete: {
+                go: `func delete(root *Node, val int) *Node {
+    if root == nil { return nil }
+    // Find node to delete
+    
+    if val < root.Val {
+        root.Left = delete(root.Left, val)
+    } else if val > root.Val {
+        root.Right = delete(root.Right, val)
+    } else {
+        if root.Left == nil { return root.Right }
+        if root.Right == nil { return root.Left }
+        min := findMin(root.Right)
+        root.Val = min.Val
+        root.Right = delete(root.Right, min.Val)
+    }
+    return root
+}`,
+                java: `public TreeNode delete(TreeNode root, int val) {
+    if (root == null) return null;
+    // Find node to delete
+    
+    if (val < root.val) root.left = delete(root.left, val);
+    else if (val > root.val) root.right = delete(root.right, val);
+    else {
+        if (root.left == null) return root.right;
+        if (root.right == null) return root.left;
+        TreeNode min = findMin(root.right);
+        root.val = min.val;
+        root.right = delete(root.right, min.val);
+    }
+    return root;
+}`,
+                python: `def delete(root, val):
+    if not root: return None
+    # Find node to delete
+    
+    if val < root.val:
+        root.left = delete(root.left, val)
+    elif val > root.val:
+        root.right = delete(root.right, val)
+    else:
+        if not root.left: return root.right
+        if not root.right: return root.left
+        min_node = find_min(root.right)
+        root.val = min_node.val
+        root.right = delete(root.right, min_node.val)
+    return root`
+            },
+            inorder: {
+                go: `func inorder(root *Node) {
+    if root == nil { return }
+    inorder(root.Left)
+    fmt.Println(root.Val)
+    inorder(root.Right)
+}`,
+                java: `void inorder(TreeNode root) {
+    if (root == null) return;
+    inorder(root.left);
+    System.out.println(root.val);
+    inorder(root.right);
+}`,
+                python: `def inorder(root):
+    if not root: return
+    inorder(root.left)
+    print(root.val)
+    inorder(root.right)`
+            },
+            preorder: {
+                go: `func preorder(root *Node) {
+    if root == nil { return }
+    fmt.Println(root.Val)
+    preorder(root.Left)
+    preorder(root.Right)
+}`,
+                java: `void preorder(TreeNode root) {
+    if (root == null) return;
+    System.out.println(root.val);
+    preorder(root.left);
+    preorder(root.right);
+}`,
+                python: `def preorder(root):
+    if not root: return
+    print(root.val)
+    preorder(root.left)
+    preorder(root.right)`
+            },
+            postorder: {
+                go: `func postorder(root *Node) {
+    if root == nil { return }
+    postorder(root.Left)
+    postorder(root.Right)
+    fmt.Println(root.Val)
+}`,
+                java: `void postorder(TreeNode root) {
+    if (root == null) return;
+    postorder(root.left);
+    postorder(root.right);
+    System.out.println(root.val);
+}`,
+                python: `def postorder(root):
+    if not root: return
+    postorder(root.left)
+    postorder(root.right)
+    print(root.val)`
+            },
+            levelorder: {
+                go: `func levelOrder(root *Node) {
+    if root == nil { return }
+    queue := []*Node{root}
+    for len(queue) > 0 {
+        curr := queue[0]; queue = queue[1:]
+        fmt.Println(curr.Val)
+        if curr.Left != nil {
+            queue = append(queue, curr.Left)
+        }
+        if curr.Right != nil {
+            queue = append(queue, curr.Right)
+        }
+    }
+}`,
+                java: `void levelOrder(TreeNode root) {
+    if (root == null) return;
+    Queue<TreeNode> q = new LinkedList<>();
+    q.add(root);
+    while (!q.isEmpty()) {
+        TreeNode curr = q.poll();
+        System.out.println(curr.val);
+        if (curr.left != null) q.add(curr.left);
+        if (curr.right != null) q.add(curr.right);
+    }
+}`,
+                python: `def level_order(root):
+    if not root: return
+    queue = deque([root])
+    while queue:
+        curr = queue.popleft()
+        print(curr.val)
+        if curr.left: queue.append(curr.left)
+        if curr.right: queue.append(curr.right)`,
+            },
+            balance: {
+                go: `func balanceBST(root *Node) *Node {
+    var nums []int
+    var collect func(*Node)
+    collect = func(n *Node) {
+        if n == nil { return }
+        collect(n.Left); nums = append(nums, n.Val); collect(n.Right)
+    }
+    collect(root)
+    var build func(int, int) *Node
+    build = func(l, r int) *Node {
+        if l > r { return nil }
+        mid := (l + r) / 2
+        node := &Node{Val: nums[mid]}
+        node.Left = build(l, mid-1); node.Right = build(mid+1, r)
+        return node
+    }
+    return build(0, len(nums)-1)
+}`,
+                java: `TreeNode balanceBST(TreeNode root) {
+    List<Integer> nums = new ArrayList<>();
+    collect(root, nums);
+    return build(nums, 0, nums.size() - 1);
+}
+void collect(TreeNode n, List<Integer> nums) {
+    if (n == null) return;
+    collect(n.left, nums); nums.add(n.val); collect(n.right, nums);
+}
+TreeNode build(List<Integer> nums, int l, int r) {
+    if (l > r) return null;
+    int mid = (l + r) / 2;
+    TreeNode node = new TreeNode(nums.get(mid));
+    node.left = build(nums, l, mid - 1);
+    node.right = build(nums, mid + 1, r);
+    return node;
+}`,
+                python: `def balance_bst(root):
+    nums = []
+    def collect(node):
+        if not node: return
+        collect(node.left); nums.append(node.val); collect(node.right)
+    collect(root)
+    def build(l, r):
+        if l > r: return None
+        mid = (l + r) // 2
+        node = TreeNode(nums[mid])
+        node.left = build(l, mid - 1); node.right = build(mid + 1, r)
+        return node
+    return build(0, len(nums) - 1)`
+            }
+        };
 
         // Initial Tree
         [50, 30, 70, 20, 40, 60, 80].forEach(v => insertNode(v));
         drawTree();
+        renderCode('insert');
 
         function insertValue() {
+            if (isAnimating) return;
             const val = parseInt(input.value);
             if (isNaN(val)) return;
             
@@ -155,7 +425,17 @@
             input.value = '';
         }
 
+        function deleteValue() {
+            if (isAnimating) return;
+            const val = parseInt(input.value);
+            if (isNaN(val)) return;
+            
+            animateOperation(val, 'delete');
+            input.value = '';
+        }
+
         function searchValue() {
+            if (isAnimating) return;
             const val = parseInt(input.value);
             if (isNaN(val)) return;
             
@@ -164,9 +444,62 @@
         }
 
         function resetTree() {
+            if (isAnimating) return;
             root = null;
             drawTree();
             statusText.textContent = "Tree reset.";
+        }
+
+        async function startTraversal(type) {
+            if (isAnimating) return;
+            isAnimating = true;
+            renderCode(type);
+            statusText.textContent = `Starting ${type} traversal...`;
+            await sleep(500);
+            
+            if (type === 'levelorder') {
+                await traverseLevelOrder(root);
+            } else {
+                await traverse(root, type);
+            }
+            
+            statusText.textContent = `${type} traversal complete.`;
+            isAnimating = false;
+            unhighlightAll();
+        }
+
+        async function balanceTree() {
+            if (isAnimating || !root) return;
+            isAnimating = true;
+            renderCode('balance');
+            statusText.textContent = "Collecting nodes (Inorder)...";
+            
+            // 1. Collect nodes
+            let nodes = [];
+            function getInorder(node) {
+                if (!node) return;
+                getInorder(node.left);
+                nodes.push(node.val);
+                getInorder(node.right);
+            }
+            getInorder(root);
+            
+            await sleep(1000);
+            statusText.textContent = "Building balanced tree...";
+            
+            function buildBalanced(arr, start, end) {
+                if (start > end) return null;
+                let mid = Math.floor((start + end) / 2);
+                let node = new Node(arr[mid]);
+                node.left = buildBalanced(arr, start, mid - 1);
+                node.right = buildBalanced(arr, mid + 1, end);
+                return node;
+            }
+            
+            root = buildBalanced(nodes, 0, nodes.length - 1);
+            drawTree();
+            statusText.textContent = "Tree balanced.";
+            isAnimating = false;
         }
 
         function insertNode(val) {
@@ -190,6 +523,24 @@
                     curr = curr.right;
                 }
             }
+        }
+
+        function deleteNode(node, val) {
+            if (!node) return null;
+            if (val < node.val) {
+                node.left = deleteNode(node.left, val);
+            } else if (val > node.val) {
+                node.right = deleteNode(node.right, val);
+            } else {
+                if (!node.left) return node.right;
+                if (!node.right) return node.left;
+                
+                let minNode = node.right;
+                while (minNode.left) minNode = minNode.left;
+                node.val = minNode.val;
+                node.right = deleteNode(node.right, minNode.val);
+            }
+            return node;
         }
 
         // Calculate positions for rendering
@@ -271,13 +622,16 @@
         // ==========================================
 
         async function animateOperation(val, type) {
+            isAnimating = true;
+            renderCode(type);
+            
             if (type === 'insert' && !root) {
                 highlightLine(1); await sleep(500);
                 highlightLine(3); await sleep(500);
                 insertNode(val);
                 drawTree();
                 statusText.textContent = `Inserted root ${val}`;
-                unhighlightLines();
+                isAnimating = false;
                 return;
             }
 
@@ -299,28 +653,40 @@
                 statusText.textContent = `Comparing ${val} with ${node.val}...`;
                 
                 highlightLine(2); // Check null
-                await sleep(800);
+                await sleep(600);
                 
                 if (val === node.val) {
                     if (type === 'search') {
                         highlightNode(node.val, 'found');
                         statusText.textContent = `Found ${val}!`;
                         return;
+                    } else if (type === 'delete') {
+                        highlightNode(node.val, 'found');
+                        statusText.textContent = `Found ${val}. Deleting...`;
+                        await sleep(1000);
+                        
+                        root = deleteNode(root, val);
+                        drawTree();
+                        statusText.textContent = `Deleted ${val}.`;
+                        isAnimating = false;
+                        unhighlightAll();
+                        return;
                     } else {
                         statusText.textContent = `${val} already exists.`;
                         unhighlightAll();
+                        isAnimating = false;
                         return;
                     }
                 }
                 
-                highlightLine(5); // Compare val < root.val
+                highlightLine(5); // Compare
                 await sleep(500);
                 
                 if (val < node.val) {
                     highlightLine(6); // Recurse Left
                 } else {
-                    highlightLine(7); // Else
-                    highlightLine(8); // Recurse Right
+                    highlightLine(7); // Else (or 8 depending on lang)
+                    highlightLine(8); 
                 }
                 unhighlightNode(node.val);
             }
@@ -328,7 +694,7 @@
             if (type === 'insert') {
                 insertNode(val);
                 drawTree();
-                highlightLine(3); // Create Node
+                highlightLine(3); // Create Node (approx)
                 // Highlight new node
                 setTimeout(() => {
                     highlightNode(val, 'found');
@@ -338,6 +704,128 @@
             } else {
                 statusText.textContent = `${val} not found.`;
             }
+            isAnimating = false;
+        }
+
+        async function traverse(node, type) {
+            if (!node) {
+                highlightLine(2); // Base case check
+                await sleep(400);
+                return;
+            }
+
+            highlightLine(1); // Func entry
+            await sleep(300);
+
+            if (type === 'preorder') {
+                await visitNode(node, 3);
+                highlightLine(4); await traverse(node.left, type);
+                highlightLine(5); await traverse(node.right, type);
+            } else if (type === 'inorder') {
+                highlightLine(3); await traverse(node.left, type);
+                await visitNode(node, 4);
+                highlightLine(5); await traverse(node.right, type);
+            } else if (type === 'postorder') {
+                highlightLine(3); await traverse(node.left, type);
+                highlightLine(4); await traverse(node.right, type);
+                await visitNode(node, 5);
+            }
+        }
+
+        function getLevelOrderLines() {
+            if (currentLang === 'go') return { init: 3, loop: 4, dequeue: 5, visit: 6, leftCheck: 7, leftAdd: 8, rightCheck: 10, rightAdd: 11 };
+            if (currentLang === 'java') return { init: 3, loop: 5, dequeue: 6, visit: 7, leftCheck: 8, leftAdd: 8, rightCheck: 9, rightAdd: 9 };
+            if (currentLang === 'python') return { init: 3, loop: 4, dequeue: 5, visit: 6, leftCheck: 7, leftAdd: 7, rightCheck: 8, rightAdd: 8 };
+            return {};
+        }
+
+        async function traverseLevelOrder(node) {
+            const lines = getLevelOrderLines();
+            
+            if (!node) {
+                highlightLine(2);
+                await sleep(400);
+                return;
+            }
+
+            highlightLine(lines.init);
+            let queue = [node];
+            await sleep(500);
+
+            while (queue.length > 0) {
+                highlightLine(lines.loop);
+                await sleep(300);
+
+                let curr = queue.shift();
+                highlightLine(lines.dequeue);
+                await sleep(300);
+
+                highlightLine(lines.visit);
+                highlightNode(curr.val, 'highlight');
+                statusText.textContent = `Visiting ${curr.val}`;
+                await sleep(700);
+                unhighlightNode(curr.val);
+
+                highlightLine(lines.leftCheck);
+                if (curr.left) {
+                    highlightLine(lines.leftAdd);
+                    queue.push(curr.left);
+                    await sleep(300);
+                }
+
+                highlightLine(lines.rightCheck);
+                if (curr.right) {
+                    highlightLine(lines.rightAdd);
+                    queue.push(curr.right);
+                    await sleep(300);
+                }
+            }
+        }
+
+        async function visitNode(node, lineNum) {
+            highlightLine(lineNum);
+            highlightNode(node.val, 'highlight');
+            statusText.textContent = `Visiting ${node.val}`;
+            await sleep(700);
+            unhighlightNode(node.val);
+        }
+
+        function renderCode(algo) {
+            currentAlgo = algo;
+            const code = ALGO_CODES[algo][currentLang];
+            const container = document.getElementById('code-display');
+            container.innerHTML = '';
+            
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = `line-${i+1}`;
+                // Simple syntax highlighting
+                let html = line
+                    .replace(/\b(func|var|return|if|else|for|type|struct|public|void|def|class|print|fmt|System)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>');
+                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                container.appendChild(div);
+            });
+        }
+
+        function copyCode() {
+            const code = ALGO_CODES[currentAlgo][currentLang];
+            navigator.clipboard.writeText(code);
+        }
+
+        function highlightLine(num) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const line = document.getElementById(`line-${num}`);
+            if (line) line.classList.add('active');
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode(currentAlgo);
         }
 
         function highlightNode(val, className) {

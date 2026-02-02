@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N-Queens Visualization - Amazon SDE Prep</title>
+    <title>N-Queens Visualization - Software Systems Prep</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="graph-visualizer.css">
     <style>
@@ -49,13 +49,67 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
+
+        /* Code Panel Styles */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+            min-height: 400px;
+        }
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+        }
+        .code-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-left: 3px solid #facc15;
+            color: #facc15;
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🌑 Amazon SDE</h1>
+                <h1>🌑 Software Systems</h1>
                 <p>N-Queens</p>
             </div>
             <div class="nav-section">
@@ -80,13 +134,29 @@
                 <div class="algo-toolbar">
                     <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
                 </div>
-                <div class="canvas-wrapper" style="display: flex; justify-content: center; align-items: center;">
-                    <div id="board" class="board"></div>
-                </div>
-                <div class="legend">
-                    <span><span class="dot" style="background: #facc15"></span>Placing</span>
-                    <span><span class="dot" style="background: #ef4444"></span>Conflict</span>
-                    <span><span class="dot" style="background: #22c55e"></span>Safe</span>
+                
+                <div class="split-view">
+                    <div class="canvas-section">
+                        <div class="canvas-wrapper" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                            <div id="board" class="board"></div>
+                        </div>
+                        <div class="legend">
+                            <span><span class="dot" style="background: #facc15"></span>Placing</span>
+                            <span><span class="dot" style="background: #ef4444"></span>Conflict</span>
+                            <span><span class="dot" style="background: #22c55e"></span>Safe</span>
+                        </div>
+                    </div>
+                    <div class="code-section">
+                        <div class="code-header">
+                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div id="code-display" class="algo-code"></div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -99,14 +169,62 @@
         let isPlaying = false;
         let intervalId = null;
         const ANIMATION_SPEED = 800;
+        let currentLang = 'go';
+        let currentOp = 'solve';
 
         const boardEl = document.getElementById('board');
         const stepText = document.getElementById('step-text');
         const playBtn = document.getElementById('playBtn');
         const nInput = document.getElementById('n-input');
 
+        const CODES = {
+            solve: {
+                go: `func solve(row int) {
+    if row == N {
+        foundSolution = true
+        return
+    }
+    for col := 0; col < N; col++ {
+        if isSafe(row, col) {
+            board[row][col] = 'Q'
+            solve(row + 1)
+            if foundSolution { return }
+            board[row][col] = '.' // Backtrack
+        }
+    }
+}`,
+                java: `void solve(int row) {
+    if (row == N) {
+        foundSolution = true;
+        return;
+    }
+    for (int col = 0; col < N; col++) {
+        if (isSafe(row, col)) {
+            board[row][col] = 'Q';
+            solve(row + 1);
+            if (foundSolution) return;
+            board[row][col] = '.'; // Backtrack
+        }
+    }
+}`,
+                python: `def solve(row):
+    if row == N:
+        return True
+    
+    for col in range(N):
+        if is_safe(row, col):
+            board[row][col] = 'Q'
+            if solve(row + 1):
+                return True
+            board[row][col] = '.' # Backtrack
+            
+    return False`
+            }
+        };
+
         function init() {
             N = parseInt(nInput.value);
+            renderCode('solve');
             renderBoardStructure();
             generateSteps();
             updateView(0);
@@ -151,7 +269,8 @@
                     steps.push({
                         board: JSON.parse(JSON.stringify(board)),
                         msg: "Solution Found!",
-                        status: 'success'
+                        status: 'success',
+                        lines: { go: 3, java: 3, python: 3 }
                     });
                     return true; // Stop after first solution for simplicity
                 }
@@ -163,7 +282,8 @@
                         board: JSON.parse(JSON.stringify(board)),
                         msg: `Trying Queen at (${row}, ${col})...`,
                         active: [row, col],
-                        status: 'active'
+                        status: 'active',
+                        lines: { go: 7, java: 7, python: 6 }
                     });
 
                     if (isSafe(row, col)) {
@@ -171,7 +291,8 @@
                             board: JSON.parse(JSON.stringify(board)),
                             msg: `(${row}, ${col}) is Safe. Moving to next row.`,
                             active: [row, col],
-                            status: 'safe'
+                            status: 'safe',
+                            lines: { go: 8, java: 8, python: 7 }
                         });
 
                         if (solve(row + 1)) return true;
@@ -181,7 +302,8 @@
                             board: JSON.parse(JSON.stringify(board)),
                             msg: `Backtracking from row ${row+1}. Removing Queen at (${row}, ${col}).`,
                             active: [row, col],
-                            status: 'backtrack'
+                            status: 'backtrack',
+                            lines: { go: 11, java: 11, python: 10 }
                         });
                         board[row][col] = '.';
                     } else {
@@ -189,7 +311,8 @@
                             board: JSON.parse(JSON.stringify(board)),
                             msg: `Conflict at (${row}, ${col})! Invalid placement.`,
                             active: [row, col],
-                            status: 'invalid'
+                            status: 'invalid',
+                            lines: { go: 7, java: 7, python: 6 }
                         });
                         board[row][col] = '.';
                     }
@@ -239,6 +362,49 @@
             }
 
             stepText.textContent = state.msg;
+            
+            if (state.lines) {
+                highlightLine(state.lines[currentLang]);
+            }
+        }
+
+        function renderCode(op) {
+            currentOp = op;
+            const code = CODES[op][currentLang];
+            const display = document.getElementById('code-display');
+            display.innerHTML = '';
+            
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = `line-${i+1}`;
+                let html = line
+                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true|false|bool|boolean)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
+                    .replace(/#.*/g, '<span class="com">$&</span>');
+                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                display.appendChild(div);
+            });
+        }
+
+        function highlightLine(num) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const line = document.getElementById(`line-${num}`);
+            if (line) line.classList.add('active');
+        }
+
+        function copyCode() {
+            const code = CODES[currentOp][currentLang];
+            navigator.clipboard.writeText(code);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode(currentOp);
+            updateView(currentStep);
         }
 
         // Controls

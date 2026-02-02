@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Min-Heap Visualization - Amazon SDE Prep</title>
+    <title>Min-Heap Visualization - Software Systems Prep</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="graph-visualizer.css">
     <style>
@@ -54,13 +54,65 @@
             border-radius: 4px;
             margin-bottom: 10px;
         }
+
+        /* Code Panel Styles */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+            min-height: 400px;
+        }
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .code-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-left: 3px solid #facc15;
+            color: #facc15;
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🌑 Amazon SDE</h1>
+                <h1>🌑 Software Systems</h1>
                 <p>Heap Visualizer</p>
             </div>
             <div class="nav-section">
@@ -86,11 +138,28 @@
                 <div class="algo-toolbar">
                     <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Min-Heap property: Parent <= Children.</div>
                 </div>
-                <div class="canvas-wrapper">
-                    <svg id="heap-svg" width="100%" height="100%"></svg>
-                </div>
-                <div class="array-view" id="array-view">
-                    <!-- Array cells injected here -->
+                
+                <div class="split-view">
+                    <!-- Left: Visualization -->
+                    <div class="canvas-section">
+                        <div class="canvas-wrapper" style="flex: 1;">
+                            <svg id="heap-svg" width="100%" height="100%"></svg>
+                        </div>
+                        <div class="array-view" id="array-view"></div>
+                    </div>
+
+                    <!-- Right: Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div id="code-display" class="algo-code"></div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -104,8 +173,98 @@
         const input = document.getElementById('val-input');
         const NODE_RADIUS = 20;
         const VERTICAL_SPACING = 60;
+        let currentLang = 'go';
+        let currentOp = 'insert';
+
+        const CODES = {
+            insert: {
+                go: `func (h *MinHeap) Insert(val int) {
+    h.data = append(h.data, val)
+    h.bubbleUp(len(h.data) - 1)
+}
+func (h *MinHeap) bubbleUp(idx int) {
+    for idx > 0 {
+        parent := (idx - 1) / 2
+        if h.data[idx] >= h.data[parent] { break }
+        h.swap(idx, parent)
+        idx = parent
+    }
+}`,
+                java: `public void insert(int val) {
+    heap.add(val);
+    bubbleUp(heap.size() - 1);
+}
+private void bubbleUp(int idx) {
+    while (idx > 0) {
+        int parent = (idx - 1) / 2;
+        if (heap.get(idx) >= heap.get(parent)) break;
+        swap(idx, parent);
+        idx = parent;
+    }
+}`,
+                python: `def insert(self, val):
+    self.heap.append(val)
+    self._bubble_up(len(self.heap) - 1)
+
+def _bubble_up(self, idx):
+    while idx > 0:
+        parent = (idx - 1) // 2
+        if self.heap[idx] >= self.heap[parent]: break
+        self._swap(idx, parent)
+        idx = parent`
+            },
+            extractMin: {
+                go: `func (h *MinHeap) ExtractMin() int {
+    min := h.data[0]; last := len(h.data)-1
+    h.data[0] = h.data[last]; h.data = h.data[:last]
+    h.bubbleDown(0)
+    return min
+}
+func (h *MinHeap) bubbleDown(idx int) {
+    for {
+        left, right := 2*idx+1, 2*idx+2
+        smallest := idx
+        if left < len(h.data) && h.data[left] < h.data[smallest] { smallest = left }
+        if right < len(h.data) && h.data[right] < h.data[smallest] { smallest = right }
+        if smallest == idx { break }
+        h.swap(idx, smallest); idx = smallest
+    }
+}`,
+                java: `public int extractMin() {
+    int min = heap.get(0);
+    heap.set(0, heap.remove(heap.size() - 1));
+    bubbleDown(0);
+    return min;
+}
+private void bubbleDown(int idx) {
+    while (true) {
+        int left = 2 * idx + 1, right = 2 * idx + 2;
+        int smallest = idx;
+        if (left < heap.size() && heap.get(left) < heap.get(smallest)) smallest = left;
+        if (right < heap.size() && heap.get(right) < heap.get(smallest)) smallest = right;
+        if (smallest == idx) break;
+        swap(idx, smallest); idx = smallest;
+    }
+}`,
+                python: `def extract_min(self):
+    min_val = self.heap[0]
+    self.heap[0] = self.heap.pop()
+    self._bubble_down(0)
+    return min_val
+
+def _bubble_down(self, idx):
+    while True:
+        left, right = 2 * idx + 1, 2 * idx + 2
+        smallest = idx
+        if left < len(self.heap) and self.heap[left] < self.heap[smallest]: smallest = left
+        if right < len(self.heap) and self.heap[right] < self.heap[smallest]: smallest = right
+        if smallest == idx: break
+        self._swap(idx, smallest); idx = smallest`
+            }
+        };
 
         function init() {
+            renderCode('insert');
             draw();
         }
 
@@ -202,6 +361,8 @@
 
         // Animations
         async function animateInsert(val) {
+            renderCode('insert');
+            highlightLine(2); // Append
             heap.push(val);
             draw();
             
@@ -210,15 +371,21 @@
             statusText.textContent = `Inserted ${val} at end. Bubbling up...`;
             await sleep(800);
 
+            highlightLine(3); // Call bubbleUp
+            await sleep(300);
+
             while (idx > 0) {
+                highlightLine(6); // Loop check
                 let parentIdx = Math.floor((idx - 1) / 2);
                 
                 highlight(idx, 'highlight');
                 highlight(parentIdx, 'compare');
                 statusText.textContent = `Comparing ${heap[idx]} with parent ${heap[parentIdx]}`;
+                highlightLine(8); // Compare
                 await sleep(800);
 
                 if (heap[idx] < heap[parentIdx]) {
+                    highlightLine(9); // Swap
                     // Swap
                     [heap[idx], heap[parentIdx]] = [heap[parentIdx], heap[idx]];
                     draw();
@@ -287,6 +454,43 @@
         function unhighlightAll() {
             document.querySelectorAll('circle').forEach(c => c.classList.remove('highlight', 'compare'));
             document.querySelectorAll('.array-cell').forEach(c => c.classList.remove('cell-active', 'cell-compare'));
+        }
+
+        function renderCode(op) {
+            currentOp = op;
+            const code = CODES[op][currentLang];
+            const display = document.getElementById('code-display');
+            display.innerHTML = '';
+            
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = `line-${i+1}`;
+                let html = line
+                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>');
+                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                display.appendChild(div);
+            });
+        }
+
+        function highlightLine(num) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const line = document.getElementById(`line-${num}`);
+            if (line) line.classList.add('active');
+        }
+
+        function copyCode() {
+            const code = CODES[currentOp][currentLang];
+            navigator.clipboard.writeText(code);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode(currentOp);
         }
 
         function sleep(ms) {

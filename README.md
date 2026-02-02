@@ -1,20 +1,20 @@
-# 🌑 Software System 
+# 🌑 Software Systems SDE Coding Interview Patterns
 
-**Your Daily Revision Hub for Software Engineer in Go Lang & Coding Interviews**
+**Your Daily Revision Hub for Company SDE-1 / SDE-2 Coding Interviews**
 
-A dark-themed, self-hosted interview preparation website focused on 18 essential DSA patterns used in real FANG Company coding interviews. Built for pattern recognition, deep learning, and practical problem-solving.
+A dark-themed, self-hosted interview preparation website focused on 18 essential DSA patterns used in real Company coding interviews. Built for pattern recognition, deep learning, and practical problem-solving.
 
 ---
 
 ## 🎯 Features
 
-- **Dark Theme Only**: Easy on eyes, professional design 
+- **Dark Theme Only**: Easy on eyes, professional design inspired by Company internal tools
 - **18 DSA Patterns**: Comprehensive coverage of all interview-critical patterns
-- **Interview-Grade Content**: Written from an interviewer's perspective
+- **Interview-Grade Content**: Written from an Company interviewer's perspective
 - **Real-World Scenarios**: Business context for each pattern (not just textbook theory)
 - **Go + Python**: Primary implementations in Go, with Python snippets
 - **Colored Callout System**:
-  - 🟢 **Green**: What Companies Expects
+  - 🟢 **Green**: What Company Expects
   - 🔵 **Blue**: Key Intuition & Core Concepts
   - 🟡 **Yellow**: Interview Tips & Real-World Examples
   - 🔴 **Red**: Common Mistakes to Avoid
@@ -58,7 +58,7 @@ A dark-themed, self-hosted interview preparation website focused on 18 essential
 ## 🏗️ Project Structure
 
 ```
-Company-coding-patterns/
+amazon-coding-patterns/
 │
 ├── index.html                    # Landing page with navigation
 ├── styles.css                    # Dark theme + colored callouts
@@ -151,7 +151,7 @@ Company-coding-patterns/
 
 ### Option 1: Open in Browser (Local)
 ```bash
-cd /home/suryavamsivaggu/Company/Company-coding-patterns
+cd /home/suryavamsivaggu/Company/amazon-coding-patterns
 python -m http.server 8000
 # Then open: http://localhost:8000
 ```
