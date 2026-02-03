@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hash Map Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .viz-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      height: calc(100vh - 150px);
+      min-height: 600px;
+    }
+    .viz-left {
+      flex: 5;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow-y: auto;
+    }
+    .viz-right {
+      flex: 4;
+      display: flex;
+      flex-direction: column;
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Array Visualization */
+    .array-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 40px 0;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .array-item {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #555;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      position: relative;
+      background: var(--bg-primary);
+      transition: all 0.3s ease;
+      color: var(--text-primary);
+    }
+    .array-item.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--callout-blue);
+      transform: scale(1.1);
+    }
+    .array-item.found {
+      background: rgba(34, 197, 94, 0.4);
+      border-color: var(--callout-green);
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+      z-index: 10;
+    }
+    
+    .index-label {
+      position: absolute;
+      bottom: -20px;
+      font-size: 0.6rem;
+      color: #666;
+    }
+
+    /* Map Visualization */
+    .map-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      min-height: 120px;
+      align-content: flex-start;
+      border: 1px solid var(--border-color);
+    }
+    .map-label {
+      width: 100%;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+    }
+    .map-entry {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      min-width: 60px;
+      overflow: hidden;
+      animation: fadeIn 0.4s ease;
+    }
+    .map-key {
+      background: rgba(255, 255, 255, 0.05);
+      width: 100%;
+      text-align: center;
+      padding: 5px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--accent-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+    .map-val {
+      padding: 8px;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+    .map-entry.highlight {
+      border-color: var(--callout-green);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Stats Panel */
+    .stats-box {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+    .stat-value { font-size: 1.5rem; font-weight: bold; font-family: monospace; color: var(--text-primary); }
+
+    /* Code Panel */
+    .lang-tabs {
+      display: flex;
+      background: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .lang-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #888;
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      border-right: 1px solid #333;
+    }
+    .lang-tab.active {
+      background: #1e1e1e;
+      color: #fff;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-view {
+      flex: 1;
+      padding: 15px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      overflow-y: auto;
+      color: #d4d4d4;
+      line-height: 1.6;
+    }
+    .code-line {
+      padding: 0 10px;
+      border-left: 3px solid transparent;
+      display: block;
+    }
+    .code-line.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left-color: var(--callout-yellow);
+    }
+    .comment { color: #6a9955; }
+    .keyword { color: #569cd6; }
+    .type { color: #4ec9b0; }
+    .string { color: #ce9178; }
+    .number { color: #b5cea8; }
+
+    /* Controls */
+    .control-panel {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary { background: var(--accent-color); color: white; }
+    .btn-secondary { background: #4b5563; color: white; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .explanation {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--callout-blue);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>SDE</h1>
+        <p>Visualizer</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="nav-item">← Back to Dashboard</a>
+        <a href="../patterns/hash-maps.html" class="nav-item">📖 Pattern Guide</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🔑 Hash Map Visualizer</h1>
+        <p>Problem: Two Sum (Find indices of two numbers that sum to target).</p>
+      </div>
+
+      <div class="viz-container">
+        <!-- Left: Visualization -->
+        <div class="viz-left">
+          <div style="text-align: center; margin-bottom: 10px;">
+            <span style="color: var(--text-secondary);">Target Sum: </span>
+            <strong style="color: var(--accent-color); font-size: 1.2rem;">9</strong>
+          </div>
+
+          <div class="array-display" id="array-container">
+            <!-- Generated by JS -->
+          </div>
+
+          <div class="map-container" id="map-container">
+            <div class="map-label">Hash Map (Value → Index)</div>
+            <!-- Map entries injected here -->
+          </div>
+
+          <div class="explanation" id="explanation">
+            Click "Start" to begin the visualization.
+          </div>
+
+          <div class="stats-box">
+            <div class="stat-item">
+              <span class="stat-label">Current Index</span>
+              <span class="stat-value" id="val-idx">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Current Num</span>
+              <span class="stat-value" id="val-num">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Complement (Target - Num)</span>
+              <span class="stat-value" id="val-comp">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Found in Map?</span>
+              <span class="stat-value" id="val-found">-</span>
+            </div>
+          </div>
+
+          <div class="control-panel">
+            <button class="btn btn-primary" onclick="startViz()" id="btn-start">▶ Start</button>
+            <button class="btn btn-secondary" onclick="stepViz()" id="btn-step" disabled>Step ➝</button>
+            <button class="btn btn-secondary" onclick="resetViz()" id="btn-reset">↺ Reset</button>
+          </div>
+
+          <div class="complexity-analysis" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+                    <div style="color: var(--accent-color); font-weight: bold; font-size: 0.9rem;">Time: O(n)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Single pass. Map lookups are O(1) on average.</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+                    <div style="color: var(--accent-color); font-weight: bold; font-size: 0.9rem;">Space: O(n)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Hash map stores up to n elements.</div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Code -->
+        <div class="viz-right">
+          <div class="lang-tabs">
+            <button class="lang-tab active" onclick="switchLang('go')">Go</button>
+            <button class="lang-tab" onclick="switchLang('java')">Java</button>
+            <button class="lang-tab" onclick="switchLang('python')">Python</button>
+          </div>
+          <div class="code-view" id="code-view">
+            <!-- Code injected by JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const nums = [2, 11, 7, 15];
+    const target = 9;
+    
+    const codeSnippets = {
+      go: [
+        "func twoSum(nums []int, target int) []int {",
+        "    seen := make(map[int]int)",
+        "    for i, num := range nums {",
+        "        complement := target - num",
+        "        if idx, ok := seen[complement]; ok {",
+        "            return []int{idx, i}",
+        "        }",
+        "        seen[num] = i",
+        "    }",
+        "    return nil",
+        "}"
+      ],
+      java: [
+        "public int[] twoSum(int[] nums, int target) {",
+        "    Map<Integer, Integer> map = new HashMap<>();",
+        "    for (int i = 0; i < nums.length; i++) {",
+        "        int complement = target - nums[i];",
+        "        if (map.containsKey(complement)) {",
+        "            return new int[] { map.get(complement), i };",
+        "        }",
+        "        map.put(nums[i], i);",
+        "    }",
+        "    return new int[] {};",
+        "}"
+      ],
+      python: [
+        "def two_sum(nums, target):",
+        "    seen = {}",
+        "    for i, num in enumerate(nums):",
+        "        complement = target - num",
+        "        if complement in seen:",
+        "            return [seen[complement], i]",
+        "        seen[num] = i",
+        "    return []",
+        ""
+      ]
+    };
+
+    // Map logical steps to line numbers (0-based)
+    const lineMappings = {
+      'init': { go: 1, java: 1, python: 1 },
+      'loop': { go: 2, java: 2, python: 2 },
+      'calc': { go: 3, java: 3, python: 3 },
+      'check': { go: 4, java: 4, python: 4 },
+      'found': { go: 5, java: 5, python: 5 },
+      'add': { go: 7, java: 7, python: 6 },
+      'end': { go: 9, java: 9, python: 7 }
+    };
+
+    let currentLang = 'go';
+    let steps = [];
+    let currentStep = -1;
+
+    function init() {
+      const container = document.getElementById('array-container');
+      container.innerHTML = '';
+      nums.forEach((n, i) => {
+        const el = document.createElement('div');
+        el.className = 'array-item';
+        el.id = `item-${i}`;
+        el.textContent = n;
+        
+        const idx = document.createElement('div');
+        idx.className = 'index-label';
+        idx.textContent = i;
+        el.appendChild(idx);
+        
+        container.appendChild(el);
+      });
+      renderCode();
+      generateSteps();
+    }
+
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderCode();
+      if (currentStep >= 0) highlightLine(steps[currentStep].type);
+    }
+
+    function renderCode() {
+      const view = document.getElementById('code-view');
+      view.innerHTML = codeSnippets[currentLang].map((line, i) => 
+        `<div class="code-line" id="line-${i}">${line.replace(/ /g, '&nbsp;')}</div>`
+      ).join('');
+    }
+
+    function generateSteps() {
+      steps = [];
+      let seen = {};
+      
+      steps.push({ type: 'init', idx: -1, num: '-', comp: '-', found: false, map: {}, msg: "Initialize empty Hash Map." });
+
+      for (let i = 0; i < nums.length; i++) {
+        let num = nums[i];
+        let complement = target - num;
+        
+        steps.push({ type: 'loop', idx: i, num, comp: '-', found: false, map: {...seen}, msg: `Iteration ${i}: Current number is ${num}.` });
+        
+        steps.push({ type: 'calc', idx: i, num, comp: complement, found: false, map: {...seen}, msg: `Calculate Complement: ${target} - ${num} = ${complement}.` });
+        
+        if (complement in seen) {
+             steps.push({ type: 'check', idx: i, num, comp: complement, found: true, map: {...seen}, msg: `Check Map: Is ${complement} in map? YES!` });
+             steps.push({ type: 'found', idx: i, num, comp: complement, found: true, map: {...seen}, msg: `Found pair! Indices [${seen[complement]}, ${i}].` });
+             return;
+        } else {
+             steps.push({ type: 'check', idx: i, num, comp: complement, found: false, map: {...seen}, msg: `Check Map: Is ${complement} in map? NO.` });
+             seen[num] = i;
+             steps.push({ type: 'add', idx: i, num, comp: complement, found: false, map: {...seen}, msg: `Add current number to map: { ${num}: ${i} }.` });
+        }
+      }
+      steps.push({ type: 'end', idx: -1, num: '-', comp: '-', found: false, map: {...seen}, msg: "Loop finished. No solution found." });
+    }
+
+    function startViz() {
+      currentStep = -1;
+      document.getElementById('btn-start').disabled = true;
+      document.getElementById('btn-step').disabled = false;
+      stepViz();
+    }
+
+    function stepViz() {
+      if (currentStep >= steps.length - 1) return;
+      currentStep++;
+      const s = steps[currentStep];
+      
+      // Update UI
+      document.getElementById('val-idx').textContent = s.idx === -1 ? '-' : s.idx;
+      document.getElementById('val-num').textContent = s.num;
+      document.getElementById('val-comp').textContent = s.comp;
+      document.getElementById('val-found').textContent = s.found ? 'YES' : 'NO';
+      document.getElementById('explanation').textContent = s.msg;
+
+      // Update Array Visuals
+      document.querySelectorAll('.array-item').forEach((el, i) => {
+        el.className = 'array-item';
+        if (i === s.idx) el.classList.add('active');
+        if (s.found && (i === s.idx || nums[i] === s.comp)) el.classList.add('found');
+      });
+
+      // Update Map Visuals
+      const mapContainer = document.getElementById('map-container');
+      mapContainer.innerHTML = '<div class="map-label">Hash Map (Value → Index)</div>';
+      
+      for (const [key, val] of Object.entries(s.map)) {
+          const entry = document.createElement('div');
+          entry.className = 'map-entry';
+          if (parseInt(key) === s.comp && s.found) entry.classList.add('highlight');
+          
+          entry.innerHTML = `
+            <div class="map-key">${key}</div>
+            <div class="map-val">${val}</div>
+          `;
+          mapContainer.appendChild(entry);
+      }
+
+      highlightLine(s.type);
+    }
+
+    function highlightLine(type) {
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      const lineNum = lineMappings[type][currentLang];
+      const el = document.getElementById(`line-${lineNum}`);
+      if (el) {
+        el.classList.add('active');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function resetViz() {
+      currentStep = -1;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('btn-step').disabled = true;
+      
+      // Reset UI
+      document.getElementById('val-idx').textContent = '-';
+      document.getElementById('val-num').textContent = '-';
+      document.getElementById('val-comp').textContent = '-';
+      document.getElementById('val-found').textContent = '-';
+      document.getElementById('explanation').textContent = 'Click "Start" to begin the visualization.';
+      document.getElementById('map-container').innerHTML = '<div class="map-label">Hash Map (Value → Index)</div>';
+      
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

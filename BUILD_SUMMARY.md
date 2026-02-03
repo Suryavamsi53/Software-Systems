@@ -26,8 +26,8 @@ amazon-coding-patterns/
 ├── patterns/                     (19 pattern pages)
 │   ├── two-pointers.html         ✅ FULL (10 sections, 500+ lines)
 │   ├── sliding-window.html       ✅ FULL (10 sections, 400+ lines)
-│   ├── binary-search.html        📋 TEMPLATE
-│   ├── hash-maps.html            📋 TEMPLATE
+│   ├── binary-search.html        ✅ FULL (10 sections + Visualizer)
+│   ├── hash-maps.html            ✅ FULL (12 sections + Visualizer)
 │   ├── linked-lists.html         📋 TEMPLATE
 │   ├── stack.html                📋 TEMPLATE
 │   ├── heap.html                 📋 TEMPLATE
@@ -43,6 +43,12 @@ amazon-coding-patterns/
 │   ├── bit-manipulation.html     📋 TEMPLATE
 │   ├── math-geometry.html        📋 TEMPLATE
 │   └── sort-search.html          📋 TEMPLATE
+│
+├── patterns/ (Interactive Visualizers)
+│   ├── sliding-window-visualizer.html
+│   ├── binary-search-visualizer.html
+│   ├── two-pointers-visualizer.html
+│   ├── hash-map-visualizer.html
 │
 └── assets/                       (Ready for diagrams)
 ```
@@ -199,6 +205,11 @@ Every complete pattern page includes:
 - Walkthrough: Step-by-step trace
 - Complexity: O(log n) time, O(1) space
 
+**Highlights**:
+- Interactive Visualizer (`binary-search-visualizer.html`)
+- Code tracking for Go, Java, Python
+- Visual search space reduction
+
 ### Pattern 4: Hash Maps & Sets
 **File**: `patterns/hash-maps.html`
 
@@ -211,6 +222,11 @@ Every complete pattern page includes:
 - Optimized: O(n) solution
 - Walkthrough: Trace table
 - Complexity: O(n) time, O(n) space
+
+**Highlights**:
+- Interactive Visualizer (`hash-map-visualizer.html`)
+- Collision handling visualization
+- Real-world system design context
 
 ---
 
@@ -437,8 +453,8 @@ CMD ["python", "-m", "http.server", "8000"]
 
 ## 📊 Statistics
 
-### Files Created: 24
-- HTML: 19 (1 index + 18 patterns)
+### Files Created: 30+
+- HTML: 23+ (Patterns + Visualizers)
 - CSS: 1 (styles.css with 300+ lines)
 - JS: 1 (script.js with 200+ lines)
 - Markdown: 2 (README + QUICKSTART)
@@ -449,7 +465,7 @@ CMD ["python", "-m", "http.server", "8000"]
 - JavaScript: 200+ lines (interactivity)
 - Two Pointers HTML: 500+ lines
 - Sliding Window HTML: 400+ lines
-- Total HTML content: 900+ lines
+- Total HTML content: 2000+ lines
 
 ### Design Colors
 - Dark theme: #0f172a (background)
@@ -549,7 +565,8 @@ python -m http.server 8000
 
 ### Current Capacity:
 - ✅ Two complete patterns (Two Pointers, Sliding Window)
-- ✅ 17 more patterns ready for content
+- ✅ Binary Search & Hash Maps complete with Visualizers
+- ✅ 15 more patterns ready for content
 - ✅ Full navigation and design
 - ✅ Responsive on all devices
 

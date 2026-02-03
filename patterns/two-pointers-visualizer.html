@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two Pointers Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .viz-container {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+      height: calc(100vh - 150px);
+      min-height: 600px;
+    }
+    .viz-left {
+      flex: 5;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+      border-radius: 8px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow-y: auto;
+    }
+    .viz-right {
+      flex: 4;
+      display: flex;
+      flex-direction: column;
+      background: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+    }
+    
+    /* Array Visualization */
+    .array-display {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin: 60px 0;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .array-item {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #555;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border-radius: 8px;
+      position: relative;
+      background: var(--bg-primary);
+      transition: all 0.3s ease;
+      color: var(--text-primary);
+    }
+    .array-item.active {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--callout-blue);
+      transform: scale(1.1);
+    }
+    .array-item.found {
+      background: rgba(34, 197, 94, 0.4);
+      border-color: var(--callout-green);
+      box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+      transform: scale(1.1);
+      z-index: 10;
+    }
+    
+    /* Pointers */
+    .pointer-label {
+      position: absolute;
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+      white-space: nowrap;
+    }
+    .ptr-left { top: -30px; left: 50%; transform: translateX(-50%); color: var(--callout-blue); }
+    .ptr-right { bottom: -30px; left: 50%; transform: translateX(-50%); color: var(--callout-red); }
+    
+    .index-label {
+      position: absolute;
+      bottom: -20px;
+      font-size: 0.6rem;
+      color: #666;
+    }
+
+    /* Stats Panel */
+    .stats-box {
+      background: rgba(255,255,255,0.05);
+      padding: 20px;
+      border-radius: 8px;
+      margin-top: auto;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-label { font-size: 0.8rem; color: #aaa; text-transform: uppercase; }
+    .stat-value { font-size: 1.5rem; font-weight: bold; font-family: monospace; color: var(--text-primary); }
+
+    /* Code Panel */
+    .lang-tabs {
+      display: flex;
+      background: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .lang-tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      color: #888;
+      background: transparent;
+      border: none;
+      font-weight: 600;
+      border-right: 1px solid #333;
+    }
+    .lang-tab.active {
+      background: #1e1e1e;
+      color: #fff;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-view {
+      flex: 1;
+      padding: 15px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      overflow-y: auto;
+      color: #d4d4d4;
+      line-height: 1.6;
+    }
+    .code-line {
+      padding: 0 10px;
+      border-left: 3px solid transparent;
+      display: block;
+    }
+    .code-line.active {
+      background: rgba(255, 255, 255, 0.1);
+      border-left-color: var(--callout-yellow);
+    }
+    .comment { color: #6a9955; }
+    .keyword { color: #569cd6; }
+    .type { color: #4ec9b0; }
+    .string { color: #ce9178; }
+    .number { color: #b5cea8; }
+
+    /* Controls */
+    .control-panel {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s;
+    }
+    .btn-primary { background: var(--accent-color); color: white; }
+    .btn-secondary { background: #4b5563; color: white; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    
+    .explanation {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--callout-blue);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Visualizer</p>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="nav-item">← Back to Dashboard</a>
+        <a href="../patterns/two-pointers.html" class="nav-item">📖 Pattern Guide</a>
+      </nav>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>↔️ Two Pointers Visualizer</h1>
+        <p>Problem: Find two numbers in a sorted array that sum to target.</p>
+      </div>
+
+      <div class="viz-container">
+        <!-- Left: Visualization -->
+        <div class="viz-left">
+          <div style="text-align: center; margin-bottom: 10px;">
+            <span style="color: var(--text-secondary);">Target Sum: </span>
+            <strong style="color: var(--accent-color); font-size: 1.2rem;">18</strong>
+          </div>
+
+          <div class="array-display" id="array-container">
+            <!-- Generated by JS -->
+          </div>
+
+          <div class="explanation" id="explanation">
+            Click "Start" to begin the visualization.
+          </div>
+
+          <div class="stats-box">
+            <div class="stat-item">
+              <span class="stat-label">Left Pointer</span>
+              <span class="stat-value" id="val-left">0</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Right Pointer</span>
+              <span class="stat-value" id="val-right">-1</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Current Sum</span>
+              <span class="stat-value" id="val-sum">-</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Comparison</span>
+              <span class="stat-value" id="val-comp">-</span>
+            </div>
+          </div>
+
+          <div class="control-panel">
+            <button class="btn btn-primary" onclick="startViz()" id="btn-start">▶ Start</button>
+            <button class="btn btn-secondary" onclick="stepViz()" id="btn-step" disabled>Step ➝</button>
+            <button class="btn btn-secondary" onclick="resetViz()" id="btn-reset">↺ Reset</button>
+          </div>
+
+          <div class="complexity-analysis" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+                    <div style="color: var(--accent-color); font-weight: bold; font-size: 0.9rem;">Time: O(n)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Single pass. Pointers move at most N steps total.</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+                    <div style="color: var(--accent-color); font-weight: bold; font-size: 0.9rem;">Space: O(1)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 5px;">Only two integer variables used for pointers.</div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Code -->
+        <div class="viz-right">
+          <div class="lang-tabs">
+            <button class="lang-tab active" onclick="switchLang('go')">Go</button>
+            <button class="lang-tab" onclick="switchLang('java')">Java</button>
+            <button class="lang-tab" onclick="switchLang('python')">Python</button>
+          </div>
+          <div class="code-view" id="code-view">
+            <!-- Code injected by JS -->
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const nums = [2, 5, 8, 11, 13, 15, 20, 25];
+    const target = 18;
+    
+    const codeSnippets = {
+      go: [
+        "func twoSum(numbers []int, target int) []int {",
+        "    left, right := 0, len(numbers)-1",
+        "    for left < right {",
+        "        sum := numbers[left] + numbers[right]",
+        "        if sum == target {",
+        "            return []int{left + 1, right + 1}",
+        "        } else if sum < target {",
+        "            left++",
+        "        } else {",
+        "            right--",
+        "        }",
+        "    }",
+        "    return nil",
+        "}"
+      ],
+      java: [
+        "public int[] twoSum(int[] numbers, int target) {",
+        "    int left = 0, right = numbers.length - 1;",
+        "    while (left < right) {",
+        "        int sum = numbers[left] + numbers[right];",
+        "        if (sum == target) {",
+        "            return new int[]{left + 1, right + 1};",
+        "        } else if (sum < target) {",
+        "            left++;",
+        "        } else {",
+        "            right--;",
+        "        }",
+        "    }",
+        "    return new int[]{-1, -1};",
+        "}"
+      ],
+      python: [
+        "def twoSum(numbers, target):",
+        "    left, right = 0, len(numbers) - 1",
+        "    while left < right:",
+        "        current_sum = numbers[left] + numbers[right]",
+        "        if current_sum == target:",
+        "            return [left + 1, right + 1]",
+        "        elif current_sum < target:",
+        "            left += 1",
+        "        else:",
+        "            right -= 1",
+        "    return []",
+        ""
+      ]
+    };
+
+    // Map logical steps to line numbers (0-based)
+    const lineMappings = {
+      'init': { go: 1, java: 1, python: 1 },
+      'loop': { go: 2, java: 2, python: 2 },
+      'calc': { go: 3, java: 3, python: 3 },
+      'found': { go: 5, java: 5, python: 5 },
+      'check_less': { go: 6, java: 6, python: 6 },
+      'move_left': { go: 7, java: 7, python: 7 },
+      'move_right': { go: 9, java: 9, python: 9 },
+      'not_found': { go: 12, java: 12, python: 10 }
+    };
+
+    let currentLang = 'go';
+    let steps = [];
+    let currentStep = -1;
+
+    function init() {
+      const container = document.getElementById('array-container');
+      container.innerHTML = '';
+      nums.forEach((n, i) => {
+        const el = document.createElement('div');
+        el.className = 'array-item';
+        el.id = `item-${i}`;
+        el.textContent = n;
+        
+        const idx = document.createElement('div');
+        idx.className = 'index-label';
+        idx.textContent = i;
+        el.appendChild(idx);
+        
+        container.appendChild(el);
+      });
+      renderCode();
+      generateSteps();
+    }
+
+    function switchLang(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderCode();
+      if (currentStep >= 0) highlightLine(steps[currentStep].type);
+    }
+
+    function renderCode() {
+      const view = document.getElementById('code-view');
+      view.innerHTML = codeSnippets[currentLang].map((line, i) => 
+        `<div class="code-line" id="line-${i}">${line.replace(/ /g, '&nbsp;')}</div>`
+      ).join('');
+    }
+
+    function generateSteps() {
+      steps = [];
+      let left = 0;
+      let right = nums.length - 1;
+      
+      steps.push({ type: 'init', left, right, sum: 0, msg: "Initialize pointers. Left=0, Right=" + right });
+
+      while (left < right) {
+        steps.push({ type: 'loop', left, right, sum: 0, msg: `Loop condition ${left} < ${right} is true.` });
+        
+        let sum = nums[left] + nums[right];
+        steps.push({ type: 'calc', left, right, sum, msg: `Calculate Sum: nums[${left}] (${nums[left]}) + nums[${right}] (${nums[right]}) = ${sum}` });
+
+        if (sum === target) {
+             steps.push({ type: 'found', left, right, sum, found: true, msg: `Sum ${sum} == Target ${target}. Found pair!` });
+             return;
+        } else if (sum < target) {
+             steps.push({ type: 'check_less', left, right, sum, msg: `Sum ${sum} < Target ${target}. Need larger sum.` });
+             left++;
+             steps.push({ type: 'move_left', left, right, sum, msg: `Move Left pointer to ${left} to increase sum.` });
+        } else {
+             steps.push({ type: 'check_less', left, right, sum, msg: `Sum ${sum} > Target ${target}. Need smaller sum.` });
+             right--;
+             steps.push({ type: 'move_right', left, right, sum, msg: `Move Right pointer to ${right} to decrease sum.` });
+        }
+      }
+      steps.push({ type: 'not_found', left, right, sum: 0, msg: "Loop finished. Pair not found." });
+    }
+
+    function startViz() {
+      currentStep = -1;
+      document.getElementById('btn-start').disabled = true;
+      document.getElementById('btn-step').disabled = false;
+      stepViz();
+    }
+
+    function stepViz() {
+      if (currentStep >= steps.length - 1) return;
+      currentStep++;
+      const s = steps[currentStep];
+      
+      // Update UI
+      document.getElementById('val-left').textContent = s.left;
+      document.getElementById('val-right').textContent = s.right;
+      document.getElementById('val-sum').textContent = s.sum === 0 ? '-' : s.sum;
+      document.getElementById('val-comp').textContent = s.sum === 0 ? '-' : (s.sum === target ? '=' : (s.sum < target ? '<' : '>'));
+      document.getElementById('explanation').textContent = s.msg;
+
+      // Update Array Visuals
+      document.querySelectorAll('.array-item').forEach((el, i) => {
+        el.className = 'array-item';
+        el.querySelectorAll('.pointer-label').forEach(p => p.remove());
+        
+        if (i === s.left || i === s.right) {
+            el.classList.add('active');
+            if (s.found) el.classList.add('found');
+        }
+      });
+
+      // Add pointers
+      if (s.left < nums.length) {
+          document.getElementById(`item-${s.left}`).innerHTML += '<div class="pointer-label ptr-left">L</div>';
+      }
+      if (s.right >= 0) {
+          document.getElementById(`item-${s.right}`).innerHTML += '<div class="pointer-label ptr-right">R</div>';
+      }
+
+      highlightLine(s.type);
+    }
+
+    function highlightLine(type) {
+      document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+      const lineNum = lineMappings[type][currentLang];
+      const el = document.getElementById(`line-${lineNum}`);
+      if (el) {
+        el.classList.add('active');
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    function resetViz() {
+      currentStep = -1;
+      document.getElementById('btn-start').disabled = false;
+      document.getElementById('btn-step').disabled = true;
+      
+      // Reset UI
+      document.getElementById('val-left').textContent = '0';
+      document.getElementById('val-right').textContent = nums.length - 1;
+      document.getElementById('val-sum').textContent = '-';
+      document.getElementById('val-comp').textContent = '-';
+      document.getElementById('explanation').textContent = 'Click "Start" to begin the visualization.';
+      
+      init();
+    }
+
+    init();
+  </script>
+</body>
+</html>

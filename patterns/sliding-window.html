@@ -87,7 +87,7 @@
         /* Window Overlay */
         .window-overlay {
             position: absolute;
-            height: 70px;
+            height: 64px;
             border: 3px solid var(--active);
             border-radius: 12px;
             pointer-events: none;
@@ -136,7 +136,7 @@
             grid-column: 1 / -1;
             text-align: center;
             font-size: 1.1rem;
-            min-height: 1.4em;
+            min-height: 3em;
             margin-top: 10px;
         }
 
@@ -172,6 +172,15 @@
             <h1>Sliding Window Visualization</h1>
             <div class="subtitle">Problem: Find Max Sum Subarray of Size K=3</div>
         </header>
+
+        <!-- Link to Code Visualizer -->
+        <div style="background-color: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong style="color: var(--text); font-size: 1.1rem;">🚀 Interactive Code Visualizer</strong>
+                <p style="margin-top: 5px; color: var(--text-muted); margin-bottom: 0;">Watch the algorithm with code tracking (Min Subarray Len).</p>
+            </div>
+            <a href="sliding-window-visualizer.html" style="background-color: var(--primary); color: var(--bg); padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+        </div>
 
         <div class="viz-container">
             <div class="array-container" id="array-container">
@@ -246,7 +255,7 @@
             const overlay = document.getElementById('window-overlay');
             overlay.style.width = `${(CELL_WIDTH * K) + (CELL_GAP * (K-1))}px`;
             overlay.style.left = '-10px'; // Initial offset
-            overlay.style.top = '-5px';
+            overlay.style.top = '-2px';
             overlay.style.opacity = '0';
         }
 
