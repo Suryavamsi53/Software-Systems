@@ -223,6 +223,122 @@ class Solution:
         </div>
       </div>
 
+      <!-- 11. Advanced Tree Implementations -->
+      <div class="section">
+        <div class="section-title">📚 11. Tree Variants & Implementations</div>
+        
+        <div class="collapsible">
+            <strong>Binary Search Tree (BST)</strong>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <p>Ordered binary tree where <code>Left < Root < Right</code>. Supports O(log N) search, insert, delete (if balanced).</p>
+            <div class="code-block"><pre>
+type BSTNode struct {
+    Val   int
+    Left  *BSTNode
+    Right *BSTNode
+}
+
+func (n *BSTNode) Insert(val int) {
+    if n == nil { return }
+    if val < n.Val {
+        if n.Left == nil { n.Left = &BSTNode{Val: val} }
+        else { n.Left.Insert(val) }
+    } else {
+        if n.Right == nil { n.Right = &BSTNode{Val: val} }
+        else { n.Right.Insert(val) }
+    }
+}
+
+func (n *BSTNode) Search(val int) bool {
+    if n == nil { return false }
+    if n.Val == val { return true }
+    if val < n.Val { return n.Left.Search(val) }
+    return n.Right.Search(val)
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+            <strong>Segment Tree</strong>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <p>Used for range queries (sum, min, max) and point updates in O(log N). Essential for advanced array problems.</p>
+            <div class="code-block"><pre>
+type SegmentTree struct {
+    tree []int
+    n    int
+}
+
+func NewSegmentTree(nums []int) *SegmentTree {
+    n := len(nums)
+    st := &SegmentTree{tree: make([]int, 2*n), n: n}
+    for i := 0; i < n; i++ { st.tree[n+i] = nums[i] }
+    for i := n - 1; i > 0; i-- { st.tree[i] = st.tree[2*i] + st.tree[2*i+1] }
+    return st
+}
+
+func (st *SegmentTree) Update(i, val int) {
+    pos := i + st.n; st.tree[pos] = val
+    for pos > 0 {
+        left, right := pos, pos
+        if pos%2 == 0 { right = pos + 1 } else { left = pos - 1 }
+        st.tree[pos/2] = st.tree[left] + st.tree[right]
+        pos /= 2
+    }
+}
+
+func (st *SegmentTree) Query(l, r int) int {
+    sum := 0; l += st.n; r += st.n
+    for l <= r {
+        if l%2 == 1 { sum += st.tree[l]; l++ }
+        if r%2 == 0 { sum += st.tree[r]; r-- }
+        l /= 2; r /= 2
+    }
+    return sum
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+            <strong>Fenwick Tree (Binary Indexed Tree)</strong>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <p>Efficient prefix sums and updates. Uses bit manipulation. Simpler to implement than Segment Tree.</p>
+            <div class="code-block"><pre>
+type FenwickTree struct { tree []int }
+
+func NewFenwickTree(n int) *FenwickTree { return &FenwickTree{tree: make([]int, n+1)} }
+
+func (ft *FenwickTree) Update(i, delta int) {
+    for i++; i < len(ft.tree); i += i & -i { ft.tree[i] += delta }
+}
+
+func (ft *FenwickTree) Query(i int) int {
+    sum := 0
+    for i++; i > 0; i -= i & -i { sum += ft.tree[i] }
+    return sum
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+            <strong>Advanced & System Design Trees</strong>
+            <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+            <ul style="margin-left: 20px;">
+                <li><strong>General Tree (N-ary):</strong> Nodes have N children. <code>type Node struct { Val int; Children []*Node }</code>.</li>
+                <li><strong>AVL Tree:</strong> Self-balancing BST. Maintains height difference of ≤ 1. Good for read-heavy loads.</li>
+                <li><strong>Red-Black Tree:</strong> Self-balancing BST using color bits. Used in Java <code>TreeMap</code>, C++ <code>map</code>. Good for write-heavy loads.</li>
+                <li><strong>B-Tree:</strong> Self-balancing tree with multiple keys per node. Optimized for disk storage (Databases).</li>
+                <li><strong>B+ Tree:</strong> Like B-Tree but data only in leaves. Leaves linked. Standard for DB Indexes.</li>
+                <li><strong>Trie:</strong> Prefix tree for strings. See <a href="tries.html">Tries Pattern</a>.</li>
+                <li><strong>Heap:</strong> Complete binary tree for priority. See <a href="heap.html">Heap Pattern</a>.</li>
+            </ul>
+        </div>
+      </div>
+
       <!-- LEETCODE PRACTICE QUESTIONS -->
       <div class="section" id="leetcode-practice" style="margin-top: 40px;">
         <div class="section-title">

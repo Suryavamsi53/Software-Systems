@@ -70,770 +70,609 @@
 
     <main class="main-content">
       <div class="content-header">
-        <h1>🐹 Go Language Master Guide</h1>
-        <p>From Beginner to Advanced - The Complete Roadmap</p>
+        <h1>🐹 Go Core Concepts & Patterns</h1>
+        <p>The 24 Essential Building Blocks of Go Development</p>
       </div>
 
       <!-- HOW TO USE -->
       <div class="section">
         <div class="callout interview-tip">
-          <div class="callout-title">✅ How to Use This List</div>
+          <div class="callout-title">✅ How to Use This Guide</div>
           <div class="callout-content">
             <ul>
-              <li><strong>Beginner:</strong> Focus on Sections 1–8 (Fundamentals & Core Data Structures)</li>
-              <li><strong>Intermediate (2 YOE):</strong> Master Sections 9–22 (Pointers, Interfaces, Concurrency)</li>
-              <li><strong>Advanced / Interview-Ready:</strong> Deep dive into Sections 23–34 (System Design, Distributed Systems)</li>
+              <li><strong>Foundations:</strong> Sections 1-4 cover the absolute must-knows for any Go developer.</li>
+              <li><strong>Concurrency:</strong> Sections 2 & 6 are Go's superpowers. Master these for SDE-2+ roles.</li>
+              <li><strong>System Design:</strong> Sections 3, 7, 9 are critical for building scalable microservices.</li>
             </ul>
           </div>
         </div>
       </div>
 
-      <!-- 1. FUNDAMENTALS -->
+      <!-- 1. Core Language Foundations -->
       <div class="section">
-        <div class="section-title" style="color: #22c55e;">🟢 GO FUNDAMENTALS (BEGINNER)</div>
+        <div class="section-title">🔹 1. Core Language Foundations</div>
         
-        <div class="collapsible"><strong>1️⃣ Language Basics</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>1️⃣ Packages & Modules</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Prevents spaghetti code, Makes builds reproducible.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Microservices, Shared libraries, Versioned APIs.</p>
+            </div>
+          </div>
           <div class="code-block"><pre>
-package main // Defines the package name
+// go.mod
+module github.com/myorg/payment-service
 
-import "fmt" // Import standard library package
+go 1.21
 
-// main is the entry point of the program
+require (
+    github.com/google/uuid v1.3.0
+)
+
+// main.go
+package main
+
+import (
+    "fmt"
+    "github.com/myorg/payment-service/processor"
+)
+
 func main() {
-    fmt.Println("Hello, World!") // Print to stdout
+    processor.Process()
 }</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><strong>Philosophy:</strong> Simplicity, explicitness, fast compilation.</li>
-            <li><strong>Structure:</strong> Workspace, Modules, <code>package main</code>, <code>func main()</code>.</li>
-            <li><strong>Init:</strong> <code>init()</code> function runs before main.</li>
-          </ul>
-          <h4 style="color: var(--callout-blue); margin-top: 15px; margin-bottom: 5px;">Go Keywords (25 total)</h4>
-          <p style="color: var(--text-secondary); font-family: monospace; background-color: var(--bg-secondary); padding: 10px; border-radius: 5px; line-height: 1.8;">
-            break, default, func, interface, select, case, defer, go, map, struct, chan, else, goto, package, switch, const, fallthrough, if, range, type, continue, for, import, return, var
-          </p>
+          <p>Go organizes code into packages (directories) and modules (versioned collections of packages). The <code>go.mod</code> file is the heart of dependency management, ensuring that every build uses the exact same version of dependencies, eliminating "it works on my machine" issues.</p>
         </div>
 
-        <div class="collapsible"><strong>2️⃣ Variables & Constants</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>2️⃣ Variables & Types</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <div class="code-block"><pre>
-var x int = 10      // Explicit type declaration
-y := 20             // Short declaration (inferred type, inside func only)
-
-const Pi = 3.14     // Constant (cannot be changed)
-
-const (
-    A = iota        // 0 (Auto-incrementing)
-    B               // 1
-    C               // 2
-)</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>var</code> vs <code>:=</code> (short declaration).</li>
-            <li><strong>Constants:</strong> <code>const</code>, <code>iota</code> for enums.</li>
-            <li><strong>Scope:</strong> Block vs Package level, Shadowing variables.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>3️⃣ Data Types</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-var i int = 0           // Zero value: 0
-var f float64 = 0.0     // Zero value: 0.0
-var b bool = false      // Zero value: false
-var s string = ""       // Zero value: "" (empty string)
-var ptr *int = nil      // Zero value: nil</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><strong>Basic:</strong> int, uint, float, bool, string, byte, rune.</li>
-            <li><strong>Zero Values:</strong> 0, false, "", nil (Crucial concept).</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>4️⃣ Control Structures</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-// If statement (no parentheses around condition)
-if x > 10 {
-    fmt.Println("Big")
-}
-
-// For loop (the only loop in Go)
-for i := 0; i < 5; i++ {
-    fmt.Println(i)
-}
-
-// Switch (no fallthrough by default)
-switch os {
-case "darwin": fmt.Println("Mac")
-default: fmt.Println("Other")
-}</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>if</code>, <code>else</code> (no parentheses).</li>
-            <li><code>for</code> (the only loop in Go).</li>
-            <li><code>switch</code> (no fallthrough by default), <code>select</code>.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>5️⃣ Functions</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-// Multiple return values
-func swap(x, y string) (string, string) {
-    return y, x
-}
-
-// Defer: Executed when surrounding function returns (LIFO)
-func main() {
-    defer fmt.Println("world") // Prints 2nd
-    fmt.Println("hello")       // Prints 1st
-}</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Multiple return values.</li>
-            <li>Named return values.</li>
-            <li>Variadic functions (<code>...int</code>).</li>
-            <li><strong>Defer:</strong> LIFO execution (stack).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 2. CORE DATA STRUCTURES -->
-      <div class="section">
-        <div class="section-title" style="color: #facc15;">🟡 CORE DATA STRUCTURES</div>
-
-        <div class="collapsible"><strong>6️⃣ Arrays</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Types & Definition</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Arrays are fixed-length sequences of items of the same type. The length is part of the type (e.g., <code>[5]int</code> is different from <code>[10]int</code>).</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Implementation</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Arrays are <strong>value types</strong>. Assigning one array to another copies all elements. Passing an array to a function copies it (expensive for large arrays).</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
-          <div class="code-block"><pre>
-// Declaration
-var a [2]string             // ["" ""] (Zero values)
-a[0] = "Hello"
-
-primes := [6]int{2, 3, 5, 7, 11, 13} // Initialized
-auto := [...]int{1, 2, 3}   // Compiler counts elements (3)</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Fixed length, value type (copy on assignment).</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>7️⃣ Slices (Deep Dive)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-            <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: var(--text-primary);">1. What it is</h4>
-                <p style="color: var(--text-secondary);">A slice is a dynamic, flexible view over an underlying array. Internally it has a pointer to the array, a length (visible elements), and a capacity (max elements without reallocation).</p>
-                
-                <h4 style="color: var(--text-primary); margin-top: 15px;">2. Why it exists</h4>
-                <p style="color: var(--text-secondary);">Arrays are fixed-size and copied on assignment. Slices solve this by providing dynamic growth, cheap passing (it's just a descriptor), and flexible memory usage.</p>
-                
-                <h4 style="color: var(--text-primary); margin-top: 15px;">3. When to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>List size is unknown.</li>
-                    <li>Passing collections to functions (cheap).</li>
-                    <li>Implementing stacks, queues, buffers.</li>
-                </ul>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">4. When NOT to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Fixed-size data is required (use Array).</li>
-                    <li>Memory ownership must be explicit.</li>
-                    <li>Concurrent writes are expected (not thread-safe).</li>
-                </ul>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">5. Real-world use cases</h4>
-                <p style="color: var(--text-secondary);">HTTP request buffers, DB result sets, Job queues, In-memory caches.</p>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <div>
-                        <strong style="color: var(--callout-green);">Pros</strong>
-                        <ul style="color: var(--text-secondary); margin-left: 20px;">
-                            <li>Dynamic size</li>
-                            <li>Cheap to pass</li>
-                            <li>Fast iteration</li>
-                            <li>Idiomatic Go</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <strong style="color: var(--callout-red);">Cons</strong>
-                        <ul style="color: var(--text-secondary); margin-left: 20px;">
-                            <li>Hidden allocations</li>
-                            <li>Capacity traps</li>
-                            <li>Memory leaks via slicing large arrays</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <h4 style="color: var(--callout-yellow); margin-top: 15px;">8. Interview Expectations</h4>
-                <p style="color: var(--text-secondary);">You MUST know: len vs cap, append reallocation mechanics, slice header behavior, and backing array sharing.</p>
-
-                <h4 style="color: var(--callout-red); margin-top: 15px;">9. Common Mistakes</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Returning pointer to slice (<code>*[]int</code>).</li>
-                    <li>Assuming <code>append</code> modifies the original slice header in the caller.</li>
-                    <li>Forgetting to <code>copy</code> when keeping a small part of a large array.</li>
-                </ul>
-
-                <h4 style="color: var(--callout-blue); margin-top: 15px;">10. Clean vs Bad Code</h4>
-                <div class="code-block"><pre>
-// ❌ Bad: Returning pointer to slice
-func get() *[]int {
-    s := []int{1, 2}
-    return &s
-}
-
-// ✅ Clean: Return slice directly
-func get() []int {
-    s := make([]int, 0, 10)
-    return append(s, 1, 2)
-}</pre></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Catch errors at compile time, Better performance.</p>
             </div>
-        </div>
-
-        <div class="collapsible"><strong>8️⃣ Maps (Deep Dive)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-            <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: var(--text-primary);">1. What it is</h4>
-                <p style="color: var(--text-secondary);">A built-in hash table implementation. It maps keys to values. Keys must be comparable (supports <code>==</code>).</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">2. Why it exists</h4>
-                <p style="color: var(--text-secondary);">To provide O(1) average time complexity for lookups, insertions, and deletions. Essential for associative data.</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">3. When to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Fast lookups by ID/Key.</li>
-                    <li>Counting frequencies (e.g., word count).</li>
-                    <li>Caching results (memoization).</li>
-                    <li>Deduplicating items (using map as a set).</li>
-                </ul>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">4. When NOT to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Order matters (Maps are unordered).</li>
-                    <li>Sequential access is needed (Slices are faster).</li>
-                    <li>Memory is extremely constrained (Maps have overhead).</li>
-                    <li>Concurrent access without synchronization (Panic).</li>
-                </ul>
-
-                <h4 style="color: var(--callout-yellow); margin-top: 15px;">8. Interview Expectations</h4>
-                <p style="color: var(--text-secondary);">Know that maps are references. Writing to a nil map panics. Reading from a nil map returns zero value. Maps are not thread-safe (use <code>sync.RWMutex</code> or <code>sync.Map</code>).</p>
-
-                <h4 style="color: var(--callout-blue); margin-top: 15px;">10. Clean vs Bad Code</h4>
-                <div class="code-block"><pre>
-// ❌ Bad: Writing to nil map
-var m map[string]int
-m["key"] = 1 // PANIC!
-
-// ✅ Clean: Initialize with make
-m := make(map[string]int)
-m["key"] = 1
-
-// ✅ Clean: Check existence
-if val, ok := m["key"]; ok {
-    fmt.Println("Found:", val)
-}</pre></div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">API payloads, Config objects, Domain models.</p>
             </div>
-        </div>
-        
-        <div class="collapsible"><strong>9️⃣ Structs</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Definition, literals, anonymous structs.</li>
-            <li><strong>Embedding:</strong> Composition over inheritance.</li>
-            <li>Tags (JSON, DB).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 3. POINTERS & METHODS -->
-      <div class="section">
-        <div class="section-title" style="color: #3b82f6;">🔵 POINTERS & METHODS</div>
-
-        <div class="collapsible"><strong>🔟 Pointers</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Concept</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Holds the memory address of a value. Used to share data or modify state.</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
+          </div>
           <div class="code-block"><pre>
-i := 42
-p := &i         // & generates a pointer to i
-fmt.Println(*p) // * dereferences the pointer (reads i)
-*p = 21         // sets i through the pointer
+// Explicit declaration
+var port int = 8080
 
-// No pointer arithmetic in Go (unlike C)</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Address operator <code>&</code>, Dereferencing <code>*</code>.</li>
-            <li>Pass by value (pointers are values too).</li>
-          </ul>
+// Short declaration (inferred type)
+host := "localhost"
+
+// Type definition
+type UserID string
+
+var uid UserID = "u_123"
+// uid = "string" // Compile error! Type safety.</pre></div>
+          <p>Go is statically typed, meaning variable types are checked at compile time. This prevents a huge class of runtime errors common in dynamic languages (like passing a string where an integer is expected). Custom types (like <code>UserID</code>) add semantic meaning and safety.</p>
         </div>
 
-        <div class="collapsible"><strong>1️⃣1️⃣ Methods</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>3️⃣ Structs</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Concept</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Functions attached to a type. The <code>receiver</code> argument appears between <code>func</code> and the method name.</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Model real-world entities, Group related data.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">User models, Request/response DTOs, Config structs.</p>
+            </div>
+          </div>
           <div class="code-block"><pre>
-import "math"
-
-// Value Receiver: Operates on a copy (cannot modify original)
-func (v Vertex) Abs() float64 { return math.Sqrt(v.X*v.X + v.Y*v.Y) }
-
-// Pointer Receiver: Operates on actual value (can modify)
-func (v *Vertex) Scale(f float64) { v.X = v.X * f; v.Y = v.Y * f }</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><strong>Value Receivers:</strong> Copy of struct.</li>
-            <li><strong>Pointer Receivers:</strong> Modify original struct.</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 4. INTERFACES & TYPES -->
-      <div class="section">
-        <div class="section-title" style="color: #a855f7;">🟣 INTERFACES & TYPES</div>
-
-        <div class="collapsible"><strong>1️⃣2️⃣ Interfaces (Deep Dive)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-            <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: var(--text-primary);">1. What it is</h4>
-                <p style="color: var(--text-secondary);">A set of method signatures. Interfaces define behavior, not data. Go interfaces are implemented implicitly (Duck Typing).</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">2. Why it exists</h4>
-                <p style="color: var(--text-secondary);">To decouple implementation from usage. Allows writing functions that accept any type satisfying a behavior (e.g., <code>io.Reader</code>).</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">3. When to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Dependency Injection (swapping real DB for mock DB).</li>
-                    <li>Generic algorithms (e.g., <code>sort.Interface</code>).</li>
-                    <li>Defining boundaries between packages.</li>
-                </ul>
-
-                <h4 style="color: var(--callout-yellow); margin-top: 15px;">8. Interview Expectations</h4>
-                <p style="color: var(--text-secondary);">Explain implicit implementation. Know the "Nil Interface" trap (interface is nil only if type and value are nil). Understand empty interface <code>interface{}</code> (or <code>any</code>).</p>
-
-                <h4 style="color: var(--callout-blue); margin-top: 15px;">10. Clean vs Bad Code</h4>
-                <div class="code-block"><pre>
-// ❌ Bad: Returning concrete type as interface (Nil Trap risk)
-func Get() io.Reader {
-    var b *bytes.Buffer = nil
-    return b // Returns (type=*bytes.Buffer, value=nil) != nil
+type User struct {
+    ID    int    `json:"id"`
+    Name  string `json:"name"`
+    Email string `json:"email"`
 }
 
-// ✅ Clean: Return nil explicitly
-func Get() io.Reader {
-    return nil
+// Composition (Embedding)
+type Admin struct {
+    User        // Admin "is a" User
+    Permissions []string
 }</pre></div>
+          <p>Structs are the backbone of data modeling in Go. They group related fields together. Go uses struct embedding (composition) instead of class inheritance to share behavior and data, promoting cleaner and more flexible designs.</p>
+        </div>
+
+        <div class="collapsible"><strong>4️⃣ Interfaces (Implicit)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Loose coupling, Easy mocking, Behavior abstraction.</p>
             </div>
-        </div>
-
-        <div class="collapsible"><strong>1️⃣3️⃣ Type System</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Dependency injection, Plugin systems, Testing.</p>
+            </div>
+          </div>
           <div class="code-block"><pre>
-type MyFloat float64 // Defined type
-func (f MyFloat) Abs() float64 { ... }</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Type alias vs Defined type.</li>
-            <li>Type conversion (Explicit).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 5. ERROR HANDLING -->
-      <div class="section">
-        <div class="section-title" style="color: #f97316;">🟠 ERROR HANDLING</div>
-
-        <div class="collapsible"><strong>1️⃣4️⃣ Errors</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-i, err := strconv.Atoi("42")
-if err != nil {
-    // Handle error
-    return fmt.Errorf("conversion failed: %w", err) // Wrap
-}</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>errors.Is</code> (Check type), <code>errors.As</code> (Cast).</li>
-            <li>Panic vs Recover (Avoid panic in logic).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 6. CONCURRENCY -->
-      <div class="section">
-        <div class="section-title" style="color: #ef4444;">🔴 CONCURRENCY (GO’S SUPERPOWER)</div>
-
-        <div class="collapsible"><strong>1️⃣5️⃣ Goroutines</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Concept</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Lightweight threads managed by Go runtime. 2KB stack.</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
-          <div class="code-block"><pre>
-func main() {
-    done := make(chan struct{})
-    
-    go func() {
-        fmt.Println("world")
-        close(done) // Signal completion
-    }()
-    
-    fmt.Println("hello")
-    <-done // Wait for goroutine
-}</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Lightweight threads (M:N scheduler).</li>
-            <li>Stack growth, Goroutine leaks.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>1️⃣6️⃣ Channels (Deep Dive)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-            <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: var(--text-primary);">1. What it is</h4>
-                <p style="color: var(--text-secondary);">A channel is a typed conduit used to communicate between goroutines. It enforces the philosophy: "Don't communicate by sharing memory; share memory by communicating."</p>
-                
-                <h4 style="color: var(--text-primary); margin-top: 15px;">2. When to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Passing ownership of data between goroutines.</li>
-                    <li>Coordinating/Signaling (e.g., "I'm done").</li>
-                    <li>Implementing worker pools.</li>
-                </ul>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">3. When NOT to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Protecting simple counters (Use <code>atomic</code> or <code>Mutex</code>).</li>
-                    <li>Low-latency critical sections (Channels have overhead).</li>
-                </ul>
-
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
-                    <div>
-                        <strong style="color: var(--callout-green);">Pros</strong>
-                        <ul style="color: var(--text-secondary); margin-left: 20px;">
-                            <li>Thread-safe</li>
-                            <li>Clear ownership</li>
-                            <li>Deadlock detection (runtime)</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <strong style="color: var(--callout-red);">Cons</strong>
-                        <ul style="color: var(--text-secondary); margin-left: 20px;">
-                            <li>Overhead vs Mutex</li>
-                            <li>Deadlocks if misused</li>
-                            <li>Harder debugging</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <h4 style="color: var(--callout-yellow); margin-top: 15px;">8. Interview Expectations</h4>
-                <p style="color: var(--text-secondary);">Explain buffered vs unbuffered, who closes the channel (sender), select statement, and channel vs mutex trade-offs.</p>
-
-                <h4 style="color: var(--callout-blue); margin-top: 15px;">10. Clean vs Bad Code</h4>
-                <div class="code-block"><pre>
-// ❌ Bad: Busy waiting
-for !done {
-    time.Sleep(100 * time.Millisecond)
+// Interface definition
+type Logger interface {
+    Log(msg string)
 }
 
-// ✅ Clean: Signal channel
-done := make(chan struct{})
-go func() { close(done) }()
-<-done</pre></div>
+// Implementation (Implicit - no "implements" keyword)
+type ConsoleLogger struct{}
+
+func (c ConsoleLogger) Log(msg string) {
+    fmt.Println(msg)
+}
+
+// Usage
+func Process(l Logger) {
+    l.Log("Processing started")
+}</pre></div>
+          <p>Interfaces in Go are satisfied implicitly. If a type implements all methods of an interface, it implements that interface. This allows you to define interfaces where you <em>use</em> them, not where you define the types, leading to highly decoupled code.</p>
+        </div>
+      </div>
+
+      <!-- 2. Concurrency & Parallelism -->
+      <div class="section">
+        <div class="section-title">🔹 2. Concurrency & Parallelism</div>
+
+        <div class="collapsible"><strong>5️⃣ Goroutines</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Efficient concurrency without heavy OS threads.</p>
             </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Handling HTTP requests, Background jobs, Async processing.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+go func() {
+    // This runs concurrently
+    processImage("image.jpg")
+}()
+
+// Main continues immediately</pre></div>
+          <p>Goroutines are lightweight threads managed by the Go runtime (not the OS). They start with a tiny stack (2KB) that grows as needed. You can easily spawn thousands of them. The Go scheduler multiplexes them onto OS threads.</p>
         </div>
 
-        <div class="collapsible"><strong>1️⃣7️⃣ select Statement</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>6️⃣ Channels</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Concept</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Waits on multiple channel operations. Like a switch for channels.</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Safe data sharing, Avoid shared memory (locks).</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Worker pools, Event pipelines, Fan-in / Fan-out.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+ch := make(chan int)
+
+go func() {
+    ch <- 42 // Send data
+}()
+
+val := <-ch // Receive data (blocks until data is available)</pre></div>
+          <p>Channels are typed conduits for synchronization and data transfer between goroutines. "Don't communicate by sharing memory; share memory by communicating." They prevent race conditions by design.</p>
+        </div>
+
+        <div class="collapsible"><strong>7️⃣ Select</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Non-blocking concurrency, Timeouts.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Cancellation, Priority handling, Racing multiple operations.</p>
+            </div>
+          </div>
           <div class="code-block"><pre>
 select {
-case msg := <-c1:
-    fmt.Println("Received", msg)
+case msg := <-ch1:
+    fmt.Println("Received from ch1:", msg)
+case msg := <-ch2:
+    fmt.Println("Received from ch2:", msg)
 case <-time.After(1 * time.Second):
-    fmt.Println("Timeout")
-default:
-    fmt.Println("Non-blocking check")
+    fmt.Println("Timeout!")
 }</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Multiplexing channels.</li>
-            <li>Timeouts, Non-blocking operations.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>1️⃣8️⃣ sync Package</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Concept</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Primitives for synchronization when channels aren't appropriate.</p>
-          
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Examples</h4>
-          <div class="code-block"><pre>
-// Mutex (Locking)
-var mu sync.Mutex
-mu.Lock()
-count++ // critical section
-mu.Unlock()
-
-// WaitGroup (Waiting for goroutines)
-var wg sync.WaitGroup
-wg.Add(1)
-go func() { defer wg.Done(); ... }()
-wg.Wait()</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>sync.Mutex</code>, <code>sync.RWMutex</code>.</li>
-            <li><code>sync.WaitGroup</code>, <code>sync.Once</code>.</li>
-            <li>Atomic operations.</li>
-          </ul>
+          <p>The <code>select</code> statement lets a goroutine wait on multiple communication operations. It blocks until one of its cases can run, then it executes that case. It's essential for handling timeouts and cancellation.</p>
         </div>
       </div>
 
-      <!-- 7. MEMORY & PERFORMANCE -->
+      <!-- 3. Context & Lifecycle Management -->
       <div class="section">
-        <div class="section-title" style="color: #3b82f6;">🔵 MEMORY & PERFORMANCE</div>
+        <div class="section-title">🔹 3. Context & Lifecycle Management</div>
 
-        <div class="collapsible"><strong>1️⃣9️⃣ Memory Model</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>8️⃣ Context (context.Context)</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Stack vs Heap.</li>
-            <li><strong>Escape Analysis:</strong> Compiler decides allocation.</li>
-            <li>Garbage Collection (Tri-color mark & sweep).</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣0️⃣ Performance Optimization</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Reducing allocations (Pre-allocation).</li>
-            <li>Profiling (<code>pprof</code>).</li>
-            <li>Object pooling (<code>sync.Pool</code>).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 8. TOOLING -->
-      <div class="section">
-        <div class="section-title" style="color: #22c55e;">🟢 TOOLING & ECOSYSTEM</div>
-
-        <div class="collapsible"><strong>2️⃣1️⃣ Go Modules</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-go mod init example.com/m
-go mod tidy</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>go.mod</code>, <code>go.sum</code>.</li>
-            <li>Dependency resolution.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣2️⃣ Build & Run</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <h4 style="color: var(--callout-blue); margin-bottom: 5px;">Common Commands</h4>
-          <div class="code-block">
-<pre>
-// Compile and run current module
-go run .
-
-// Build binary
-go build -o myapp
-
-// Install binary to GOPATH/bin
-go install
-
-// Add dependency
-go get github.com/gin-gonic/gin
-
-// Clean unused dependencies
-go mod tidy
-
-// Clean build cache
-go clean
-</pre>
-          </div>
-
-          <h4 style="color: var(--callout-blue); margin-top: 15px; margin-bottom: 5px;">Cross-Compilation</h4>
-          <p style="color: var(--text-secondary); margin-bottom: 10px;">Go makes it trivial to build for other operating systems and architectures. You just need to set environment variables.</p>
-          <div class="code-block">
-<pre>
-// Windows
-GOOS=windows GOARCH=amd64 go build -o myapp.exe
-
-// Linux ARM
-GOOS=linux GOARCH=arm go build -o myapp_arm
-</pre>
-          </div>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣3️⃣ Testing</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-func TestAbs(t *testing.T) {
-    got := Abs(-1)
-    if got != 1 {
-        t.Errorf("Abs(-1) = %f; want 1", got)
-    }
-}</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Unit testing, Table-driven tests.</li>
-            <li>Benchmark tests.</li>
-            <li>Race detector (<code>-race</code>).</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 9. STANDARD LIBRARY -->
-      <div class="section">
-        <div class="section-title" style="color: #3b82f6;">🔵 STANDARD LIBRARY</div>
-
-        <div class="collapsible"><strong>2️⃣4️⃣ net/http</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-http.HandleFunc("/", handler)
-log.Fatal(http.ListenAndServe(":8080", nil))</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>HTTP server, Routing, Middleware.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣5️⃣ Encoding</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-type Message struct {
-    Name string `json:"name"`
-    Body string `json:"body"`
-}
-b, err := json.Marshal(Message{"Alice", "Hello"})</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>JSON encoding/decoding (<code>json.Marshal</code>).</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣6️⃣ Database</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-db, err := sql.Open("postgres", "user:password@tcp(127.0.0.1:3306)/hello")</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>database/sql</code>, Connection pooling.</li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- 10. BACKEND & SYSTEM DESIGN -->
-      <div class="section">
-        <div class="section-title" style="color: #a855f7;">🟣 BACKEND & SYSTEM DESIGN</div>
-
-        <div class="collapsible"><strong>2️⃣7️⃣ Backend Architecture</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>REST APIs, gRPC.</li>
-            <li>Clean architecture, Dependency injection.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>2️⃣8️⃣ Context Package (Deep Dive)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-            <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
-                <h4 style="color: var(--text-primary);">1. What it is</h4>
-                <p style="color: var(--text-secondary);">A standard package for carrying deadlines, cancellation signals, and request-scoped values across API boundaries and goroutines.</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">2. Why it exists</h4>
-                <p style="color: var(--text-secondary);">To prevent goroutine leaks and wasted work. If a user cancels a request, all downstream work (DB queries, API calls) should stop immediately.</p>
-
-                <h4 style="color: var(--text-primary); margin-top: 15px;">3. When to use</h4>
-                <ul style="color: var(--text-secondary); margin-left: 20px;">
-                    <li>Every long-running operation (DB, Network).</li>
-                    <li>Passing Trace IDs or User Auth info.</li>
-                    <li>Setting timeouts for external calls.</li>
-                </ul>
-
-                <h4 style="color: var(--callout-yellow); margin-top: 15px;">8. Interview Expectations</h4>
-                <p style="color: var(--text-secondary);">Always pass <code>ctx</code> as the first argument. Never store <code>ctx</code> in a struct (pass it explicitly). Use <code>defer cancel()</code> to avoid leaks.</p>
-
-                <h4 style="color: var(--callout-blue); margin-top: 15px;">10. Clean vs Bad Code</h4>
-                <div class="code-block"><pre>
-// ❌ Bad: Ignoring context
-func dbCall() {
-    time.Sleep(5 * time.Second) // Can't be cancelled
-}
-
-// ✅ Clean: Respecting cancellation
-func dbCall(ctx context.Context) error {
-    select {
-    case <-time.After(5 * time.Second):
-        return nil
-    case <-ctx.Done():
-        return ctx.Err() // Cancelled
-    }
-}</pre></div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Prevent goroutine leaks, Control request lifecycle.</p>
             </div>
-        </div>
-      </div>
-
-      <!-- 11. ADVANCED TOPICS -->
-      <div class="section">
-        <div class="section-title" style="color: #f97316;">🟠 ADVANCED TOPICS</div>
-
-        <div class="collapsible"><strong>2️⃣9️⃣ Reflection</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">HTTP requests, DB queries, Graceful shutdown.</p>
+            </div>
+          </div>
           <div class="code-block"><pre>
-t := reflect.TypeOf(i)
-v := reflect.ValueOf(i)</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>reflect</code> package. Performance costs.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>3️⃣0️⃣ Unsafe</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-p := unsafe.Pointer(&i)</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li><code>unsafe.Pointer</code>. Memory layout.</li>
-          </ul>
-        </div>
-
-        <div class="collapsible"><strong>3️⃣1️⃣ Generics (Go 1.18+)</strong><span class="collapsible-icon">▼</span></div>
-        <div class="collapsible-content">
-          <div class="code-block"><pre>
-func Index[T comparable](s []T, x T) int {
-    for i, v := range s {
-        if v == x {
-            return i
-        }
+func handler(w http.ResponseWriter, r *http.Request) {
+    ctx := r.Context()
+    
+    // Pass context to DB call
+    data, err := db.QueryContext(ctx, "SELECT * FROM users")
+    if err != nil {
+        // If client disconnects, DB query is cancelled automatically
+        return
     }
-    return -1
 }</pre></div>
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Type parameters, Constraints.</li>
-          </ul>
+          <p>Context carries deadlines, cancellation signals, and request-scoped values across API boundaries. It is critical for preventing goroutine leaks—when a request is cancelled, all work associated with it should stop immediately.</p>
         </div>
       </div>
 
-      <!-- 12. DISTRIBUTED SYSTEMS -->
+      <!-- 4. Error Handling & Safety -->
       <div class="section">
-        <div class="section-title" style="color: #ef4444;">🔴 DISTRIBUTED SYSTEMS & PROD</div>
+        <div class="section-title">🔹 4. Error Handling & Safety</div>
 
-        <div class="collapsible"><strong>3️⃣2️⃣ Observability</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>9️⃣ Explicit Error Handling</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Logging, Metrics, Tracing (OpenTelemetry).</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">No hidden control flow, Predictable behavior.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">API error propagation, Retry logic, Validation.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+f, err := os.Open("file.txt")
+if err != nil {
+    return fmt.Errorf("failed to open file: %w", err)
+}
+// Use f...</pre></div>
+          <p>In Go, errors are values, not exceptions. This forces developers to handle errors explicitly where they occur, leading to more robust and readable code. There is no "try-catch" block hiding control flow.</p>
         </div>
 
-        <div class="collapsible"><strong>3️⃣3️⃣ Deployment</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>🔟 Panic & Recover</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Docker, Kubernetes, CI/CD.</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Catch fatal runtime failures.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Server crash protection, Framework boundaries.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+func safeHandler() {
+    defer func() {
+        if r := recover(); r != nil {
+            fmt.Println("Recovered from panic:", r)
+        }
+    }()
+    // Code that might panic
+    panic("something went wrong")
+}</pre></div>
+          <p>Panic is for unrecoverable errors (like index out of bounds). Recover allows a program to regain control of a panicking goroutine, typically used at the top level of a server to prevent a crash from taking down the entire service.</p>
+        </div>
+      </div>
+
+      <!-- 5. Memory Management & Performance -->
+      <div class="section">
+        <div class="section-title">🔹 5. Memory Management & Performance</div>
+
+        <div class="collapsible"><strong>1️⃣1️⃣ Garbage Collection (GC)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Developer productivity, Safety.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Long-running services.</p>
+            </div>
+          </div>
+          <p>Go uses a concurrent, tri-color mark-and-sweep garbage collector. It is optimized for low latency (short pause times) rather than high throughput, making it ideal for network servers and interactive applications.</p>
         </div>
 
-        <div class="collapsible"><strong>3️⃣4️⃣ Security</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible"><strong>1️⃣2️⃣ Pointers</strong><span class="collapsible-icon">▼</span></div>
         <div class="collapsible-content">
-          <ul style="margin-left: 20px; color: var(--text-secondary);">
-            <li>Input validation, TLS, Secrets management.</li>
-          </ul>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Performance (avoid copying), Mutability.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Large structs, Shared state.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+func update(val *int) {
+    *val = 100 // Modifies the original variable
+}
+
+func main() {
+    x := 10
+    update(&x) // Pass address
+    // x is now 100
+}</pre></div>
+          <p>Pointers hold the memory address of a value. They allow you to pass references to data instead of copying the entire data structure, which is crucial for performance with large objects and for functions that need to modify their inputs.</p>
+        </div>
+      </div>
+
+      <!-- 6. Synchronization Primitives -->
+      <div class="section">
+        <div class="section-title">🔹 6. Synchronization Primitives</div>
+
+        <div class="collapsible"><strong>1️⃣3️⃣ Mutex / RWMutex</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Avoid race conditions.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">In-memory caches, Counters, Shared maps.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+var mu sync.Mutex
+var count int
+
+func increment() {
+    mu.Lock()
+    defer mu.Unlock()
+    count++
+}</pre></div>
+          <p>Mutexes provide mutual exclusion, ensuring that only one goroutine can access a critical section of code (like a shared variable) at a time. <code>RWMutex</code> allows multiple readers but only one writer, which is efficient for read-heavy workloads.</p>
+        </div>
+
+        <div class="collapsible"><strong>1️⃣4️⃣ WaitGroup</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Synchronization.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Batch jobs, Parallel API calls.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+var wg sync.WaitGroup
+
+for i := 0; i < 3; i++ {
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        // Do work
+    }()
+}
+wg.Wait() // Blocks until counter is 0</pre></div>
+          <p><code>sync.WaitGroup</code> waits for a collection of goroutines to finish. You <code>Add</code> to the counter before starting a goroutine, and call <code>Done</code> when it finishes. <code>Wait</code> blocks until the counter is zero.</p>
+        </div>
+
+        <div class="collapsible"><strong>1️⃣5️⃣ Atomic Operations</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Performance (Lock-free).</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Counters, Flags.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+var ops int64
+atomic.AddInt64(&ops, 1)
+val := atomic.LoadInt64(&ops)</pre></div>
+          <p>Atomic operations provide low-level synchronization primitives for implementing lock-free algorithms. They are faster than mutexes for simple operations like incrementing a counter or setting a boolean flag.</p>
+        </div>
+      </div>
+
+      <!-- 7. Collections & Data Structures -->
+      <div class="section">
+        <div class="section-title">🔹 7. Collections & Data Structures</div>
+
+        <div class="collapsible"><strong>1️⃣6️⃣ Slices</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Flexible memory handling.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Lists, Buffers, Queues.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+s := []int{1, 2, 3}
+s = append(s, 4) // Dynamic growth</pre></div>
+          <p>Slices are dynamic arrays. They are a view into an underlying array. They have a length and a capacity. When you append to a slice and exceed its capacity, Go automatically allocates a larger array and copies the elements.</p>
+        </div>
+
+        <div class="collapsible"><strong>1️⃣7️⃣ Maps</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Fast lookup.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Caches, Session storage, Indexing.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+m := make(map[string]int)
+m["key"] = 42
+val, ok := m["key"] // Check existence</pre></div>
+          <p>Maps provide O(1) average time complexity for lookups, insertions, and deletions. They are unordered collections of key-value pairs. Keys must be comparable types.</p>
+        </div>
+      </div>
+
+      <!-- 8. Tooling & Ecosystem -->
+      <div class="section">
+        <div class="section-title">🔹 8. Tooling & Ecosystem</div>
+
+        <div class="collapsible"><strong>1️⃣8️⃣ go build, go test, go fmt</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Simplicity, Consistency.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">CI/CD, Team workflows.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+go fmt ./...   # Format code
+go test ./...  # Run tests
+go build       # Compile binary</pre></div>
+          <p>Go comes with a powerful standard toolchain. <code>go fmt</code> eliminates style debates. <code>go test</code> provides a standard testing framework. <code>go build</code> produces static binaries.</p>
+        </div>
+
+        <div class="collapsible"><strong>1️⃣9️⃣ Testing (testing package)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Reliability.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Unit tests, Benchmarks, Table-driven tests.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+func TestAdd(t *testing.T) {
+    got := Add(1, 2)
+    if got != 3 {
+        t.Errorf("Expected 3, got %d", got)
+    }
+}</pre></div>
+          <p>Go has first-class support for testing. Files ending in <code>_test.go</code> are recognized by <code>go test</code>. It supports unit tests, benchmarks, and examples (which also serve as documentation).</p>
+        </div>
+      </div>
+
+      <!-- 9. Networking & Web -->
+      <div class="section">
+        <div class="section-title">🔹 9. Networking & Web</div>
+
+        <div class="collapsible"><strong>2️⃣0️⃣ net/http</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Minimal & powerful.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Real Use</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">REST APIs, Middleware, Proxies.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, "Hello!")
+})
+http.ListenAndServe(":8080", nil)</pre></div>
+          <p>The standard library <code>net/http</code> package is production-ready. It provides a robust HTTP client and server. Many Go services use just this package or lightweight wrappers around it.</p>
+        </div>
+      </div>
+
+      <!-- 10. Advanced & Interview-Winning Concepts -->
+      <div class="section">
+        <div class="section-title">🔹 10. Advanced & Interview-Winning Concepts</div>
+
+        <div class="collapsible"><strong>2️⃣1️⃣ Escape Analysis</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Performance tuning.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Concept</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Stack vs Heap allocation.</p>
+            </div>
+          </div>
+          <p>The compiler determines whether a variable should be allocated on the stack (fast, auto-cleaned) or the heap (slower, GC-managed). If a reference to a variable "escapes" the function where it's defined (e.g., returned as a pointer), it moves to the heap.</p>
+        </div>
+
+        <div class="collapsible"><strong>2️⃣2️⃣ Interfaces + Composition</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Flexible design.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Concept</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Prefer composition over inheritance.</p>
+            </div>
+          </div>
+          <p>Go favors composition (embedding structs) over inheritance. Combined with small interfaces, this allows for highly modular and testable code. You build complex objects by combining smaller, simpler ones.</p>
+        </div>
+
+        <div class="collapsible"><strong>2️⃣3️⃣ Immutability by Convention</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Safer concurrency.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Concept</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Not enforced, but encouraged.</p>
+            </div>
+          </div>
+          <p>While Go doesn't enforce immutability, passing values instead of pointers and avoiding shared state modification is a common pattern to prevent race conditions and make code easier to reason about.</p>
+        </div>
+
+        <div class="collapsible"><strong>2️⃣4️⃣ Build Tags</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+            <div style="background: rgba(59, 130, 246, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #3b82f6;">
+              <strong style="color: #3b82f6;">Why it exists</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">OS-specific code, Feature flags.</p>
+            </div>
+            <div style="background: rgba(16, 185, 129, 0.1); padding: 10px; border-radius: 6px; border-left: 3px solid #10b981;">
+              <strong style="color: #10b981;">Concept</strong>
+              <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Conditional compilation.</p>
+            </div>
+          </div>
+          <div class="code-block"><pre>
+//go:build linux
+
+package main
+
+func init() {
+    // Linux specific init
+}</pre></div>
+          <p>Build tags allow you to include or exclude files from the build process based on conditions like the operating system, architecture, or custom tags. This is essential for writing cross-platform code.</p>
         </div>
       </div>
 
