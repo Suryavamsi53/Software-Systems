@@ -229,7 +229,22 @@
     let speed = 50;
     let isRunning = false;
     let shouldStop = false;
+    let currentLang = 'go';
     
+    const lineMap = {
+        go: { loopR: 2, loopC: 3, checkEmpty: 4, loopNum: 5, checkValid: 6, place: 7, recurse: 8, backtrack: 9, returnFalse: 12, returnTrue: 16 },
+        java: { loopR: 2, loopC: 3, checkEmpty: 4, loopNum: 5, checkValid: 6, place: 7, recurse: 8, backtrack: 9, returnFalse: 12, returnTrue: 16 },
+        python: { loopR: 2, loopC: 3, checkEmpty: 4, loopNum: 5, checkValid: 6, place: 7, recurse: 8, backtrack: 9, returnFalse: 10, returnTrue: 11 }
+    };
+
+    function highlightLine(stepName) {
+        const lineNum = lineMap[currentLang] ? lineMap[currentLang][stepName] : null;
+        if (!lineNum) return;
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        const el = document.getElementById(`${currentLang}-${lineNum}`);
+        if (el) el.classList.add('active');
+    }
+
     // Simple puzzle (0 represents empty)
     const initialBoard = [
         [5, 3, 0, 0, 7, 0, 0, 0, 0],
@@ -264,7 +279,7 @@
 
     async function solve(r, c) {
         if (shouldStop) return false;
-        if (r === 9) return true;
+        if (r === 9) { highlightLine('returnTrue'); return true; }
         
         let nextR = c === 8 ? r + 1 : r;
         let nextC = c === 8 ? 0 : c + 1;
@@ -273,23 +288,30 @@
 
         const cell = document.getElementById(`cell-${r}-${c}`);
         cell.classList.add('active');
+        highlightLine('checkEmpty');
 
         for (let num = 1; num <= 9; num++) {
             if (shouldStop) return false;
+            highlightLine('loopNum');
             
             cell.textContent = num;
             cell.classList.add('trying');
             await new Promise(r => setTimeout(r, speed));
 
+            highlightLine('checkValid');
             if (isValid(r, c, num)) {
+                highlightLine('place');
                 board[r][c] = num;
+                highlightLine('recurse');
                 if (await solve(nextR, nextC)) return true;
+                highlightLine('backtrack');
                 board[r][c] = 0; // Backtrack
             }
             
             cell.classList.remove('trying');
         }
         
+        highlightLine('returnFalse');
         cell.textContent = '';
         cell.classList.remove('active');
         return false;
@@ -319,9 +341,11 @@
         isRunning = false;
         board = JSON.parse(JSON.stringify(initialBoard));
         initBoard();
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
     }
 
     function switchTab(lang) {
+        currentLang = lang;
         document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
         document.getElementById('code-' + lang).style.display = 'block';
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));

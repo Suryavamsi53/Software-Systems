@@ -333,6 +333,24 @@
     let speed = 20;
     let currentLang = 'go';
 
+    const lineMap = {
+        bfs: {
+            go: { start: 2, loop: 4, curr: 5, check: 6, neighbors: 7, visit: 8, push: 10 },
+            java: { start: 3, loop: 4, curr: 5, check: 6, neighbors: 7, visit: 8, push: 10 },
+            python: { start: 2, loop: 4, curr: 5, check: 6, neighbors: 7, visit: 8, push: 10 }
+        },
+        dfs: {
+            go: { check: 2, visit: 3, neighbors: 4, notVisited: 5, recurse: 7 },
+            java: { check: 2, visit: 3, neighbors: 4, notVisited: 5, recurse: 7 },
+            python: { check: 2, visit: 3, neighbors: 4, notVisited: 5, recurse: 7 }
+        },
+        astar: {
+            go: { start: 2, loop: 4, curr: 5, check: 6, neighbors: 7, better: 9, push: 12 },
+            java: { start: 3, loop: 4, curr: 5, check: 6, neighbors: 7, better: 9, push: 12 },
+            python: { start: 2, loop: 3, curr: 4, check: 5, neighbors: 6, better: 8, push: 11 }
+        }
+    };
+
     function initGrid() {
         const maze = document.getElementById('maze');
         maze.innerHTML = '';
@@ -429,6 +447,22 @@
         }
     }
 
+    function highlightLine(algo, stepName) {
+        if (!lineMap[algo] || !lineMap[algo][currentLang]) return;
+        const lineNum = lineMap[algo][currentLang][stepName];
+        if (!lineNum) return;
+        
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        let id = '';
+        if (currentLang === 'go') {
+            id = `${algo}-${lineNum}`;
+        } else {
+            id = `${algo}-${currentLang}-${lineNum}`;
+        }
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
+    }
+
     async function startPathfinding() {
         if (isRunning) return;
         resetPath();
@@ -459,6 +493,7 @@
             grid[r][c].f = Infinity;
             const cell = document.getElementById(`cell-${r}-${c}`);
             cell.classList.remove('visited', 'path', 'current');
+            document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
         }
     }
 
@@ -475,13 +510,17 @@
     async function bfs() {
         let queue = [grid[0][0]];
         grid[0][0].visited = true;
+        highlightLine('bfs', 'start');
 
         while (queue.length > 0) {
             if (shouldStop) return;
+            highlightLine('bfs', 'loop');
             let curr = queue.shift();
+            highlightLine('bfs', 'curr');
             
             if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
                 await drawPath(curr);
+                highlightLine('bfs', 'check');
                 return;
             }
 
@@ -489,11 +528,14 @@
             cellEl.classList.add('visited');
             await new Promise(r => setTimeout(r, speed));
 
+            highlightLine('bfs', 'neighbors');
             for (let n of getNeighbors(curr)) {
                 if (!n.visited) {
+                    highlightLine('bfs', 'visit');
                     n.visited = true;
                     n.parent = curr;
                     queue.push(n);
+                    highlightLine('bfs', 'push');
                 }
             }
         }
@@ -506,21 +548,26 @@
         while (stack.length > 0) {
             if (shouldStop) return;
             let curr = stack.pop();
+            highlightLine('dfs', 'check');
 
             if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
                 await drawPath(curr);
                 return;
             }
 
+            highlightLine('dfs', 'visit');
             const cellEl = document.getElementById(`cell-${curr.r}-${curr.c}`);
             cellEl.classList.add('visited');
             await new Promise(r => setTimeout(r, speed));
 
+            highlightLine('dfs', 'neighbors');
             for (let n of getNeighbors(curr)) {
                 if (!n.visited) {
+                    highlightLine('dfs', 'notVisited');
                     n.visited = true;
                     n.parent = curr;
                     stack.push(n);
+                    highlightLine('dfs', 'recurse');
                 }
             }
         }
@@ -530,16 +577,20 @@
         let openSet = [grid[0][0]];
         grid[0][0].g = 0;
         grid[0][0].f = heuristic(grid[0][0], grid[ROWS-1][COLS-1]);
+        highlightLine('astar', 'start');
 
         while (openSet.length > 0) {
             if (shouldStop) return;
+            highlightLine('astar', 'loop');
             
             // Simple priority queue (sort)
             openSet.sort((a, b) => a.f - b.f);
             let curr = openSet.shift();
+            highlightLine('astar', 'curr');
 
             if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
                 await drawPath(curr);
+                highlightLine('astar', 'check');
                 return;
             }
 
@@ -548,15 +599,18 @@
             cellEl.classList.add('visited');
             await new Promise(r => setTimeout(r, speed));
 
+            highlightLine('astar', 'neighbors');
             for (let n of getNeighbors(curr)) {
                 if (n.visited) continue;
                 
                 let tentativeG = curr.g + 1;
                 if (tentativeG < n.g) {
+                    highlightLine('astar', 'better');
                     n.parent = curr;
                     n.g = tentativeG;
                     n.f = n.g + heuristic(n, grid[ROWS-1][COLS-1]);
                     if (!openSet.includes(n)) openSet.push(n);
+                    highlightLine('astar', 'push');
                 }
             }
         }

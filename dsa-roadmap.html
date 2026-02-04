@@ -68,6 +68,20 @@
       display: block;
       margin-bottom: 5px;
     }
+    .status-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    .status-available { background-color: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status-soon { background-color: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+    }
   </style>
 </head>
 <body>
@@ -130,25 +144,25 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="complexity-guide.html">
-              <strong>Complexity Analysis</strong>
+              <strong>Complexity Analysis <span class="status-badge status-available">Live</span></strong>
               Big O, Time vs Space, Logarithmic time
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/two-pointers.html">
-              <strong>Two Pointers</strong>
+              <strong>Two Pointers <span class="status-badge status-available">Live</span></strong>
               Pairs, Reversing, Partitioning
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/sliding-window.html">
-              <strong>Sliding Window</strong>
+              <strong>Sliding Window <span class="status-badge status-available">Live</span></strong>
               Subarrays, Substrings, Anagrams
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/prefix-sum.html">
-              <strong>Prefix Sum</strong>
+              <strong>Prefix Sum <span class="status-badge status-available">Live</span></strong>
               Range queries, Cumulative sums
             </a>
           </div>
@@ -166,19 +180,19 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="patterns/hash-maps.html">
-              <strong>Hash Maps & Sets</strong>
+              <strong>Hash Maps & Sets <span class="status-badge status-available">Live</span></strong>
               O(1) lookups, Counting, Deduplication
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/linked-lists.html">
-              <strong>Linked Lists</strong>
+              <strong>Linked Lists <span class="status-badge status-available">Live</span></strong>
               Traversal, Reversal, Fast & Slow Pointers
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/stack.html">
-              <strong>Stacks & Queues</strong>
+              <strong>Stacks & Queues <span class="status-badge status-available">Live</span></strong>
               LIFO/FIFO, Monotonic Stack, BFS Queue
             </a>
           </div>
@@ -196,19 +210,19 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="patterns/binary-search.html">
-              <strong>Binary Search</strong>
+              <strong>Binary Search <span class="status-badge status-available">Live</span></strong>
               Sorted arrays, Search space reduction
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/sort-search.html">
-              <strong>Sorting & Searching</strong>
+              <strong>Sorting & Searching <span class="status-badge status-soon">Coming Soon</span></strong>
               Merge Sort, Quick Sort, Custom Comparators
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/intervals.html">
-              <strong>Intervals</strong>
+              <strong>Intervals <span class="status-badge status-available">Live</span></strong>
               Merging, Overlaps, Scheduling
             </a>
           </div>
@@ -226,25 +240,25 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="patterns/trees.html">
-              <strong>Trees & BST</strong>
+              <strong>Trees & BST <span class="status-badge status-available">Live</span></strong>
               DFS, BFS, Recursion, Level-order
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/graphs.html">
-              <strong>Graphs</strong>
+              <strong>Graphs <span class="status-badge status-available">Live</span></strong>
               Adjacency List, Islands, Shortest Path
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/heap.html">
-              <strong>Heaps (Priority Queue)</strong>
+              <strong>Heaps (Priority Queue) <span class="status-badge status-available">Live</span></strong>
               Top-K elements, Median, Scheduling
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/tries.html">
-              <strong>Tries</strong>
+              <strong>Tries <span class="status-badge status-available">Live</span></strong>
               Prefix matching, Autocomplete
             </a>
           </div>
@@ -262,19 +276,19 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="patterns/dynamic-programming.html">
-              <strong>Dynamic Programming</strong>
+              <strong>Dynamic Programming <span class="status-badge status-available">Live</span></strong>
               Memoization, Tabulation, Knapsack
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/backtracking.html">
-              <strong>Backtracking</strong>
+              <strong>Backtracking <span class="status-badge status-available">Live</span></strong>
               Permutations, Subsets, Puzzles
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/greedy.html">
-              <strong>Greedy</strong>
+              <strong>Greedy <span class="status-badge status-available">Live</span></strong>
               Local optimization, Activity selection
             </a>
           </div>
@@ -292,20 +306,26 @@
         <div class="topic-grid">
           <div class="topic-card">
             <a href="mock-interview-checklist.html">
-              <strong>Mock Interviews</strong>
+              <strong>Mock Interviews <span class="status-badge status-available">Live</span></strong>
               Behavioral (LP), Coding, System Design
             </a>
           </div>
           <div class="topic-card">
             <a href="system-design.html">
-              <strong>System Design</strong>
+              <strong>System Design <span class="status-badge status-available">Live</span></strong>
               Scalability, Load Balancing, Caching
             </a>
           </div>
           <div class="topic-card">
             <a href="patterns/bit-manipulation.html">
-              <strong>Bit Manipulation</strong>
+              <strong>Bit Manipulation <span class="status-badge status-soon">Coming Soon</span></strong>
               XOR, Bit masking
+            </a>
+          </div>
+          <div class="topic-card">
+            <a href="patterns/math-geometry.html">
+              <strong>Math & Geometry <span class="status-badge status-soon">Coming Soon</span></strong>
+              GCD, Primes, Coordinates
             </a>
           </div>
         </div>
