@@ -1,456 +1,379 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>N-Queens Visualization - Software Systems Prep</title>
-    <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="graph-visualizer.css">
-    <style>
-        .board {
-            display: grid;
-            border: 4px solid #334155;
-        }
-
-        .cell {
-            width: 50px;
-            height: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            position: relative;
-        }
-
-        .cell.light { background-color: #e2e8f0; color: #1e293b; }
-        .cell.dark { background-color: #475569; color: #f1f5f9; }
-
-        .cell.active { background-color: #facc15 !important; }
-        .cell.invalid { background-color: #ef4444 !important; }
-        .cell.solution { background-color: #22c55e !important; }
-        
-        .legend {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            padding: 10px;
-            background: var(--bg-secondary);
-        }
-        .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
-        
-        .control-input {
-            width: 100%;
-            padding: 8px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 4px;
-            margin-bottom: 10px;
-        }
-
-        /* Code Panel Styles */
-        .split-view {
-            display: flex;
-            gap: 20px;
-            height: 100%;
-            min-height: 400px;
-        }
-        .canvas-section {
-            flex: 2;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-            align-items: center;
-            justify-content: center;
-        }
-        .code-section {
-            flex: 1;
-            background-color: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 300px;
-        }
-        .code-header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: rgba(255,255,255,0.05);
-        }
-        .algo-code {
-            padding: 15px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-secondary);
-            flex: 1;
-        }
-        .code-line { padding: 2px 5px; border-radius: 4px; }
-        .code-line.active {
-            background-color: rgba(250, 204, 21, 0.2);
-            border-left: 3px solid #facc15;
-            color: #facc15;
-        }
-        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
-        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>N-Queens Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .visualizer-section {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .code-display {
+      flex: 1;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .lang-tabs {
+      display: flex;
+      background-color: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-content {
+      padding: 15px;
+      margin: 0;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .line {
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+    }
+    .chess-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 60px);
+      grid-template-rows: repeat(4, 60px);
+      border: 4px solid #5c4033;
+    }
+    .chess-cell {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+    }
+    .chess-cell.white { background-color: #f0d9b5; }
+    .chess-cell.black { background-color: #b58863; }
+    .chess-cell.queen { color: #000; text-shadow: 0 0 2px #fff; }
+    .chess-cell.checking { box-shadow: inset 0 0 0 4px #ef4444; }
+    .chess-cell.placing { box-shadow: inset 0 0 0 4px #22c55e; }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>🌑 Software Systems</h1>
-                <p>N-Queens</p>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Interactive Visualizers</div>
+        <a href="n-queens.html" class="nav-item active">N-Queens Backtracking</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>♛ N-Queens Backtracking</h1>
+        <p>Visualize how the backtracking algorithm places queens on the board.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🎯 Real-World Scenario: Constraint Satisfaction</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Resource Allocation & Scheduling</div>
+          <div class="callout-content">
+            <p>The N-Queens problem is a classic example of a <strong>Constraint Satisfaction Problem (CSP)</strong>. In real-world systems, this pattern is used for:</p>
+            <ul>
+              <li><strong>Server Job Scheduling:</strong> Assigning tasks to servers such that no two tasks conflict on shared resources (CPU, Memory, Time slots).</li>
+              <li><strong>VLSI Design:</strong> Placing components on a chip so that connecting wires don't overlap or interfere.</li>
+              <li><strong>Timetabling:</strong> Creating class schedules where no teacher or student has overlapping classes.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="visualizer-section">
+          <!-- Board Visualization (Left) -->
+          <div style="flex: 1; display: flex; flex-direction: column; gap: 10px;">
+          <div class="controls">
+            <button class="tab-btn active" onclick="startViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Start</button>
+            <button class="tab-btn" onclick="resetViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Reset</button>
+            <span style="color: var(--text-secondary)">Speed:</span>
+            <input type="range" min="100" max="1000" value="500" oninput="speed = 1100 - this.value">
+          </div>
+          <div id="status" class="status-text">Ready to start...</div>
+
+          <!-- Board Visualization Placeholder -->
+          <div class="board-view">
+            <div class="chess-grid" id="board">
             </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Back</div>
-                <a href="../index.html" class="nav-item">← Dashboard</a>
+          </div>
+          </div>
+
+          <!-- Code Tracking Section (Right) -->
+          <div class="code-display">
+            <div class="lang-tabs">
+              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+              <button class="tab-btn" onclick="switchTab('java')">Java</button>
+              <button class="tab-btn" onclick="switchTab('python')">Python</button>
             </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Controls</div>
-                <div class="control-group">
-                    <label>Board Size (N)</label>
-                    <input type="number" id="n-input" class="control-input" value="4" min="4" max="8">
-                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
-                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
-                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
-                    <button class="action-btn warning" onclick="reset()">Reset</button>
-                </div>
+            
+            <div id="code-go" class="code-content" style="display: block;">
+<span class="line" id="go-1"><span class="kwd">func</span> solveNQueens(n <span class="type">int</span>) [][]<span class="type">string</span> {</span>
+<span class="line" id="go-2">    board := <span class="kwd">make</span>([][]<span class="type">string</span>, n)</span>
+<span class="line" id="go-3">    <span class="com">// Initialize board...</span></span>
+<span class="line" id="go-4">    <span class="kwd">var</span> res [][]<span class="type">string</span></span>
+<span class="line" id="go-5">    backtrack(<span class="num">0</span>, board, &res, n)</span>
+<span class="line" id="go-6">    <span class="kwd">return</span> res</span>
+<span class="line" id="go-7">}</span>
+<span class="line" id="go-8"></span>
+<span class="line" id="go-9"><span class="kwd">func</span> backtrack(row <span class="type">int</span>, board [][]<span class="type">string</span>, res *[][]<span class="type">string</span>, n <span class="type">int</span>) {</span>
+<span class="line" id="go-10">    <span class="kwd">if</span> row == n {</span>
+<span class="line" id="go-11">        <span class="com">// Found solution, add to results</span></span>
+<span class="line" id="go-12">        <span class="kwd">return</span></span>
+<span class="line" id="go-13">    }</span>
+<span class="line" id="go-14">    <span class="kwd">for</span> col := <span class="num">0</span>; col < n; col++ {</span>
+<span class="line" id="go-15">        <span class="kwd">if</span> isValid(board, row, col, n) {</span>
+<span class="line" id="go-16">            board[row][col] = <span class="str">"Q"</span>  <span class="com">// Place Queen</span></span>
+<span class="line" id="go-17">            backtrack(row+<span class="num">1</span>, board, res, n)</span>
+<span class="line" id="go-18">            board[row][col] = <span class="str">"."</span>  <span class="com">// Backtrack</span></span>
+<span class="line" id="go-19">        }</span>
+<span class="line" id="go-20">    }</span>
+<span class="line" id="go-21">}</span>
             </div>
-        </aside>
 
-        <main class="main-content no-padding">
-            <div class="viz-container">
-                <div class="algo-toolbar">
-                    <div id="step-text" style="font-family: monospace; color: var(--accent-color);">Ready to start...</div>
-                </div>
-                
-                <div class="split-view">
-                    <div class="canvas-section">
-                        <div class="canvas-wrapper" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
-                            <div id="board" class="board"></div>
-                        </div>
-                        <div class="legend">
-                            <span><span class="dot" style="background: #facc15"></span>Placing</span>
-                            <span><span class="dot" style="background: #ef4444"></span>Conflict</span>
-                            <span><span class="dot" style="background: #22c55e"></span>Safe</span>
-                        </div>
-                    </div>
-                    <div class="code-section">
-                        <div class="code-header">
-                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
-                            <div class="btn-group">
-                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
-                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
-                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
-                            </div>
-                        </div>
-                        <div id="code-display" class="algo-code"></div>
-                    </div>
-                </div>
+            <div id="code-java" class="code-content" style="display: none;">
+<span class="line" id="java-1"><span class="kwd">public</span> List&lt;List&lt;String>> solveNQueens(<span class="type">int</span> n) {</span>
+<span class="line" id="java-2">    <span class="type">char</span>[][] board = <span class="kwd">new</span> <span class="type">char</span>[n][n];</span>
+<span class="line" id="java-3">    <span class="com">// Initialize board...</span></span>
+<span class="line" id="java-4">    List&lt;List&lt;String>> res = <span class="kwd">new</span> ArrayList<>();</span>
+<span class="line" id="java-5">    backtrack(<span class="num">0</span>, board, res);</span>
+<span class="line" id="java-6">    <span class="kwd">return</span> res;</span>
+<span class="line" id="java-7">}</span>
+<span class="line" id="java-8"></span>
+<span class="line" id="java-9"><span class="kwd">void</span> backtrack(<span class="type">int</span> row, <span class="type">char</span>[][] board, List&lt;List&lt;String>> res) {</span>
+<span class="line" id="java-10">    <span class="kwd">if</span>(row == board.length) {</span>
+<span class="line" id="java-11">        res.add(construct(board));</span>
+<span class="line" id="java-12">        <span class="kwd">return</span>;</span>
+<span class="line" id="java-13">    }</span>
+<span class="line" id="java-14">    <span class="kwd">for</span>(<span class="type">int</span> col = <span class="num">0</span>; col < board.length; col++) {</span>
+<span class="line" id="java-15">        <span class="kwd">if</span>(isValid(board, row, col)) {</span>
+<span class="line" id="java-16">            board[row][col] = <span class="str">'Q'</span>; <span class="com">// Place Queen</span></span>
+<span class="line" id="java-17">            backtrack(row + <span class="num">1</span>, board, res);</span>
+<span class="line" id="java-18">            board[row][col] = <span class="str">'.'</span>; <span class="com">// Backtrack</span></span>
+<span class="line" id="java-19">        }</span>
+<span class="line" id="java-20">    }</span>
+<span class="line" id="java-21">}</span>
             </div>
-        </main>
-    </div>
 
-    <script>
-        let N = 4;
-        let steps = [];
-        let currentStep = 0;
-        let isPlaying = false;
-        let intervalId = null;
-        const ANIMATION_SPEED = 800;
-        let currentLang = 'go';
-        let currentOp = 'solve';
+            <div id="code-python" class="code-content" style="display: none;">
+<span class="line" id="python-1"><span class="kwd">def</span> solveNQueens(self, n: <span class="type">int</span>) -> List[List[str]]:</span>
+<span class="line" id="python-2">    board = [[<span class="str">'.'</span>] * n <span class="kwd">for</span> _ <span class="kwd">in</span> <span class="kwd">range</span>(n)]</span>
+<span class="line" id="python-3">    res = []</span>
+<span class="line" id="python-4">    </span>
+<span class="line" id="python-5">    <span class="kwd">def</span> backtrack(row):</span>
+<span class="line" id="python-6">        <span class="kwd">if</span> row == n:</span>
+<span class="line" id="python-7">            res.append([<span class="str">""</span>.join(r) <span class="kwd">for</span> r <span class="kwd">in</span> board])</span>
+<span class="line" id="python-8">            <span class="kwd">return</span></span>
+<span class="line" id="python-9">        </span>
+<span class="line" id="python-10">        <span class="kwd">for</span> col <span class="kwd">in</span> <span class="kwd">range</span>(n):</span>
+<span class="line" id="python-11">            <span class="kwd">if</span> is_valid(row, col):</span>
+<span class="line" id="python-12">                board[row][col] = <span class="str">'Q'</span> <span class="com"># Place Queen</span></span>
+<span class="line" id="python-13">                backtrack(row + <span class="num">1</span>)</span>
+<span class="line" id="python-14">                board[row][col] = <span class="str">'.'</span> <span class="com"># Backtrack</span></span>
+<span class="line" id="python-15">    </span>
+<span class="line" id="python-16">    backtrack(<span class="num">0</span>)</span>
+<span class="line" id="python-17">    <span class="kwd">return</span> res</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 
-        const boardEl = document.getElementById('board');
-        const stepText = document.getElementById('step-text');
-        const playBtn = document.getElementById('playBtn');
-        const nInput = document.getElementById('n-input');
+  <script>
+    let n = 4;
+    let speed = 600;
+    let isRunning = false;
+    let currentLang = 'go';
+    let shouldStop = false;
 
-        const CODES = {
-            solve: {
-                go: `func solve(row int) {
-    if row == N {
-        foundSolution = true
-        return
+    const lineMap = {
+        go: { base: 10, found: 11, loop: 14, check: 15, place: 16, recurse: 17, back: 18 },
+        java: { base: 10, found: 11, loop: 14, check: 15, place: 16, recurse: 17, back: 18 },
+        python: { base: 6, found: 7, loop: 10, check: 11, place: 12, recurse: 13, back: 14 }
+    };
+
+    function initBoard() {
+      const board = document.getElementById('board');
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${n}, 60px)`;
+      board.style.gridTemplateRows = `repeat(${n}, 60px)`;
+
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          const cell = document.createElement('div');
+          cell.className = `chess-cell ${(r + c) % 2 === 0 ? 'white' : 'black'}`;
+          cell.id = `cell-${r}-${c}`;
+          board.appendChild(cell);
+        }
+      }
     }
-    for col := 0; col < N; col++ {
-        if isSafe(row, col) {
-            board[row][col] = 'Q'
-            solve(row + 1)
-            if foundSolution { return }
-            board[row][col] = '.' // Backtrack
-        }
+
+    function switchTab(lang) {
+      currentLang = lang;
+      document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+      document.getElementById('code-' + lang).style.display = 'block';
+      
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
     }
-}`,
-                java: `void solve(int row) {
-    if (row == N) {
-        foundSolution = true;
-        return;
+
+    async function startViz() {
+      if (isRunning) return;
+      isRunning = true;
+      shouldStop = false;
+      resetViz(false);
+      
+      const board = Array(n).fill().map(() => Array(n).fill('.'));
+      document.getElementById('status').textContent = "Starting...";
+      
+      await solve(0, board);
+      
+      if (!shouldStop) {
+        document.getElementById('status').textContent = "Visualization Complete!";
+      }
+      isRunning = false;
     }
-    for (int col = 0; col < N; col++) {
-        if (isSafe(row, col)) {
-            board[row][col] = 'Q';
-            solve(row + 1);
-            if (foundSolution) return;
-            board[row][col] = '.'; // Backtrack
-        }
+
+    function resetViz(stop = true) {
+      if (stop) {
+        shouldStop = true;
+        isRunning = false;
+      }
+      initBoard();
+      document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+      document.getElementById('status').textContent = "Ready";
     }
-}`,
-                python: `def solve(row):
-    if row == N:
-        return True
-    
-    for col in range(N):
-        if is_safe(row, col):
-            board[row][col] = 'Q'
-            if solve(row + 1):
-                return True
-            board[row][col] = '.' # Backtrack
-            
-    return False`
-            }
-        };
 
-        function init() {
-            N = parseInt(nInput.value);
-            renderCode('solve');
-            renderBoardStructure();
-            generateSteps();
-            updateView(0);
+    async function solve(row, board) {
+      if (shouldStop) return false;
+      const lines = lineMap[currentLang] || lineMap['go'];
+
+      highlightLine(lines.base);
+      if (row === n) {
+        highlightLine(lines.found);
+        document.getElementById('status').textContent = "Solution Found!";
+        await sleep(speed * 2);
+        return true; 
+      }
+
+      highlightLine(lines.loop);
+      for (let col = 0; col < n; col++) {
+        if (shouldStop) return false;
+
+        highlightLine(lines.check);
+        const cell = document.getElementById(`cell-${row}-${col}`);
+        cell.classList.add('checking');
+        await sleep(speed / 2);
+        cell.classList.remove('checking');
+
+        if (isValid(board, row, col)) {
+          board[row][col] = 'Q';
+          cell.textContent = '♛';
+          cell.classList.add('queen');
+          cell.classList.add('placing');
+          
+          highlightLine(lines.place);
+          document.getElementById('status').textContent = `Placed Queen at (${row}, ${col})`;
+          await sleep(speed);
+          cell.classList.remove('placing');
+
+          highlightLine(lines.recurse);
+          if (await solve(row + 1, board)) return true;
+
+          highlightLine(lines.back);
+          board[row][col] = '.';
+          cell.textContent = '';
+          cell.classList.remove('queen');
+          document.getElementById('status').textContent = `Backtracking from (${row}, ${col})`;
+          await sleep(speed);
         }
+      }
+      return false;
+    }
 
-        function renderBoardStructure() {
-            boardEl.style.gridTemplateColumns = `repeat(${N}, 50px)`;
-            boardEl.innerHTML = '';
-            for (let r = 0; r < N; r++) {
-                for (let c = 0; c < N; c++) {
-                    const cell = document.createElement('div');
-                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-                    cell.id = `cell-${r}-${c}`;
-                    boardEl.appendChild(cell);
-                }
-            }
-        }
+    function isValid(board, row, col) {
+      for (let i = 0; i < row; i++) {
+        if (board[i][col] === 'Q') return false;
+        if (col - (row - i) >= 0 && board[i][col - (row - i)] === 'Q') return false;
+        if (col + (row - i) < n && board[i][col + (row - i)] === 'Q') return false;
+      }
+      return true;
+    }
 
-        function generateSteps() {
-            steps = [];
-            const board = Array(N).fill().map(() => Array(N).fill('.'));
-            
-            // Helper to check safety
-            function isSafe(row, col) {
-                // Check column
-                for (let i = 0; i < row; i++) {
-                    if (board[i][col] === 'Q') return false;
-                }
-                // Check upper left diagonal
-                for (let i = row, j = col; i >= 0 && j >= 0; i--, j--) {
-                    if (board[i][j] === 'Q') return false;
-                }
-                // Check upper right diagonal
-                for (let i = row, j = col; i >= 0 && j < N; i--, j++) {
-                    if (board[i][j] === 'Q') return false;
-                }
-                return true;
-            }
+    function highlightLine(lineNum) {
+      document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+      const el = document.getElementById(`${currentLang}-${lineNum}`);
+      if (el) el.classList.add('active');
+    }
 
-            function solve(row) {
-                if (row === N) {
-                    steps.push({
-                        board: JSON.parse(JSON.stringify(board)),
-                        msg: "Solution Found!",
-                        status: 'success',
-                        lines: { go: 3, java: 3, python: 3 }
-                    });
-                    return true; // Stop after first solution for simplicity
-                }
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-                for (let col = 0; col < N; col++) {
-                    // Try placing
-                    board[row][col] = 'Q';
-                    steps.push({
-                        board: JSON.parse(JSON.stringify(board)),
-                        msg: `Trying Queen at (${row}, ${col})...`,
-                        active: [row, col],
-                        status: 'active',
-                        lines: { go: 7, java: 7, python: 6 }
-                    });
-
-                    if (isSafe(row, col)) {
-                        steps.push({
-                            board: JSON.parse(JSON.stringify(board)),
-                            msg: `(${row}, ${col}) is Safe. Moving to next row.`,
-                            active: [row, col],
-                            status: 'safe',
-                            lines: { go: 8, java: 8, python: 7 }
-                        });
-
-                        if (solve(row + 1)) return true;
-
-                        // Backtrack
-                        steps.push({
-                            board: JSON.parse(JSON.stringify(board)),
-                            msg: `Backtracking from row ${row+1}. Removing Queen at (${row}, ${col}).`,
-                            active: [row, col],
-                            status: 'backtrack',
-                            lines: { go: 11, java: 11, python: 10 }
-                        });
-                        board[row][col] = '.';
-                    } else {
-                        steps.push({
-                            board: JSON.parse(JSON.stringify(board)),
-                            msg: `Conflict at (${row}, ${col})! Invalid placement.`,
-                            active: [row, col],
-                            status: 'invalid',
-                            lines: { go: 7, java: 7, python: 6 }
-                        });
-                        board[row][col] = '.';
-                    }
-                }
-                return false;
-            }
-
-            solve(0);
-        }
-
-        function updateView(stepIndex) {
-            const state = steps[stepIndex];
-            if (!state) return;
-
-            // Clear board
-            for (let r = 0; r < N; r++) {
-                for (let c = 0; c < N; c++) {
-                    const cell = document.getElementById(`cell-${r}-${c}`);
-                    cell.textContent = '';
-                    cell.className = `cell ${(r + c) % 2 === 0 ? 'light' : 'dark'}`;
-                    
-                    if (state.board[r][c] === 'Q') {
-                        cell.textContent = '♛';
-                    }
-                }
-            }
-
-            // Highlight active cell
-            if (state.active) {
-                const [r, c] = state.active;
-                const cell = document.getElementById(`cell-${r}-${c}`);
-                if (state.status === 'active') cell.classList.add('active');
-                if (state.status === 'invalid') cell.classList.add('invalid');
-                if (state.status === 'safe') cell.classList.add('solution');
-                if (state.status === 'backtrack') cell.classList.add('invalid'); // Flash red on remove
-            }
-
-            if (state.status === 'success') {
-                // Highlight all queens green
-                for (let r = 0; r < N; r++) {
-                    for (let c = 0; c < N; c++) {
-                        if (state.board[r][c] === 'Q') {
-                            document.getElementById(`cell-${r}-${c}`).classList.add('solution');
-                        }
-                    }
-                }
-            }
-
-            stepText.textContent = state.msg;
-            
-            if (state.lines) {
-                highlightLine(state.lines[currentLang]);
-            }
-        }
-
-        function renderCode(op) {
-            currentOp = op;
-            const code = CODES[op][currentLang];
-            const display = document.getElementById('code-display');
-            display.innerHTML = '';
-            
-            const lines = code.split('\n');
-            lines.forEach((line, i) => {
-                const div = document.createElement('div');
-                div.className = 'code-line';
-                div.id = `line-${i+1}`;
-                let html = line
-                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true|false|bool|boolean)\b/g, '<span class="kwd">$1</span>')
-                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
-                    .replace(/#.*/g, '<span class="com">$&</span>');
-                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
-                display.appendChild(div);
-            });
-        }
-
-        function highlightLine(num) {
-            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
-            const line = document.getElementById(`line-${num}`);
-            if (line) line.classList.add('active');
-        }
-
-        function copyCode() {
-            const code = CODES[currentOp][currentLang];
-            navigator.clipboard.writeText(code);
-        }
-
-        function switchLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderCode(currentOp);
-            updateView(currentStep);
-        }
-
-        // Controls
-        function togglePlay() {
-            if (isPlaying) {
-                clearInterval(intervalId);
-                isPlaying = false;
-                playBtn.textContent = "Play";
-            } else {
-                if (currentStep >= steps.length - 1) currentStep = 0;
-                isPlaying = true;
-                playBtn.textContent = "Pause";
-                intervalId = setInterval(() => {
-                    if (currentStep < steps.length - 1) {
-                        currentStep++;
-                        updateView(currentStep);
-                    } else {
-                        togglePlay();
-                    }
-                }, ANIMATION_SPEED);
-            }
-        }
-
-        function stepForward() {
-            if (currentStep < steps.length - 1) {
-                currentStep++;
-                updateView(currentStep);
-            }
-        }
-
-        function stepBackward() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateView(currentStep);
-            }
-        }
-
-        function reset() {
-            if (isPlaying) togglePlay();
-            currentStep = 0;
-            init(); // Re-init in case N changed
-        }
-
-        nInput.addEventListener('change', reset);
-
-        init();
-    </script>
+    initBoard();
+  </script>
+  <script src="../script.js"></script>
 </body>
 </html>

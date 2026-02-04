@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sudoku Solver Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .visualizer-section {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .code-display {
+      flex: 1;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .lang-tabs {
+      display: flex;
+      background-color: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-content {
+      padding: 15px;
+      margin: 0;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .line {
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+    }
+    .sudoku-board {
+      display: grid;
+      grid-template-columns: repeat(9, 40px);
+      grid-template-rows: repeat(9, 40px);
+      gap: 1px;
+      background-color: #555;
+      border: 2px solid #333;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 40px;
+      height: 40px;
+      background-color: #1e1e1e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      color: #fff;
+      position: relative;
+    }
+    /* 3x3 Subgrid Borders */
+    .cell:nth-child(3n) { border-right: 2px solid #888; }
+    .cell:nth-child(9n) { border-right: none; }
+    .cell:nth-child(n+19):nth-child(-n+27),
+    .cell:nth-child(n+46):nth-child(-n+54) {
+        border-bottom: 2px solid #888;
+    }
+
+    .cell.fixed { font-weight: bold; color: #aaa; background-color: #252526; }
+    .cell.trying { color: #facc15; background-color: rgba(250, 204, 21, 0.1); }
+    .cell.solved { color: #22c55e; }
+    .cell.active { box-shadow: inset 0 0 0 2px #3b82f6; }
+    .cell.invalid { background-color: rgba(239, 68, 68, 0.2); }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Interactive Visualizers</div>
+        <a href="n-queens.html" class="nav-item">N-Queens Backtracking</a>
+        <a href="sudoku-solver.html" class="nav-item active">Sudoku Solver</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🧩 Sudoku Solver</h1>
+        <p>Visualize the backtracking algorithm solving a Sudoku puzzle.</p>
+      </div>
+
+      <div class="section">
+        <div class="visualizer-section">
+          <!-- Board Visualization (Left) -->
+          <div class="board-view">
+            <div class="controls">
+              <button class="tab-btn active" onclick="startViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Start</button>
+              <button class="tab-btn" onclick="resetViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Reset</button>
+              <span style="color: var(--text-secondary)">Speed:</span>
+              <input type="range" min="1" max="100" value="50" oninput="speed = 101 - this.value">
+            </div>
+            <div id="status" class="status-text">Ready to start...</div>
+
+            <div class="sudoku-board" id="board"></div>
+          </div>
+
+          <!-- Code Tracking Section (Right) -->
+          <div class="code-display">
+            <div class="lang-tabs">
+              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+              <button class="tab-btn" onclick="switchTab('java')">Java</button>
+              <button class="tab-btn" onclick="switchTab('python')">Python</button>
+            </div>
+            
+            <div id="code-go" class="code-content" style="display: block;">
+<span class="line" id="go-1"><span class="kwd">func</span> solveSudoku(board [][]<span class="type">byte</span>) <span class="type">bool</span> {</span>
+<span class="line" id="go-2">    <span class="kwd">for</span> r := <span class="num">0</span>; r < <span class="num">9</span>; r++ {</span>
+<span class="line" id="go-3">        <span class="kwd">for</span> c := <span class="num">0</span>; c < <span class="num">9</span>; c++ {</span>
+<span class="line" id="go-4">            <span class="kwd">if</span> board[r][c] == <span class="str">'.'</span> {</span>
+<span class="line" id="go-5">                <span class="kwd">for</span> num := <span class="str">'1'</span>; num <= <span class="str">'9'</span>; num++ {</span>
+<span class="line" id="go-6">                    <span class="kwd">if</span> isValid(board, r, c, num) {</span>
+<span class="line" id="go-7">                        board[r][c] = num</span>
+<span class="line" id="go-8">                        <span class="kwd">if</span> solveSudoku(board) { <span class="kwd">return true</span> }</span>
+<span class="line" id="go-9">                        board[r][c] = <span class="str">'.'</span> <span class="com">// Backtrack</span></span>
+<span class="line" id="go-10">                    }</span>
+<span class="line" id="go-11">                }</span>
+<span class="line" id="go-12">                <span class="kwd">return false</span></span>
+<span class="line" id="go-13">            }</span>
+<span class="line" id="go-14">        }</span>
+<span class="line" id="go-15">    }</span>
+<span class="line" id="go-16">    <span class="kwd">return true</span></span>
+<span class="line" id="go-17">}</span>
+            </div>
+
+            <div id="code-java" class="code-content" style="display: none;">
+<span class="line" id="java-1"><span class="kwd">public boolean</span> solveSudoku(<span class="type">char</span>[][] board) {</span>
+<span class="line" id="java-2">    <span class="kwd">for</span> (<span class="type">int</span> r = <span class="num">0</span>; r < <span class="num">9</span>; r++) {</span>
+<span class="line" id="java-3">        <span class="kwd">for</span> (<span class="type">int</span> c = <span class="num">0</span>; c < <span class="num">9</span>; c++) {</span>
+<span class="line" id="java-4">            <span class="kwd">if</span> (board[r][c] == <span class="str">'.'</span>) {</span>
+<span class="line" id="java-5">                <span class="kwd">for</span> (<span class="type">char</span> num = <span class="str">'1'</span>; num <= <span class="str">'9'</span>; num++) {</span>
+<span class="line" id="java-6">                    <span class="kwd">if</span> (isValid(board, r, c, num)) {</span>
+<span class="line" id="java-7">                        board[r][c] = num;</span>
+<span class="line" id="java-8">                        <span class="kwd">if</span> (solveSudoku(board)) <span class="kwd">return true</span>;</span>
+<span class="line" id="java-9">                        board[r][c] = <span class="str">'.'</span>; <span class="com">// Backtrack</span></span>
+<span class="line" id="java-10">                    }</span>
+<span class="line" id="java-11">                }</span>
+<span class="line" id="java-12">                <span class="kwd">return false</span>;</span>
+<span class="line" id="java-13">            }</span>
+<span class="line" id="java-14">        }</span>
+<span class="line" id="java-15">    }</span>
+<span class="line" id="java-16">    <span class="kwd">return true</span>;</span>
+<span class="line" id="java-17">}</span>
+            </div>
+
+            <div id="code-python" class="code-content" style="display: none;">
+<span class="line" id="python-1"><span class="kwd">def</span> solveSudoku(self, board: List[List[str]]) -> <span class="type">bool</span>:</span>
+<span class="line" id="python-2">    <span class="kwd">for</span> r <span class="kwd">in</span> <span class="kwd">range</span>(<span class="num">9</span>):</span>
+<span class="line" id="python-3">        <span class="kwd">for</span> c <span class="kwd">in</span> <span class="kwd">range</span>(<span class="num">9</span>):</span>
+<span class="line" id="python-4">            <span class="kwd">if</span> board[r][c] == <span class="str">'.'</span>:</span>
+<span class="line" id="python-5">                <span class="kwd">for</span> num <span class="kwd">in</span> <span class="str">"123456789"</span>:</span>
+<span class="line" id="python-6">                    <span class="kwd">if</span> self.isValid(board, r, c, num):</span>
+<span class="line" id="python-7">                        board[r][c] = num</span>
+<span class="line" id="python-8">                        <span class="kwd">if</span> self.solveSudoku(board): <span class="kwd">return True</span></span>
+<span class="line" id="python-9">                        board[r][c] = <span class="str">'.'</span> <span class="com"># Backtrack</span></span>
+<span class="line" id="python-10">                <span class="kwd">return False</span></span>
+<span class="line" id="python-11">    <span class="kwd">return True</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let speed = 50;
+    let isRunning = false;
+    let shouldStop = false;
+    
+    // Simple puzzle (0 represents empty)
+    const initialBoard = [
+        [5, 3, 0, 0, 7, 0, 0, 0, 0],
+        [6, 0, 0, 1, 9, 5, 0, 0, 0],
+        [0, 9, 8, 0, 0, 0, 0, 6, 0],
+        [8, 0, 0, 0, 6, 0, 0, 0, 3],
+        [4, 0, 0, 8, 0, 3, 0, 0, 1],
+        [7, 0, 0, 0, 2, 0, 0, 0, 6],
+        [0, 6, 0, 0, 0, 0, 2, 8, 0],
+        [0, 0, 0, 4, 1, 9, 0, 0, 5],
+        [0, 0, 0, 0, 8, 0, 0, 7, 9]
+    ];
+    
+    let board = JSON.parse(JSON.stringify(initialBoard));
+
+    function initBoard() {
+        const container = document.getElementById('board');
+        container.innerHTML = '';
+        for (let r = 0; r < 9; r++) {
+            for (let c = 0; c < 9; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${r}-${c}`;
+                if (initialBoard[r][c] !== 0) {
+                    cell.textContent = initialBoard[r][c];
+                    cell.classList.add('fixed');
+                }
+                container.appendChild(cell);
+            }
+        }
+    }
+
+    async function solve(r, c) {
+        if (shouldStop) return false;
+        if (r === 9) return true;
+        
+        let nextR = c === 8 ? r + 1 : r;
+        let nextC = c === 8 ? 0 : c + 1;
+
+        if (board[r][c] !== 0) return solve(nextR, nextC);
+
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        cell.classList.add('active');
+
+        for (let num = 1; num <= 9; num++) {
+            if (shouldStop) return false;
+            
+            cell.textContent = num;
+            cell.classList.add('trying');
+            await new Promise(r => setTimeout(r, speed));
+
+            if (isValid(r, c, num)) {
+                board[r][c] = num;
+                if (await solve(nextR, nextC)) return true;
+                board[r][c] = 0; // Backtrack
+            }
+            
+            cell.classList.remove('trying');
+        }
+        
+        cell.textContent = '';
+        cell.classList.remove('active');
+        return false;
+    }
+
+    function isValid(r, c, num) {
+        for (let i = 0; i < 9; i++) {
+            if (board[r][i] === num) return false;
+            if (board[i][c] === num) return false;
+            if (board[3 * Math.floor(r / 3) + Math.floor(i / 3)][3 * Math.floor(c / 3) + i % 3] === num) return false;
+        }
+        return true;
+    }
+
+    async function startViz() {
+        if (isRunning) return;
+        isRunning = true;
+        shouldStop = false;
+        board = JSON.parse(JSON.stringify(initialBoard));
+        initBoard();
+        await solve(0, 0);
+        isRunning = false;
+    }
+
+    function resetViz() {
+        shouldStop = true;
+        isRunning = false;
+        board = JSON.parse(JSON.stringify(initialBoard));
+        initBoard();
+    }
+
+    function switchTab(lang) {
+        document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+        document.getElementById('code-' + lang).style.display = 'block';
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    initBoard();
+  </script>
+</body>
+</html>

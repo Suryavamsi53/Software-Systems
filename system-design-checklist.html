@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Design Checklist - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 15px;
+      padding: 15px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+    .checklist-item:hover {
+      transform: translateX(5px);
+      border-color: var(--accent-color);
+    }
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--text-muted);
+      border-radius: 6px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .checklist-item.checked .checkbox {
+      background-color: var(--callout-green);
+      border-color: var(--callout-green);
+    }
+    .checklist-item.checked .checkbox::after {
+      content: '✓';
+      color: white;
+      font-weight: bold;
+    }
+    .item-content h3 {
+      margin: 0 0 5px 0;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+    }
+    .item-content p {
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .time-badge {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--callout-blue);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System Design</div>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="system-design-checklist.html" class="nav-item active">System Design Checklist</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🏗️ System Design Interview Checklist</h1>
+        <p>A 45-minute structured guide to ace your system design interview.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⏱️</span> Phase 1: Clarification & Scope (5-10 min)
+        </div>
+        
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>1. Define Functional Requirements <span class="time-badge">2 min</span></h3>
+            <p>What exactly does the system do? (e.g., Users can post tweets, follow others, view timeline). Limit to top 3-4 core features.</p>
+          </div>
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>2. Define Non-Functional Requirements <span class="time-badge">2 min</span></h3>
+            <p>Scalability (DAU/MAU), Latency (p99), Availability (CAP theorem), Consistency (Strong vs Eventual), Durability.</p>
+          </div>
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>3. Back-of-the-Envelope Estimations <span class="time-badge">3 min</span></h3>
+            <p>Traffic (QPS), Storage (TB/year), Bandwidth (Mbps). Do this ONLY if relevant to design choices (e.g., sharding).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">📐</span> Phase 2: High-Level Design (10-15 min)
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>4. API Design <span class="time-badge">3 min</span></h3>
+            <p>Define endpoints. <code>POST /tweet (user_id, content)</code>, <code>GET /feed (user_id, cursor)</code>. Keep it REST/gRPC.</p>
+          </div>
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>5. Database Schema <span class="time-badge">3 min</span></h3>
+            <p>SQL vs NoSQL decision. Define tables/collections. Primary keys, Partition keys. Relationships (1:N, M:N).</p>
+          </div>
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>6. High-Level Diagram <span class="time-badge">5 min</span></h3>
+            <p>Draw boxes: Client -> LB -> Service -> DB. Add Cache, Queue, CDN where appropriate. Walk through the flow.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🔍</span> Phase 3: Deep Dive (15-20 min)
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>7. Scaling & Bottlenecks <span class="time-badge">5 min</span></h3>
+            <p>Identify single points of failure. Discuss Sharding (DB), Replication (Read/Write), Load Balancing strategies.</p>
+          </div>
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>8. Specific Component Drill-down <span class="time-badge">10 min</span></h3>
+            <p>Interviewer's choice. E.g., "How to generate unique IDs?", "How to handle fan-out?", "How to secure data?".</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">🏁</span> Phase 4: Wrap Up (2-3 min)
+        </div>
+
+        <div class="checklist-item" onclick="this.classList.toggle('checked')">
+          <div class="checkbox"></div>
+          <div class="item-content">
+            <h3>9. Summary & Trade-offs <span class="time-badge">2 min</span></h3>
+            <p>Recap the design. Admit flaws (e.g., "Latency might be high for cross-region users"). Suggest future improvements.</p>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

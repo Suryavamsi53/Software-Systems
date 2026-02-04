@@ -97,6 +97,7 @@
                     <input type="text" id="word-input" class="control-input" placeholder="Enter word..." maxlength="8">
                     <button class="action-btn" onclick="insertWord()">Insert Word</button>
                     <button class="action-btn" onclick="searchWord()">Search Word</button>
+                    <button class="action-btn" onclick="startsWithWord()">Starts With</button>
                 </div>
                 <div class="control-group">
                     <button class="action-btn warning" onclick="resetTrie()">Reset Trie</button>
@@ -166,6 +167,13 @@
             const word = input.value.toLowerCase().replace(/[^a-z]/g, '');
             if (!word) return;
             animateOperation(word, 'search');
+            input.value = '';
+        }
+
+        function startsWithWord() {
+            const word = input.value.toLowerCase().replace(/[^a-z]/g, '');
+            if (!word) return;
+            animateOperation(word, 'startsWith');
             input.value = '';
         }
 
@@ -284,7 +292,7 @@
                         // Re-highlight path after redraw
                         // (Simplified: just highlight current)
                     }
-                } else if (type === 'search') {
+                } else if (type === 'search' || type === 'startsWith') {
                     highlightLine(4); // Check if exists
                     if (!curr.children[char]) {
                         highlightLine(5); // Return false
@@ -309,12 +317,18 @@
                 highlightNode(curr.id, 'found');
                 statusText.textContent = `Inserted "${word}". Marked end of word.`;
             } else {
-                highlightLine(9); // Return isEnd
-                if (curr.isEnd) {
-                    highlightNode(curr.id, 'found');
-                    statusText.textContent = `Found word "${word}"!`;
+                highlightLine(type === 'search' ? 9 : 8); // Return isEnd or True
+                if (type === 'search') {
+                    if (curr.isEnd) {
+                        highlightNode(curr.id, 'found');
+                        statusText.textContent = `Found word "${word}"!`;
+                    } else {
+                        statusText.textContent = `Prefix "${word}" exists, but not as a complete word.`;
+                    }
                 } else {
-                    statusText.textContent = `Prefix "${word}" exists, but not as a complete word.`;
+                    // startsWith
+                    highlightNode(curr.id, 'found');
+                    statusText.textContent = `Prefix "${word}" found!`;
                 }
             }
             

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Interview Questions - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .q-list { list-style: none; padding: 0; }
+    .q-item { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; margin-bottom: 15px; }
+    .q-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px; }
+    .q-question { font-weight: 700; color: var(--text-primary); font-size: 1rem; }
+    .q-tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; white-space: nowrap; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Difficulty Tags */
+    .q-tag.easy { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .q-tag.medium { background: rgba(250, 204, 21, 0.15); color: #facc15; border: 1px solid rgba(250, 204, 21, 0.3); }
+    .q-tag.hard { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    
+    .q-meta { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .q-meta::before { content: '🎯'; font-size: 0.8rem; }
+    .q-answer { font-size: 0.95rem; color: var(--text-secondary); border-top: 1px solid var(--border-color); padding-top: 10px; margin-top: 10px; line-height: 1.5; }
+    .category-header { color: var(--accent-color); border-bottom: 2px solid var(--border-color); padding-bottom: 10px; margin: 30px 0 20px 0; font-size: 1.4rem; font-weight: 800; }
+    
+    /* Google Colors */
+    .google-blue { color: #4285f4; }
+    .google-red { color: #ea4335; }
+    .google-yellow { color: #fbbc04; }
+    .google-green { color: #34a853; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="system-design.html" class="nav-item">System Design Basics</a>
+        <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="google-interview-questions.html" class="nav-item active">Google Interview Questions</a>
+        <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1><span class="google-blue">G</span><span class="google-red">o</span><span class="google-yellow">o</span><span class="google-blue">g</span><span class="google-green">l</span><span class="google-red">e</span> Interview Questions</h1>
+        <p>Top 50 most frequent questions for Google SDE interviews, categorized by topic.</p>
+      </div>
+
+      <!-- INTRO -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #4285f4;">
+        <div class="section-title">
+          <span class="emoji">🚀</span> What Google Looks For
+        </div>
+        <p style="margin-top: 10px; color: var(--text-secondary);">
+          Google interviews are known for <strong>ambiguity</strong> and <strong>scale</strong>. Unlike Amazon, they focus less on Leadership Principles and more on "Googlyness" (navigating ambiguity, valuing feedback, challenging status quo).
+        </p>
+        <ul style="margin-top: 10px; margin-left: 20px; color: var(--text-secondary);">
+            <li><strong>Algorithms:</strong> Heavy focus on Graphs, DP, and Trees.</li>
+            <li><strong>Code Quality:</strong> Speed and correctness are paramount.</li>
+            <li><strong>Clarification:</strong> You MUST ask clarifying questions to define the vague problem.</li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 1: GRAPHS & TREES -->
+      <div class="section">
+        <div class="category-header">1. Graphs & Trees (High Priority)</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">1. Word Ladder II</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: BFS, Backtracking, Optimization.</div>
+            <div class="q-answer">Find all shortest transformation sequences from startWord to endWord. Requires BFS to find distance and DFS/Backtracking to reconstruct paths.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">2. Course Schedule II</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: Topological Sort, Cycle Detection.</div>
+            <div class="q-answer">Return the ordering of courses to finish all. Use Kahn's Algorithm (BFS) or DFS with 3-state coloring (White/Gray/Black) to detect cycles.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">3. Number of Islands II</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: Union-Find (Disjoint Set).</div>
+            <div class="q-answer">Dynamically add land and count islands. Use Union-Find to merge components in O(1) (amortized) time per operation.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">4. Diameter of Binary Tree</span><span class="q-tag easy">Easy</span></div>
+            <div class="q-meta">Evaluates: Tree DFS, Recursion.</div>
+            <div class="q-answer">Find the longest path between any two nodes. Compute depth of left and right subtrees at each node; update max diameter with <code>left_depth + right_depth</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">5. Alien Dictionary</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: Topological Sort, Edge Cases.</div>
+            <div class="q-answer">Derive character order from a sorted list of alien words. Build a graph where <code>char1 -> char2</code> if char1 comes before char2. Perform Topo Sort.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">6. Lowest Common Ancestor (Binary Tree)</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: Tree Traversal, Recursion.</div>
+            <div class="q-answer">Find LCA of two nodes. If root matches either p or q, return root. Else recurse left and right. If both return non-null, root is LCA.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">7. Cracking the Safe</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: Euler Path, Hierholzer's Algorithm.</div>
+            <div class="q-answer">Find shortest string containing all n-length codes. Model as a De Bruijn sequence graph problem.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 2: DYNAMIC PROGRAMMING -->
+      <div class="section">
+        <div class="category-header">2. Dynamic Programming</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">8. Split Array Largest Sum</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: Binary Search on Answer + Greedy.</div>
+            <div class="q-answer">Split array into m subarrays to minimize the largest sum. Binary search the answer range [max(nums), sum(nums)].</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">9. Longest Increasing Path in a Matrix</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: DFS + Memoization.</div>
+            <div class="q-answer">Find the longest path in a matrix where values increase. Use DFS with memoization <code>dp[i][j]</code> to store max path starting at (i, j).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">10. Edit Distance</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: 2D DP.</div>
+            <div class="q-answer">Min operations to convert word1 to word2. <code>dp[i][j]</code> depends on insert, delete, or replace costs.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">11. Maximum Subarray (Kadane's)</span><span class="q-tag easy">Easy</span></div>
+            <div class="q-meta">Evaluates: Array Optimization.</div>
+            <div class="q-answer">Find contiguous subarray with largest sum. <code>current_max = max(num, current_max + num)</code>.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 3: ARRAYS & STRINGS -->
+      <div class="section">
+        <div class="category-header">3. Arrays & Strings</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">12. Next Permutation</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: Mathematical Logic.</div>
+            <div class="q-answer">Find next lexicographical permutation. 1. Find first decreasing element from right. 2. Swap with next larger. 3. Reverse suffix.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">13. 3Sum</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: Two Pointers.</div>
+            <div class="q-answer">Find unique triplets summing to zero. Sort array, iterate <code>i</code>, then use two pointers for <code>j</code> and <code>k</code>.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">14. Text Justification</span><span class="q-tag hard">Hard</span></div>
+            <div class="q-meta">Evaluates: String Manipulation, Edge Cases.</div>
+            <div class="q-answer">Pack words into lines of width `maxWidth`. Distribute spaces evenly. Handle last line (left-justified) differently.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">15. Meeting Rooms II</span><span class="q-tag medium">Medium</span></div>
+            <div class="q-meta">Evaluates: Heap / Sorting.</div>
+            <div class="q-answer">Min conference rooms required. Sort by start time. Use Min-Heap to track end times of active meetings.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 4: SYSTEM DESIGN -->
+      <div class="section">
+        <div class="category-header">4. System Design (Google Scale)</div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">16. Design Google Drive / Dropbox</span><span class="q-tag hard">System Design</span></div>
+            <div class="q-meta">Evaluates: File Storage, Synchronization, Consistency.</div>
+            <div class="q-answer">Focus on chunking files (block storage), deduplication, metadata DB (ACID), and synchronization service (long-polling/websockets).</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">17. Design YouTube</span><span class="q-tag hard">System Design</span></div>
+            <div class="q-meta">Evaluates: CDN, Blob Storage, Transcoding.</div>
+            <div class="q-answer">Video upload -> Queue -> Transcoding Service (different formats) -> S3/Blob Store -> CDN. Metadata in SQL/NoSQL.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">18. Design a Web Crawler</span><span class="q-tag hard">System Design</span></div>
+            <div class="q-meta">Evaluates: Distributed Systems, BFS, Politeness.</div>
+            <div class="q-answer">URL Frontier (Queue), DNS Resolver, Content Downloader, Deduplication (Bloom Filter), Storage. Handle cycles and robots.txt.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">19. Design Google Search Typeahead</span><span class="q-tag hard">System Design</span></div>
+            <div class="q-meta">Evaluates: Tries, Caching, Latency.</div>
+            <div class="q-answer">Use a Trie to store prefixes. Store top 5 hot searches at each node. Cache heavily.</div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- CATEGORY 5: GOOGLYNESS -->
+      <div class="section">
+        <div class="category-header">5. Googlyness (Behavioral)</div>
+        <div class="callout" style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+            <p style="color: var(--text-secondary);">Google values "Googlyness": navigating ambiguity, bias for action, collaboration, and humility.</p>
+        </div>
+        <ul class="q-list">
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">20. Tell me about a time you navigated ambiguity.</span></div>
+            <div class="q-meta">Evaluates: Independence, Problem Solving.</div>
+            <div class="q-answer">Focus on how you gathered requirements, made assumptions, validated them, and delivered despite unclear instructions.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">21. Tell me about a time you challenged the status quo.</span></div>
+            <div class="q-meta">Evaluates: Innovation, Courage.</div>
+            <div class="q-answer">Describe a situation where you improved a process or technology, even if it wasn't broken, to gain efficiency or quality.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">22. How do you handle constructive criticism?</span></div>
+            <div class="q-meta">Evaluates: Humility, Growth Mindset.</div>
+            <div class="q-answer">Show that you value feedback as a tool for growth, not a personal attack. Give a specific example of changing behavior based on feedback.</div>
+          </li>
+          <li class="q-item">
+            <div class="q-header"><span class="q-question">23. Describe a time you failed.</span></div>
+            <div class="q-meta">Evaluates: Resilience, Learning.</div>
+            <div class="q-answer">Don't use a fake failure. Pick a real one, own it, explain what you learned, and how you prevent it now.</div>
+          </li>
+        </ul>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

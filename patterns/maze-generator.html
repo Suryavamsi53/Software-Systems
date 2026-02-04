@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maze Generator (DFS) - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .visualizer-section {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .code-display {
+      flex: 1;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .lang-tabs {
+      display: flex;
+      background-color: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-content {
+      padding: 15px;
+      margin: 0;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .line {
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+    }
+    .maze-grid {
+      display: grid;
+      gap: 0;
+      border: 2px solid #555;
+      background-color: #1e1e1e;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      box-sizing: border-box;
+      border: 1px solid #444;
+      background-color: #1e1e1e;
+      transition: background-color 0.1s;
+    }
+    .cell.visited { background-color: #2d2d2d; }
+    .cell.current { background-color: #facc15; }
+    .cell.stack { background-color: rgba(59, 130, 246, 0.3); }
+    
+    /* Wall removal classes */
+    .no-top { border-top-color: transparent !important; }
+    .no-right { border-right-color: transparent !important; }
+    .no-bottom { border-bottom-color: transparent !important; }
+    .no-left { border-left-color: transparent !important; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      align-items: center;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Interactive Visualizers</div>
+        <a href="n-queens.html" class="nav-item">N-Queens Backtracking</a>
+        <a href="sudoku-solver.html" class="nav-item">Sudoku Solver</a>
+        <a href="maze-generator.html" class="nav-item active">Maze Generator</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🕸️ Maze Generator (DFS)</h1>
+        <p>Visualize how Depth-First Search with backtracking creates a perfect maze.</p>
+      </div>
+
+      <div class="section">
+        <div class="visualizer-section">
+          <!-- Board Visualization (Left) -->
+          <div class="board-view">
+            <div class="controls">
+              <button class="tab-btn active" onclick="startViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Start</button>
+              <button class="tab-btn" onclick="resetViz()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Reset</button>
+              <span style="color: var(--text-secondary)">Speed:</span>
+              <input type="range" min="1" max="100" value="80" oninput="speed = 101 - this.value">
+            </div>
+            <div id="status" class="status-text">Ready to start...</div>
+
+            <div class="maze-grid" id="maze"></div>
+          </div>
+
+          <!-- Code Tracking Section (Right) -->
+          <div class="code-display">
+            <div class="lang-tabs">
+              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+              <button class="tab-btn" onclick="switchTab('java')">Java</button>
+              <button class="tab-btn" onclick="switchTab('python')">Python</button>
+            </div>
+            
+            <div id="code-go" class="code-content" style="display: block;">
+<span class="line" id="go-1"><span class="kwd">func</span> generateMaze(r, c <span class="type">int</span>) {</span>
+<span class="line" id="go-2">    visited[r][c] = <span class="kwd">true</span></span>
+<span class="line" id="go-3">    dirs := shuffle([][]<span class="type">int</span>{{<span class="num">0</span>, <span class="num">1</span>}, {<span class="num">1</span>, <span class="num">0</span>}, {<span class="num">0</span>, -<span class="num">1</span>}, {-<span class="num">1</span>, <span class="num">0</span>}})</span>
+<span class="line" id="go-4">    <span class="kwd">for</span> _, d := <span class="kwd">range</span> dirs {</span>
+<span class="line" id="go-5">        nr, nc := r+d[<span class="num">0</span>], c+d[<span class="num">1</span>]</span>
+<span class="line" id="go-6">        <span class="kwd">if</span> isValid(nr, nc) && !visited[nr][nc] {</span>
+<span class="line" id="go-7">            removeWall(r, c, nr, nc)</span>
+<span class="line" id="go-8">            generateMaze(nr, nc)</span>
+<span class="line" id="go-9">        }</span>
+<span class="line" id="go-10">    }</span>
+<span class="line" id="go-11">}</span>
+            </div>
+
+            <div id="code-java" class="code-content" style="display: none;">
+<span class="line" id="java-1"><span class="kwd">void</span> generateMaze(<span class="type">int</span> r, <span class="type">int</span> c) {</span>
+<span class="line" id="java-2">    visited[r][c] = <span class="kwd">true</span>;</span>
+<span class="line" id="java-3">    <span class="type">int</span>[][] dirs = shuffle(<span class="kwd">new</span> <span class="type">int</span>[][]{{<span class="num">0</span>,<span class="num">1</span>}, {<span class="num">1</span>,<span class="num">0</span>}, {<span class="num">0</span>,-<span class="num">1</span>}, {-<span class="num">1</span>,<span class="num">0</span>}});</span>
+<span class="line" id="java-4">    <span class="kwd">for</span> (<span class="type">int</span>[] d : dirs) {</span>
+<span class="line" id="java-5">        <span class="type">int</span> nr = r + d[<span class="num">0</span>], nc = c + d[<span class="num">1</span>];</span>
+<span class="line" id="java-6">        <span class="kwd">if</span> (isValid(nr, nc) && !visited[nr][nc]) {</span>
+<span class="line" id="java-7">            removeWall(r, c, nr, nc);</span>
+<span class="line" id="java-8">            generateMaze(nr, nc);</span>
+<span class="line" id="java-9">        }</span>
+<span class="line" id="java-10">    }</span>
+<span class="line" id="java-11">}</span>
+            </div>
+
+            <div id="code-python" class="code-content" style="display: none;">
+<span class="line" id="python-1"><span class="kwd">def</span> generate_maze(r, c):</span>
+<span class="line" id="python-2">    visited.add((r, c))</span>
+<span class="line" id="python-3">    dirs = [(<span class="num">0</span>, <span class="num">1</span>), (<span class="num">1</span>, <span class="num">0</span>), (<span class="num">0</span>, -<span class="num">1</span>), (-<span class="num">1</span>, <span class="num">0</span>)]</span>
+<span class="line" id="python-4">    random.shuffle(dirs)</span>
+<span class="line" id="python-5">    <span class="kwd">for</span> dr, dc <span class="kwd">in</span> dirs:</span>
+<span class="line" id="python-6">        nr, nc = r + dr, c + dc</span>
+<span class="line" id="python-7">        <span class="kwd">if</span> is_valid(nr, nc) <span class="kwd">and</span> (nr, nc) <span class="kwd">not in</span> visited:</span>
+<span class="line" id="python-8">            remove_wall(r, c, nr, nc)</span>
+<span class="line" id="python-9">            generate_maze(nr, nc)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const ROWS = 15;
+    const COLS = 15;
+    let speed = 20;
+    let isRunning = false;
+    let shouldStop = false;
+    let visited = [];
+    let currentLang = 'go';
+
+    const lineMap = {
+        go: { base: 1, visit: 2, shuffle: 3, loop: 4, check: 6, remove: 7, recurse: 8 },
+        java: { base: 1, visit: 2, shuffle: 3, loop: 4, check: 6, remove: 7, recurse: 8 },
+        python: { base: 1, visit: 2, shuffle: 4, loop: 5, check: 7, remove: 8, recurse: 9 }
+    };
+
+    function initGrid() {
+        const maze = document.getElementById('maze');
+        maze.innerHTML = '';
+        maze.style.gridTemplateColumns = `repeat(${COLS}, 30px)`;
+        maze.style.gridTemplateRows = `repeat(${ROWS}, 30px)`;
+
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${r}-${c}`;
+                maze.appendChild(cell);
+            }
+        }
+    }
+
+    async function generate(r, c) {
+        if (shouldStop) return;
+        
+        visited[r][c] = true;
+        const cell = document.getElementById(`cell-${r}-${c}`);
+        cell.classList.add('current');
+        cell.classList.add('visited');
+        
+        highlightLine(lineMap[currentLang].visit);
+        await new Promise(res => setTimeout(res, speed));
+        cell.classList.remove('current');
+
+        const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]].sort(() => Math.random() - 0.5);
+        highlightLine(lineMap[currentLang].shuffle);
+
+        for (let [dr, dc] of dirs) {
+            if (shouldStop) return;
+            highlightLine(lineMap[currentLang].loop);
+            
+            const nr = r + dr;
+            const nc = c + dc;
+
+            highlightLine(lineMap[currentLang].check);
+            if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS && !visited[nr][nc]) {
+                highlightLine(lineMap[currentLang].remove);
+                // Remove walls
+                const nextCell = document.getElementById(`cell-${nr}-${nc}`);
+                if (dr === 1) { cell.classList.add('no-bottom'); nextCell.classList.add('no-top'); }
+                else if (dr === -1) { cell.classList.add('no-top'); nextCell.classList.add('no-bottom'); }
+                else if (dc === 1) { cell.classList.add('no-right'); nextCell.classList.add('no-left'); }
+                else if (dc === -1) { cell.classList.add('no-left'); nextCell.classList.add('no-right'); }
+                
+                highlightLine(lineMap[currentLang].recurse);
+                await generate(nr, nc);
+                
+                // Backtracking visual
+                cell.classList.add('current');
+                await new Promise(res => setTimeout(res, speed/2));
+                cell.classList.remove('current');
+            }
+        }
+    }
+
+    async function startViz() {
+        if (isRunning) return;
+        isRunning = true;
+        shouldStop = false;
+        resetViz(false);
+        
+        visited = Array(ROWS).fill().map(() => Array(COLS).fill(false));
+        document.getElementById('status').textContent = "Generating Maze...";
+        
+        await generate(0, 0);
+        
+        if (!shouldStop) document.getElementById('status').textContent = "Maze Generated!";
+        isRunning = false;
+    }
+
+    function resetViz(stop = true) {
+        if (stop) {
+            shouldStop = true;
+            isRunning = false;
+        }
+        initGrid();
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        document.getElementById('status').textContent = "Ready";
+    }
+
+    function highlightLine(lineNum) {
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        const el = document.getElementById(`${currentLang}-${lineNum}`);
+        if (el) el.classList.add('active');
+    }
+
+    function switchTab(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+        document.getElementById('code-' + lang).style.display = 'block';
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    initGrid();
+  </script>
+</body>
+</html>

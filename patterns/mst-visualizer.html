@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MST Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .visualizer-section {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .code-display {
+      flex: 1;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .lang-tabs {
+      display: flex;
+      background-color: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-content {
+      padding: 15px;
+      margin: 0;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .line {
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* Graph Styles */
+    svg {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        width: 100%;
+        height: 400px;
+    }
+    .node { fill: #3b82f6; stroke: #fff; stroke-width: 2px; }
+    .node.visited { fill: #10b981; }
+    .node-text { fill: white; font-weight: bold; font-family: sans-serif; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .edge { stroke: #555; stroke-width: 2px; }
+    .edge.considering { stroke: #facc15; stroke-width: 4px; }
+    .edge.mst { stroke: #10b981; stroke-width: 4px; }
+    .edge.skipped { stroke: #ef4444; stroke-width: 1px; stroke-dasharray: 5,5; opacity: 0.5; }
+    .edge-weight { fill: #aaa; font-size: 12px; font-family: sans-serif; text-anchor: middle; background-color: #1e1e1e; }
+    .weight-bg { fill: #1e1e1e; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Interactive Visualizers</div>
+        <a href="graphs.html" class="nav-item">← Graphs Pattern</a>
+        <a href="mst-visualizer.html" class="nav-item active">Minimum Spanning Tree</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🌲 Minimum Spanning Tree</h1>
+        <p>Visualize Prim's and Kruskal's algorithms for finding the MST.</p>
+      </div>
+
+      <div class="section">
+        <div class="visualizer-section">
+          <!-- Board Visualization (Left) -->
+          <div class="board-view">
+            <div class="controls">
+              <button class="tab-btn" onclick="generateGraph()" style="border: 1px solid var(--border-color); border-radius: 4px;">🎲 New Graph</button>
+              <select id="algo-select" class="tab-btn" style="border: 1px solid var(--border-color); border-radius: 4px; background: #1e1e1e;">
+                <option value="prims">Prim's Algorithm</option>
+                <option value="kruskal">Kruskal's Algorithm</option>
+              </select>
+              <button class="tab-btn active" onclick="startAlgo()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Run</button>
+              <button class="tab-btn" onclick="resetGraph()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Reset</button>
+            </div>
+            <div id="status" class="status-text">Ready to start...</div>
+
+            <svg id="graph-svg"></svg>
+          </div>
+
+          <!-- Code Tracking Section (Right) -->
+          <div class="code-display">
+            <div class="lang-tabs">
+              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+              <button class="tab-btn" onclick="switchTab('java')">Java</button>
+              <button class="tab-btn" onclick="switchTab('python')">Python</button>
+            </div>
+            
+            <!-- Prim's Code -->
+            <div id="code-prims" class="code-content" style="display: block;">
+<span class="line" id="prims-1"><span class="kwd">func</span> prims(n <span class="type">int</span>) <span class="type">int</span> {</span>
+<span class="line" id="prims-2">    visited := <span class="kwd">make</span>([]<span class="type">bool</span>, n)</span>
+<span class="line" id="prims-3">    pq := &MinHeap{{<span class="num">0</span>, <span class="num">0</span>}} <span class="com">// {weight, node}</span></span>
+<span class="line" id="prims-4">    cost := <span class="num">0</span></span>
+<span class="line" id="prims-5">    <span class="kwd">for</span> pq.Len() > <span class="num">0</span> {</span>
+<span class="line" id="prims-6">        u := heap.Pop(pq)</span>
+<span class="line" id="prims-7">        <span class="kwd">if</span> visited[u.id] { <span class="kwd">continue</span> }</span>
+<span class="line" id="prims-8">        visited[u.id] = <span class="kwd">true</span>; cost += u.w</span>
+<span class="line" id="prims-9">        <span class="kwd">for</span> v, w := <span class="kwd">range</span> graph[u.id] {</span>
+<span class="line" id="prims-10">            <span class="kwd">if</span> !visited[v] {</span>
+<span class="line" id="prims-11">                heap.Push(pq, {w, v})</span>
+<span class="line" id="prims-12">            }</span>
+<span class="line" id="prims-13">        }</span>
+<span class="line" id="prims-14">    }</span>
+<span class="line" id="prims-15">    <span class="kwd">return</span> cost</span>
+<span class="line" id="prims-16">}</span>
+            </div>
+
+            <!-- Kruskal's Code -->
+            <div id="code-kruskal" class="code-content" style="display: none;">
+<span class="line" id="kruskal-1"><span class="kwd">func</span> kruskal(n <span class="type">int</span>, edges [][]<span class="type">int</span>) <span class="type">int</span> {</span>
+<span class="line" id="kruskal-2">    sort.Slice(edges, <span class="kwd">func</span>(i, j <span class="type">int</span>) <span class="type">bool</span> {</span>
+<span class="line" id="kruskal-3">        <span class="kwd">return</span> edges[i][<span class="num">2</span>] < edges[j][<span class="num">2</span>]</span>
+<span class="line" id="kruskal-4">    })</span>
+<span class="line" id="kruskal-5">    uf := NewUnionFind(n)</span>
+<span class="line" id="kruskal-6">    cost := <span class="num">0</span></span>
+<span class="line" id="kruskal-7">    <span class="kwd">for</span> _, e := <span class="kwd">range</span> edges {</span>
+<span class="line" id="kruskal-8">        u, v, w := e[<span class="num">0</span>], e[<span class="num">1</span>], e[<span class="num">2</span>]</span>
+<span class="line" id="kruskal-9">        <span class="kwd">if</span> uf.Union(u, v) {</span>
+<span class="line" id="kruskal-10">            cost += w</span>
+<span class="line" id="kruskal-11">        }</span>
+<span class="line" id="kruskal-12">    }</span>
+<span class="line" id="kruskal-13">    <span class="kwd">return</span> cost</span>
+<span class="line" id="kruskal-14">}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const svg = document.getElementById('graph-svg');
+    const numNodes = 8;
+    let nodes = [];
+    let edges = [];
+    let isRunning = false;
+    let shouldStop = false;
+    let speed = 800;
+
+    function generateGraph() {
+        if (isRunning) return;
+        resetGraph();
+        nodes = [];
+        edges = [];
+        svg.innerHTML = '';
+
+        // Circular Layout
+        const cx = 300, cy = 200, r = 150;
+        for(let i=0; i<numNodes; i++) {
+            const angle = (i / numNodes) * 2 * Math.PI;
+            nodes.push({
+                id: i,
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+            });
+        }
+
+        // Create Edges (Ensure connected + random)
+        for(let i=0; i<numNodes; i++) {
+            addEdge(i, (i+1)%numNodes); // Ring
+            if (Math.random() > 0.5) addEdge(i, (i+2)%numNodes); // Random chords
+        }
+        
+        drawGraph();
+    }
+
+    function addEdge(u, v) {
+        // Avoid duplicates
+        if (edges.some(e => (e.u === u && e.v === v) || (e.u === v && e.v === u))) return;
+        const w = Math.floor(Math.random() * 20) + 1;
+        edges.push({ u, v, w, id: `e-${u}-${v}` });
+    }
+
+    function drawGraph() {
+        svg.innerHTML = '';
+        
+        // Draw Edges
+        edges.forEach(e => {
+            const n1 = nodes[e.u];
+            const n2 = nodes[e.v];
+            
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", n1.x); line.setAttribute("y1", n1.y);
+            line.setAttribute("x2", n2.x); line.setAttribute("y2", n2.y);
+            line.setAttribute("class", "edge");
+            line.setAttribute("id", e.id);
+            svg.appendChild(line);
+
+            // Weight Label
+            const midX = (n1.x + n2.x) / 2;
+            const midY = (n1.y + n2.y) / 2;
+            
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", midX - 10); rect.setAttribute("y", midY - 10);
+            rect.setAttribute("width", 20); rect.setAttribute("height", 20);
+            rect.setAttribute("class", "weight-bg");
+            svg.appendChild(rect);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", midX); text.setAttribute("y", midY);
+            text.setAttribute("class", "edge-weight");
+            text.textContent = e.w;
+            svg.appendChild(text);
+        });
+
+        // Draw Nodes
+        nodes.forEach(n => {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y);
+            circle.setAttribute("r", 20);
+            circle.setAttribute("class", "node");
+            circle.setAttribute("id", `n-${n.id}`);
+            svg.appendChild(circle);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", n.x); text.setAttribute("y", n.y);
+            text.setAttribute("class", "node-text");
+            text.textContent = n.id;
+            svg.appendChild(text);
+        });
+    }
+
+    async function startAlgo() {
+        if (isRunning) return;
+        isRunning = true;
+        shouldStop = false;
+        resetGraph();
+        
+        const algo = document.getElementById('algo-select').value;
+        document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+        document.getElementById(`code-${algo}`).style.display = 'block';
+
+        if (algo === 'prims') await runPrims();
+        else await runKruskal();
+        
+        isRunning = false;
+    }
+
+    async function runPrims() {
+        const visited = new Set();
+        const pq = [{ w: 0, u: 0, from: -1 }]; // Simple PQ
+        let cost = 0;
+
+        document.getElementById('status').textContent = "Starting Prim's from Node 0...";
+
+        while (pq.length > 0) {
+            if (shouldStop) return;
+            
+            // Sort to simulate Min-Heap
+            pq.sort((a, b) => a.w - b.w);
+            const { w, u, from } = pq.shift();
+
+            if (visited.has(u)) continue;
+            visited.add(u);
+            cost += w;
+
+            // Visuals
+            document.getElementById(`n-${u}`).classList.add('visited');
+            if (from !== -1) {
+                const edgeId = `e-${Math.min(u, from)}-${Math.max(u, from)}`;
+                const edgeEl = document.getElementById(edgeId);
+                if (edgeEl) edgeEl.classList.add('mst');
+            }
+            document.getElementById('status').textContent = `Visited Node ${u}. Total Cost: ${cost}`;
+            await new Promise(r => setTimeout(r, speed));
+
+            // Add neighbors
+            edges.forEach(e => {
+                if (e.u === u && !visited.has(e.v)) {
+                    pq.push({ w: e.w, u: e.v, from: u });
+                    document.getElementById(e.id).classList.add('considering');
+                } else if (e.v === u && !visited.has(e.u)) {
+                    pq.push({ w: e.w, u: e.u, from: u });
+                    document.getElementById(e.id).classList.add('considering');
+                }
+            });
+            await new Promise(r => setTimeout(r, speed/2));
+        }
+        document.getElementById('status').textContent = `MST Complete! Total Cost: ${cost}`;
+    }
+
+    async function runKruskal() {
+        const sortedEdges = [...edges].sort((a, b) => a.w - b.w);
+        const parent = Array.from({length: numNodes}, (_, i) => i);
+        let cost = 0;
+        let edgesCount = 0;
+
+        function find(i) {
+            if (parent[i] === i) return i;
+            return parent[i] = find(parent[i]);
+        }
+
+        function union(i, j) {
+            const rootI = find(i);
+            const rootJ = find(j);
+            if (rootI !== rootJ) {
+                parent[rootI] = rootJ;
+                return true;
+            }
+            return false;
+        }
+
+        document.getElementById('status').textContent = "Sorted edges by weight. Starting Kruskal's...";
+
+        for (let e of sortedEdges) {
+            if (shouldStop) return;
+            if (edgesCount === numNodes - 1) break;
+
+            const edgeEl = document.getElementById(e.id);
+            edgeEl.classList.add('considering');
+            await new Promise(r => setTimeout(r, speed));
+
+            if (union(e.u, e.v)) {
+                edgeEl.classList.remove('considering');
+                edgeEl.classList.add('mst');
+                document.getElementById(`n-${e.u}`).classList.add('visited');
+                document.getElementById(`n-${e.v}`).classList.add('visited');
+                cost += e.w;
+                edgesCount++;
+                document.getElementById('status').textContent = `Added edge (${e.u}-${e.v}). Cost: ${cost}`;
+            } else {
+                edgeEl.classList.remove('considering');
+                edgeEl.classList.add('skipped');
+                document.getElementById('status').textContent = `Skipped edge (${e.u}-${e.v}) - Cycle detected`;
+            }
+            await new Promise(r => setTimeout(r, speed));
+        }
+        document.getElementById('status').textContent = `MST Complete! Total Cost: ${cost}`;
+    }
+
+    function resetGraph() {
+        shouldStop = true;
+        isRunning = false;
+        document.querySelectorAll('.node').forEach(n => n.classList.remove('visited'));
+        document.querySelectorAll('.edge').forEach(e => e.classList.remove('mst', 'considering', 'skipped'));
+        document.getElementById('status').textContent = "Ready";
+    }
+
+    function switchTab(lang) {
+        // Just for visual toggle
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            if (['go', 'java', 'python'].includes(el.textContent.toLowerCase())) {
+                el.classList.remove('active');
+            }
+        });
+        event.target.classList.add('active');
+    }
+
+    generateGraph();
+  </script>
+</body>
+</html>

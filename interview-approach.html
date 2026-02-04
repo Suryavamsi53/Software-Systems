@@ -398,6 +398,89 @@
         </div>
       </div>
 
+      <!-- MASTERING EDGE CASES -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
+        <div class="section-title">
+          <span class="emoji">🧪</span> Mastering Edge Cases
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">Handling edge cases proves you write production-ready code. Always check these 6 categories:</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">1. Emptiness & Nulls</strong>
+            <ul style="margin: 5px 0 0 20px; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>Empty array/string/list</li>
+              <li>Null pointers/references</li>
+              <li>Root of tree is null</li>
+            </ul>
+          </div>
+          <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">2. Size Extremes</strong>
+            <ul style="margin: 5px 0 0 20px; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>Single element (n=1)</li>
+              <li>Very large n (Integer overflow, TLE)</li>
+              <li>Two elements (n=2)</li>
+            </ul>
+          </div>
+          <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">3. Values & Types</strong>
+            <ul style="margin: 5px 0 0 20px; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>Negative numbers</li>
+              <li>Zero</li>
+              <li>Floating point precision</li>
+              <li>MaxInt / MinInt</li>
+            </ul>
+          </div>
+          <div style="background-color: rgba(255, 255, 255, 0.05); padding: 15px; border-radius: 8px;">
+            <strong style="color: var(--text-primary);">4. Structure & Order</strong>
+            <ul style="margin: 5px 0 0 20px; color: var(--text-secondary); font-size: 0.9rem;">
+              <li>Already sorted / Reverse sorted</li>
+              <li>All duplicates</li>
+              <li>Cycles in linked list/graph</li>
+              <li>Disconnected graph components</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- GOOGLE TIPS -->
+      <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #ea4335;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> Cracking Google: Tips & Differences
+        </div>
+        <p style="color: var(--text-secondary); margin-bottom: 20px;">While Amazon focuses heavily on Leadership Principles, Google prioritizes algorithmic depth and code quality.</p>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="background-color: rgba(234, 67, 53, 0.1); padding: 20px; border-radius: 8px;">
+            <strong style="color: #ea4335; font-size: 1.1em;">1. Algorithm Optimization</strong>
+            <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+              Google interviewers often push for the absolute optimal solution (e.g., O(n) vs O(n log n)). They care deeply about the "why" behind your choices and may ask you to implement complex data structures (Segment Trees, Tries) from scratch.
+            </p>
+          </div>
+          
+          <div style="background-color: rgba(66, 133, 244, 0.1); padding: 20px; border-radius: 8px;">
+            <strong style="color: #4285f4; font-size: 1.1em;">2. Ambiguity is the Test</strong>
+            <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+              Google questions are intentionally vague. "Design a scheduler" or "Find the closest points". You are expected to ask clarifying questions to define the scope. Jumping to code without clarifying is a red flag.
+            </p>
+          </div>
+
+          <div style="background-color: rgba(251, 188, 4, 0.1); padding: 20px; border-radius: 8px;">
+            <strong style="color: #fbbc04; font-size: 1.1em;">3. Code Quality & Speed</strong>
+            <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+              You need to write compilable, clean code fast. Use helper functions. Don't write one giant function. Google values readability and maintainability highly.
+            </p>
+          </div>
+
+          <div style="background-color: rgba(52, 168, 83, 0.1); padding: 20px; border-radius: 8px;">
+            <strong style="color: #34a853; font-size: 1.1em;">4. Testing</strong>
+            <p style="margin-top: 10px; color: var(--text-secondary); font-size: 0.9rem;">
+              Proactively test your code. Don't wait for the interviewer to find bugs. Walk through edge cases and sample inputs manually.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <!-- TIPS FOR SUCCESS -->
       <div class="section" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px;">
         <div class="section-title">

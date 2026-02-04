@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pathfinding Visualizer - SDE Prep</title>
+  <link rel="stylesheet" href="../styles.css">
+  <style>
+    .visualizer-section {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .code-display {
+      flex: 1;
+      background-color: #1e1e1e;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #333;
+    }
+    .lang-tabs {
+      display: flex;
+      background-color: #252526;
+      border-bottom: 1px solid #333;
+    }
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #888;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .tab-btn.active {
+      color: #fff;
+      background-color: #1e1e1e;
+      border-top: 2px solid var(--accent-color);
+    }
+    .code-content {
+      padding: 15px;
+      margin: 0;
+      color: #d4d4d4;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: auto;
+    }
+    .line {
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+    }
+    .maze-grid {
+      display: grid;
+      gap: 0;
+      border: 2px solid #555;
+      background-color: #1e1e1e;
+      margin-bottom: 20px;
+    }
+    .cell {
+      width: 30px;
+      height: 30px;
+      box-sizing: border-box;
+      border: 1px solid #444;
+      background-color: #1e1e1e;
+      transition: background-color 0.1s;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 12px;
+    }
+    
+    /* Wall removal classes */
+    .no-top { border-top-color: transparent !important; }
+    .no-right { border-right-color: transparent !important; }
+    .no-bottom { border-bottom-color: transparent !important; }
+    .no-left { border-left-color: transparent !important; }
+
+    /* Pathfinding States */
+    .cell.start { background-color: #22c55e; color: black; font-weight: bold; }
+    .cell.end { background-color: #ef4444; color: black; font-weight: bold; }
+    .cell.visited { background-color: rgba(59, 130, 246, 0.3); }
+    .cell.path { background-color: #facc15; transition: background-color 0.3s; }
+    .cell.current { background-color: #fff; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Interactive Visualizers</div>
+        <a href="n-queens.html" class="nav-item">N-Queens Backtracking</a>
+        <a href="maze-generator.html" class="nav-item">Maze Generator</a>
+        <a href="pathfinding-visualizer.html" class="nav-item active">Pathfinding (BFS/DFS/A*)</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🗺️ Pathfinding Visualizer</h1>
+        <p>Generate a maze and find the path using BFS, DFS, or A*.</p>
+      </div>
+
+      <div class="section">
+        <div class="visualizer-section">
+          <!-- Board Visualization (Left) -->
+          <div class="board-view">
+            <div class="controls">
+              <button class="tab-btn" onclick="generateMaze()" style="border: 1px solid var(--border-color); border-radius: 4px;">🎲 New Maze</button>
+              <select id="algo-select" class="tab-btn" style="border: 1px solid var(--border-color); border-radius: 4px; background: #1e1e1e;">
+                <option value="bfs">BFS (Shortest Path)</option>
+                <option value="dfs">DFS (Deep Path)</option>
+                <option value="astar">A* (Heuristic)</option>
+              </select>
+              <button class="tab-btn active" onclick="startPathfinding()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Solve</button>
+              <button class="tab-btn" onclick="resetPath()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Clear Path</button>
+            </div>
+            <div id="status" class="status-text">Generate a maze to start...</div>
+
+            <div class="maze-grid" id="maze"></div>
+          </div>
+
+          <!-- Code Tracking Section (Right) -->
+          <div class="code-display">
+            <div class="lang-tabs">
+              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+              <button class="tab-btn" onclick="switchTab('java')">Java</button>
+              <button class="tab-btn" onclick="switchTab('python')">Python</button>
+            </div>
+            
+            <!-- BFS Code -->
+            <div id="code-bfs" class="code-content" style="display: block;">
+<div id="code-bfs-go" class="lang-code" style="display: block;">
+<span class="line" id="bfs-1"><span class="kwd">func</span> BFS(start, end *Node) {</span>
+<span class="line" id="bfs-2">    queue := []*Node{start}</span>
+<span class="line" id="bfs-3">    visited[start] = <span class="kwd">true</span></span>
+<span class="line" id="bfs-4">    <span class="kwd">for</span> <span class="func">len</span>(queue) > <span class="num">0</span> {</span>
+<div class="line" id="bfs-5">        curr := queue[<span class="num">0</span>]; queue = queue[<span class="num">1</span>:]</div>
+<div class="line" id="bfs-6">        <span class="kwd">if</span> curr == end { <span class="kwd">return</span> }</div>
+<div class="line" id="bfs-7">        <span class="kwd">for</span> _, n := <span class="kwd">range</span> curr.Neighbors {</div>
+<div class="line" id="bfs-8">            <span class="kwd">if</span> !visited[n] {</div>
+<div class="line" id="bfs-9">                visited[n] = <span class="kwd">true</span>; parent[n] = curr</div>
+<div class="line" id="bfs-10">                queue = <span class="func">append</span>(queue, n)</div>
+<div class="line" id="bfs-11">            }</div>
+<div class="line" id="bfs-12">        }</div>
+<span class="line" id="bfs-13">    }</span>
+<span class="line" id="bfs-14">}</span>
+            </div>
+<div id="code-bfs-java" class="lang-code" style="display: none;">
+<span class="line" id="bfs-java-1"><span class="kwd">void</span> BFS(Node start, Node end) {</span>
+<span class="line" id="bfs-java-2">    Queue&lt;Node> queue = <span class="kwd">new</span> LinkedList&lt;>();</span>
+<span class="line" id="bfs-java-3">    queue.add(start); visited.put(start, <span class="kwd">true</span>);</span>
+<span class="line" id="bfs-java-4">    <span class="kwd">while</span> (!queue.isEmpty()) {</span>
+<span class="line" id="bfs-java-5">        Node curr = queue.poll();</span>
+<span class="line" id="bfs-java-6">        <span class="kwd">if</span> (curr == end) <span class="kwd">return</span>;</span>
+<span class="line" id="bfs-java-7">        <span class="kwd">for</span> (Node n : curr.neighbors) {</span>
+<span class="line" id="bfs-java-8">            <span class="kwd">if</span> (!visited.containsKey(n)) {</span>
+<span class="line" id="bfs-java-9">                visited.put(n, <span class="kwd">true</span>); parent.put(n, curr);</span>
+<span class="line" id="bfs-java-10">                queue.add(n);</span>
+<span class="line" id="bfs-java-11">            }</span>
+<span class="line" id="bfs-java-12">        }</span>
+<span class="line" id="bfs-java-13">    }</span>
+<span class="line" id="bfs-java-14">}</span>
+</div>
+<div id="code-bfs-python" class="lang-code" style="display: none;">
+<span class="line" id="bfs-python-1"><span class="kwd">def</span> BFS(start, end):</span>
+<span class="line" id="bfs-python-2">    queue = deque([start])</span>
+<span class="line" id="bfs-python-3">    visited.add(start)</span>
+<span class="line" id="bfs-python-4">    <span class="kwd">while</span> queue:</span>
+<span class="line" id="bfs-python-5">        curr = queue.popleft()</span>
+<span class="line" id="bfs-python-6">        <span class="kwd">if</span> curr == end: <span class="kwd">return</span></span>
+<span class="line" id="bfs-python-7">        <span class="kwd">for</span> n <span class="kwd">in</span> curr.neighbors:</span>
+<span class="line" id="bfs-python-8">            <span class="kwd">if</span> n <span class="kwd">not in</span> visited:</span>
+<span class="line" id="bfs-python-9">                visited.add(n); parent[n] = curr</span>
+<span class="line" id="bfs-python-10">                queue.append(n)</span>
+<span class="line" id="bfs-python-11"></span>
+<span class="line" id="bfs-python-12"></span>
+<span class="line" id="bfs-python-13"></span>
+<span class="line" id="bfs-python-14"></span>
+</div>
+            </div>
+
+            <!-- DFS Code -->
+            <div id="code-dfs" class="code-content" style="display: none;">
+<div id="code-dfs-go" class="lang-code" style="display: block;">
+<span class="line" id="dfs-1"><span class="kwd">func</span> DFS(curr, end *Node) <span class="type">bool</span> {</span>
+<span class="line" id="dfs-2">    <span class="kwd">if</span> curr == end { <span class="kwd">return true</span> }</span>
+<span class="line" id="dfs-3">    visited[curr] = <span class="kwd">true</span></span>
+<span class="line" id="dfs-4">    <span class="kwd">for</span> _, n := <span class="kwd">range</span> curr.Neighbors {</span>
+<span class="line" id="dfs-5">        <span class="kwd">if</span> !visited[n] {</span>
+<span class="line" id="dfs-6">            parent[n] = curr</span>
+<span class="line" id="dfs-7">            <span class="kwd">if</span> DFS(n, end) { <span class="kwd">return true</span> }</span>
+<span class="line" id="dfs-8">        }</span>
+<span class="line" id="dfs-9">    }</span>
+<span class="line" id="dfs-10">    <span class="kwd">return false</span></span>
+<span class="line" id="dfs-11">}</span>
+            </div>
+<div id="code-dfs-java" class="lang-code" style="display: none;">
+<span class="line" id="dfs-java-1"><span class="type">boolean</span> DFS(Node curr, Node end) {</span>
+<span class="line" id="dfs-java-2">    <span class="kwd">if</span> (curr == end) <span class="kwd">return true</span>;</span>
+<span class="line" id="dfs-java-3">    visited.put(curr, <span class="kwd">true</span>);</span>
+<span class="line" id="dfs-java-4">    <span class="kwd">for</span> (Node n : curr.neighbors) {</span>
+<span class="line" id="dfs-java-5">        <span class="kwd">if</span> (!visited.containsKey(n)) {</span>
+<span class="line" id="dfs-java-6">            parent.put(n, curr);</span>
+<span class="line" id="dfs-java-7">            <span class="kwd">if</span> (DFS(n, end)) <span class="kwd">return true</span>;</span>
+<span class="line" id="dfs-java-8">        }</span>
+<span class="line" id="dfs-java-9">    }</span>
+<span class="line" id="dfs-java-10">    <span class="kwd">return false</span>;</span>
+<span class="line" id="dfs-java-11">}</span>
+</div>
+<div id="code-dfs-python" class="lang-code" style="display: none;">
+<span class="line" id="dfs-python-1"><span class="kwd">def</span> DFS(curr, end):</span>
+<span class="line" id="dfs-python-2">    <span class="kwd">if</span> curr == end: <span class="kwd">return True</span></span>
+<span class="line" id="dfs-python-3">    visited.add(curr)</span>
+<span class="line" id="dfs-python-4">    <span class="kwd">for</span> n <span class="kwd">in</span> curr.neighbors:</span>
+<span class="line" id="dfs-python-5">        <span class="kwd">if</span> n <span class="kwd">not in</span> visited:</span>
+<span class="line" id="dfs-python-6">            parent[n] = curr</span>
+<span class="line" id="dfs-python-7">            <span class="kwd">if</span> DFS(n, end): <span class="kwd">return True</span></span>
+<span class="line" id="dfs-python-8">    <span class="kwd">return False</span></span>
+<span class="line" id="dfs-python-9"></span>
+<span class="line" id="dfs-python-10"></span>
+<span class="line" id="dfs-python-11"></span>
+</div>
+            </div>
+
+            <!-- A* Code -->
+            <div id="code-astar" class="code-content" style="display: none;">
+<div id="code-astar-go" class="lang-code" style="display: block;">
+<span class="line" id="astar-1"><span class="kwd">func</span> AStar(start, end *Node) {</span>
+<span class="line" id="astar-2">    pq := &PriorityQueue{Item{start, <span class="num">0</span>}}</span>
+<span class="line" id="astar-3">    gScore[start] = <span class="num">0</span></span>
+<span class="line" id="astar-4">    <span class="kwd">for</span> pq.Len() > <span class="num">0</span> {</span>
+<span class="line" id="astar-5">        curr := heap.Pop(pq).(*Item).Node</span>
+<span class="line" id="astar-6">        <span class="kwd">if</span> curr == end { <span class="kwd">return</span> }</span>
+<span class="line" id="astar-7">        <span class="kwd">for</span> _, n := <span class="kwd">range</span> curr.Neighbors {</span>
+<span class="line" id="astar-8">            tentativeG := gScore[curr] + <span class="num">1</span></span>
+<span class="line" id="astar-9">            <span class="kwd">if</span> tentativeG < gScore[n] {</span>
+<span class="line" id="astar-10">                gScore[n] = tentativeG</span>
+<span class="line" id="astar-11">                f := tentativeG + h(n, end)</span>
+<span class="line" id="astar-12">                heap.Push(pq, Item{n, f})</span>
+<span class="line" id="astar-13">            }</span>
+<span class="line" id="astar-14">        }</span>
+<span class="line" id="astar-15">    }</span>
+<span class="line" id="astar-16">}</span>
+            </div>
+<div id="code-astar-java" class="lang-code" style="display: none;">
+<span class="line" id="astar-java-1"><span class="kwd">void</span> AStar(Node start, Node end) {</span>
+<span class="line" id="astar-java-2">    PriorityQueue&lt;Node> pq = <span class="kwd">new</span> PriorityQueue&lt;>();</span>
+<span class="line" id="astar-java-3">    pq.add(start); gScore.put(start, <span class="num">0</span>);</span>
+<span class="line" id="astar-java-4">    <span class="kwd">while</span> (!pq.isEmpty()) {</span>
+<span class="line" id="astar-java-5">        Node curr = pq.poll();</span>
+<span class="line" id="astar-java-6">        <span class="kwd">if</span> (curr == end) <span class="kwd">return</span>;</span>
+<span class="line" id="astar-java-7">        <span class="kwd">for</span> (Node n : curr.neighbors) {</span>
+<span class="line" id="astar-java-8">            <span class="type">int</span> tentativeG = gScore.get(curr) + <span class="num">1</span>;</span>
+<span class="line" id="astar-java-9">            <span class="kwd">if</span> (tentativeG < gScore.getOrDefault(n, MAX)) {</span>
+<span class="line" id="astar-java-10">                gScore.put(n, tentativeG);</span>
+<span class="line" id="astar-java-11">                fScore.put(n, tentativeG + h(n, end));</span>
+<span class="line" id="astar-java-12">                pq.add(n);</span>
+<span class="line" id="astar-java-13">            }</span>
+<span class="line" id="astar-java-14">        }</span>
+<span class="line" id="astar-java-15">    }</span>
+<span class="line" id="astar-java-16">}</span>
+</div>
+<div id="code-astar-python" class="lang-code" style="display: none;">
+<span class="line" id="astar-python-1"><span class="kwd">def</span> AStar(start, end):</span>
+<span class="line" id="astar-python-2">    pq = [(<span class="num">0</span>, start)]; gScore[start] = <span class="num">0</span></span>
+<span class="line" id="astar-python-3">    <span class="kwd">while</span> pq:</span>
+<span class="line" id="astar-python-4">        _, curr = heapq.heappop(pq)</span>
+<span class="line" id="astar-python-5">        <span class="kwd">if</span> curr == end: <span class="kwd">return</span></span>
+<span class="line" id="astar-python-6">        <span class="kwd">for</span> n <span class="kwd">in</span> curr.neighbors:</span>
+<span class="line" id="astar-python-7">            tentativeG = gScore[curr] + <span class="num">1</span></span>
+<span class="line" id="astar-python-8">            <span class="kwd">if</span> tentativeG < gScore.get(n, inf):</span>
+<span class="line" id="astar-python-9">                gScore[n] = tentativeG</span>
+<span class="line" id="astar-python-10">                f = tentativeG + h(n, end)</span>
+<span class="line" id="astar-python-11">                heapq.heappush(pq, (f, n))</span>
+</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const ROWS = 15;
+    const COLS = 15;
+    let grid = []; // Stores cell data: {r, c, walls: {top, right, bottom, left}}
+    let isRunning = false;
+    let shouldStop = false;
+    let speed = 20;
+    let currentLang = 'go';
+
+    function initGrid() {
+        const maze = document.getElementById('maze');
+        maze.innerHTML = '';
+        maze.style.gridTemplateColumns = `repeat(${COLS}, 30px)`;
+        maze.style.gridTemplateRows = `repeat(${ROWS}, 30px)`;
+        grid = [];
+
+        for (let r = 0; r < ROWS; r++) {
+            let row = [];
+            for (let c = 0; c < COLS; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${r}-${c}`;
+                maze.appendChild(cell);
+                row.push({ r, c, walls: { top: true, right: true, bottom: true, left: true }, visited: false, parent: null });
+            }
+            grid.push(row);
+        }
+        
+        // Mark Start and End
+        document.getElementById(`cell-0-0`).classList.add('start');
+        document.getElementById(`cell-${ROWS-1}-${COLS-1}`).classList.add('end');
+        document.getElementById(`cell-0-0`).textContent = 'S';
+        document.getElementById(`cell-${ROWS-1}-${COLS-1}`).textContent = 'E';
+    }
+
+    async function generateMaze() {
+        if (isRunning) return;
+        isRunning = true;
+        shouldStop = false;
+        initGrid();
+        document.getElementById('status').textContent = "Generating Maze...";
+
+        let stack = [grid[0][0]];
+        grid[0][0].visited = true;
+
+        while (stack.length > 0) {
+            if (shouldStop) break;
+            let curr = stack[stack.length - 1];
+            let neighbors = getUnvisitedNeighbors(curr);
+
+            if (neighbors.length > 0) {
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                removeWalls(curr, next);
+                next.visited = true;
+                stack.push(next);
+                
+                // Visual update
+                const cell = document.getElementById(`cell-${next.r}-${next.c}`);
+                cell.classList.add('current');
+                await new Promise(r => setTimeout(r, 10));
+                cell.classList.remove('current');
+            } else {
+                stack.pop();
+            }
+        }
+        
+        // Reset visited for pathfinding
+        for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) {
+            grid[r][c].visited = false;
+            grid[r][c].parent = null;
+        }
+        
+        document.getElementById('status').textContent = "Maze Ready. Select Algorithm & Solve.";
+        isRunning = false;
+    }
+
+    function getUnvisitedNeighbors(cell) {
+        let neighbors = [];
+        const { r, c } = cell;
+        if (r > 0 && !grid[r - 1][c].visited) neighbors.push(grid[r - 1][c]);
+        if (r < ROWS - 1 && !grid[r + 1][c].visited) neighbors.push(grid[r + 1][c]);
+        if (c > 0 && !grid[r][c - 1].visited) neighbors.push(grid[r][c - 1]);
+        if (c < COLS - 1 && !grid[r][c + 1].visited) neighbors.push(grid[r][c + 1]);
+        return neighbors;
+    }
+
+    function removeWalls(a, b) {
+        const cellA = document.getElementById(`cell-${a.r}-${a.c}`);
+        const cellB = document.getElementById(`cell-${b.r}-${b.c}`);
+
+        if (a.r - b.r === 1) { // a is below b
+            a.walls.top = false; b.walls.bottom = false;
+            cellA.classList.add('no-top'); cellB.classList.add('no-bottom');
+        } else if (a.r - b.r === -1) { // a is above b
+            a.walls.bottom = false; b.walls.top = false;
+            cellA.classList.add('no-bottom'); cellB.classList.add('no-top');
+        } else if (a.c - b.c === 1) { // a is right of b
+            a.walls.left = false; b.walls.right = false;
+            cellA.classList.add('no-left'); cellB.classList.add('no-right');
+        } else if (a.c - b.c === -1) { // a is left of b
+            a.walls.right = false; b.walls.left = false;
+            cellA.classList.add('no-right'); cellB.classList.add('no-left');
+        }
+    }
+
+    async function startPathfinding() {
+        if (isRunning) return;
+        resetPath();
+        isRunning = true;
+        shouldStop = false;
+        
+        const algo = document.getElementById('algo-select').value;
+        document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+        document.getElementById(`code-${algo}`).style.display = 'block';
+        
+        // Ensure correct language is shown for the new algorithm
+        switchTab(currentLang);
+        
+        document.getElementById('status').textContent = `Running ${algo.toUpperCase()}...`;
+
+        if (algo === 'bfs') await bfs();
+        else if (algo === 'dfs') await dfs();
+        else if (algo === 'astar') await astar();
+
+        isRunning = false;
+    }
+
+    function resetPath() {
+        for(let r=0; r<ROWS; r++) for(let c=0; c<COLS; c++) {
+            grid[r][c].visited = false;
+            grid[r][c].parent = null;
+            grid[r][c].g = Infinity;
+            grid[r][c].f = Infinity;
+            const cell = document.getElementById(`cell-${r}-${c}`);
+            cell.classList.remove('visited', 'path', 'current');
+        }
+    }
+
+    function getNeighbors(cell) {
+        let neighbors = [];
+        const { r, c } = cell;
+        if (!cell.walls.top) neighbors.push(grid[r - 1][c]);
+        if (!cell.walls.bottom) neighbors.push(grid[r + 1][c]);
+        if (!cell.walls.left) neighbors.push(grid[r][c - 1]);
+        if (!cell.walls.right) neighbors.push(grid[r][c + 1]);
+        return neighbors;
+    }
+
+    async function bfs() {
+        let queue = [grid[0][0]];
+        grid[0][0].visited = true;
+
+        while (queue.length > 0) {
+            if (shouldStop) return;
+            let curr = queue.shift();
+            
+            if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
+                await drawPath(curr);
+                return;
+            }
+
+            const cellEl = document.getElementById(`cell-${curr.r}-${curr.c}`);
+            cellEl.classList.add('visited');
+            await new Promise(r => setTimeout(r, speed));
+
+            for (let n of getNeighbors(curr)) {
+                if (!n.visited) {
+                    n.visited = true;
+                    n.parent = curr;
+                    queue.push(n);
+                }
+            }
+        }
+    }
+
+    async function dfs() {
+        let stack = [grid[0][0]];
+        grid[0][0].visited = true;
+
+        while (stack.length > 0) {
+            if (shouldStop) return;
+            let curr = stack.pop();
+
+            if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
+                await drawPath(curr);
+                return;
+            }
+
+            const cellEl = document.getElementById(`cell-${curr.r}-${curr.c}`);
+            cellEl.classList.add('visited');
+            await new Promise(r => setTimeout(r, speed));
+
+            for (let n of getNeighbors(curr)) {
+                if (!n.visited) {
+                    n.visited = true;
+                    n.parent = curr;
+                    stack.push(n);
+                }
+            }
+        }
+    }
+
+    async function astar() {
+        let openSet = [grid[0][0]];
+        grid[0][0].g = 0;
+        grid[0][0].f = heuristic(grid[0][0], grid[ROWS-1][COLS-1]);
+
+        while (openSet.length > 0) {
+            if (shouldStop) return;
+            
+            // Simple priority queue (sort)
+            openSet.sort((a, b) => a.f - b.f);
+            let curr = openSet.shift();
+
+            if (curr.r === ROWS - 1 && curr.c === COLS - 1) {
+                await drawPath(curr);
+                return;
+            }
+
+            curr.visited = true;
+            const cellEl = document.getElementById(`cell-${curr.r}-${curr.c}`);
+            cellEl.classList.add('visited');
+            await new Promise(r => setTimeout(r, speed));
+
+            for (let n of getNeighbors(curr)) {
+                if (n.visited) continue;
+                
+                let tentativeG = curr.g + 1;
+                if (tentativeG < n.g) {
+                    n.parent = curr;
+                    n.g = tentativeG;
+                    n.f = n.g + heuristic(n, grid[ROWS-1][COLS-1]);
+                    if (!openSet.includes(n)) openSet.push(n);
+                }
+            }
+        }
+    }
+
+    function heuristic(a, b) {
+        return Math.abs(a.r - b.r) + Math.abs(a.c - b.c);
+    }
+
+    async function drawPath(endNode) {
+        let curr = endNode;
+        document.getElementById('status').textContent = "Path Found!";
+        while (curr) {
+            const cell = document.getElementById(`cell-${curr.r}-${curr.c}`);
+            cell.classList.remove('visited');
+            cell.classList.add('path');
+            curr = curr.parent;
+            await new Promise(r => setTimeout(r, 30));
+        }
+    }
+
+    function switchTab(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            if (['go', 'java', 'python'].includes(el.textContent.toLowerCase())) {
+                el.classList.remove('active');
+            }
+        });
+        
+        // Find button for this lang and make active
+        const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase() === lang);
+        if (btn) btn.classList.add('active');
+        
+        // Update visibility of language blocks within active algorithm block
+        const activeAlgo = document.querySelector('.code-content[style*="display: block"]');
+        if (activeAlgo) {
+            activeAlgo.querySelectorAll('.lang-code').forEach(el => el.style.display = 'none');
+            const langBlock = activeAlgo.querySelector(`[id$="-${lang}"]`);
+            if (langBlock) langBlock.style.display = 'block';
+        }
+    }
+
+    // Start with a maze
+    initGrid();
+    generateMaze();
+  </script>
+</body>
+</html>
