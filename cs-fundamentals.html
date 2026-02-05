@@ -36,6 +36,8 @@
             <div class="progress-indicator"><div class="progress-bar"></div></div>
           </summary>
           <a href="cs-fundamentals.html" class="nav-item active" data-id="tool-0">CS Fundamentals</a>
+          <a href="osi-layers.html" class="nav-item" data-id="tool-9">OSI Model Deep Dive</a>
+          <a href="tcp-ip-model.html" class="nav-item" data-id="tool-10">TCP/IP Model Deep Dive</a>
           <a href="golang-guide.html" class="nav-item" data-id="tool-1">Go Language Guide</a>
           <a href="go-interview-questions.html" class="nav-item" data-id="tool-2">Go Interview Questions</a>
           <a href="go-interview-plan.html" class="nav-item" data-id="tool-6">📅 14-Day Interview Plan</a>
@@ -406,6 +408,17 @@
               <tr><td>Link</td><td>Data Link, Physical</td><td>Link</td><td>Ethernet, Wi-Fi</td></tr>
             </tbody>
           </table>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--text-primary);">Key Differences</h4>
+          <table class="complexity-table">
+            <thead><tr><th>Feature</th><th>OSI Model</th><th>TCP/IP Model</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Nature</strong></td><td>Theoretical / Reference Model</td><td>Practical / Implementation Model</td></tr>
+              <tr><td><strong>Layers</strong></td><td>7 Layers (Granular)</td><td>4 Layers (Condensed)</td></tr>
+              <tr><td><strong>Protocols</strong></td><td>Protocol Independent</td><td>Protocol Dependent</td></tr>
+              <tr><td><strong>Usage</strong></td><td>Academic / Teaching</td><td>Real-world Internet</td></tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- 3. PHYSICAL & DATA LINK -->
@@ -478,6 +491,17 @@
             <li><strong>SMTP/IMAP:</strong> Email protocols.</li>
             <li><strong>WebSockets:</strong> Persistent, full-duplex communication.</li>
           </ul>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--text-primary);">HTTP vs HTTPS</h4>
+          <table class="complexity-table">
+            <thead><tr><th>Feature</th><th>HTTP</th><th>HTTPS</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Security</strong></td><td>Plain text (Insecure)</td><td>Encrypted (SSL/TLS)</td></tr>
+              <tr><td><strong>Port</strong></td><td>80</td><td>443</td></tr>
+              <tr><td><strong>Performance</strong></td><td>Faster (no handshake)</td><td>Slightly slower (handshake overhead)</td></tr>
+              <tr><td><strong>Trust</strong></td><td>No certificate</td><td>Requires SSL Certificate</td></tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- 8. SECURITY -->
@@ -673,6 +697,18 @@
             <li><strong>Non-Relational (NoSQL):</strong> Flexible, Schema-less, Documents/Key-Value (MongoDB, Redis).</li>
             <li><strong>SQL vs NoSQL:</strong> SQL for complex queries/transactions; NoSQL for scale/flexibility.</li>
           </ul>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--text-primary);">SQL vs NoSQL Comparison</h4>
+          <table class="complexity-table">
+            <thead><tr><th>Feature</th><th>SQL (Relational)</th><th>NoSQL (Non-Relational)</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Structure</strong></td><td>Structured, Tables, Fixed Schema</td><td>Unstructured, Document/Key-Value, Flexible</td></tr>
+              <tr><td><strong>Scaling</strong></td><td>Vertical (Scale Up)</td><td>Horizontal (Scale Out)</td></tr>
+              <tr><td><strong>Transactions</strong></td><td>ACID (Strong Consistency)</td><td>BASE (Eventual Consistency) usually</td></tr>
+              <tr><td><strong>Joins</strong></td><td>Complex Joins supported</td><td>No/Limited Joins (Denormalization preferred)</td></tr>
+              <tr><td><strong>Examples</strong></td><td>MySQL, PostgreSQL, Oracle</td><td>MongoDB, Cassandra, Redis, DynamoDB</td></tr>
+            </tbody>
+          </table>
         </div>
 
         <!-- 2. ACID PROPERTIES -->

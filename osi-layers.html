@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OSI Model Layers - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .osi-diagram {
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 30px auto;
+      gap: 4px;
+    }
+    .osi-layer-box {
+      display: grid;
+      grid-template-columns: 50px 1fr 1fr;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .osi-layer-box:hover {
+      transform: translateX(5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .osi-num {
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-color);
+    }
+    .osi-name {
+      padding: 12px 15px;
+      font-weight: bold;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+    }
+    .osi-pdu {
+      padding: 12px 15px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.1);
+      border-left: 1px solid var(--border-color);
+    }
+    .layer-detail {
+      margin-top: 30px;
+    }
+    .scenario-box {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .flow-arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      margin: -5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+        <a href="cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
+        <a href="osi-layers.html" class="nav-item active">OSI Model Deep Dive</a>
+        <a href="tcp-ip-model.html" class="nav-item">TCP/IP Model Deep Dive</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🌐 The OSI Model</h1>
+        <p>Open Systems Interconnection: The 7 Layers of Networking Architecture</p>
+      </div>
+
+      <!-- Diagram Section -->
+      <div class="section">
+        <div class="section-title">🏗️ Architecture Diagram</div>
+        <p style="color: var(--text-secondary);">Data flows down from Application to Physical at the sender, and up from Physical to Application at the receiver.</p>
+        
+        <div class="osi-diagram">
+          <div class="osi-layer-box">
+            <div class="osi-num">7</div>
+            <div class="osi-name">Application</div>
+            <div class="osi-pdu">Data</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">6</div>
+            <div class="osi-name">Presentation</div>
+            <div class="osi-pdu">Data</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">5</div>
+            <div class="osi-name">Session</div>
+            <div class="osi-pdu">Data</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">4</div>
+            <div class="osi-name">Transport</div>
+            <div class="osi-pdu">Segments</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">3</div>
+            <div class="osi-name">Network</div>
+            <div class="osi-pdu">Packets</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">2</div>
+            <div class="osi-name">Data Link</div>
+            <div class="osi-pdu">Frames</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">1</div>
+            <div class="osi-name">Physical</div>
+            <div class="osi-pdu">Bits</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Layers -->
+      <div class="section">
+        <div class="section-title">📚 Layer-by-Layer Explanation</div>
+
+        <!-- Layer 7 -->
+        <div class="collapsible">
+          <strong>7. Application Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> The layer closest to the end user. It provides network services to applications.</p>
+            <p><strong>Uses:</strong> HTTP, HTTPS, FTP, SMTP, DNS.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> When you click a link in Chrome, the browser (Application) constructs an HTTP GET request.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 6 -->
+        <div class="collapsible">
+          <strong>6. Presentation Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Translates data between the application and network formats. Handles encryption, compression, and serialization.</p>
+            <p><strong>Uses:</strong> SSL/TLS (Encryption), JPEG/GIF (Compression), ASCII/EBCDIC.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Converting a JSON object into binary data, or encrypting your credit card number before sending it.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 5 -->
+        <div class="collapsible">
+          <strong>5. Session Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Manages sessions (connections) between computers. Controls dialogs (start, stop, restart).</p>
+            <p><strong>Uses:</strong> NetBIOS, RPC, PPTP.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Keeping your banking session active while you navigate between pages, or reconnecting a dropped file transfer.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 4 -->
+        <div class="collapsible">
+          <strong>4. Transport Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Ensures reliable data transfer. Handles flow control, error correction, and segmentation.</p>
+            <p><strong>Uses:</strong> TCP (Reliable), UDP (Fast), Ports (80, 443).</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> TCP ensures all parts of a webpage arrive in order. UDP streams video where a few lost frames don't matter.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 3 -->
+        <div class="collapsible">
+          <strong>3. Network Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Handles routing and logical addressing (IP addresses). Determines the best path for data.</p>
+            <p><strong>Uses:</strong> IP (IPv4/IPv6), ICMP (Ping), Routers.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> A router looks at the destination IP of your packet and decides which neighbor to send it to next.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="collapsible">
+          <strong>2. Data Link Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Physical addressing (MAC) and error detection. Transfers frames between nodes on the same network segment.</p>
+            <p><strong>Uses:</strong> Ethernet, Wi-Fi (802.11), Switches, MAC Addresses.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Your Wi-Fi card sending data to your home router using its MAC address.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 1 -->
+        <div class="collapsible">
+          <strong>1. Physical Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> The raw hardware. Transmits raw bits (0s and 1s) over a physical medium.</p>
+            <p><strong>Uses:</strong> Cables (Cat6, Fiber), Hubs, Radio waves.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Electrical pulses traveling through an Ethernet cable or radio waves moving through the air.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mnemonic -->
+      <div class="section">
+        <div class="section-title">🧠 Mnemonic to Remember</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Top-Down (7 to 1)</div>
+          <div class="callout-content">
+            <strong>A</strong>ll <strong>P</strong>eople <strong>S</strong>eem <strong>T</strong>o <strong>N</strong>eed <strong>D</strong>ata <strong>P</strong>rocessing
+          </div>
+        </div>
+        <div class="callout interview-tip" style="margin-top: 10px;">
+          <div class="callout-title">Bottom-Up (1 to 7)</div>
+          <div class="callout-content">
+            <strong>P</strong>lease <strong>D</strong>o <strong>N</strong>ot <strong>T</strong>hrow <strong>S</strong>ausage <strong>P</strong>izza <strong>A</strong>way
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

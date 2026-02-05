@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TCP/IP Model - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .osi-diagram {
+      display: flex;
+      flex-direction: column;
+      max-width: 600px;
+      margin: 30px auto;
+      gap: 4px;
+    }
+    .osi-layer-box {
+      display: grid;
+      grid-template-columns: 50px 1fr 1fr;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      transition: all 0.2s;
+    }
+    .osi-layer-box:hover {
+      transform: translateX(5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .osi-num {
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-color);
+    }
+    .osi-name {
+      padding: 12px 15px;
+      font-weight: bold;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+    }
+    .osi-pdu {
+      padding: 12px 15px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      background: rgba(0,0,0,0.1);
+      border-left: 1px solid var(--border-color);
+    }
+    .layer-detail {
+      margin-top: 30px;
+    }
+    .scenario-box {
+      background: rgba(59, 130, 246, 0.05);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .flow-arrow {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      margin: -5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+        <a href="cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
+        <a href="osi-layers.html" class="nav-item">OSI Model Deep Dive</a>
+        <a href="tcp-ip-model.html" class="nav-item active">TCP/IP Model Deep Dive</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🌐 The TCP/IP Model</h1>
+        <p>Transmission Control Protocol/Internet Protocol: The 4 Layers of the Internet</p>
+      </div>
+
+      <!-- Diagram Section -->
+      <div class="section">
+        <div class="section-title">🏗️ Architecture Diagram</div>
+        <p style="color: var(--text-secondary);">The practical implementation of networking used by the Internet today. It condenses the OSI model into 4 layers.</p>
+        
+        <div class="osi-diagram">
+          <div class="osi-layer-box">
+            <div class="osi-num">4</div>
+            <div class="osi-name">Application</div>
+            <div class="osi-pdu">Data</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">3</div>
+            <div class="osi-name">Transport</div>
+            <div class="osi-pdu">Segments</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">2</div>
+            <div class="osi-name">Internet</div>
+            <div class="osi-pdu">Packets</div>
+          </div>
+          <div class="flow-arrow">↓</div>
+          <div class="osi-layer-box">
+            <div class="osi-num">1</div>
+            <div class="osi-name">Network Interface</div>
+            <div class="osi-pdu">Frames</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Layers -->
+      <div class="section">
+        <div class="section-title">📚 Layer-by-Layer Explanation</div>
+
+        <!-- Layer 4 -->
+        <div class="collapsible">
+          <strong>4. Application Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Combines OSI Application, Presentation, and Session layers. Handles high-level protocols, representation, and encoding.</p>
+            <p><strong>Uses:</strong> HTTP, HTTPS, FTP, SMTP, SSH, DNS.</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Your browser sending an HTTP request to fetch a webpage, or an email client using SMTP to send a message.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 3 -->
+        <div class="collapsible">
+          <strong>3. Transport Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Provides end-to-end communication services. Handles reliability, flow control, and multiplexing.</p>
+            <p><strong>Uses:</strong> TCP (Reliable, connection-oriented), UDP (Unreliable, connectionless).</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> TCP ensuring your file download is complete and error-free. UDP streaming a live video call where speed matters more than perfect accuracy.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 2 -->
+        <div class="collapsible">
+          <strong>2. Internet Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Responsible for logical addressing and routing packets across networks.</p>
+            <p><strong>Uses:</strong> IP (IPv4, IPv6), ICMP (Ping), ARP (Address Resolution).</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Routers on the internet looking at the destination IP address of a packet to decide which path it should take to reach the server.
+            </div>
+          </div>
+        </div>
+
+        <!-- Layer 1 -->
+        <div class="collapsible">
+          <strong>1. Network Interface Layer</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <p><strong>Concept:</strong> Combines OSI Data Link and Physical layers. Handles physical transmission of data.</p>
+            <p><strong>Uses:</strong> Ethernet, Wi-Fi, Drivers, Network Interface Cards (NIC).</p>
+            <div class="scenario-box">
+              <strong>Real Scenario:</strong> Your Wi-Fi card modulating data into radio waves to send to your router, or an Ethernet cable carrying electrical signals.
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Comparison -->
+      <div class="section">
+        <div class="section-title">⚖️ OSI vs TCP/IP</div>
+        <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <th style="text-align: left; padding: 10px;">OSI Model (7 Layers)</th>
+                        <th style="text-align: left; padding: 10px;">TCP/IP Model (4 Layers)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="padding: 10px;">Application, Presentation, Session</td>
+                        <td style="padding: 10px; color: var(--accent-color); font-weight: bold;">Application</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px;">Transport</td>
+                        <td style="padding: 10px; color: var(--accent-color); font-weight: bold;">Transport</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px;">Network</td>
+                        <td style="padding: 10px; color: var(--accent-color); font-weight: bold;">Internet</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px;">Data Link, Physical</td>
+                        <td style="padding: 10px; color: var(--accent-color); font-weight: bold;">Network Interface</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

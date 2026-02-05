@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Design Quiz - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .quiz-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .question-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 25px;
+      transition: transform 0.2s;
+    }
+    .question-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+    .options-grid {
+      display: grid;
+      gap: 12px;
+    }
+    .option-btn {
+      text-align: left;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      padding: 15px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+    .option-btn:hover {
+      border-color: var(--accent-color);
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--text-primary);
+    }
+    .option-btn.correct {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #22c55e;
+      color: #22c55e;
+    }
+    .option-btn.incorrect {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #ef4444;
+      color: #ef4444;
+    }
+    .explanation {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(59, 130, 246, 0.1);
+      border-radius: 6px;
+      border-left: 4px solid var(--accent-color);
+      display: none;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .score-section {
+      text-align: center;
+      padding: 40px;
+      background: var(--bg-tertiary);
+      border-radius: 12px;
+      margin-top: 30px;
+      display: none;
+    }
+    .score-title {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+    .score-value {
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent-color);
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System Design</div>
+        <a href="system-design.html" class="nav-item">Basics</a>
+        <a href="system-design-masterclass.html" class="nav-item">Masterclass</a>
+        <a href="system-design-quiz.html" class="nav-item active">Quiz</a>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🎓 System Design Quiz</h1>
+        <p>Test your knowledge of Scalability, CAP Theorem, and Distributed Systems.</p>
+      </div>
+
+      <div id="quiz-container" class="quiz-container">
+        <!-- Questions will be injected here -->
+      </div>
+
+      <div id="score-section" class="score-section">
+        <div class="score-title">Quiz Complete!</div>
+        <div class="score-value" id="final-score">0 / 0</div>
+        <p id="score-message" style="color: var(--text-secondary); margin-bottom: 20px;"></p>
+        <button onclick="location.reload()" style="background: var(--accent-color); color: white; padding: 12px 24px; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer;">Retake Quiz</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        category: "Foundations",
+        question: "According to the CAP Theorem, in the event of a network partition (P), what trade-off must a distributed system make?",
+        options: [
+          "Consistency vs Latency",
+          "Consistency vs Availability",
+          "Availability vs Scalability",
+          "Reliability vs Consistency"
+        ],
+        correct: 1,
+        explanation: "The CAP theorem states that a distributed system can only provide two of three guarantees: Consistency, Availability, and Partition Tolerance. Since network partitions (P) are inevitable in distributed systems, you must choose between Consistency (CP) and Availability (AP)."
+      },
+      {
+        category: "Load Balancing",
+        question: "Which Load Balancing strategy is most effective when requests have varying processing times?",
+        options: [
+          "Round Robin",
+          "Least Connections",
+          "Random",
+          "IP Hash"
+        ],
+        correct: 1,
+        explanation: "Least Connections directs traffic to the server with the fewest active connections. This is ideal when some requests take much longer than others, preventing a single server from getting bogged down with heavy tasks."
+      },
+      {
+        category: "Caching",
+        question: "Which caching strategy updates the cache and the database simultaneously?",
+        options: [
+          "Cache-Aside",
+          "Write-Back",
+          "Write-Through",
+          "Read-Through"
+        ],
+        correct: 2,
+        explanation: "In Write-Through caching, data is written to the cache and the database at the same time. This ensures high data consistency but adds latency to write operations."
+      },
+      {
+        category: "Databases",
+        question: "What is the primary disadvantage of Database Sharding?",
+        options: [
+          "Slower read performance",
+          "Limited storage capacity",
+          "Complex joins across shards",
+          "Single point of failure"
+        ],
+        correct: 2,
+        explanation: "Sharding splits data across multiple servers. Performing joins on data that resides on different shards is extremely difficult, expensive, and often impossible without application-level logic."
+      },
+      {
+        category: "Distributed Systems",
+        question: "Which pattern is used to prevent cascading failures in a microservices architecture?",
+        options: [
+          "Rate Limiting",
+          "Circuit Breaker",
+          "Load Balancing",
+          "Saga Pattern"
+        ],
+        correct: 1,
+        explanation: "The Circuit Breaker pattern detects failures and encapsulates the logic of preventing a failure from constantly recurring (e.g., by failing fast), thus protecting the system from cascading failure."
+      },
+      {
+        category: "Hashing",
+        question: "What problem does Consistent Hashing solve?",
+        options: [
+          "Slow hash calculation",
+          "Hash collisions",
+          "Massive key remapping when adding/removing servers",
+          "Security vulnerabilities"
+        ],
+        correct: 2,
+        explanation: "In traditional hashing (key % N), changing N (servers) remaps nearly all keys. Consistent hashing maps both keys and servers to a ring, so adding/removing a server only affects k/N keys."
+      }
+    ];
+
+    const container = document.getElementById('quiz-container');
+    let score = 0;
+    let answered = 0;
+
+    function renderQuiz() {
+      questions.forEach((q, index) => {
+        const card = document.createElement('div');
+        card.className = 'question-card';
+        card.innerHTML = `
+          <div class="question-header">Question ${index + 1} • ${q.category}</div>
+          <div class="question-text">${q.question}</div>
+          <div class="options-grid" id="options-${index}"></div>
+          <div class="explanation" id="explain-${index}">${q.explanation}</div>
+        `;
+        
+        const optionsContainer = card.querySelector(`#options-${index}`);
+        q.options.forEach((opt, optIndex) => {
+          const btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.textContent = opt;
+          btn.onclick = () => checkAnswer(index, optIndex, q.correct, btn);
+          optionsContainer.appendChild(btn);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, btn) {
+      const optionsDiv = document.getElementById(`options-${qIndex}`);
+      if (optionsDiv.classList.contains('answered')) return; // Prevent re-answering
+      
+      optionsDiv.classList.add('answered');
+      const buttons = optionsDiv.querySelectorAll('.option-btn');
+      
+      if (selected === correct) {
+        btn.classList.add('correct');
+        score++;
+      } else {
+        btn.classList.add('incorrect');
+        buttons[correct].classList.add('correct');
+      }
+
+      document.getElementById(`explain-${qIndex}`).style.display = 'block';
+      answered++;
+
+      if (answered === questions.length) {
+        showScore();
+      }
+    }
+
+    function showScore() {
+      document.getElementById('score-section').style.display = 'block';
+      document.getElementById('final-score').textContent = `${score} / ${questions.length}`;
+      
+      const msg = document.getElementById('score-message');
+      if (score === questions.length) msg.textContent = "🏆 Perfect Score! You are a System Design Master!";
+      else if (score > questions.length / 2) msg.textContent = "👏 Great job! You have a solid understanding.";
+      else msg.textContent = "📚 Keep studying! Review the Masterclass and try again.";
+      
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>

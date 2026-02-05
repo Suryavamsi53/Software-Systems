@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Design Masterclass - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .diagram-box {
+      font-family: 'Courier New', 'Consolas', monospace;
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      white-space: pre;
+      overflow-x: auto;
+      line-height: 1.3;
+      color: var(--text-secondary);
+      margin: 15px 0;
+      font-size: 0.85rem;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+    }
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      font-size: 0.9rem;
+    }
+    .comparison-table th, .comparison-table td {
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      text-align: left;
+    }
+    .comparison-table th {
+      background: var(--bg-tertiary);
+      color: var(--accent-color);
+    }
+    .concept-card {
+      background: var(--bg-tertiary);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--accent-color);
+    }
+    .step-badge {
+      background: var(--accent-color);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">System Design</div>
+        <a href="system-design.html" class="nav-item">Basics</a>
+        <a href="system-design-masterclass.html" class="nav-item active">Masterclass (Part 1)</a>
+        <a href="system-design-patterns.html" class="nav-item">Patterns</a>
+        <a href="system-design-checklist.html" class="nav-item">Checklist</a>
+        <a href="system-design-case-studies.html" class="nav-item">Case Studies</a>
+        <a href="system-design-quiz.html" class="nav-item">Quiz</a>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🏗️ System Design Masterclass</h1>
+        <p>Part 1: Foundations (Beginner → Intermediate)</p>
+      </div>
+
+      <!-- 1. What is System Design -->
+      <div class="section">
+        <div class="section-title">1. What is System Design?</div>
+        <div class="concept-card">
+          <p>The process of defining architecture, components, and data flow to satisfy specific requirements.</p>
+          <div class="diagram-box">
+   [ Vague Problem ]  --->  [ Requirements ]  --->  [ Architecture ]  --->  [ Scalable System ]
+   "Design Twitter"         Functional              Load Balancers          100M Users
+                            Non-Functional          Databases               Low Latency
+                                                    Caching
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Requirements -->
+      <div class="section">
+        <div class="section-title">2. Functional vs Non-Functional Requirements</div>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Definition</th>
+              <th>Examples (Twitter)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Functional (FR)</strong></td>
+              <td>What the system DOES (Features)</td>
+              <td>- Post a tweet<br>- Follow user<br>- View timeline</td>
+            </tr>
+            <tr>
+              <td><strong>Non-Functional (NFR)</strong></td>
+              <td>How the system BEHAVES (Quality)</td>
+              <td>- Low Latency (< 200ms)<br>- High Availability (99.99%)<br>- Consistency (Eventual)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 3. Scalability Concepts -->
+      <div class="section">
+        <div class="section-title">3. Core Metrics: Scalability, Availability, Latency</div>
+        
+        <div class="collapsible"><strong>Scalability (Vertical vs Horizontal)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div class="diagram-box">
+   VERTICAL SCALING (Scale Up)        HORIZONTAL SCALING (Scale Out)
+   ===========================        ==============================
+   
+       [ SERVER ]                         [ LB ]
+           |                               /  \
+       [ Bigger RAM ]               [ Server ] [ Server ]
+       [ Bigger CPU ]               [ Server ] [ Server ]
+   
+   Pros: Simple, No network overhead  Pros: Infinite scale, Cheaper HW
+   Cons: Hard limit, Single POF       Cons: Complex (Data consistency)
+          </div>
+        </div>
+
+        <div class="collapsible"><strong>Availability vs Reliability</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <ul>
+            <li><strong>Availability:</strong> % of time system is operational (e.g., 99.99% = 52 min downtime/year).</li>
+            <li><strong>Reliability:</strong> Probability system performs correctly without failure.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 4. CAP Theorem -->
+      <div class="section">
+        <div class="section-title">4. CAP Theorem</div>
+        <div class="concept-card">
+          <p>In a distributed system with partitions (P), you can only choose between Consistency (C) or Availability (A).</p>
+          <div class="diagram-box">
+             C (Consistency)
+                /   \
+               /     \
+              /_______\
+      A (Availability)   P (Partition Tolerance)
+      
+      Pick Two (P is mandatory in distributed systems):
+      1. CA: RDBMS (MySQL) - Not possible in distributed systems (P is mandatory)
+      2. CP: MongoDB/HBase - System waits/errors if partition occurs (Data safety > Uptime)
+      3. AP: Cassandra/Dynamo - System responds with stale data (Uptime > Data precision)
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Load Balancer -->
+      <div class="section">
+        <div class="section-title">5. Load Balancer (LB)</div>
+        <div class="diagram-box">
+      Clients
+      /  |  \
+     /   |   \
+  [ Load Balancer ]  <-- Distributes Traffic
+     /   |   \
+ [S1]  [S2]  [S3]    <-- Web Servers
+        </div>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Layer 4 (Transport)</th>
+              <th>Layer 7 (Application)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Based on IP + Port</td>
+              <td>Based on URL, Cookies, Headers</td>
+            </tr>
+            <tr>
+              <td>Fast, Simple</td>
+              <td>Smarter routing (e.g., /images -> ImageServer)</td>
+            </tr>
+            <tr>
+              <td>No decryption</td>
+              <td>Can terminate SSL</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 6. Caching -->
+      <div class="section">
+        <div class="section-title">6. Caching</div>
+        <div class="diagram-box">
+    [ Client ]
+        |
+        v
+    [ Web Server ]
+        | \
+        |  \ (1. Check Cache)
+        |   \
+        |   [ Cache (Redis) ]
+        |   /
+        |  / (2. Return if Hit)
+        | /
+        v
+    [ Database ] (3. Fetch if Miss & Update Cache)
+        </div>
+      </div>
+
+      <!-- 7. Databases -->
+      <div class="section">
+        <div class="section-title">7. Databases: SQL vs NoSQL</div>
+        <div class="diagram-box">
+   SQL (Relational)                 NoSQL (Non-Relational)
+   ----------------                 ----------------------
+   [ User Table ]                   [ User Doc ]
+   id | name | age                  {
+   1  | Bob  | 25                     "id": 1,
+                                      "name": "Bob",
+   [ Order Table ]                    "orders": [...]
+   id | uid | item                  }
+   10 | 1   | Book
+   
+   - Structured                     - Flexible Schema
+   - ACID Transactions              - BASE (Eventual Consistency)
+   - Vertical Scaling               - Horizontal Scaling
+   - Complex Joins                  - No Joins (Denormalized)
+        </div>
+        <div class="concept-card">
+            <strong>NoSQL Types:</strong>
+            <ul>
+                <li><strong>Key-Value:</strong> Redis, DynamoDB (Fast lookup)</li>
+                <li><strong>Document:</strong> MongoDB (Flexible JSON)</li>
+                <li><strong>Wide Column:</strong> Cassandra (Write heavy, Time series)</li>
+                <li><strong>Graph:</strong> Neo4j (Relationships)</li>
+            </ul>
+        </div>
+      </div>
+
+      <!-- PART 2 HEADER -->
+      <div class="section" style="margin-top: 60px; border-top: 2px solid var(--border-color); padding-top: 40px;">
+        <div class="content-header">
+          <h1>🏗️ Part 2: Core Building Blocks</h1>
+          <p>Intermediate Concepts: The components that make systems scalable.</p>
+        </div>
+      </div>
+
+      <!-- 8. The Standard Architecture -->
+      <div class="section">
+        <div class="section-title">8. The Standard Web Architecture</div>
+        <div class="diagram-box">
+   [ Client ] (Browser/Mobile)
+       |
+       v
+   [ CDN ] (Static Assets: Images, CSS, JS)
+       |
+       v
+   [ Load Balancer ] (Nginx/HAProxy)
+       |
+       v
+   [ API Gateway ] (Auth, Rate Limiting)
+       |
+       v
+   [ Web Servers ] (Stateless Application Logic)
+       | \
+       |  \
+       |   [ Distributed Cache ] (Redis/Memcached)
+       |
+       v
+   [ Database ] (Persistent Storage)
+        </div>
+      </div>
+
+      <!-- 9. CDN -->
+      <div class="section">
+        <div class="section-title">9. Content Delivery Network (CDN)</div>
+        <div class="concept-card">
+          <p><strong>Goal:</strong> Serve static content from a server closest to the user to reduce latency.</p>
+          <div class="diagram-box">
+   User (USA)  -->  [ US Edge Server ]  (Hit! Fast)
+   User (India) --> [ IN Edge Server ]  (Hit! Fast)
+                          |
+                          v (If Miss)
+                   [ Origin Server ] (Source of Truth)
+          </div>
+          <p><strong>Push vs Pull:</strong></p>
+          <ul>
+            <li><strong>Pull:</strong> CDN fetches from Origin on first request (Lazy).</li>
+            <li><strong>Push:</strong> You upload files to CDN beforehand.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 10. Caching Strategies -->
+      <div class="section">
+        <div class="section-title">10. Caching Strategies & Eviction</div>
+        
+        <div class="collapsible"><strong>Cache Hit vs Miss Flow</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div class="diagram-box">
+   1. App requests Key "user:123"
+   2. Cache checks memory.
+      -> Found? Return Value (HIT)
+      -> Not Found? Read DB -> Write to Cache -> Return Value (MISS)
+          </div>
+        </div>
+
+        <div class="collapsible"><strong>Eviction Policies</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <table class="comparison-table">
+            <thead><tr><th>Policy</th><th>Concept</th><th>Use Case</th></tr></thead>
+            <tbody>
+              <tr><td><strong>LRU</strong></td><td>Least Recently Used</td><td>Most common. Discards items not used for longest time.</td></tr>
+              <tr><td><strong>LFU</strong></td><td>Least Frequently Used</td><td>Keeps popular items. Good for stable access patterns.</td></tr>
+              <tr><td><strong>FIFO</strong></td><td>First In First Out</td><td>Simple, but not optimal for locality.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 11. Consistent Hashing -->
+      <div class="section">
+        <div class="section-title">11. Consistent Hashing</div>
+        <div class="concept-card">
+          <p><strong>Problem:</strong> In normal hashing (key % N), adding a server (N+1) remaps almost ALL keys. Cache stampede!</p>
+          <p><strong>Solution:</strong> Map both Servers and Keys to a circle (0-360°). Key maps to the next server clockwise.</p>
+          <div class="diagram-box">
+         [S1]
+        /    \
+     [K1]    [K2]
+      |       |
+     [S4]----[S2]
+       \     /
+        [S3]
+        
+   - Add S5 between S1 and S2? Only keys between S1 and S5 move to S5.
+   - S1, S3, S4 unaffected.
+          </div>
+        </div>
+      </div>
+
+      <!-- 12. Database Scaling -->
+      <div class="section">
+        <div class="section-title">12. Database Scaling: Sharding & Replication</div>
+        
+        <div class="collapsible"><strong>Replication (Master-Slave)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div class="diagram-box">
+      [ Writes ] --> [ Master DB ]
+                         |    |
+            (Async Copy) |    | (Async Copy)
+                         v    v
+                    [ Slave ][ Slave ]
+                        ^      ^
+                        |      |
+                   [ Reads ][ Reads ]
+          </div>
+          <p><strong>Trade-off:</strong> Replication Lag (Eventual Consistency).</p>
+        </div>
+
+        <div class="collapsible"><strong>Sharding (Partitioning)</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>Splitting data across multiple machines.</p>
+          <ul>
+            <li><strong>Horizontal:</strong> Range based (A-M on DB1, N-Z on DB2).</li>
+            <li><strong>Key Based:</strong> Hash(ID) % N.</li>
+          </ul>
+          <p><strong>Cons:</strong> No joins across shards. Complex transactions.</p>
+        </div>
+      </div>
+
+      <!-- 13. Message Queues -->
+      <div class="section">
+        <div class="section-title">13. Message Queues (Async Processing)</div>
+        <div class="diagram-box">
+   [ Producer ]  --->  [ Queue (Kafka/RabbitMQ) ]  --->  [ Consumer ]
+   (Web Server)        (Buffer)                          (Worker)
+   
+   1. User uploads video.
+   2. Web Server puts "job" in Queue. Returns "Processing".
+   3. Worker picks job, processes video, updates DB.
+   4. User notified via WebSocket/Polling.
+        </div>
+        <p><strong>Benefits:</strong> Decoupling, Traffic Smoothing (Peak load handling).</p>
+      </div>
+
+      <!-- 14. Reliability Patterns -->
+      <div class="section">
+        <div class="section-title">14. Reliability Patterns</div>
+        
+        <div class="collapsible"><strong>Idempotency</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p><strong>Definition:</strong> Doing an operation multiple times has the same effect as doing it once.</p>
+          <p><strong>Example:</strong> "Pay $10". If retried, user pays $20 (Bad).<br>
+             "Pay $10 with ID=req_123". If retried, server sees ID exists, ignores (Good).</p>
+        </div>
+
+        <div class="collapsible"><strong>Rate Limiting</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div class="diagram-box">
+   Token Bucket Algorithm:
+   
+   [ Bucket (Capacity=10) ]
+       |
+       +-- (Add 1 token every 1 sec)
+       
+   Request comes -> Take 1 token.
+   If bucket empty -> Drop request (429 Too Many Requests).
+          </div>
+        </div>
+      </div>
+
+      <!-- PART 3 HEADER -->
+      <div class="section" style="margin-top: 60px; border-top: 2px solid var(--border-color); padding-top: 40px;">
+        <div class="content-header">
+          <h1>🏗️ Part 3: Advanced Distributed Systems</h1>
+          <p>Advanced Concepts: Handling failures, consistency, and complexity at scale.</p>
+        </div>
+      </div>
+
+      <!-- 15. Microservices -->
+      <div class="section">
+        <div class="section-title">15. Monolith vs Microservices</div>
+        <div class="diagram-box">
+   MONOLITH                     MICROSERVICES
+   [ UI + Auth + Pay + Inv ]    [ UI ] --> [ Auth Svc ]
+           |                                   |
+        [ DB ]                             [ Pay Svc ] --> [ Pay DB ]
+                                               |
+                                           [ Inv Svc ] --> [ Inv DB ]
+   
+   - Simple to deploy           - Independent scaling
+   - Single point of failure    - Complex networking
+   - Shared DB (messy)          - Data isolation
+        </div>
+      </div>
+
+      <!-- 16. Event-Driven -->
+      <div class="section">
+        <div class="section-title">16. Event-Driven Architecture</div>
+        <div class="diagram-box">
+   [ Order Svc ] --(Event: OrderCreated)--> [ Kafka/SNS ]
+                                                 |
+                            +--------------------+--------------------+
+                            |                    |                    |
+                      [ Email Svc ]        [ Inv Svc ]          [ Analytics ]
+                      (Send Conf)          (Reserve Item)       (Update Dash)
+        </div>
+        <div class="concept-card">
+            <strong>Delivery Guarantees:</strong>
+            <ul>
+                <li><strong>At-most-once:</strong> Fire and forget. Message might be lost. (IoT sensors)</li>
+                <li><strong>At-least-once:</strong> Retry until ACK. Message might be duplicated. (Payments - requires Idempotency)</li>
+                <li><strong>Exactly-once:</strong> Hardest. Transactional messaging. (Kafka Streams)</li>
+            </ul>
+        </div>
+      </div>
+
+      <!-- 17. Resiliency -->
+      <div class="section">
+        <div class="section-title">17. Resiliency Patterns</div>
+        
+        <div class="collapsible"><strong>Circuit Breaker</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>Prevents cascading failures when a downstream service is down.</p>
+          <div class="diagram-box">
+   State: CLOSED (Normal)
+      |
+      v (Error Threshold Reached, e.g., 50% fails)
+   State: OPEN (Fail Fast) -> Returns error immediately without calling downstream.
+      |
+      v (Timeout expires)
+   State: HALF-OPEN (Test) -> Allow 1 request.
+      |--> Success? -> CLOSED
+      |--> Fail?    -> OPEN
+          </div>
+        </div>
+
+        <div class="collapsible"><strong>Backpressure</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>If Consumer is slow, Producer should slow down instead of overwhelming Consumer.</p>
+          <p><strong>Mechanisms:</strong> TCP Window, Queue limits, Dropping requests.</p>
+        </div>
+
+        <div class="collapsible"><strong>Retry with Exponential Backoff</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>Don't retry immediately. Wait 1s, then 2s, then 4s, then 8s. Add "Jitter" (randomness) to prevent thundering herd.</p>
+        </div>
+      </div>
+
+      <!-- 18. Distributed Coordination -->
+      <div class="section">
+        <div class="section-title">18. Distributed Coordination</div>
+        
+        <div class="collapsible"><strong>Distributed Locks</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>Ensuring only one process performs an action (e.g., processing a refund).</p>
+          <p><strong>Tools:</strong> Redis (Redlock), Zookeeper, etcd.</p>
+          <div class="diagram-box">
+   [ Svc A ] --(Try Lock: "refund_123", TTL=10s)--> [ Redis ]
+   [ Svc B ] --(Try Lock: "refund_123")--> [ Redis ] -> Fail (Locked)
+          </div>
+        </div>
+
+        <div class="collapsible"><strong>Leader Election</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>Selecting one node as the coordinator (Master) to avoid conflict.</p>
+          <p><strong>Algorithm:</strong> Raft, Paxos (used in Kubernetes, Kafka).</p>
+        </div>
+      </div>
+
+      <!-- 19. Observability -->
+      <div class="section">
+        <div class="section-title">19. Observability</div>
+        <table class="comparison-table">
+          <thead><tr><th>Type</th><th>Purpose</th><th>Tools</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Logs</strong></td><td>"What happened?" (Events)</td><td>ELK Stack, Splunk</td></tr>
+            <tr><td><strong>Metrics</strong></td><td>"Is it healthy?" (Aggregates)</td><td>Prometheus, Grafana</td></tr>
+            <tr><td><strong>Tracing</strong></td><td>"Where is the latency?" (Request flow)</td><td>Jaeger, Zipkin</td></tr>
+          </tbody>
+        </table>
+        <div class="diagram-box">
+   Distributed Tracing:
+   [ Client ] -> [ API Gateway (TraceID: ABC) ] -> [ Auth Svc (SpanID: 1) ]
+                                                -> [ Order Svc (SpanID: 2) ] -> [ DB (SpanID: 3) ]
+   
+   Visualizes the waterfall of time spent in each service.
+        </div>
+      </div>
+
+      <!-- PART 4 HEADER -->
+      <div class="section" style="margin-top: 60px; border-top: 2px solid var(--border-color); padding-top: 40px;">
+        <div class="content-header">
+          <h1>🏗️ Part 4: Real World Case Studies</h1>
+          <p>Applying concepts to design FAANG-scale systems.</p>
+        </div>
+      </div>
+
+      <!-- 20. Design Instagram Feed -->
+      <div class="section">
+        <div class="section-title">20. Design Instagram Feed (Read-Heavy)</div>
+        <div class="concept-card">
+            <p><strong>Core Challenge:</strong> Generating feeds for millions of users with low latency. Handling "Celebrity" accounts (millions of followers).</p>
+        </div>
+        
+        <div class="collapsible"><strong>Feed Generation: Push vs Pull</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <table class="comparison-table">
+            <thead><tr><th>Model</th><th>Mechanism</th><th>Pros/Cons</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Pull (Fan-out on Load)</strong></td><td>When User A loads feed, fetch tweets from all followees, sort, and return.</td><td>+ Simple write<br>- Slow read (high latency)</td></tr>
+              <tr><td><strong>Push (Fan-out on Write)</strong></td><td>When User A posts, push ID to all followers' pre-computed feed lists.</td><td>+ Fast read (O(1))<br>- Slow write (Backlog for celebrities)</td></tr>
+              <tr><td><strong>Hybrid</strong></td><td>Push for normal users. Pull for celebrities (Justin Bieber).</td><td>+ Best of both worlds</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="diagram-box">
+   [ User ] --(Post Image)--> [ Web Server ] --> [ DB (Images/Metadata) ]
+                                     |
+                                     v
+                              [ Fan-out Service ]
+                               /      |      \
+                    (Push to Followers' Cache via Redis)
+                               /      |      \
+                   [ Feed Cache 1 ] [ Feed Cache 2 ] ...
+        </div>
+      </div>
+
+      <!-- 21. Design YouTube -->
+      <div class="section">
+        <div class="section-title">21. Design YouTube (Data-Heavy)</div>
+        <div class="concept-card">
+            <p><strong>Core Challenge:</strong> Storing petabytes of data and streaming efficiently to different devices/bandwidths.</p>
+        </div>
+
+        <div class="collapsible"><strong>High-Level Architecture</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <div class="diagram-box">
+   1. Upload:
+   [ Client ] --> [ Load Balancer ] --> [ Web Server ] --> [ S3/Blob Storage (Raw) ]
+                                              |
+                                              v
+                                       [ Transcoding Service ] (Convert to 360p, 720p, 1080p, HLS/DASH)
+                                              |
+                                              v
+                                       [ S3 (Processed) ] --> [ CDN ]
+
+   2. Stream:
+   [ Client ] --(Request Video)--> [ CDN Edge ] (Closest location)
+          </div>
+        </div>
+        
+        <div class="concept-card">
+            <strong>Key Components:</strong>
+            <ul>
+                <li><strong>Transcoding:</strong> Converting video to different formats/resolutions.</li>
+                <li><strong>CDN:</strong> Caching popular videos at the edge.</li>
+                <li><strong>Adaptive Bitrate Streaming:</strong> Client switches quality based on bandwidth (e.g., Netflix/YouTube player).</li>
+            </ul>
+        </div>
+      </div>
+
+      <!-- 22. Design Uber -->
+      <div class="section">
+        <div class="section-title">22. Design Uber (Location-Based)</div>
+        <div class="concept-card">
+            <p><strong>Core Challenge:</strong> Matching riders with drivers in real-time based on geolocation.</p>
+        </div>
+
+        <div class="collapsible"><strong>QuadTree / Geohashing</strong><span class="collapsible-icon">▼</span></div>
+        <div class="collapsible-content">
+          <p>How to efficiently find "drivers near me"?</p>
+          <p><strong>Naive:</strong> SQL query `SELECT * FROM drivers WHERE distance(user, driver) < 5km`. Too slow.</p>
+          <p><strong>Optimized:</strong> Divide map into grids (QuadTree or Google S2). Drivers belong to a grid cell.</p>
+          <div class="diagram-box">
+   [ Map ]
+   +-------+-------+
+   | A     | B     |
+   |  d1   |   d2  |
+   +-------+-------+
+   | C  u1 | D     |
+   |       |   d3  |
+   +-------+-------+
+   
+   User u1 is in Cell C. Search drivers in C and neighbors (A, B, D).
+          </div>
+        </div>
+      </div>
+      
+      <!-- Link to more -->
+      <div class="section">
+        <div class="section-title">More Case Studies</div>
+        <div class="callout interview-tip">
+            <div class="callout-title">Deep Dives</div>
+            <div class="callout-content">
+                Check out the dedicated <a href="system-design-case-studies.html" style="color: var(--accent-color); font-weight: bold;">Case Studies Page</a> for detailed designs of <strong>TinyURL</strong> and <strong>WhatsApp</strong>.
+            </div>
+        </div>
+      </div>
+
+      <!-- PART 5 HEADER -->
+      <div class="section" style="margin-top: 60px; border-top: 2px solid var(--border-color); padding-top: 40px;">
+        <div class="content-header">
+          <h1>🎓 Part 5: Interview Readiness</h1>
+          <p>How to communicate, think, and pass the interview.</p>
+        </div>
+      </div>
+
+      <!-- 23. The Interview Framework -->
+      <div class="section">
+        <div class="section-title">23. The 45-Minute Framework</div>
+        <div class="concept-card">
+            <ol>
+                <li><strong>Clarify Requirements (5 min):</strong> Functional (What it does) & Non-Functional (Scale/Latency). Ask questions!</li>
+                <li><strong>Back-of-Envelope Estimation (5 min):</strong> QPS, Storage, Bandwidth. Do you need sharding?</li>
+                <li><strong>High-Level Design (10 min):</strong> Draw the big boxes (LB, Web Server, DB, Cache). Connect them.</li>
+                <li><strong>Deep Dive (20 min):</strong> Pick interesting components (e.g., "How does the feed generation work?").</li>
+                <li><strong>Wrap Up (5 min):</strong> Bottlenecks, failure points, future improvements.</li>
+            </ol>
+        </div>
+      </div>
+
+      <!-- 24. Common Mistakes -->
+      <div class="section">
+        <div class="section-title">24. Common Mistakes to Avoid</div>
+        <div class="callout common-mistakes">
+            <div class="callout-title">❌ Red Flags</div>
+            <div class="callout-content">
+                <ul>
+                    <li><strong>Jumping to solution:</strong> Don't start drawing immediately. Gather requirements first.</li>
+                    <li><strong>Silent designing:</strong> Talk through your thought process. "I'm choosing NoSQL here because..."</li>
+                    <li><strong>Over-engineering:</strong> Don't add Kafka/Kubernetes if a simple cron job works.</li>
+                    <li><strong>Ignoring trade-offs:</strong> Every decision has a cost. Mention it. (e.g., "Consistency vs Availability").</li>
+                </ul>
+            </div>
+        </div>
+      </div>
+
+      <!-- QUIZ LINK -->
+      <div class="section" style="margin-top: 60px; text-align: center;">
+        <div style="background: var(--bg-tertiary); padding: 40px; border-radius: 12px; border: 1px solid var(--border-color);">
+          <h2 style="margin-bottom: 15px;">🎓 Ready to Test Your Knowledge?</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 25px;">Check if you've mastered the concepts from this masterclass with our interactive quiz.</p>
+          <a href="system-design-quiz.html" style="background: var(--accent-color); color: white; padding: 12px 30px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: transform 0.2s;">
+            Start System Design Quiz →
+          </a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

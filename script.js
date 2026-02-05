@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeSearch();
   initializeBackToTop();
   addPageNavigation();
+  initializeDailyChallenge();
 });
 
 // ============================================================
@@ -35,6 +36,64 @@ function initializeNavigation() {
       }
     });
   });
+}
+
+// ============================================================
+// DAILY CHALLENGE
+// ============================================================
+
+function initializeDailyChallenge() {
+  const challengeSection = document.getElementById('daily-challenge-section');
+  if (!challengeSection) return;
+
+  const patterns = [
+    'patterns/two-pointers.html',
+    'patterns/sliding-window.html',
+    'patterns/binary-search.html',
+    'patterns/hash-maps.html',
+    'patterns/linked-lists.html',
+    'patterns/stack.html',
+    'patterns/heap.html',
+    'patterns/trees.html',
+    'patterns/tries.html',
+    'patterns/graphs.html',
+    'patterns/backtracking.html',
+    'patterns/dynamic-programming.html',
+    'patterns/greedy.html',
+    'patterns/fast-slow-pointers.html',
+    'patterns/intervals.html',
+    'patterns/prefix-sum.html',
+    'patterns/bit-manipulation.html',
+    'patterns/math-geometry.html',
+    'patterns/sort-search.html'
+  ];
+
+  const today = new Date().toISOString().split('T')[0];
+  let challenge = {};
+  
+  try {
+    challenge = JSON.parse(localStorage.getItem('dailyChallenge') || '{}');
+  } catch (e) {
+    console.warn('LocalStorage error for daily challenge');
+  }
+
+  if (challenge.date !== today) {
+    const randomIndex = Math.floor(Math.random() * patterns.length);
+    challenge = {
+      date: today,
+      pattern: patterns[randomIndex]
+    };
+    localStorage.setItem('dailyChallenge', JSON.stringify(challenge));
+  }
+
+  const patternName = formatPageName(challenge.pattern);
+  const nameEl = document.getElementById('daily-challenge-name');
+  const linkEl = document.getElementById('daily-challenge-link');
+
+  if (nameEl) nameEl.textContent = patternName;
+  if (linkEl) linkEl.href = challenge.pattern;
+  
+  challengeSection.style.display = 'flex';
 }
 
 // ============================================================
@@ -326,7 +385,7 @@ window.getStudyStats = function() {
 
 console.log('📚 Amazon SDE Coding Patterns loaded. Type getStudyStats() to see your progress.');
 
-/* ============================================================
+// ============================================================
 // DASHBOARD & TRACKING LOGIC
 // ============================================================
 
@@ -368,12 +427,35 @@ window.renderDashboard = function() {
     const totalEl = document.getElementById('total-days');
     if(totalEl) totalEl.textContent = totalDays;
     
+    // Patterns Progress Logic
+    const allPatterns = [
+        'patterns/two-pointers.html', 'patterns/sliding-window.html', 'patterns/binary-search.html',
+        'patterns/hash-maps.html', 'patterns/linked-lists.html', 'patterns/stack.html',
+        'patterns/heap.html', 'patterns/trees.html', 'patterns/tries.html',
+        'patterns/graphs.html', 'patterns/backtracking.html', 'patterns/dynamic-programming.html',
+        'patterns/greedy.html', 'patterns/fast-slow-pointers.html', 'patterns/intervals.html',
+        'patterns/prefix-sum.html', 'patterns/bit-manipulation.html', 'patterns/math-geometry.html',
+        'patterns/sort-search.html'
+    ];
+
+    let visitedCount = 0;
+    const visitedPaths = Object.keys(pageViews);
+    
+    allPatterns.forEach(pattern => {
+        const filename = pattern.split('/').pop();
+        if (visitedPaths.some(path => path.endsWith(filename))) {
+            visitedCount++;
+        }
+    });
+
     const patternsEl = document.getElementById('patterns-count');
-    if(patternsEl) {
-        // Count unique patterns visited (files in patterns/ folder)
-        const patterns = Object.keys(pageViews).filter(url => url.includes('patterns/') && url.endsWith('.html'));
-        patternsEl.textContent = patterns.length;
-    }
+    if(patternsEl) patternsEl.textContent = visitedCount;
+
+    const progressText = document.getElementById('progress-text');
+    const progressBar = document.getElementById('total-progress-bar');
+    
+    if (progressText) progressText.textContent = `${visitedCount} / ${allPatterns.length}`;
+    if (progressBar) progressBar.style.width = `${(visitedCount / allPatterns.length) * 100}%`;
     
     // 3. Render Heatmap
     renderHeatmapGrid(history);
@@ -555,8 +637,6 @@ window.editDailyGoal = function() {
         }
     }
 };
-
-*/
 
 // ============================================================
 // NEW SIDEBAR LOGIC
