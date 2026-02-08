@@ -24,34 +24,77 @@ A dark-themed, self-hosted interview preparation website focused on 18 essential
 
 ## 📚 Pattern Coverage
 
-### Fundamental Patterns
-- [Two Pointers](patterns/two-pointers.html) ✅ **FULL**
-- [Sliding Window](patterns/sliding-window.html) ✅ **FULL**
-- [Binary Search](patterns/binary-search.html)
-- [Hash Maps & Sets](patterns/hash-maps.html)
+> **Note:** This roadmap follows the "Mastering DSA Patterns – 2026" structure, covering 8 essential sections from Arrays to Graphs.
 
-### Data Structures
+### 1️⃣ Arrays & Strings
+- [Two Pointers](patterns/two-pointers.html) ✅ **FULL**
+- [Sliding Window](patterns/sliding-window.html) (fixed & variable) ✅ **FULL**
+- [Prefix Sum](patterns/prefix-sum.html)
+- [Sort & Search](patterns/sort-search.html) (Sorting techniques)
+- [Hash Maps & Sets](patterns/hash-maps.html)
+- [Intervals](patterns/intervals.html) (Merge Intervals)
+
+### 2️⃣ Binary Search
+- [Binary Search](patterns/binary-search.html)
+  - Basic Binary Search
+  - Binary Search on Answer
+  - Lower Bound / Upper Bound
+  - Count-based Binary Search
+  - Mountain / Bitonic Array Search
+
+### 3️⃣ Linked Lists
 - [Linked Lists](patterns/linked-lists.html)
+- [Fast & Slow Pointers](patterns/fast-slow-pointers.html)
+  - In-place Reversal
+  - Dummy Node
+  - Recursion tricks
+
+### 4️⃣ Stacks & Queues
 - [Stack](patterns/stack.html)
+  - Monotonic Stack (increasing & decreasing)
+  - Expression Stack
+  - Sliding Window using Deque
+  - Design problems using Stack / Queue
+
+### 5️⃣ Heaps / Priority Queues
 - [Heap (Priority Queue)](patterns/heap.html)
+  - Kth Largest / Smallest
+  - Top K Frequent Elements
+  - Merge K Sorted Lists
+  - Heap Design & Stream problems
+
+### 6️⃣ Trees
 - [Trees](patterns/trees.html)
+  - Tree Traversals (DFS, BFS)
+  - Binary Tree vs Binary Search Tree
+  - Tree Construction
+  - Path Sum patterns
+  - LCA (Lowest Common Ancestor)
 - [Tries](patterns/tries.html)
 
-### Advanced Algorithms
-- [Graphs](patterns/graphs.html)
-- [Backtracking](patterns/backtracking.html)
+### 7️⃣ Dynamic Programming
 - [Dynamic Programming](patterns/dynamic-programming.html)
-- [Greedy](patterns/greedy.html)
+  - Memoization vs Tabulation
+  - 1D DP & Subsequence DP
+  - Knapsack patterns
+  - Interval DP
+  - Counting Ways
 
-### Specialized Topics
-- [Fast & Slow Pointers](patterns/fast-slow-pointers.html)
-- [Intervals](patterns/intervals.html)
-- [Prefix Sum](patterns/prefix-sum.html)
+### 8️⃣ Graphs
+- [Graphs](patterns/graphs.html)
+  - BFS / DFS
+  - Connected Components
+  - Shortest Path (unweighted & weighted)
+  - Cycle Detection
+  - DAG & Topological Sort
+  - Bipartite Graph Check
+  - Union-Find (DSU)
+
+### Additional Modules (Advanced)
+- [Backtracking](patterns/backtracking.html) (N-Queens, Permutations)
+- [Greedy](patterns/greedy.html) (Interval Scheduling)
 - [Bit Manipulation](patterns/bit-manipulation.html)
 - [Math & Geometry](patterns/math-geometry.html)
-
-### Reference
-- [Sort & Search](patterns/sort-search.html)
 
 ---
 
@@ -195,6 +238,23 @@ google-chrome index.html
 - Focus on: Two Pointers, Sliding Window, Binary Search
 - Practice: Linked Lists, Trees, Graphs
 - Polish: Dynamic Programming, Backtracking
+
+---
+
+## 📘 Pattern Structure & Teaching Style
+
+For every pattern in this project, we strictly follow this structure to ensure interview readiness:
+
+### Structure for Each Pattern Page
+1. **Pattern Intuition**: Real-world analogy (e.g., sliding window as a bus window).
+2. **Identification**: How to spot this pattern (keywords like "contiguous", "sorted", "shortest path").
+3. **Visual Explanation**: ASCII diagrams, flowcharts, and mental models.
+4. **Step-by-step Dry Run**: Tracing the algorithm with variables.
+5. **Common Mistakes**: Edge cases and pitfalls.
+6. **Complexity Analysis**: Time & Space.
+7. **Template/Pseudocode**: The skeleton code.
+8. **Classic Problems**: 3-5 problems (Easy to Hard).
+9. **Variations**: Advanced tricks.
 
 ---
 

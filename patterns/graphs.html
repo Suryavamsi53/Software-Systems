@@ -313,10 +313,120 @@ func dfs(node int, graph map[int][]int, visited map[int]bool) {
         </div>
       </div>
 
-      <!-- SECTION 4: ALGORITHMS -->
+      <!-- SECTION 4: MATRIX GRAPHS -->
       <div class="section">
         <div class="section-title">
-          <span class="emoji">⚡</span> 4. Important Graph Algorithms
+          <span class="emoji">▦</span> 4. Matrix Graphs (Grid Problems)
+        </div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Implicit Graphs</div>
+          <div class="callout-content">
+            <p>A 2D matrix is a graph where:</p>
+            <ul>
+              <li><strong>Nodes:</strong> Cells <code>(r, c)</code></li>
+              <li><strong>Edges:</strong> Connections to adjacent cells (Up, Down, Left, Right)</li>
+            </ul>
+            <p><strong>Common Pattern:</strong> Use a <code>directions</code> array to navigate neighbors.</p>
+          </div>
+        </div>
+
+        <div class="collapsible">
+          <strong>1. Number of Islands (DFS/BFS)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>Problem:</strong> Count connected components of '1's (land).</p>
+          <p style="color: var(--text-secondary);"><strong>Approach:</strong> Iterate through matrix. When '1' is found, increment count and trigger DFS/BFS to mark all connected '1's as '0' (visited).</p>
+          
+          <div class="code-block"><pre>
+func numIslands(grid [][]byte) int {
+    if len(grid) == 0 { return 0 }
+    rows, cols := len(grid), len(grid[0])
+    count := 0
+    
+    var dfs func(r, c int)
+    dfs = func(r, c int) {
+        // Boundary check and visited check
+        if r < 0 || c < 0 || r >= rows || c >= cols || grid[r][c] == '0' {
+            return
+        }
+        grid[r][c] = '0' // Mark visited
+        
+        // Visit neighbors
+        dfs(r+1, c)
+        dfs(r-1, c)
+        dfs(r, c+1)
+        dfs(r, c-1)
+    }
+    
+    for r := 0; r < rows; r++ {
+        for c := 0; c < cols; c++ {
+            if grid[r][c] == '1' {
+                count++
+                dfs(r, c)
+            }
+        }
+    }
+    return count
+}</pre></div>
+        </div>
+
+        <div class="collapsible">
+          <strong>2. Rotting Oranges (Multi-Source BFS)</strong>
+          <span class="collapsible-icon">▼</span>
+        </div>
+        <div class="collapsible-content">
+          <p style="color: var(--text-secondary);"><strong>Problem:</strong> Min minutes until all fresh oranges rot. Rotten oranges affect neighbors every minute.</p>
+          <p style="color: var(--text-secondary);"><strong>Approach:</strong> Use BFS. Add all initially rotten oranges to Queue (Level 0). Process level by level.</p>
+          
+          <div class="code-block"><pre>
+func orangesRotting(grid [][]int) int {
+    rows, cols := len(grid), len(grid[0])
+    queue := [][2]int{}
+    fresh := 0
+    
+    // Init queue with all rotten oranges
+    for r := 0; r < rows; r++ {
+        for c := 0; c < cols; c++ {
+            if grid[r][c] == 2 {
+                queue = append(queue, [2]int{r, c})
+            } else if grid[r][c] == 1 {
+                fresh++
+            }
+        }
+    }
+    
+    minutes := 0
+    dirs := [][2]int{{0,1}, {0,-1}, {1,0}, {-1,0}}
+    
+    for len(queue) > 0 && fresh > 0 {
+        minutes++
+        size := len(queue)
+        for i := 0; i < size; i++ {
+            curr := queue[0]
+            queue = queue[1:]
+            
+            for _, d := range dirs {
+                nr, nc := curr[0]+d[0], curr[1]+d[1]
+                if nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] == 1 {
+                    grid[nr][nc] = 2 // Rot it
+                    fresh--
+                    queue = append(queue, [2]int{nr, nc})
+                }
+            }
+        }
+    }
+    
+    if fresh > 0 { return -1 }
+    return minutes
+}</pre></div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: ALGORITHMS -->
+      <div class="section">
+        <div class="section-title">
+          <span class="emoji">⚡</span> 5. Important Graph Algorithms
         </div>
 
         <!-- TOPOLOGICAL SORT -->
@@ -455,10 +565,10 @@ func (uf *UnionFind) Union(x, y int) bool {
         </div>
       </div>
 
-      <!-- SECTION 5: ADVANCED -->
+      <!-- SECTION 6: ADVANCED -->
       <div class="section">
         <div class="section-title">
-          <span class="emoji">🎓</span> 5. Advanced Topics (SDE-2+)
+          <span class="emoji">🎓</span> 6. Advanced Topics (SDE-2+)
         </div>
         <div class="callout" style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px;">
           <ul style="margin-left: 20px; color: var(--text-secondary);">
@@ -471,10 +581,10 @@ func (uf *UnionFind) Union(x, y int) bool {
         </div>
       </div>
 
-      <!-- SECTION 6: REAL WORLD -->
+      <!-- SECTION 7: REAL WORLD -->
       <div class="section">
         <div class="section-title">
-          <span class="emoji">🌍</span> 6. Real-World Mapping
+          <span class="emoji">🌍</span> 7. Real-World Mapping
         </div>
         <table class="complexity-table">
           <thead><tr><th>System</th><th>Graph Representation</th><th>Algorithm</th></tr></thead>
@@ -488,10 +598,10 @@ func (uf *UnionFind) Union(x, y int) bool {
         </table>
       </div>
 
-      <!-- SECTION 7: PATTERNS -->
+      <!-- SECTION 8: PATTERNS -->
       <div class="section">
         <div class="section-title">
-          <span class="emoji">🧠</span> 7. Interview Decision Table
+          <span class="emoji">🧠</span> 8. Interview Decision Table
         </div>
         <div class="callout interview-tip">
           <div class="callout-title">Which Algorithm to Choose?</div>
@@ -509,10 +619,10 @@ func (uf *UnionFind) Union(x, y int) bool {
         </div>
       </div>
 
-      <!-- SECTION 8: SUMMARY -->
+      <!-- SECTION 9: SUMMARY -->
       <div class="section">
         <div class="section-title">
-          <span class="emoji">✅</span> 8. Final Summary
+          <span class="emoji">✅</span> 9. Final Summary
         </div>
         <div class="callout amazon-expects">
           <div class="callout-title">Before the Interview</div>
