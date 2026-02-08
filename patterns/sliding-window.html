@@ -1,415 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sliding Window Visualization - Software Systems Prep</title>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --panel: #1e293b;
-            --primary: #38bdf8;
-            --active: #facc15;   /* Yellow for window */
-            --remove: #ef4444;   /* Red for removing */
-            --add: #22c55e;      /* Green for adding */
-            --text: #e5e7eb;
-            --text-muted: #94a3b8;
-            --border: rgba(255,255,255,0.1);
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: system-ui, -apple-system, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h1 { margin: 0 0 10px 0; }
-        .subtitle { color: var(--text-muted); }
-
-        /* Visualization Area */
-        .viz-container {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            height: 250px;
-            position: relative;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .array-container {
-            display: flex;
-            gap: 10px;
-            position: relative;
-        }
-
-        .cell {
-            width: 60px;
-            height: 60px;
-            background-color: var(--bg);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 1.2rem;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-
-        .cell-index {
-            position: absolute;
-            bottom: -25px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        /* Window Overlay */
-        .window-overlay {
-            position: absolute;
-            height: 64px;
-            border: 3px solid var(--active);
-            border-radius: 12px;
-            pointer-events: none;
-            transition: all 0.5s ease;
-            box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
-        }
-
-        .cell.in-window {
-            background-color: rgba(250, 204, 21, 0.1);
-            border-color: var(--active);
-        }
-
-        .cell.adding {
-            background-color: rgba(34, 197, 94, 0.2);
-            border-color: var(--add);
-        }
-
-        .cell.removing {
-            background-color: rgba(239, 68, 68, 0.2);
-            border-color: var(--remove);
-        }
-
-        /* Info Panel */
-        .info-panel {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        .stat-box {
-            background-color: rgba(0,0,0,0.2);
-            padding: 15px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .stat-label { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 5px; }
-        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-
-        .step-text {
-            grid-column: 1 / -1;
-            text-align: center;
-            font-size: 1.1rem;
-            min-height: 3em;
-            margin-top: 10px;
-        }
-
-        /* Controls */
-        .controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        button {
-            background-color: var(--panel);
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-
-        button:hover { background-color: rgba(255,255,255,0.05); border-color: var(--primary); }
-        button.primary { background-color: var(--primary); color: var(--bg); border: none; }
-        button.primary:hover { opacity: 0.9; }
-
-    </style>
-    <link rel="stylesheet" href="../styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sliding Window Pattern - Software Systems Interview</title>
+  <link rel="stylesheet" href="../styles.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Sliding Window Visualization</h1>
-            <div class="subtitle">Problem: Find Max Sum Subarray of Size K=3</div>
-        </header>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Software Systems</h1>
+        <p>Coding Interview Prep</p>
+      </div>
 
-        <!-- Link to Code Visualizer -->
-        <div style="background-color: var(--panel); padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-            <div>
-                <strong style="color: var(--text); font-size: 1.1rem;">🚀 Interactive Code Visualizer</strong>
-                <p style="margin-top: 5px; color: var(--text-muted); margin-bottom: 0;">Watch the algorithm with code tracking (Min Subarray Len).</p>
-            </div>
-            <a href="sliding-window-visualizer.html" style="background-color: var(--primary); color: var(--bg); padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Learning Resources</div>
+        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+        <a href="../cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+        <a href="../system-design.html" class="nav-item">System Design Basics</a>
+        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+        <a href="../go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+        <a href="../golang-guide.html" class="nav-item">Go Language Guide</a>
+        <a href="../mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        <a href="../dashboard.html" class="nav-item">📊 My Dashboard</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Fundamental Patterns</div>
+        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
+        <a href="sliding-window.html" class="nav-item active" data-pattern="sliding-window">Sliding Window</a>
+        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
+        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Data Structures</div>
+        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
+        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
+        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
+        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
+        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Algorithms</div>
+        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
+        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
+        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
+        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Specialized Topics</div>
+        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
+        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
+        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
+        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
+        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Reference</div>
+        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back to Home</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Sliding Window Pattern</h1>
+        <p>Master contiguous subarray and substring problems</p>
+      </div>
+
+      <!-- HOW TO SPOT THIS PATTERN -->
+      <div class="section" id="spot-pattern" style="background-color: var(--bg-tertiary); padding: 25px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #3b82f6;">
+        <div class="section-title">
+          <span class="emoji">🔍</span> How to Spot This Pattern: The 3-Prong Detection System
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin: 20px 0;">
+          <div style="background-color: rgba(59, 130, 246, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <strong style="color: #3b82f6; display: block; margin-bottom: 10px;">📊 INPUT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Array or String</li>
+              <li>Sequential data</li>
+              <li>Need contiguous part</li>
+              <li>Stream of data</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(16, 185, 129, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <strong style="color: #10b981; display: block; margin-bottom: 10px;">❓ QUESTION SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>Longest/Shortest substring</li>
+              <li>Max sum subarray of size K</li>
+              <li>String anagrams</li>
+              <li>Contains permutation</li>
+            </ul>
+          </div>
+          
+          <div style="background-color: rgba(245, 158, 11, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <strong style="color: #f59e0b; display: block; margin-bottom: 10px;">⚡ CONSTRAINT SIGNAL</strong>
+            <ul style="margin: 0; padding-left: 20px; font-size: 0.9rem; color: var(--text-secondary);">
+              <li>O(n) time complexity</li>
+              <li>O(1) or O(k) space</li>
+              <li>Avoid re-calculating overlap</li>
+              <li>Single pass preferred</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Amazon Expects -->
+      <div class="section">
+        <div class="section-title">✅ 1. What Software Systems EXPECTS</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Interviewer's Checklist</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Window Type:</strong> Can you identify if it's a Fixed Size or Dynamic Size window?</li>
+              <li><strong>Optimization:</strong> Do you avoid re-calculating the sum/count for the overlapping part?</li>
+              <li><strong>Data Structure:</strong> Do you use a Hash Map or Set correctly to track window state?</li>
+              <li><strong>Complexity:</strong> Can you explain why the solution is O(n) even with nested loops (amortized)?</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Core Concept -->
+      <div class="section">
+        <div class="section-title">🧠 2. Core Concept Theory</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">Don't Re-calculate</div>
+          <div class="callout-content">
+            <p>The Sliding Window pattern is used to perform a required operation on a specific window size of a given array or string. Instead of re-calculating the entire window, we slide it by one element: <strong>Subtract the element leaving</strong> and <strong>Add the element entering</strong>.</p>
+            <p><strong>Types:</strong></p>
+            <ul>
+              <li><strong>Fixed Window:</strong> Window size <code>k</code> is constant. (e.g., Max sum of 3 elements).</li>
+              <li><strong>Dynamic Window:</strong> Window grows/shrinks based on constraints. (e.g., Smallest subarray with sum >= S).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Real-World Scenario -->
+      <div class="section">
+        <div class="section-title">🎯 3. Real-World Software Systems Scenario</div>
+        <div class="callout interview-tip">
+          <div class="callout-title">Rate Limiting & Monitoring</div>
+          <div class="callout-content">
+            <p><strong>Scenario:</strong> Software Systems API Gateway needs to limit users to 100 requests per minute. Or, CloudWatch needs to calculate the average CPU usage over the last 5 minutes.</p>
+            <p><strong>Solution:</strong> A sliding window of timestamps allows us to count requests in the current time frame efficiently, dropping old requests as time moves forward.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Visual Explanation -->
+      <div class="section">
+        <div class="section-title">🖼️ 4. Visual Explanation</div>
+        
+        <!-- Interactive Visualizer Link -->
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive Sliding Window Visualizer</strong>
+            <p style="margin-top: 5px; color: var(--text-secondary);">Watch the window slide and calculate sums step-by-step.</p>
+          </div>
+          <a href="sliding-window-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
         </div>
 
-        <div class="viz-container">
-            <div class="array-container" id="array-container">
-                <!-- Cells injected here -->
-                <div class="window-overlay" id="window-overlay"></div>
-            </div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+          <div style="margin-bottom: 15px;">
+            <strong style="color: var(--text-primary);">Dynamic Window (Longest Substring)</strong>
+            <p style="margin-top: 8px; color: var(--text-secondary);">Expand <code>right</code> to include new characters. If a duplicate is found, shrink <code>left</code> until valid.</p>
+          </div>
+          <div style="background-color: white; padding: 15px; border-radius: 8px;">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 900 400'%3E%3Crect width='900' height='400' fill='%23f8fafc'/%3E%3Ctext x='450' y='30' font-family='sans-serif' font-size='20' font-weight='bold' text-anchor='middle' fill='%23334155'%3EDynamic Sliding Window: Longest Substring %22abcabcbb%22%3C/text%3E%3C!-- String --%3E%3Cg transform='translate(50, 80)'%3E%3Crect x='0' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='30' y='35' text-anchor='middle' font-weight='bold'%3Ea%3C/text%3E%3Crect x='70' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='100' y='35' text-anchor='middle' font-weight='bold'%3Eb%3C/text%3E%3Crect x='140' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='170' y='35' text-anchor='middle' font-weight='bold'%3Ec%3C/text%3E%3Crect x='210' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='240' y='35' text-anchor='middle' font-weight='bold'%3Ea%3C/text%3E%3Crect x='280' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='310' y='35' text-anchor='middle' font-weight='bold'%3Eb%3C/text%3E%3Crect x='350' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='380' y='35' text-anchor='middle' font-weight='bold'%3Ec%3C/text%3E%3Crect x='420' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='450' y='35' text-anchor='middle' font-weight='bold'%3Eb%3C/text%3E%3Crect x='490' y='0' width='60' height='60' fill='%23e2e8f0' stroke='%2394a3b8'/%3E%3Ctext x='520' y='35' text-anchor='middle' font-weight='bold'%3Eb%3C/text%3E%3C/g%3E%3C!-- Step 1 --%3E%3Cg transform='translate(50, 180)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EStep 1: Expand Right%3C/text%3E%3Crect x='0' y='20' width='200' height='60' fill='%23dbeafe' stroke='%233b82f6' stroke-width='3' rx='5'/%3E%3Ctext x='100' y='55' text-anchor='middle' fill='%231e3a8a'%3EWindow: [a, b, c]%3C/text%3E%3Ctext x='220' y='55' fill='%2310b981'%3EValid (Len 3)%3C/text%3E%3C/g%3E%3C!-- Step 2 --%3E%3Cg transform='translate(50, 260)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EStep 2: Hit Duplicate 'a'%3C/text%3E%3Crect x='0' y='20' width='270' height='60' fill='%23fee2e2' stroke='%23ef4444' stroke-width='3' rx='5'/%3E%3Ctext x='135' y='55' text-anchor='middle' fill='%23991b1b'%3EWindow: [a, b, c, a]%3C/text%3E%3Ctext x='290' y='55' fill='%23ef4444'%3EInvalid! Duplicate 'a'%3C/text%3E%3C/g%3E%3C!-- Step 3 --%3E%3Cg transform='translate(450, 180)'%3E%3Ctext x='0' y='0' font-weight='bold' fill='%23333'%3EStep 3: Shrink Left%3C/text%3E%3Crect x='70' y='20' width='200' height='60' fill='%23dbeafe' stroke='%233b82f6' stroke-width='3' rx='5'/%3E%3Ctext x='170' y='55' text-anchor='middle' fill='%231e3a8a'%3EWindow: [b, c, a]%3C/text%3E%3Ctext x='290' y='55' fill='%2310b981'%3EValid (Len 3)%3C/text%3E%3Cpath d='M30,50 L60,50' stroke='%2364748b' stroke-width='2' marker-end='url(%23arrow)'/%3E%3Ctext x='45' y='40' font-size='12' text-anchor='middle'%3ERemove 'a'%3C/text%3E%3C/g%3E%3Cdefs%3E%3Cmarker id='arrow' markerWidth='10' markerHeight='10' refX='9' refY='3' orient='auto' markerUnits='strokeWidth'%3E%3Cpath d='M0,0 L0,6 L9,3 z' fill='%2364748b'/%3E%3C/marker%3E%3C/defs%3E%3C/svg%3E" style="width: 100%; max-width: 800px; margin: 0 auto; display: block;" alt="Dynamic Sliding Window Visualization"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Canonical Problem -->
+      <div class="section">
+        <div class="section-title">🧩 5. Canonical Software Systems Problem</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Longest Substring Without Repeating Characters (LeetCode 3)</div>
+          <div class="callout-content">
+            <p><strong>Problem:</strong> Given a string <code>s</code>, find the length of the longest substring without repeating characters.</p>
+            <p><strong>Input:</strong> s = "abcabcbb"<br>
+            <strong>Output:</strong> 3 (The answer is "abc", with the length of 3.)</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. Brute Force -->
+      <div class="section">
+        <div class="section-title">🔴 6. Brute Force Analysis</div>
+        <div class="callout common-mistakes">
+          <div class="callout-title">Check All Substrings</div>
+          <div class="callout-content">
+            <p>Generate all possible substrings and check if they have unique characters.</p>
+            <p><strong>Time Complexity:</strong> O(N³) - O(N²) substrings * O(N) to check uniqueness.</p>
+            <p><strong>Why Software Systems Rejects:</strong> Extremely inefficient for long strings.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. Optimized Solution -->
+      <div class="section">
+        <div class="section-title">🟢 7. Optimized Solution</div>
+        
+        <div class="code-tabs">
+            <button class="tab-btn active" onclick="switchTab('go')">Go</button>
+            <button class="tab-btn" onclick="switchTab('java')">Java</button>
+            <button class="tab-btn" onclick="switchTab('python')">Python</button>
         </div>
 
-        <div class="info-panel">
-            <div class="stat-box">
-                <div class="stat-label">Current Window Sum</div>
-                <div class="stat-value" id="current-sum">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Max Sum So Far</div>
-                <div class="stat-value" id="max-sum">0</div>
-            </div>
-            <div class="step-text" id="step-text">Ready to start...</div>
-        </div>
+        <div class="code-container">
+            <!-- GO CODE -->
+            <div id="go" class="lang-content active">
+                <div class="code-block"><pre>
+func lengthOfLongestSubstring(s string) int {
+    charIndex := make(map[byte]int)
+    left := 0
+    maxLength := 0
 
-        <div class="controls">
-            <button onclick="reset()">Reset</button>
-            <button onclick="stepBackward()">Previous</button>
-            <button class="primary" id="playBtn" onclick="togglePlay()">Play</button>
-            <button onclick="stepForward()">Next</button>
-        </div>
-    </div>
-
-    <script>
-        // Configuration
-        const ARRAY = [2, 1, 5, 1, 3, 2, 9, 7];
-        const K = 3;
-        const CELL_WIDTH = 60;
-        const CELL_GAP = 10;
-        const ANIMATION_SPEED = 1000;
-
-        // State
-        let steps = [];
-        let currentStep = 0;
-        let isPlaying = false;
-        let intervalId = null;
-
-        // DOM Elements
-        const arrayContainer = document.getElementById('array-container');
-        const windowOverlay = document.getElementById('window-overlay');
-        const currentSumEl = document.getElementById('current-sum');
-        const maxSumEl = document.getElementById('max-sum');
-        const stepText = document.getElementById('step-text');
-        const playBtn = document.getElementById('playBtn');
-
-        function init() {
-            renderArray();
-            generateSteps();
-            updateView(0);
+    for right := 0; right < len(s); right++ {
+        char := s[right]
+        
+        // If char is in map and is inside the current window
+        if idx, ok := charIndex[char]; ok && idx >= left {
+            // Move left pointer to skip the duplicate
+            left = idx + 1
         }
+        
+        // Update the last seen index of the character
+        charIndex[char] = right
+        
+        // Calculate current window length
+        currentLength := right - left + 1
+        if currentLength > maxLength {
+            maxLength = currentLength
+        }
+    }
+    
+    return maxLength
+}
+</pre></div>
+            </div>
 
-        function renderArray() {
-            let html = '';
-            ARRAY.forEach((val, idx) => {
-                html += `
-                    <div class="cell" id="cell-${idx}">
-                        ${val}
-                        <span class="cell-index">${idx}</span>
-                    </div>
-                `;
-            });
-            // Keep overlay inside
-            html += '<div class="window-overlay" id="window-overlay"></div>';
-            arrayContainer.innerHTML = html;
+            <!-- JAVA CODE -->
+            <div id="java" class="lang-content">
+                <div class="code-block"><pre>
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character, Integer> map = new HashMap<>();
+        int left = 0;
+        int maxLength = 0;
+        
+        for (int right = 0; right < s.length(); right++) {
+            char c = s.charAt(right);
             
-            // Re-select overlay after innerHTML rewrite
-            const overlay = document.getElementById('window-overlay');
-            overlay.style.width = `${(CELL_WIDTH * K) + (CELL_GAP * (K-1))}px`;
-            overlay.style.left = '-10px'; // Initial offset
-            overlay.style.top = '-2px';
-            overlay.style.opacity = '0';
+            if (map.containsKey(c)) {
+                // Move left pointer to max of current left or duplicate's next index
+                left = Math.max(left, map.get(c) + 1);
+            }
+            
+            map.put(c, right);
+            maxLength = Math.max(maxLength, right - left + 1);
         }
+        
+        return maxLength;
+    }
+}
+</pre></div>
+            </div>
 
-        function generateSteps() {
-            steps = [];
-            let windowSum = 0;
-            let maxSum = 0;
+            <!-- PYTHON CODE -->
+            <div id="python" class="lang-content">
+                <div class="code-block"><pre>
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        char_index = {}
+        left = 0
+        max_length = 0
+        
+        for right, char in enumerate(s):
+            if char in char_index and char_index[char] >= left:
+                left = char_index[char] + 1
+            
+            char_index[char] = right
+            max_length = max(max_length, right - left + 1)
+            
+        return max_length
+</pre></div>
+            </div>
+        </div>
+      </div>
 
-            // Step 0: Initial
-            steps.push({
-                windowStart: 0,
-                windowEnd: -1,
-                sum: 0,
-                max: 0,
-                msg: "Start with an empty window.",
-                action: 'init'
-            });
+      <!-- 8. Walkthrough -->
+      <div class="section">
+        <div class="section-title">🧩 8. Logical Walkthrough</div>
+        <p>Trace for <code>s = "abcabcbb"</code></p>
+        <div class="diagram">
+Init: left=0, max=0, map={}
 
-            // Build first window
-            for (let i = 0; i < K; i++) {
-                windowSum += ARRAY[i];
-                steps.push({
-                    windowStart: 0,
-                    windowEnd: i,
-                    sum: windowSum,
-                    max: 0, // Max not set until window full
-                    msg: `Expand window: Add ${ARRAY[i]} (Index ${i})`,
-                    action: 'expand',
-                    targetIdx: i
-                });
-            }
+r=0 ('a'): map={'a':0}, len=1, max=1
+r=1 ('b'): map={'a':0, 'b':1}, len=2, max=2
+r=2 ('c'): map={'a':0, 'b':1, 'c':2}, len=3, max=3
+r=3 ('a'): Duplicate! 'a' is at 0.
+           left = map['a'] + 1 = 1.
+           map={'a':3, ...}, len=3-1+1=3, max=3
+r=4 ('b'): Duplicate! 'b' is at 1.
+           left = map['b'] + 1 = 2.
+           map={'b':4, ...}, len=4-2+1=3, max=3
+...
+        </div>
+      </div>
 
-            maxSum = windowSum;
-            steps.push({
-                windowStart: 0,
-                windowEnd: K-1,
-                sum: windowSum,
-                max: maxSum,
-                msg: `Window size ${K} reached. Initial Max Sum = ${maxSum}`,
-                action: 'check'
-            });
+      <!-- 9. Complexity -->
+      <div class="section">
+        <div class="section-title">⚙️ 9. Complexity Analysis</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">Time & Space</div>
+          <div class="callout-content">
+            <p><strong>Time Complexity: O(N)</strong></p>
+            <p>We traverse the string once. Each character is added and removed from the window at most once.</p>
+            <p><strong>Space Complexity: O(min(N, M))</strong></p>
+            <p>Where M is the size of the charset (e.g., 26 for lowercase English, 128 for ASCII). We store the last index of each character.</p>
+          </div>
+        </div>
+      </div>
 
-            // Slide window
-            for (let i = K; i < ARRAY.length; i++) {
-                let leaving = ARRAY[i-K];
-                let entering = ARRAY[i];
-                
-                windowSum = windowSum - leaving + entering;
-                maxSum = Math.max(maxSum, windowSum);
+      <!-- 10. Follow-ups -->
+      <div class="section">
+        <div class="section-title">🟣 10. Software Systems Follow-up Questions</div>
+        <div class="callout advanced-followup">
+          <div class="callout-title">Variations</div>
+          <div class="callout-content">
+            <p><strong>Q: What if we want the longest substring with at most K distinct characters?</strong><br>
+            A: Use a map to count frequencies. When map size > K, shrink left until map size <= K.</p>
+            <p><strong>Q: What if the input is a stream?</strong><br>
+            A: We can't keep the whole string. We might need to store only the current window in a buffer.</p>
+          </div>
+        </div>
+      </div>
 
-                steps.push({
-                    windowStart: i-K+1,
-                    windowEnd: i,
-                    sum: windowSum,
-                    max: maxSum,
-                    msg: `Slide: Remove ${leaving}, Add ${entering}. New Sum = ${windowSum}`,
-                    action: 'slide',
-                    addIdx: i,
-                    removeIdx: i-K
-                });
-            }
+      <!-- LEETCODE PRACTICE QUESTIONS -->
+      <div class="section" id="leetcode-practice" style="margin-top: 40px;">
+        <div class="section-title">
+          <span class="emoji">🎯</span> LeetCode Practice Questions
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 20px;">
+          <!-- EASY -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-weight: bold; color: #10b981; margin-bottom: 15px;">🟢 EASY</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#643</strong> - Maximum Average Subarray I</li>
+              <li style="margin-bottom: 12px;"><strong>#1876</strong> - Substrings of Size Three with Distinct Characters</li>
+            </ul>
+          </div>
+          
+          <!-- MEDIUM -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b;">
+            <div style="font-weight: bold; color: #f59e0b; margin-bottom: 15px;">🟡 MEDIUM</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#3</strong> - Longest Substring Without Repeating Characters (Amazon!)</li>
+              <li style="margin-bottom: 12px;"><strong>#209</strong> - Minimum Size Subarray Sum</li>
+              <li style="margin-bottom: 12px;"><strong>#424</strong> - Longest Repeating Character Replacement</li>
+              <li style="margin-bottom: 12px;"><strong>#567</strong> - Permutation in String</li>
+            </ul>
+          </div>
+          
+          <!-- HARD -->
+          <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-weight: bold; color: #ef4444; margin-bottom: 15px;">🔴 HARD</div>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+              <li style="margin-bottom: 12px;"><strong>#76</strong> - Minimum Window Substring</li>
+              <li style="margin-bottom: 12px;"><strong>#30</strong> - Substring with Concatenation of All Words</li>
+              <li style="margin-bottom: 12px;"><strong>#239</strong> - Sliding Window Maximum</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
-            steps.push({
-                windowStart: ARRAY.length - K,
-                windowEnd: ARRAY.length - 1,
-                sum: windowSum,
-                max: maxSum,
-                msg: `Finished! Maximum Sum is ${maxSum}`,
-                action: 'done'
-            });
-        }
-
-        function updateView(stepIndex) {
-            const state = steps[stepIndex];
-            const overlay = document.getElementById('window-overlay');
-
-            // Reset styles
-            document.querySelectorAll('.cell').forEach(c => {
-                c.className = 'cell';
-            });
-
-            // Update Overlay Position
-            if (state.windowEnd >= 0) {
-                overlay.style.opacity = '1';
-                const leftPos = state.windowStart * (CELL_WIDTH + CELL_GAP);
-                overlay.style.transform = `translateX(${leftPos}px)`;
-            } else {
-                overlay.style.opacity = '0';
-            }
-
-            // Highlight cells in window
-            for (let i = state.windowStart; i <= state.windowEnd; i++) {
-                if (i >= 0) document.getElementById(`cell-${i}`)?.classList.add('in-window');
-            }
-
-            // Action specific highlights
-            if (state.action === 'expand') {
-                document.getElementById(`cell-${state.targetIdx}`)?.classList.add('adding');
-            } else if (state.action === 'slide') {
-                document.getElementById(`cell-${state.addIdx}`)?.classList.add('adding');
-                // The removed cell is technically outside the new window start, but we can flash it red if we want
-                // But since we moved the window, the previous start is now outside.
-                // Let's just highlight the new addition for clarity.
-            }
-
-            // Update Stats
-            currentSumEl.textContent = state.sum;
-            maxSumEl.textContent = state.max;
-            stepText.textContent = state.msg;
-        }
-
-        // Controls
-        function togglePlay() {
-            if (isPlaying) {
-                clearInterval(intervalId);
-                isPlaying = false;
-                playBtn.textContent = "Play";
-            } else {
-                if (currentStep >= steps.length - 1) currentStep = 0;
-                isPlaying = true;
-                playBtn.textContent = "Pause";
-                intervalId = setInterval(() => {
-                    if (currentStep < steps.length - 1) {
-                        currentStep++;
-                        updateView(currentStep);
-                    } else {
-                        togglePlay();
-                    }
-                }, ANIMATION_SPEED);
-            }
-        }
-
-        function stepForward() {
-            if (currentStep < steps.length - 1) {
-                currentStep++;
-                updateView(currentStep);
-            }
-        }
-
-        function stepBackward() {
-            if (currentStep > 0) {
-                currentStep--;
-                updateView(currentStep);
-            }
-        }
-
-        function reset() {
-            if (isPlaying) togglePlay();
-            currentStep = 0;
-            updateView(0);
-        }
-
-        init();
-    </script>
-    <script src="../script.js"></script>
+    </main>
+  </div>
+  <script src="../script.js"></script>
 </body>
 </html>

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topological Sort Visualizer - SDE Prep</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="graph-visualizer.css">
+    <style>
+        /* Specific overrides for Topo Sort */
+        .node { fill: var(--bg-tertiary); stroke: var(--text-secondary); stroke-width: 2px; transition: all 0.5s ease; }
+        .node.active { stroke: var(--accent-color); stroke-width: 3px; fill: rgba(250, 204, 21, 0.1); }
+        .node.visited { stroke: #22c55e; stroke-width: 3px; fill: rgba(34, 197, 94, 0.1); }
+        .node.processing { stroke: #3b82f6; stroke-width: 3px; fill: rgba(59, 130, 246, 0.1); }
+        
+        .node-text { fill: var(--text-primary); font-weight: bold; font-family: monospace; font-size: 14px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+        .edge { stroke: var(--text-muted); stroke-width: 2px; marker-end: url(#arrow); transition: all 0.5s ease; }
+        .edge.active { stroke: var(--accent-color); stroke-width: 3px; marker-end: url(#arrow-active); }
+        
+        .indegree-badge {
+            font-size: 10px;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+        .indegree-bg {
+            fill: #ef4444;
+            r: 8px;
+        }
+
+        /* Queue Visualization */
+        .queue-container {
+            display: flex;
+            gap: 5px;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            min-height: 50px;
+            align-items: center;
+            overflow-x: auto;
+        }
+        .queue-item {
+            width: 30px;
+            height: 30px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+        /* Result List */
+        .result-list {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .result-item {
+            padding: 5px 10px;
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid #22c55e;
+            border-radius: 4px;
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        /* Code Panel Styles */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+            min-height: 500px;
+        }
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .code-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 350px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-left: 3px solid #facc15;
+            color: #facc15;
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Software Systems</h1>
+                <p>Topological Sort</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+                <a href="graphs.html" class="nav-item">← Graphs Pattern</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Controls</div>
+                <div class="control-group">
+                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
+                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn" onclick="generateGraph()">🎲 New Graph</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Kahn's Algorithm (BFS based).</div>
+                </div>
+                
+                <div class="split-view">
+                    <!-- Left: Visualization -->
+                    <div class="canvas-section">
+                        <div style="flex: 1; position: relative;">
+                            <svg id="graph-svg" width="100%" height="100%">
+                                <defs>
+                                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                                        <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                                    </marker>
+                                    <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                                        <path d="M0,0 L0,6 L9,3 z" fill="#facc15" />
+                                    </marker>
+                                </defs>
+                            </svg>
+                        </div>
+                        <div style="padding: 15px; border-top: 1px solid var(--border-color); background: var(--bg-tertiary);">
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Queue (Nodes with In-Degree 0)</div>
+                            <div id="queue-container" class="queue-container"></div>
+                            <div style="font-size: 0.8rem; color: var(--text-muted); margin: 10px 0 5px;">Sorted Order</div>
+                            <div id="result-list" class="result-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div id="code-display" class="algo-code"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const NUM_NODES = 6;
+        let nodes = [];
+        let edges = [];
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        let currentLang = 'go';
+        const ANIMATION_SPEED = 1000;
+
+        const svg = document.getElementById('graph-svg');
+        const statusText = document.getElementById('status-text');
+        const queueContainer = document.getElementById('queue-container');
+        const resultList = document.getElementById('result-list');
+        const playBtn = document.getElementById('playBtn');
+
+        const CODES = {
+            kahn: {
+                go: `func topologicalSort(n int, edges [][]int) []int {
+    inDegree := make([]int, n)
+    graph := make(map[int][]int)
+    for _, e := range edges {
+        graph[e[0]] = append(graph[e[0]], e[1])
+        inDegree[e[1]]++
+    }
+
+    queue := []int{}
+    for i := 0; i < n; i++ {
+        if inDegree[i] == 0 { queue = append(queue, i) }
+    }
+
+    var result []int
+    for len(queue) > 0 {
+        u := queue[0]; queue = queue[1:]
+        result = append(result, u)
+
+        for _, v := range graph[u] {
+            inDegree[v]--
+            if inDegree[v] == 0 {
+                queue = append(queue, v)
+            }
+        }
+    }
+    return result
+}`,
+                java: `public int[] topologicalSort(int n, int[][] edges) {
+    int[] inDegree = new int[n];
+    List<List<Integer>> graph = new ArrayList<>();
+    for(int i=0; i<n; i++) graph.add(new ArrayList<>());
+    for(int[] e : edges) {
+        graph.get(e[0]).add(e[1]);
+        inDegree[e[1]]++;
+    }
+
+    Queue<Integer> q = new LinkedList<>();
+    for(int i=0; i<n; i++) if(inDegree[i] == 0) q.add(i);
+
+    int[] res = new int[n]; int idx = 0;
+    while(!q.isEmpty()) {
+        int u = q.poll();
+        res[idx++] = u;
+        for(int v : graph.get(u)) {
+            inDegree[v]--;
+            if(inDegree[v] == 0) q.add(v);
+        }
+    }
+    return res;
+}`,
+                python: `def topological_sort(n, edges):
+    in_degree = {i: 0 for i in range(n)}
+    graph = {i: [] for i in range(n)}
+    for u, v in edges:
+        graph[u].append(v)
+        in_degree[v] += 1
+
+    queue = deque([i for i in in_degree if in_degree[i] == 0])
+    result = []
+
+    while queue:
+        u = queue.popleft()
+        result.append(u)
+
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                queue.append(v)
+    
+    return result`
+            }
+        };
+
+        const LINES = {
+            go: { init: 2, build: 5, qInit: 9, loop: 12, pop: 13, addRes: 14, neighborLoop: 16, dec: 17, checkZero: 18, push: 19 },
+            java: { init: 2, build: 6, qInit: 9, loop: 11, pop: 12, addRes: 13, neighborLoop: 14, dec: 15, checkZero: 16, push: 16 }, // Java compact
+            python: { init: 2, build: 5, qInit: 7, loop: 10, pop: 11, addRes: 12, neighborLoop: 14, dec: 15, checkZero: 16, push: 17 }
+        };
+
+        function init() {
+            renderCode('kahn');
+            generateGraph();
+        }
+
+        function generateGraph() {
+            nodes = [];
+            edges = [];
+            // Create DAG
+            // Layered approach to ensure no cycles
+            const layers = [[0], [1, 2], [3, 4], [5]];
+            
+            // Assign positions
+            const width = 800;
+            const height = 400;
+            const layerHeight = height / (layers.length + 1);
+            
+            layers.forEach((layer, lIdx) => {
+                const layerWidth = width / (layer.length + 1);
+                layer.forEach((nodeId, nIdx) => {
+                    nodes.push({
+                        id: nodeId,
+                        x: (nIdx + 1) * layerWidth,
+                        y: (lIdx + 1) * layerHeight,
+                        inDegree: 0
+                    });
+                });
+            });
+
+            // Add edges (only forward)
+            const addEdge = (u, v) => {
+                edges.push({ u, v });
+                nodes.find(n => n.id === v).inDegree++;
+            };
+
+            addEdge(0, 1); addEdge(0, 2);
+            addEdge(1, 3); addEdge(1, 4);
+            addEdge(2, 4);
+            addEdge(3, 5); addEdge(4, 5);
+
+            generateSteps();
+            render(0);
+        }
+
+        function generateSteps() {
+            steps = [];
+            // Deep copy for simulation
+            let simNodes = JSON.parse(JSON.stringify(nodes));
+            let simEdges = JSON.parse(JSON.stringify(edges));
+            let queue = [];
+            let result = [];
+            
+            // Step 0: Initial State
+            steps.push({
+                nodes: JSON.parse(JSON.stringify(simNodes)),
+                queue: [],
+                result: [],
+                msg: "Calculate In-Degrees for all nodes.",
+                line: 'init'
+            });
+
+            // Step 1: Add 0-indegree to queue
+            simNodes.forEach(n => {
+                if (n.inDegree === 0) queue.push(n.id);
+            });
+            steps.push({
+                nodes: JSON.parse(JSON.stringify(simNodes)),
+                queue: [...queue],
+                result: [],
+                msg: `Nodes with 0 In-Degree added to Queue: ${queue.join(', ')}`,
+                line: 'qInit'
+            });
+
+            while (queue.length > 0) {
+                // Pop
+                let u = queue.shift();
+                result.push(u);
+                
+                steps.push({
+                    nodes: JSON.parse(JSON.stringify(simNodes)),
+                    queue: [...queue],
+                    result: [...result],
+                    activeNode: u,
+                    msg: `Process Node ${u}. Add to result.`,
+                    line: 'pop'
+                });
+
+                // Neighbors
+                let neighbors = simEdges.filter(e => e.u === u).map(e => e.v);
+                for (let v of neighbors) {
+                    let vNode = simNodes.find(n => n.id === v);
+                    vNode.inDegree--;
+                    
+                    steps.push({
+                        nodes: JSON.parse(JSON.stringify(simNodes)),
+                        queue: [...queue],
+                        result: [...result],
+                        activeNode: u,
+                        activeEdge: {u, v},
+                        msg: `Reduce In-Degree of neighbor ${v}. New In-Degree: ${vNode.inDegree}`,
+                        line: 'dec'
+                    });
+
+                    if (vNode.inDegree === 0) {
+                        queue.push(v);
+                        steps.push({
+                            nodes: JSON.parse(JSON.stringify(simNodes)),
+                            queue: [...queue],
+                            result: [...result],
+                            activeNode: u,
+                            activeEdge: {u, v},
+                            msg: `Node ${v} has 0 In-Degree. Add to Queue.`,
+                            line: 'push'
+                        });
+                    }
+                }
+            }
+
+            steps.push({
+                nodes: JSON.parse(JSON.stringify(simNodes)),
+                queue: [],
+                result: [...result],
+                msg: "Topological Sort Complete!",
+                line: 'loop' // End
+            });
+        }
+
+        function render(stepIndex) {
+            const state = steps[stepIndex];
+            svg.innerHTML = `
+                <defs>
+                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                    </marker>
+                    <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#facc15" />
+                    </marker>
+                </defs>
+            `;
+
+            // Draw Edges
+            edges.forEach(e => {
+                const u = state.nodes.find(n => n.id === e.u);
+                const v = state.nodes.find(n => n.id === e.v);
+                const isActive = state.activeEdge && state.activeEdge.u === e.u && state.activeEdge.v === e.v;
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", u.x); line.setAttribute("y1", u.y);
+                line.setAttribute("x2", v.x); line.setAttribute("y2", v.y);
+                line.setAttribute("class", `edge ${isActive ? 'active' : ''}`);
+                svg.appendChild(line);
+            });
+
+            // Draw Nodes
+            state.nodes.forEach(n => {
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                const isActive = state.activeNode === n.id;
+                const isVisited = state.result.includes(n.id);
+                
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y);
+                circle.setAttribute("r", 20);
+                circle.setAttribute("class", `node ${isActive ? 'active' : ''} ${isVisited ? 'visited' : ''}`);
+                
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", n.x); text.setAttribute("y", n.y);
+                text.setAttribute("class", "node-text");
+                text.textContent = n.id;
+
+                // In-Degree Badge
+                if (!isVisited) {
+                    const badge = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    badge.setAttribute("cx", n.x + 15); badge.setAttribute("cy", n.y - 15);
+                    badge.setAttribute("class", "indegree-bg");
+                    
+                    const badgeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                    badgeText.setAttribute("x", n.x + 15); badgeText.setAttribute("y", n.y - 15);
+                    badgeText.setAttribute("class", "indegree-badge");
+                    badgeText.textContent = n.inDegree;
+                    
+                    g.appendChild(badge);
+                    g.appendChild(badgeText);
+                }
+
+                g.appendChild(circle);
+                g.appendChild(text);
+                svg.appendChild(g);
+            });
+
+            // Update UI
+            statusText.textContent = state.msg;
+            queueContainer.innerHTML = state.queue.map(id => `<div class="queue-item">${id}</div>`).join('');
+            resultList.innerHTML = state.result.map(id => `<div class="result-item">${id}</div>`).join('');
+
+            // Highlight Code
+            if (state.line) highlightLine(state.line);
+        }
+
+        function highlightLine(key) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const lineNum = LINES[currentLang][key];
+            if (lineNum) {
+                const el = document.getElementById(`${currentLang === 'go' ? 'kahn' : 'kahn'}-${currentLang}-${lineNum}`); // ID fix logic if needed
+                // Actually IDs are like kahn-go-1
+                const realId = `kahn-${currentLang}-${lineNum}`;
+                const el2 = document.getElementById(realId);
+                if (el2) el2.classList.add('active');
+            }
+        }
+
+        function renderCode(algo) {
+            const code = CODES[algo][currentLang];
+            const display = document.getElementById('code-display');
+            display.innerHTML = '';
+            
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = `kahn-${currentLang}-${i+1}`;
+                let html = line
+                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true|false)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
+                    .replace(/#.*/g, '<span class="com">$&</span>');
+                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                display.appendChild(div);
+            });
+        }
+
+        function copyCode() {
+            navigator.clipboard.writeText(CODES['kahn'][currentLang]);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode('kahn');
+            render(currentStep);
+        }
+
+        // Controls
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        render(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                render(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                render(currentStep);
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            render(0);
+        }
+
+        init();
+    </script>
+</body>
+</html>
