@@ -106,6 +106,55 @@
         }
         .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
         .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+
+        /* Complexity Analysis Section */
+        .complexity-section {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        .complexity-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .comp-card {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .comp-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+        .comp-val {
+            font-family: 'Consolas', monospace;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        .comp-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Log Panel */
+        .log-section {
+            height: 150px;
+            background-color: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -146,6 +195,9 @@
                             <svg id="heap-svg" width="100%" height="100%"></svg>
                         </div>
                         <div class="array-view" id="array-view"></div>
+                        <div class="log-section" id="log-panel">
+                            <div class="log-entry">> Ready to start...</div>
+                        </div>
                     </div>
 
                     <!-- Right: Code Panel -->
@@ -159,6 +211,22 @@
                             </div>
                         </div>
                         <div id="code-display" class="algo-code"></div>
+                        
+                        <!-- Complexity Analysis -->
+                        <div class="complexity-section">
+                            <div class="complexity-grid">
+                                <div class="comp-card">
+                                    <div class="comp-title">Time Complexity</div>
+                                    <div class="comp-val">O(log N)</div>
+                                    <div class="comp-desc">Insert & Extract</div>
+                                </div>
+                                <div class="comp-card">
+                                    <div class="comp-title">Space Complexity</div>
+                                    <div class="comp-val">O(N)</div>
+                                    <div class="comp-desc">Array storage</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -263,6 +331,26 @@ def _bubble_down(self, idx):
             }
         };
 
+        const LINE_MAP = {
+            insert: {
+                go: { append: 2, call: 3, loop: 6, compare: 8, swap: 9 },
+                java: { append: 2, call: 3, loop: 6, compare: 8, swap: 9 },
+                python: { append: 2, call: 3, loop: 6, compare: 8, swap: 9 }
+            },
+            extractMin: {
+                go: { swapRoot: 3, call: 4, loop: 8, compare: 11, check: 13, swap: 14 },
+                java: { swapRoot: 3, call: 4, loop: 8, compare: 11, check: 13, swap: 14 },
+                python: { swapRoot: 3, call: 4, loop: 8, compare: 11, check: 13, swap: 14 }
+            }
+        };
+
+        function highlightStep(step) {
+            const map = LINE_MAP[currentOp][currentLang];
+            if (map && map[step]) {
+                highlightLine(map[step]);
+            }
+        }
+
         function init() {
             renderCode('insert');
             draw();
@@ -284,6 +372,7 @@ def _bubble_down(self, idx):
             heap = [10, 20, 15, 30, 40];
             draw();
             statusText.textContent = "Heap reset.";
+            log("Heap reset to initial state.");
         }
 
         // Drawing Logic
@@ -369,6 +458,7 @@ def _bubble_down(self, idx):
             let idx = heap.length - 1;
             highlight(idx, 'highlight');
             statusText.textContent = `Inserted ${val} at end. Bubbling up...`;
+            log(`Inserted ${val} at index ${idx}. Starting bubble up.`);
             await sleep(800);
 
             highlightLine(3); // Call bubbleUp
@@ -381,6 +471,7 @@ def _bubble_down(self, idx):
                 highlight(idx, 'highlight');
                 highlight(parentIdx, 'compare');
                 statusText.textContent = `Comparing ${heap[idx]} with parent ${heap[parentIdx]}`;
+                log(`Comparing node ${heap[idx]} (idx ${idx}) with parent ${heap[parentIdx]} (idx ${parentIdx})`);
                 highlightLine(8); // Compare
                 await sleep(800);
 
@@ -391,57 +482,74 @@ def _bubble_down(self, idx):
                     draw();
                     highlight(parentIdx, 'highlight'); // New position
                     statusText.textContent = `Swapped!`;
+                    log(`Swapped ${heap[parentIdx]} and ${heap[idx]} because child < parent.`);
                     await sleep(600);
                     idx = parentIdx;
                 } else {
                     statusText.textContent = `Heap property satisfied.`;
+                    log(`Heap property satisfied. ${heap[idx]} >= ${heap[parentIdx]}.`);
                     break;
                 }
             }
             unhighlightAll();
+            log(`Insert operation complete.`);
         }
 
         async function animateExtractMin() {
+            renderCode('extractMin');
             const min = heap[0];
             const last = heap.pop();
             
             if (heap.length > 0) {
                 heap[0] = last;
                 draw();
+                highlightStep('swapRoot');
                 statusText.textContent = `Removed min ${min}. Moved last element ${last} to root. Bubbling down...`;
+                log(`Extracted min ${min}. Moved last element ${last} to root (idx 0).`);
                 
                 let idx = 0;
                 highlight(idx, 'highlight');
                 await sleep(800);
 
+                highlightStep('call');
+                await sleep(300);
+
                 while (true) {
+                    highlightStep('loop');
                     let left = 2 * idx + 1;
                     let right = 2 * idx + 2;
                     let smallest = idx;
 
+                    highlightStep('compare');
                     if (left < heap.length && heap[left] < heap[smallest]) smallest = left;
                     if (right < heap.length && heap[right] < heap[smallest]) smallest = right;
 
+                    highlightStep('check');
                     if (smallest !== idx) {
                         highlight(idx, 'compare');
                         highlight(smallest, 'highlight');
                         statusText.textContent = `Swapping with smaller child ${heap[smallest]}`;
+                        log(`Swapping ${heap[idx]} with smaller child ${heap[smallest]} (idx ${smallest}).`);
                         await sleep(800);
 
+                        highlightStep('swap');
                         [heap[idx], heap[smallest]] = [heap[smallest], heap[idx]];
                         draw();
                         idx = smallest;
                         highlight(idx, 'highlight');
                         await sleep(600);
                     } else {
+                        log(`Heap property satisfied. Node is smaller than children.`);
                         break;
                     }
                 }
             } else {
                 draw();
                 statusText.textContent = `Removed last element ${min}. Heap empty.`;
+                log(`Extracted last element ${min}. Heap is now empty.`);
             }
             unhighlightAll();
+            log(`Extract Min operation complete.`);
         }
 
         function highlight(idx, className) {
@@ -495,6 +603,15 @@ def _bubble_down(self, idx):
 
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function log(msg) {
+            const panel = document.getElementById('log-panel');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.textContent = `> ${msg}`;
+            panel.appendChild(entry);
+            panel.scrollTop = panel.scrollHeight;
         }
 
         init();
