@@ -178,6 +178,12 @@ html, body {
   font-weight: 600;
 }
 
+.nav-item.indent {
+  padding-left: 35px;
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+}
+
 /* Collapsed state for sidebar sections */
 .nav-section.collapsed .nav-item {
   display: none;

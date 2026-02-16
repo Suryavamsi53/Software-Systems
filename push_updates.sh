@@ -26,6 +26,7 @@ fi
 
 echo ""
 echo "📦 Adding files..."
+echo "  $ git add ."
 git add .
 
 # Get commit message
@@ -38,11 +39,20 @@ else
 fi
 
 echo "💾 Committing: '$COMMIT_MSG'..."
+echo "  $ git commit -m \"$COMMIT_MSG\""
 git commit -m "$COMMIT_MSG"
+
+# Check if remote 'origin' exists before pushing
+if ! git remote | grep -q "origin"; then
+    echo "❌ Error: No remote 'origin' found."
+    echo "Run: git remote add origin <your-repo-url>"
+    exit 1
+fi
 
 # Push
 CURRENT_BRANCH=$(git branch --show-current)
 echo "🚀 Pushing to origin/$CURRENT_BRANCH..."
+echo "  $ git push origin \"$CURRENT_BRANCH\""
 git push origin "$CURRENT_BRANCH"
 
 echo "✅ Success! Updates pushed."

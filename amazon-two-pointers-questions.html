@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amazon Two Pointers Questions - SDE Prep</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .q-card {
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    .q-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 15px;
+    }
+    .q-title {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: var(--text-primary);
+      margin: 0;
+    }
+    .q-tags {
+      display: flex;
+      gap: 8px;
+    }
+    .tag {
+      font-size: 0.75rem;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+    .tag.easy { background: rgba(34, 197, 94, 0.15); color: #4ade80; }
+    .tag.medium { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+    .tag.hard { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+    
+    .q-section { margin-bottom: 15px; }
+    .q-label { font-weight: bold; color: var(--accent-color); font-size: 0.9rem; display: block; margin-bottom: 5px; }
+    .q-text { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; }
+    .q-code-details { margin-top: 15px; }
+    .q-code-details summary { cursor: pointer; color: var(--accent-color); font-weight: bold; margin-bottom: 10px; outline: none; }
+    
+    .amazon-tip {
+      background: rgba(255, 153, 0, 0.1);
+      border-left: 4px solid #ff9900;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+    .amazon-tip strong { color: #ff9900; display: block; margin-bottom: 5px; }
+    
+    .topic-header {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      margin: 40px 0 20px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent-color);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Amazon SDE</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back</div>
+        <a href="index.html" class="nav-item">← Dashboard</a>
+        <a href="patterns/two-pointers.html" class="nav-item">← Two Pointers Pattern</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Contents</div>
+        <a href="#sorted-array" class="nav-item">Sorted Array</a>
+        <a href="#array-general" class="nav-item">Array (General)</a>
+        <a href="#strings" class="nav-item">Strings</a>
+        <a href="#linked-list" class="nav-item">Linked List</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>🎯 Amazon Two Pointers Questions</h1>
+        <p>The most frequently asked Two Pointers problems in Amazon OA and Onsite interviews.</p>
+      </div>
+
+      <!-- TOPIC: SORTED ARRAY -->
+      <div id="sorted-array" class="topic-header">1. Sorted Array Variations</div>
+
+      <!-- Q1: Two Sum II -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">1. Two Sum II - Input Array Is Sorted</h3>
+          <div class="q-tags"><span class="tag medium">Medium</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given a 1-indexed array of integers <code>numbers</code> that is already sorted in non-decreasing order, find two numbers such that they add up to a specific <code>target</code> number. Return the indices of the two numbers.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>numbers = [2,7,11,15], target = 9</code><br>Output: <code>[1,2]</code> (Explanation: 2 + 7 = 9)</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Complexity</span>
+          <p class="q-text">Time: <strong>O(n)</strong> | Space: <strong>O(1)</strong></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Use two pointers starting at the beginning (left) and end (right) of the array. Calculate <code>sum = numbers[left] + numbers[right]</code>. If <code>sum == target</code>, return indices. If <code>sum < target</code>, increment <code>left</code> (need larger value). If <code>sum > target</code>, decrement <code>right</code> (need smaller value).</p>
+        </div>
+        
+        <details class="q-code-details">
+          <summary>View Solution (Go, Java, Python)</summary>
+          <div class="code-block"><pre>
+// Go
+func twoSum(numbers []int, target int) []int {
+    left, right := 0, len(numbers)-1
+    for left < right {
+        sum := numbers[left] + numbers[right]
+        if sum == target {
+            return []int{left + 1, right + 1}
+        } else if sum < target {
+            left++
+        } else {
+            right--
+        }
+    }
+    return nil
+}
+
+// Java
+public int[] twoSum(int[] numbers, int target) {
+    int left = 0, right = numbers.length - 1;
+    while (left < right) {
+        int sum = numbers[left] + numbers[right];
+        if (sum == target) return new int[]{left + 1, right + 1};
+        else if (sum < target) left++;
+        else right--;
+    }
+    return new int[]{-1, -1};
+}
+
+# Python
+def twoSum(numbers, target):
+    left, right = 0, len(numbers) - 1
+    while left < right:
+        s = numbers[left] + numbers[right]
+        if s == target:
+            return [left + 1, right + 1]
+        elif s < target:
+            left += 1
+        else:
+            right -= 1
+    return []</pre></div>
+        </details>
+
+        <div class="amazon-tip">
+          <strong>💡 Amazon Interview Tip</strong>
+          Interviewers often ask this to check if you can optimize space. The Hash Map approach is O(n) Time / O(n) Space. This Two Pointers approach is O(n) Time / O(1) Space. Explicitly mention this trade-off.
+        </div>
+      </div>
+
+      <!-- Q2: 3Sum -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">2. 3Sum</h3>
+          <div class="q-tags"><span class="tag medium">Medium</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given an integer array nums, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>. The solution set must not contain duplicate triplets.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>nums = [-1,0,1,2,-1,-4]</code><br>Output: <code>[[-1,-1,2],[-1,0,1]]</code></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Complexity</span>
+          <p class="q-text">Time: <strong>O(n²)</strong> | Space: <strong>O(1)</strong> (ignoring output)</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Sort the array first. Iterate through the array with index <code>i</code>. For each <code>i</code>, use two pointers (<code>left = i+1</code>, <code>right = end</code>) to find pairs that sum to <code>-nums[i]</code>. Crucial: Skip duplicates for <code>i</code>, <code>left</code>, and <code>right</code> to avoid duplicate triplets.</p>
+        </div>
+
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func threeSum(nums []int) [][]int {
+    sort.Ints(nums)
+    var res [][]int
+    for i := 0; i < len(nums)-2; i++ {
+        if i > 0 && nums[i] == nums[i-1] { continue } // Skip duplicate i
+        left, right := i+1, len(nums)-1
+        for left < right {
+            sum := nums[i] + nums[left] + nums[right]
+            if sum == 0 {
+                res = append(res, []int{nums[i], nums[left], nums[right]})
+                for left < right && nums[left] == nums[left+1] { left++ } // Skip duplicate left
+                for left < right && nums[right] == nums[right-1] { right-- } // Skip duplicate right
+                left++; right--
+            } else if sum < 0 {
+                left++
+            } else {
+                right--
+            }
+        }
+    }
+    return res
+}</pre></div>
+        </details>
+
+        <div class="amazon-tip">
+          <strong>💡 Amazon Interview Tip</strong>
+          This is extremely common in Amazon OAs. The edge case of "handling duplicates" is where most candidates fail. Make sure you write the `while` loops to skip duplicates correctly.
+        </div>
+      </div>
+
+      <!-- Q3: Squares of Sorted Array -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">3. Squares of a Sorted Array</h3>
+          <div class="q-tags"><span class="tag easy">Easy</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given an integer array <code>nums</code> sorted in non-decreasing order, return an array of the squares of each number sorted in non-decreasing order.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>nums = [-4,-1,0,3,10]</code><br>Output: <code>[0,1,9,16,100]</code></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Since the array is sorted, the largest squares are at the ends (negatives become positive). Use pointers at start and end. Compare absolute values. Place the larger square at the end of the result array and move inward.</p>
+        </div>
+      </div>
+
+      <!-- TOPIC: ARRAY GENERAL -->
+      <div id="array-general" class="topic-header">2. Array (General)</div>
+
+      <!-- Q4: Container With Most Water -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">4. Container With Most Water</h3>
+          <div class="q-tags"><span class="tag medium">Medium</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given an integer array <code>height</code> of length n, find two lines that together with the x-axis form a container, such that the container contains the most water.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>height = [1,8,6,2,5,4,8,3,7]</code><br>Output: <code>49</code></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Complexity</span>
+          <p class="q-text">Time: <strong>O(n)</strong> | Space: <strong>O(1)</strong></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Initialize pointers at both ends. Area = <code>min(height[left], height[right]) * (right - left)</code>. To maximize area, move the pointer pointing to the <strong>shorter</strong> line inward (hoping to find a taller line). Moving the taller line would only decrease width without potentially increasing height.</p>
+        </div>
+
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func maxArea(height []int) int {
+    left, right := 0, len(height)-1
+    maxA := 0
+    for left < right {
+        w := right - left
+        h := 0
+        if height[left] < height[right] {
+            h = height[left]
+            left++
+        } else {
+            h = height[right]
+            right--
+        }
+        area := w * h
+        if area > maxA { maxA = area }
+    }
+    return maxA
+}</pre></div>
+        </details>
+
+        <div class="amazon-tip">
+          <strong>💡 Amazon Interview Tip</strong>
+          This is a classic "Greedy" Two Pointer problem. Be prepared to explain the proof: "Why do we move the shorter pointer?" (Answer: Because the area is limited by the shorter line. Moving the taller one can only reduce width without increasing height).
+        </div>
+      </div>
+
+      <!-- Q5: Trapping Rain Water -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">5. Trapping Rain Water</h3>
+          <div class="q-tags"><span class="tag hard">Hard</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>height = [0,1,0,2,1,0,1,3,2,1,2,1]</code><br>Output: <code>6</code></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Complexity</span>
+          <p class="q-text">Time: <strong>O(n)</strong> | Space: <strong>O(1)</strong></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Use two pointers <code>left</code> and <code>right</code>. Maintain <code>leftMax</code> and <code>rightMax</code>. If <code>height[left] < height[right]</code>, then water level at <code>left</code> is determined by <code>leftMax</code> (because right side is guaranteed to be higher or equal). Fill water <code>leftMax - height[left]</code> and move left. Otherwise, do the same for right.</p>
+        </div>
+
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func trap(height []int) int {
+    left, right := 0, len(height)-1
+    leftMax, rightMax := 0, 0
+    water := 0
+    
+    for left < right {
+        if height[left] < height[right] {
+            if height[left] >= leftMax {
+                leftMax = height[left]
+            } else {
+                water += leftMax - height[left]
+            }
+            left++
+        } else {
+            if height[right] >= rightMax {
+                rightMax = height[right]
+            } else {
+                water += rightMax - height[right]
+            }
+            right--
+        }
+    }
+    return water
+}</pre></div>
+        </details>
+
+        <div class="amazon-tip">
+          <strong>💡 Amazon Interview Tip</strong>
+          This is a "Bar Raiser" question. Many candidates solve it with O(n) space (using prefix/suffix arrays). Solving it with O(1) space using Two Pointers is what distinguishes a "Strong Hire".
+        </div>
+      </div>
+
+      <!-- TOPIC: STRINGS -->
+      <div id="strings" class="topic-header">3. Strings</div>
+
+      <!-- Q6: Valid Palindrome -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">6. Valid Palindrome</h3>
+          <div class="q-tags"><span class="tag easy">Easy</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given a string <code>s</code>, return true if it is a palindrome, considering only alphanumeric characters and ignoring cases.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>s = "A man, a plan, a canal: Panama"</code><br>Output: <code>true</code></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Two pointers from start and end. Move inward. If char is not alphanumeric, skip it. If chars don't match (case-insensitive), return false.</p>
+        </div>
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func isPalindrome(s string) bool {
+    s = strings.ToLower(s)
+    left, right := 0, len(s)-1
+    for left < right {
+        if !isAlphanumeric(s[left]) {
+            left++
+        } else if !isAlphanumeric(s[right]) {
+            right--
+        } else if s[left] != s[right] {
+            return false
+        } else {
+            left++; right--
+        }
+    }
+    return true
+}</pre></div>
+        </details>
+      </div>
+
+      <!-- TOPIC: LINKED LIST -->
+      <div id="linked-list" class="topic-header">4. Linked List</div>
+
+      <!-- Q7: Linked List Cycle -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">7. Linked List Cycle</h3>
+          <div class="q-tags"><span class="tag easy">Easy</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given head, the head of a linked list, determine if the linked list has a cycle in it.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Complexity</span>
+          <p class="q-text">Time: <strong>O(n)</strong> | Space: <strong>O(1)</strong></p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Floyd's Cycle-Finding Algorithm (Tortoise and Hare). Use two pointers: <code>slow</code> moves 1 step, <code>fast</code> moves 2 steps. If they meet, there is a cycle. If <code>fast</code> reaches null, no cycle.</p>
+        </div>
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func hasCycle(head *ListNode) bool {
+    if head == nil { return false }
+    slow, fast := head, head
+    for fast != nil && fast.Next != nil {
+        slow = slow.Next
+        fast = fast.Next.Next
+        if slow == fast { return true }
+    }
+    return false
+}</pre></div>
+        </details>
+      </div>
+
+      <!-- Q8: Middle of Linked List -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">8. Middle of the Linked List</h3>
+          <div class="q-tags"><span class="tag easy">Easy</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Use Fast & Slow pointers. When <code>fast</code> reaches the end, <code>slow</code> will be at the middle.</p>
+        </div>
+      </div>
+
+      <!-- TOPIC: SLIDING WINDOW -->
+      <div id="sliding-window" class="topic-header">5. Sliding Window (Subset)</div>
+
+      <!-- Q9: Longest Substring Without Repeating Characters -->
+      <div class="q-card">
+        <div class="q-header">
+          <h3 class="q-title">9. Longest Substring Without Repeating Characters</h3>
+          <div class="q-tags"><span class="tag medium">Medium</span></div>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Problem Description</span>
+          <p class="q-text">Given a string <code>s</code>, find the length of the longest substring without repeating characters.</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Example</span>
+          <p class="q-text">Input: <code>s = "abcabcbb"</code><br>Output: <code>3</code> ("abc")</p>
+        </div>
+        <div class="q-section">
+          <span class="q-label">Approach</span>
+          <p class="q-text">Use a sliding window <code>[left, right]</code> and a Hash Map/Set to store characters in the window. Expand <code>right</code>. If <code>s[right]</code> is in map, shrink window from <code>left</code> until duplicate is removed. Update max length.</p>
+        </div>
+        <details class="q-code-details">
+          <summary>View Solution (Go)</summary>
+          <div class="code-block"><pre>
+func lengthOfLongestSubstring(s string) int {
+    charIndex := make(map[byte]int)
+    left := 0
+    maxLen := 0
+    
+    for right := 0; right < len(s); right++ {
+        char := s[right]
+        if idx, found := charIndex[char]; found && idx >= left {
+            left = idx + 1
+        }
+        charIndex[char] = right
+        currLen := right - left + 1
+        if currLen > maxLen { maxLen = currLen }
+    }
+    return maxLen
+}</pre></div>
+        </details>
+      </div>
+
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

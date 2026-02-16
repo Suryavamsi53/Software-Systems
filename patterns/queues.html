@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Queues - Software Systems Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Software Systems</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Queues (FIFO)</h1>
+        <p>First-In, First-Out Data Structure</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🧠 Core Concept</div>
+        <div class="callout key-intuition">
+          <div class="callout-title">FIFO Property</div>
+          <div class="callout-content">
+            <p>A Queue is a linear data structure that follows the First-In, First-Out principle. Elements are added at the rear (enqueue) and removed from the front (dequeue).</p>
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+              <li><strong>BFS:</strong> Breadth-First Search in graphs/trees.</li>
+              <li><strong>Task Scheduling:</strong> Processing jobs in order.</li>
+              <li><strong>Buffering:</strong> IO buffers, message queues.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🖼️ Visual Explanation</div>
+        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid var(--accent-color); display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <strong style="color: var(--text-primary); font-size: 1.1rem;">🚀 Interactive Queue Visualizer</strong>
+            <p style="margin-top: 5px; color: var(--text-secondary);">Visualize Enqueue, Dequeue, and Circular Buffer.</p>
+          </div>
+          <a href="queue-visualizer.html" class="nav-item" style="background-color: var(--accent-color); color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: bold;">Try It Now →</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🟢 Implementation (Go)</div>
+        <div class="code-block"><pre>
+type Queue struct {
+    items []int
+}
+
+func (q *Queue) Enqueue(i int) {
+    q.items = append(q.items, i)
+}
+
+func (q *Queue) Dequeue() int {
+    if len(q.items) == 0 {
+        return -1
+    }
+    item := q.items[0]
+    q.items = q.items[1:]
+    return item
+}
+</pre></div>
+      </div>
+
+    </main>
+  </div>
+  <script src="../script.js"></script>
+</body>
+</html>

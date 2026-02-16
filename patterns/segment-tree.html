@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Segment Tree Pattern - Software Systems Interview</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 Software Systems</h1>
+        <p>Coding Interview Prep</p>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Back</div>
+        <a href="../index.html" class="nav-item">← Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Advanced Data Structures</div>
+        <a href="tries.html" class="nav-item">Tries</a>
+        <a href="graphs.html" class="nav-item">Graphs</a>
+        <a href="segment-tree.html" class="nav-item active">Segment Trees</a>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-header">
+        <h1>Segment Tree & Fenwick Tree</h1>
+        <p>Advanced structures for efficient range queries and updates.</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🔍 Pattern Identification</div>
+        <div class="callout" style="border-left-color: #f59e0b;">
+          <div class="callout-title">When to use Segment Trees?</div>
+          <div class="callout-content">
+            <ul>
+              <li><strong>Input:</strong> An array of numbers.</li>
+              <li><strong>Operations:</strong> Frequent <strong>Range Queries</strong> (e.g., sum, min, max between index L and R) AND frequent <strong>Point/Range Updates</strong>.</li>
+              <li><strong>Constraint:</strong> O(n) is too slow for queries. You need O(log n).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🧠 Core Concept</div>
+        <p>A <strong>Segment Tree</strong> is a binary tree where each node represents an interval. The root represents the whole array <code>[0, n-1]</code>. Each child represents half of the parent's interval.</p>
+        
+        <div class="diagram">
+Array: [1, 3, 5, 7]
+
+        [0-3] (Sum=16)
+       /             \
+   [0-1] (4)       [2-3] (12)
+   /     \         /      \
+[0] (1) [1] (3)  [2] (5)  [3] (7)
+        </div>
+        
+        <p><strong>Fenwick Tree (Binary Indexed Tree):</strong> A more compact array-based structure that supports prefix sums and updates in O(log n). Easier to implement but less flexible than Segment Trees (mostly for sums).</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🧩 Canonical Problem: Range Sum Query - Mutable</div>
+        <div class="callout amazon-expects">
+          <div class="callout-title">LeetCode 307</div>
+          <div class="callout-content">
+            <p>Given an integer array <code>nums</code>, handle multiple queries of the following types:</p>
+            <ol>
+              <li><code>Update(index, val)</code>: Updates the value of <code>nums[index]</code> to be <code>val</code>.</li>
+              <li><code>SumRange(left, right)</code>: Returns the sum of the subarray <code>nums[left...right]</code>.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="code-block"><pre>
+type SegmentTree struct {
+    tree []int
+    n    int
+}
+
+func Constructor(nums []int) SegmentTree {
+    n := len(nums)
+    tree := make([]int, 2*n)
+    
+    // Build tree (leaves at end)
+    for i := 0; i < n; i++ {
+        tree[n+i] = nums[i]
+    }
+    // Build internal nodes
+    for i := n - 1; i > 0; i-- {
+        tree[i] = tree[2*i] + tree[2*i+1]
+    }
+    
+    return SegmentTree{tree: tree, n: n}
+}
+
+func (st *SegmentTree) Update(index int, val int) {
+    pos := index + st.n
+    st.tree[pos] = val
+    
+    // Bubble up
+    for pos > 0 {
+        left, right := pos, pos
+        if pos%2 == 0 {
+            right = pos + 1
+        } else {
+            left = pos - 1
+        }
+        st.tree[pos/2] = st.tree[left] + st.tree[right]
+        pos /= 2
+    }
+}
+
+func (st *SegmentTree) SumRange(left int, right int) int {
+    l, r := left + st.n, right + st.n
+    sum := 0
+    
+    for l <= r {
+        if l%2 == 1 {
+            sum += st.tree[l]
+            l++
+        }
+        if r%2 == 0 {
+            sum += st.tree[r]
+            r--
+        }
+        l /= 2
+        r /= 2
+    }
+    return sum
+}</pre></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">⚙️ Complexity Analysis</div>
+        <table class="complexity-table">
+          <thead><tr><th>Operation</th><th>Time</th><th>Space</th></tr></thead>
+          <tbody>
+            <tr><td>Build Tree</td><td>O(n)</td><td>O(n)</td></tr>
+            <tr><td>Update</td><td>O(log n)</td><td>O(1)</td></tr>
+            <tr><td>Range Query</td><td>O(log n)</td><td>O(1)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section">
+        <div class="section-title">🚀 Advanced: Fenwick Tree (BIT)</div>
+        <p>Best for Prefix Sums. Uses bit manipulation (<code>i & -i</code>) to traverse parents.</p>
+        <div class="code-block"><pre>
+type FenwickTree struct {
+    tree []int
+}
+
+func NewFenwick(n int) *FenwickTree {
+    return &FenwickTree{tree: make([]int, n+1)}
+}
+
+func (ft *FenwickTree) Add(i int, delta int) {
+    i++ // 1-based indexing
+    for i < len(ft.tree) {
+        ft.tree[i] += delta
+        i += i & -i
+    }
+}
+
+func (ft *FenwickTree) Query(i int) int {
+    i++
+    sum := 0
+    for i > 0 {
+        sum += ft.tree[i]
+        i -= i & -i
+    }
+    return sum
+}</pre></div>
+      </div>
+
+    </main>
+  </div>
+  <script src="../script.js"></script>
+</body>
+</html>
