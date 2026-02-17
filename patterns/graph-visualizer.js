@@ -1419,10 +1419,12 @@ class Controller {
 }
 
 // Global Language Switcher
-window.switchLang = function(lang) {
+window.switchLang = function(lang, btn) {
     // Update buttons
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    event.target.classList.add('active');
+    if (btn) {
+        btn.classList.add('active');
+    }
     
     // Update code visibility
     document.querySelectorAll('.lang-code').forEach(el => el.classList.remove('active'));

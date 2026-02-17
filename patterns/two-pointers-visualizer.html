@@ -183,6 +183,16 @@
       color: var(--text-secondary);
       min-height: 80px;
     }
+
+    @media (max-width: 1024px) {
+        .viz-container {
+            flex-direction: column;
+        }
+        .viz-left, .viz-right {
+            width: 100%;
+            flex: none;
+        }
+    }
   </style>
 </head>
 <body>
@@ -262,9 +272,9 @@
         <!-- Right: Code -->
         <div class="viz-right">
           <div class="lang-tabs">
-            <button class="lang-tab active" onclick="switchLang('go')">Go</button>
-            <button class="lang-tab" onclick="switchLang('java')">Java</button>
-            <button class="lang-tab" onclick="switchLang('python')">Python</button>
+            <button class="lang-tab active" onclick="switchLang('go', this)">Go</button>
+            <button class="lang-tab" onclick="switchLang('java', this)">Java</button>
+            <button class="lang-tab" onclick="switchLang('python', this)">Python</button>
           </div>
           <div class="code-view" id="code-view">
             <!-- Code injected by JS -->
@@ -363,10 +373,10 @@
       generateSteps();
     }
 
-    function switchLang(lang) {
+    function switchLang(lang, btn) {
       currentLang = lang;
       document.querySelectorAll('.lang-tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      if (btn) btn.classList.add('active');
       renderCode();
       if (currentStep >= 0) highlightLine(steps[currentStep].type);
     }

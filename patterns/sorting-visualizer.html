@@ -42,6 +42,11 @@
             align-items: flex-end;
             min-height: 120px;
             position: relative;
+            overflow-x: auto;
+        }
+
+        #chart-tracker {
+            height: 180px; /* Explicit height required for percentage bars */
         }
 
         /* Chart Tracker (Histogram) */
@@ -51,6 +56,7 @@
             background-color: #cbd5e1; /* Light gray default */
             transition: height 0.2s, background-color 0.2s;
             border-radius: 2px 2px 0 0;
+            min-height: 4px;
         }
         .chart-bar.active { background-color: var(--accent-color); }
         .chart-bar.compare { background-color: #fb923c; }
@@ -91,6 +97,7 @@
             gap: 15px;
             align-items: flex-start;
             height: 100%;
+            margin: 0 auto;
         }
         .bucket {
             display: flex;
@@ -137,7 +144,7 @@
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 10px;
-            margin: 0 10px;
+            margin: 0;
             overflow-y: auto;
             font-family: monospace;
             font-size: 0.85rem;
@@ -156,6 +163,28 @@
             color: var(--text-primary);
             font-size: 0.9rem;
         }
+
+        /* Controls in Code Panel */
+        .code-controls {
+            padding: 15px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: rgba(255,255,255,0.02);
+        }
+        
+        .control-group-inline {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .code-line { white-space: pre; }
+        .kwd { color: #f472b6; font-weight: bold; }
+        .typ { color: #60a5fa; }
+        .num { color: #facc15; }
+        .com { color: #6a9955; font-style: italic; }
     </style>
 </head>
 <body>
@@ -182,19 +211,6 @@
                 <a href="javascript:void(0)" class="nav-item" id="nav-bucket" onclick="selectAlgo('bucket')">Bucket Sort</a>
                 <a href="javascript:void(0)" class="nav-item" id="nav-shell" onclick="selectAlgo('shell')">Shell Sort</a>
             </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Controls</div>
-                <div class="control-group">
-                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
-                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
-                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
-                    <button class="action-btn warning" onclick="reset()">Reset / Randomize</button>
-                </div>
-                <div class="control-group">
-                    <label>Speed</label>
-                    <input type="range" id="speedRange" min="50" max="1000" step="50" value="400" onchange="setSpeed(this.value)" style="width: 100%">
-                </div>
-            </div>
         </aside>
 
         <main class="main-content no-padding">
@@ -216,6 +232,10 @@
                                 <div class="tracker-header">Array (Values)</div>
                                 <div class="tracker-content" id="array-tracker"></div>
                             </div>
+                            <!-- Log Panel -->
+                            <div class="log-section" id="log-panel">
+                                <div class="log-entry">Ready to start...</div>
+                            </div>
                             <div class="tracker" id="aux-tracker-wrapper" style="display: none;">
                                 <div class="tracker-header">Auxiliary (Buckets / Temp)</div>
                                 <div class="tracker-content" id="aux-tracker"></div>
@@ -223,15 +243,9 @@
                         </div>
                     </div>
 
-                    <!-- Log Panel -->
-                    <div class="log-section" id="log-panel">
-                        <div class="log-entry">Ready to start...</div>
-                    </div>
-
                     <!-- Code Panel -->
                     <div class="code-section">
                         <div class="code-header">
-                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
                             <span>Algorithm Code</span>
                             <div class="btn-group">
                                 <button class="tab-btn active" onclick="switchLang('go')">Go</button>
@@ -242,6 +256,16 @@
 
                         <div id="code-display" class="algo-code active">
                             <!-- Code will be injected here by JS -->
+                        </div>
+                        
+                        <div class="code-controls">
+                            <div class="control-group-inline">
+                                <input type="range" id="speedRange" min="50" max="1000" step="50" value="400" onchange="setSpeed(this.value)" title="Speed">
+                                <button class="action-btn" onclick="stepBackward()">⏮</button>
+                                <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play</button>
+                                <button class="action-btn" onclick="stepForward()">⏭</button>
+                                <button class="action-btn warning" onclick="reset()">↺ Reset</button>
+                            </div>
                         </div>
                         <div class="explanation-panel" id="explanation">
                             Algorithm explanation will appear here.
@@ -264,7 +288,6 @@
         let currentLang = 'go';
         let currentAlgo = 'bubble';
 
-        // Semantic Line Mapping
         const LINES = {
             bubble: {
                 compare: { go: 4, java: 4, python: 4 },
@@ -272,53 +295,53 @@
                 sorted: { go: 2, java: 2, python: 2 }
             },
             selection: {
+                select: { go: 3, java: 3, python: 3 },
                 compare: { go: 5, java: 5, python: 5 },
                 newMin: { go: 5, java: 5, python: 5 },
-                swap: { go: 7, java: 7, python: 7 },
-                sorted: { go: 2, java: 2, python: 2 }
+                swap: { go: 7, java: 7, python: 6 }
             },
             insertion: {
+                select: { go: 3, java: 3, python: 3 },
                 compare: { go: 4, java: 4, python: 4 },
-                swap: { go: 5, java: 5, python: 5 },
-                insert: { go: 7, java: 7, python: 7 },
-                sorted: { go: 2, java: 2, python: 2 }
+                shift: { go: 5, java: 5, python: 5 },
+                insert: { go: 7, java: 7, python: 6 }
             },
             merge: {
                 split: { go: 3, java: 3, python: 3 },
-                merge: { go: 6, java: 6, python: 5 },
-                compare: { go: 9, java: 9, python: 9 },
-                overwrite: { go: 9, java: 9, python: 9 }
+                mergeStart: { go: 9, java: 9, python: 8 },
+                compare: { go: 12, java: 12, python: 11 },
+                overwrite: { go: 13, java: 13, python: 12 }
             },
             quick: {
-                pivot: { go: 9, java: 8, python: 8 },
-                compare: { go: 11, java: 8, python: 8 },
-                swap: { go: 12, java: 8, python: 8 },
-                placePivot: { go: 15, java: 8, python: 8 }
+                pivot: { go: 10, java: 10, python: 9 },
+                compare: { go: 13, java: 13, python: 12 },
+                swap: { go: 15, java: 15, python: 14 },
+                placePivot: { go: 18, java: 18, python: 16 }
             },
             heap: {
-                heapify: { go: 4, java: 4, python: 4 },
-                extract: { go: 7, java: 7, python: 7 },
-                compare: { go: 13, java: 14, python: 12 },
-                swap: { go: 16, java: 17, python: 15 }
+                heapify: { go: 12, java: 12, python: 11 },
+                compare: { go: 15, java: 15, python: 14 },
+                swap: { go: 18, java: 18, python: 17 },
+                extract: { go: 8, java: 8, python: 7 }
             },
             counting: {
                 count: { go: 4, java: 4, python: 4 },
                 place: { go: 8, java: 8, python: 8 }
             },
             radix: {
-                digit: { go: 3, java: 3, python: 4 },
-                count: { go: 4, java: 4, python: 5 }
+                digit: { go: 3, java: 3, python: 3 },
+                update: { go: 13, java: 13, python: 11 }
             },
             bucket: {
-                distribute: { go: 4, java: 7, python: 5 },
-                sort: { go: 9, java: 10, python: 8 },
-                collect: { go: 11, java: 12, python: 10 }
+                distribute: { go: 4, java: 5, python: 4 },
+                sortBucket: { go: 8, java: 9, python: 7 },
+                collect: { go: 10, java: 11, python: 9 }
             },
             shell: {
-                gap: { go: 3, java: 3, python: 4 },
-                compare: { go: 7, java: 7, python: 8 },
-                swap: { go: 8, java: 8, python: 9 },
-                insert: { go: 10, java: 10, python: 11 }
+                gap: { go: 3, java: 3, python: 3 },
+                compare: { go: 7, java: 7, python: 7 },
+                shift: { go: 8, java: 8, python: 8 },
+                place: { go: 10, java: 10, python: 9 }
             }
         };
 
@@ -326,334 +349,404 @@
         const ALGO_CODES = {
             bubble: {
                 go: `func bubbleSort(arr []int) {
-  for i := 0; i < len(arr); i++ {
-    for j := 0; j < len(arr)-i-1; j++ {
-      if arr[j] > arr[j+1] {
-        arr[j], arr[j+1] = arr[j+1], arr[j]
+  for i := 0; i < len(arr); i++ { // Outer loop for passes
+    for j := 0; j < len(arr)-i-1; j++ { // Inner loop for comparison
+      if arr[j] > arr[j+1] { // Compare adjacent elements
+        arr[j], arr[j+1] = arr[j+1], arr[j] // Swap if wrong order
       }
     }
   }
 }`,
                 java: `void bubbleSort(int[] arr) {
-  for (int i = 0; i < arr.length; i++) {
-    for (int j = 0; j < arr.length - i - 1; j++) {
-      if (arr[j] > arr[j+1]) {
-        swap(arr, j, j+1);
+  for (int i = 0; i < arr.length; i++) { // Outer loop
+    for (int j = 0; j < arr.length - i - 1; j++) { // Inner loop
+      if (arr[j] > arr[j+1]) { // Compare adjacent
+        swap(arr, j, j+1); // Swap if needed
       }
     }
   }
 }`,
                 python: `def bubble_sort(arr):
-  for i in range(len(arr)):
-    for j in range(len(arr) - i - 1):
-      if arr[j] > arr[j+1]:
-        arr[j], arr[j+1] = arr[j+1], arr[j]`
+  for i in range(len(arr)): # Traverse all elements
+    for j in range(len(arr) - i - 1): # Last i elements are sorted
+      if arr[j] > arr[j+1]: # Compare adjacent
+        arr[j], arr[j+1] = arr[j+1], arr[j] # Swap`
             },
             selection: {
                 go: `func selectionSort(arr []int) {
-  for i := 0; i < len(arr); i++ {
-    minIdx := i
-    for j := i + 1; j < len(arr); j++ {
-      if arr[j] < arr[minIdx] { minIdx = j }
+  for i := 0; i < len(arr); i++ { // Iterate through array
+    minIdx := i // Assume current is min
+    for j := i + 1; j < len(arr); j++ { // Find min in unsorted
+      if arr[j] < arr[minIdx] { minIdx = j } // Update min index
     }
-    arr[i], arr[minIdx] = arr[minIdx], arr[i]
+    arr[i], arr[minIdx] = arr[minIdx], arr[i] // Swap min to correct pos
   }
 }`,
                 java: `void selectionSort(int[] arr) {
-  for (int i = 0; i < arr.length; i++) {
-    int minIdx = i;
-    for (int j = i + 1; j < arr.length; j++) {
-      if (arr[j] < arr[minIdx]) minIdx = j;
+  for (int i = 0; i < arr.length; i++) { // Iterate array
+    int minIdx = i; // Assume i is min
+    for (int j = i + 1; j < arr.length; j++) { // Find actual min
+      if (arr[j] < arr[minIdx]) minIdx = j; // Update min index
     }
-    swap(arr, i, minIdx);
+    swap(arr, i, minIdx); // Swap min to position i
   }
 }`,
                 python: `def selection_sort(arr):
-  for i in range(len(arr)):
-    min_idx = i
-    for j in range(i + 1, len(arr)):
-      if arr[j] < arr[min_idx]: min_idx = j
-    arr[i], arr[min_idx] = arr[min_idx], arr[i]`
+  for i in range(len(arr)): # Traverse array
+    min_idx = i # Assume current is min
+    for j in range(i + 1, len(arr)): # Find min in rest
+      if arr[j] < arr[min_idx]: min_idx = j # Update min index
+    arr[i], arr[min_idx] = arr[min_idx], arr[i] # Swap`
             },
             insertion: {
                 go: `func insertionSort(arr []int) {
-  for i := 1; i < len(arr); i++ {
-    key := arr[i]; j := i - 1
-    for j >= 0 && arr[j] > key {
-      arr[j+1] = arr[j]; j--
-    }
-    arr[j+1] = key
+  for i := 1; i < len(arr); i++ { // Start from second element
+    key := arr[i]; j := i - 1 // Element to insert
+    for j >= 0 && arr[j] > key { // Shift larger elements
+      arr[j+1] = arr[j]; j-- // Move right
+    } 
+    arr[j+1] = key // Insert key
   }
 }`,
                 java: `void insertionSort(int[] arr) {
-  for (int i = 1; i < arr.length; i++) {
-    int key = arr[i]; int j = i - 1;
-    while (j >= 0 && arr[j] > key) {
-      arr[j+1] = arr[j]; j--;
+  for (int i = 1; i < arr.length; i++) { // Iterate from 2nd element
+    int key = arr[i]; int j = i - 1; // Key to insert
+    while (j >= 0 && arr[j] > key) { // Shift elements > key
+      arr[j+1] = arr[j]; j--; // Move right
     }
-    arr[j+1] = key;
+    arr[j+1] = key; // Place key
   }
 }`,
                 python: `def insertion_sort(arr):
-  for i in range(1, len(arr)):
-    key = arr[i]; j = i - 1
-    while j >= 0 and arr[j] > key:
-      arr[j+1] = arr[j]; j -= 1
-    arr[j+1] = key`
+  for i in range(1, len(arr)): # Start from 2nd element
+    key = arr[i]; j = i - 1 # Element to insert
+    while j >= 0 and arr[j] > key: # Shift larger elements
+      arr[j+1] = arr[j]; j -= 1 # Move right
+    arr[j+1] = key # Insert key`
             },
             merge: {
                 go: `func mergeSort(arr []int) []int {
-  if len(arr) <= 1 { return arr }
-  mid := len(arr) / 2
-  left := mergeSort(arr[:mid])
-  right := mergeSort(arr[mid:])
-  return merge(left, right)
-}`,
-                java: `void mergeSort(int[] arr, int l, int r) {
-  if (l < r) {
-    int m = (l + r) / 2;
-    mergeSort(arr, l, m);
-    mergeSort(arr, m + 1, r);
-    merge(arr, l, m, r);
+  if len(arr) <= 1 { return arr } // Base case
+  mid := len(arr) / 2 // Find middle
+  left := mergeSort(arr[:mid]) // Sort left
+  right := mergeSort(arr[mid:]) // Sort right
+  return merge(left, right) // Merge sorted halves
+}
+func merge(left, right []int) []int {
+  res := []int{}; i, j := 0, 0
+  for i < len(left) && j < len(right) { // Compare elements
+    if left[i] <= right[j] {
+      res = append(res, left[i]); i++ // Take from left
+    } else {
+      res = append(res, right[j]); j++ // Take from right
+    }
   }
-}`,
+  res = append(res, left[i:]...) // Append remaining
+  res = append(res, right[j:]...)
+  return res
+}`, // Simplified for display
+                java: `void mergeSort(int[] arr, int l, int r) {
+  if (l < r) { // Base case check
+    int m = (l + r) / 2; // Find middle
+    mergeSort(arr, l, m); // Sort left
+    mergeSort(arr, m + 1, r); // Sort right
+    merge(arr, l, m, r); // Merge halves
+  }
+}
+void merge(int[] arr, int l, int m, int r) {
+  // Copy data to temp arrays L[] and R[]
+  int i = 0, j = 0; // Initial indexes
+  int k = l; // Initial index of merged
+  while (i < n1 && j < n2) { // Merge temp arrays
+    if (L[i] <= R[j]) {
+      arr[k] = L[i]; i++; // Take from L
+    } else {
+      arr[k] = R[j]; j++; // Take from R
+    }
+    k++;
+  }
+}`, // Simplified
                 python: `def merge_sort(arr):
-  if len(arr) > 1:
-    mid = len(arr) // 2
-    L = arr[:mid]; R = arr[mid:]
-    merge_sort(L)
-    merge_sort(R)
-    # Merge L and R`
+  if len(arr) > 1: # Base case
+    mid = len(arr) // 2 # Find middle
+    L = arr[:mid]; R = arr[mid:] # Split
+    merge_sort(L); merge_sort(R) # Recursive sort
+    
+    i = j = k = 0
+    while i < len(L) and j < len(R): # Merge
+      if L[i] < R[j]:
+        arr[k] = L[i]; i += 1 # Take from L
+      else:
+        arr[k] = R[j]; j += 1 # Take from R
+      k += 1`
             },
             quick: {
                 go: `func quickSort(arr []int, low, high int) {
-  if low < high {
-    p := partition(arr, low, high)
-    quickSort(arr, low, p-1)
-    quickSort(arr, p+1, high)
+  if low < high { // Base case
+    p := partition(arr, low, high) // Partition index
+    quickSort(arr, low, p-1) // Sort left
+    quickSort(arr, p+1, high) // Sort right
   }
 }
 func partition(arr []int, low, high int) int {
-  pivot := arr[high]; i := low
-  for j := low; j < high; j++ {
-    if arr[j] < pivot {
-      arr[i], arr[j] = arr[j], arr[i]; i++
+  pivot := arr[high]; i := low // Pivot is last element
+  for j := low; j < high; j++ { // Iterate
+    if arr[j] < pivot { // If smaller than pivot
+      arr[i], arr[j] = arr[j], arr[i]; i++ // Swap
     }
   }
-  arr[i], arr[high] = arr[high], arr[i]
+  arr[i], arr[high] = arr[high], arr[i] // Place pivot
   return i
 }`,
                 java: `void quickSort(int[] arr, int low, int high) {
-  if (low < high) {
-    int pi = partition(arr, low, high);
-    quickSort(arr, low, pi - 1);
-    quickSort(arr, pi + 1, high);
+  if (low < high) { // Base case
+    int pi = partition(arr, low, high); // Partitioning index
+    quickSort(arr, low, pi - 1); // Sort elements before
+    quickSort(arr, pi + 1, high); // Sort elements after
   }
 }
-int partition(int[] arr, int low, int high) { ... }`,
+int partition(int[] arr, int low, int high) {
+  int pivot = arr[high]; // Pivot
+  int i = (low - 1); // Index of smaller element
+  for (int j = low; j < high; j++) {
+    if (arr[j] < pivot) { // If current < pivot
+      i++;
+      int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp; // Swap
+    }
+  }
+  int temp = arr[i + 1]; arr[i + 1] = arr[high]; arr[high] = temp; // Swap pivot
+  return i + 1;
+}`,
                 python: `def quick_sort(arr, low, high):
-  if low < high:
-    pi = partition(arr, low, high)
-    quick_sort(arr, low, pi - 1)
-    quick_sort(arr, pi + 1, high)
+  if low < high: # Base case
+    pi = partition(arr, low, high) # Partition index
+    quick_sort(arr, low, pi - 1) # Sort left
+    quick_sort(arr, pi + 1, high) # Sort right
 
 def partition(arr, low, high):
-  # Partition logic`
+  pivot = arr[high]; i = low - 1 # Pivot
+  for j in range(low, high):
+    if arr[j] < pivot: # If smaller than pivot
+      i += 1; arr[i], arr[j] = arr[j], arr[i] # Swap
+  arr[i + 1], arr[high] = arr[high], arr[i + 1] # Place pivot
+  return i + 1`
             },
             heap: {
                 go: `func heapSort(arr []int) {
   n := len(arr)
-  for i := n/2 - 1; i >= 0; i-- {
+  for i := n/2 - 1; i >= 0; i-- { // Build heap
     heapify(arr, n, i)
   }
-  for i := n - 1; i > 0; i-- {
-    arr[0], arr[i] = arr[i], arr[0]
-    heapify(arr, i, 0)
-  }
+  for i := n - 1; i > 0; i-- { // Extract elements
+    arr[0], arr[i] = arr[i], arr[0] // Move root to end
+    heapify(arr, i, 0) // Max heapify reduced heap
+  } 
 }
 func heapify(arr []int, n, i int) {
-  largest := i
-  l, r := 2*i+1, 2*i+2
-  if l < n && arr[l] > arr[largest] { largest = l }
-  if r < n && arr[r] > arr[largest] { largest = r }
-  if largest != i {
-    arr[i], arr[largest] = arr[largest], arr[i]
-    heapify(arr, n, largest)
+  largest := i // Initialize largest as root
+  l, r := 2*i+1, 2*i+2 // Left and right children
+  if l < n && arr[l] > arr[largest] { largest = l } // Check left
+  if r < n && arr[r] > arr[largest] { largest = r } // Check right
+  if largest != i { // If largest is not root
+    arr[i], arr[largest] = arr[largest], arr[i] // Swap
+    heapify(arr, n, largest) // Recursively heapify
   }
 }`,
                 java: `void heapSort(int[] arr) {
   int n = arr.length;
-  for (int i = n / 2 - 1; i >= 0; i--)
+  for (int i = n / 2 - 1; i >= 0; i--) // Build heap
     heapify(arr, n, i);
-  for (int i = n - 1; i > 0; i--) {
-    swap(arr, 0, i);
-    heapify(arr, i, 0);
+  for (int i = n - 1; i > 0; i--) { // Extract elements
+    swap(arr, 0, i); // Move current root to end
+    heapify(arr, i, 0); // Call max heapify
   }
 }
 void heapify(int[] arr, int n, int i) {
-  int largest = i;
-  int l = 2 * i + 1;
-  int r = 2 * i + 2;
-  if (l < n && arr[l] > arr[largest]) largest = l;
-  if (r < n && arr[r] > arr[largest]) largest = r;
-  if (largest != i) {
-    swap(arr, i, largest);
-    heapify(arr, n, largest);
+  int largest = i; // Initialize largest as root
+  int l = 2 * i + 1; // Left child
+  int r = 2 * i + 2; // Right child
+  if (l < n && arr[l] > arr[largest]) largest = l; // Check left
+  if (r < n && arr[r] > arr[largest]) largest = r; // Check right
+  if (largest != i) { // If largest is not root
+    swap(arr, i, largest); // Swap
+    heapify(arr, n, largest); // Recursively heapify
   }
 }`,
                 python: `def heap_sort(arr):
   n = len(arr)
-  for i in range(n // 2 - 1, -1, -1):
+  for i in range(n // 2 - 1, -1, -1): # Build maxheap
     heapify(arr, n, i)
-  for i in range(n - 1, 0, -1):
-    arr[i], arr[0] = arr[0], arr[i]
-    heapify(arr, i, 0)
+  for i in range(n - 1, 0, -1): # Extract elements
+    arr[i], arr[0] = arr[0], arr[i] # Swap
+    heapify(arr, i, 0) # Heapify root
 
 def heapify(arr, n, i):
-  largest = i
-  l, r = 2 * i + 1, 2 * i + 2
-  if l < n and arr[l] > arr[largest]: largest = l
-  if r < n and arr[r] > arr[largest]: largest = r
-  if largest != i:
-    arr[i], arr[largest] = arr[largest], arr[i]
-    heapify(arr, n, largest)`
+  largest = i # Initialize largest as root
+  l, r = 2 * i + 1, 2 * i + 2 # Children
+  if l < n and arr[l] > arr[largest]: largest = l # Check left
+  if r < n and arr[r] > arr[largest]: largest = r # Check right
+  if largest != i: # If root not largest
+    arr[i], arr[largest] = arr[largest], arr[i] # Swap
+    heapify(arr, n, largest) # Recursively heapify`
             },
             counting: {
                 go: `func countingSort(arr []int) {
-  max := findMax(arr)
-  count := make([]int, max+1)
-  for _, x := range arr { count[x]++ }
+  max := findMax(arr) // Find max value
+  count := make([]int, max+1) // Create count array
+  for _, x := range arr { count[x]++ } // Count occurrences
   idx := 0
-  for i, c := range count {
-    for c > 0 {
-      arr[idx] = i
+  for i, c := range count { // Iterate count array
+    for c > 0 { 
+      arr[idx] = i // Reconstruct array
       idx++; c--
     }
   }
 }`,
                 java: `void countingSort(int[] arr) {
-  int max = findMax(arr);
-  int[] count = new int[max + 1];
-  for (int x : arr) count[x]++;
+  int max = findMax(arr); // Find max
+  int[] count = new int[max + 1]; // Count array
+  for (int x : arr) count[x]++; // Store count
   int idx = 0;
-  for (int i = 0; i <= max; i++) {
+  for (int i = 0; i <= max; i++) { // Iterate counts
     while (count[i] > 0) {
-      arr[idx++] = i;
+      arr[idx++] = i; // Place elements
       count[i]--;
     }
   }
 }`,
                 python: `def counting_sort(arr):
-  max_val = max(arr)
-  count = [0] * (max_val + 1)
-  for x in arr: count[x] += 1
+  max_val = max(arr) # Find max
+  count = [0] * (max_val + 1) # Count array
+  for x in arr: count[x] += 1 # Store count
   idx = 0
-  for i in range(len(count)):
+  for i in range(len(count)): # Reconstruct
     while count[i] > 0:
       arr[idx] = i
       idx += 1; count[i] -= 1`
             },
             radix: {
                 go: `func radixSort(arr []int) {
-  max := getMax(arr)
-  for exp := 1; max/exp > 0; exp *= 10 {
-    countingSortByDigit(arr, exp)
+  max := getMax(arr) // Find max number
+  for exp := 1; max/exp > 0; exp *= 10 { // For each digit
+    // Counting sort by digit
+    count := make([]int, 10)
+    for i := 0; i < len(arr); i++ {
+      count[(arr[i]/exp)%10]++ // Count digits
+    }
+    // ... (prefix sum logic)
+    // Build output array
+    for i := 0; i < len(arr); i++ {
+      arr[i] = output[i] // Copy back
+    }
   }
 }`,
                 java: `void radixSort(int[] arr) {
-  int max = getMax(arr);
-  for (int exp = 1; max/exp > 0; exp *= 10) {
-    countSort(arr, exp);
+  int max = getMax(arr); // Find max
+  for (int exp = 1; max/exp > 0; exp *= 10) { // Exponent
+    // Count sort by digit
+    int[] count = new int[10];
+    for (int i = 0; i < n; i++)
+      count[(arr[i] / exp) % 10]++; // Count occurrences
+    // ...
+    for (int i = 0; i < n; i++)
+      arr[i] = output[i]; // Copy output
   }
 }`,
                 python: `def radix_sort(arr):
-  max_val = max(arr)
+  max_val = max(arr) # Find max
   exp = 1
-  while max_val // exp > 0:
-    counting_sort(arr, exp)
+  while max_val // exp > 0: # For each digit
+    # Counting sort by digit
+    count = [0] * 10
+    for i in range(n):
+      index = arr[i] // exp
+      count[index % 10] += 1 # Count
+    # ...
+    for i in range(n):
+      arr[i] = output[i] # Copy
     exp *= 10`
             },
             bucket: {
                 go: `func bucketSort(arr []int) {
-  buckets := make([][]int, len(arr))
+  buckets := make([][]int, len(arr)) // Create buckets
   for _, num := range arr {
-    idx := (num * len(arr)) / (max + 1)
-    buckets[idx] = append(buckets[idx], num)
+    idx := (num * len(arr)) / (max + 1) // Calculate index
+    buckets[idx] = append(buckets[idx], num) // Add to bucket
   }
   idx := 0
   for _, bucket := range buckets {
-    sort.Ints(bucket)
+    sort.Ints(bucket) // Sort individual bucket
     for _, num := range bucket {
-      arr[idx] = num; idx++
+      arr[idx] = num; idx++ // Concatenate
     }
   }
 }`,
                 java: `void bucketSort(float[] arr) {
   int n = arr.length;
-  ArrayList[] buckets = new ArrayList[n];
+  ArrayList[] buckets = new ArrayList[n]; // Create buckets
   for (int i=0; i<n; i++) buckets[i] = new ArrayList<>();
   for (float num : arr) {
-    int idx = (int)num * n;
+    int idx = (int)num * n; // Index in bucket
     buckets[idx].add(num);
   }
   for (int i=0; i<n; i++) {
-    Collections.sort(buckets[i]);
+    Collections.sort(buckets[i]); // Sort bucket
     for (float num : buckets[i]) {
-      arr[idx++] = num;
+      arr[idx++] = num; // Concatenate
     }
   }
 }`,
                 python: `def bucket_sort(arr):
-  buckets = [[] for _ in range(len(arr))]
+  buckets = [[] for _ in range(len(arr))] # Create buckets
   for num in arr:
-    idx = int(num * len(arr))
+    idx = int(num * len(arr)) # Index
     buckets[idx].append(num)
   idx = 0
   for bucket in buckets:
-    bucket.sort()
+    bucket.sort() # Sort bucket
     for num in bucket:
-      arr[idx] = num
+      arr[idx] = num # Concatenate
       idx += 1`
             },
             shell: {
                 go: `func shellSort(arr []int) {
   n := len(arr)
-  for gap := n/2; gap > 0; gap /= 2 {
-    for i := gap; i < n; i++ {
+  for gap := n/2; gap > 0; gap /= 2 { // Reduce gap
+    for i := gap; i < n; i++ { // Gapped insertion sort
       temp := arr[i]
       j := i
       for ; j >= gap && arr[j-gap] > temp; j -= gap {
-        arr[j] = arr[j-gap]
+        arr[j] = arr[j-gap] // Shift elements
       }
-      arr[j] = temp
+      arr[j] = temp // Place temp
     }
   }
 }`,
                 java: `void shellSort(int[] arr) {
   int n = arr.length;
-  for (int gap = n/2; gap > 0; gap /= 2) {
-    for (int i = gap; i < n; i++) {
+  for (int gap = n/2; gap > 0; gap /= 2) { // Reduce gap
+    for (int i = gap; i < n; i++) { // Insertion sort
       int temp = arr[i];
       int j;
       for (j = i; j >= gap && arr[j-gap] > temp; j -= gap) {
-        arr[j] = arr[j-gap];
+        arr[j] = arr[j-gap]; // Shift
       }
-      arr[j] = temp;
+      arr[j] = temp; // Place
     }
   }
 }`,
                 python: `def shell_sort(arr):
   n = len(arr)
-  gap = n // 2
+  gap = n // 2 # Start with large gap
   while gap > 0:
-    for i in range(gap, n):
+    for i in range(gap, n): # Gapped insertion sort
       temp = arr[i]
       j = i
       while j >= gap and arr[j-gap] > temp:
-        arr[j] = arr[j-gap]
+        arr[j] = arr[j-gap] # Shift
         j -= gap
-      arr[j] = temp
-    gap //= 2`
+      arr[j] = temp # Place
+    gap //= 2 # Reduce gap`
             }
         };
 
@@ -683,8 +776,8 @@ def heapify(arr, n, i):
                 }
             } else if (type === 'selection') {
                 for (let i = 0; i < arr.length; i++) {
-                    let minIdx = i;
-                    steps.push(createStep('SELECT', arr, `Current min index: ${i}`, LINES.selection.sorted, { active: [i] }));
+                    let minIdx = i; 
+                    steps.push(createStep('SELECT', arr, `Current min index: ${i}`, LINES.selection.select, { active: [i] }));
                     for (let j = i + 1; j < arr.length; j++) {
                         steps.push(createStep('COMPARE', arr, `Check ${arr[j]} < ${arr[minIdx]}?`, LINES.selection.compare, { active: [i], compare: [j, minIdx] }));
                         if (arr[j] < arr[minIdx]) {
@@ -701,12 +794,12 @@ def heapify(arr, n, i):
                 for (let i = 1; i < arr.length; i++) {
                     let key = arr[i];
                     let j = i - 1;
-                    steps.push(createStep('SELECT', arr, `Insert ${key}`, {go: 3, java: 3, python: 3}, { active: [i] }));
+                    steps.push(createStep('SELECT', arr, `Insert ${key}`, LINES.insertion.select, { active: [i] }));
                     while (j >= 0 && arr[j] > key) {
                         steps.push(createStep('COMPARE', arr, `${arr[j]} > ${key}, shift right`, LINES.insertion.compare, { compare: [j] }));
                         arr[j + 1] = arr[j];
                         j = j - 1;
-                        steps.push(createStep('SHIFT', arr, 'Shifted', LINES.insertion.swap, { swap: [j+1] }));
+                        steps.push(createStep('SHIFT', arr, 'Shifted', LINES.insertion.shift, { swap: [j+1] }));
                     }
                     arr[j + 1] = key;
                     steps.push(createStep('INSERT', arr, `Placed ${key}`, LINES.insertion.insert, { sorted: [j+1] }));
@@ -727,10 +820,10 @@ def heapify(arr, n, i):
                     let right = arr.slice(mid + 1, end + 1);
                     let i = 0, j = 0, k = start;
                     
-                    steps.push(createStep('MERGE_START', arr, `Merging range [${start}, ${end}]`, LINES.merge.merge, { range: [start, end], active: Array.from({length: end-start+1}, (_, idx) => start+idx) }));
+                    steps.push(createStep('MERGE_START', arr, `Merging range [${start}, ${end}]`, LINES.merge.mergeStart, { range: [start, end], active: Array.from({length: end-start+1}, (_, idx) => start+idx), aux: [left, right], auxLabels: ['Left', 'Right'] }));
 
                     while (i < left.length && j < right.length) {
-                        steps.push(createStep('COMPARE', arr, `Compare ${left[i]} vs ${right[j]}`, LINES.merge.compare, { range: [start, end], compare: [start+i, mid+1+j] }));
+                        steps.push(createStep('COMPARE', arr, `Compare ${left[i]} vs ${right[j]}`, LINES.merge.compare, { range: [start, end], compare: [start+i, mid+1+j], aux: [left, right], auxLabels: ['Left', 'Right'] }));
                         if (left[i] <= right[j]) {
                             arr[k] = left[i];
                             i++;
@@ -738,17 +831,17 @@ def heapify(arr, n, i):
                             arr[k] = right[j];
                             j++;
                         }
-                        steps.push(createStep('OVERWRITE', arr, `Placed ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k] }));
+                        steps.push(createStep('OVERWRITE', arr, `Placed ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k], aux: [left, right], auxLabels: ['Left', 'Right'] }));
                         k++;
                     }
                     while (i < left.length) {
                         arr[k] = left[i];
-                        steps.push(createStep('OVERWRITE', arr, `Placed remaining ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k] }));
+                        steps.push(createStep('OVERWRITE', arr, `Placed remaining ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k], aux: [left, right], auxLabels: ['Left', 'Right'] }));
                         i++; k++;
                     }
                     while (j < right.length) {
                         arr[k] = right[j];
-                        steps.push(createStep('OVERWRITE', arr, `Placed remaining ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k] }));
+                        steps.push(createStep('OVERWRITE', arr, `Placed remaining ${arr[k]}`, LINES.merge.overwrite, { range: [start, end], sorted: [k], aux: [left, right], auxLabels: ['Left', 'Right'] }));
                         j++; k++;
                     }
                 }
@@ -856,7 +949,7 @@ def heapify(arr, n, i):
                     }
                     for (let i = 0; i < arr.length; i++) {
                         arr[i] = output[i];
-                        steps.push({ type: 'UPDATE', arr: [...arr], active: [i], msg: `Update index ${i} with ${arr[i]}`, lines: LINES.radix.count, log: `Updated index ${i} to ${arr[i]}` });
+                        steps.push({ type: 'UPDATE', arr: [...arr], active: [i], msg: `Update index ${i} with ${arr[i]}`, lines: LINES.radix.update, log: `Updated index ${i} to ${arr[i]}`, aux: buckets, auxLabels: auxLabels });
                     }
                 }
             } else if (type === 'bucket') {
@@ -880,7 +973,7 @@ def heapify(arr, n, i):
                 for (let i = 0; i < bucketCount; i++) {
                     if (buckets[i].length > 0) {
                         buckets[i].sort((a, b) => a - b);
-                        steps.push(createStep('SORT_BUCKET', arr, `Sort bucket ${i}`, LINES.bucket.sort, { aux: JSON.parse(JSON.stringify(buckets)), activeBucket: i }));
+                        steps.push(createStep('SORT_BUCKET', arr, `Sort bucket ${i}`, LINES.bucket.sortBucket, { aux: JSON.parse(JSON.stringify(buckets)), activeBucket: i }));
                         for (let val of buckets[i]) {
                             arr[idx] = val;
                             steps.push(createStep('COLLECT', arr, `Place ${val} back into array`, LINES.bucket.collect, { sorted: [idx], aux: JSON.parse(JSON.stringify(buckets)), activeBucket: i }));
@@ -896,19 +989,19 @@ def heapify(arr, n, i):
                     for (let i = gap; i < n; i++) {
                         let temp = arr[i];
                         let j;
-                        steps.push({ type: 'INSERT_START', arr: [...arr], active: [i], msg: `Insert ${temp} into gap-sorted subarray`, lines: LINES.shell.insert });
+                        steps.push({ type: 'INSERT_START', arr: [...arr], active: [i], msg: `Insert ${temp} into gap-sorted subarray`, lines: LINES.shell.gap });
                         for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
                             steps.push({ type: 'COMPARE', arr: [...arr], compare: [j, j-gap], msg: `${arr[j-gap]} > ${temp}, shift right`, lines: LINES.shell.compare });
                             arr[j] = arr[j - gap];
-                            steps.push({ type: 'SHIFT', arr: [...arr], swap: [j], msg: `Shifted ${arr[j]}`, lines: LINES.shell.swap, log: `Shifted ${arr[j]} right` });
+                            steps.push({ type: 'SHIFT', arr: [...arr], swap: [j], msg: `Shifted ${arr[j]}`, lines: LINES.shell.shift, log: `Shifted ${arr[j]} right` });
                         }
                         arr[j] = temp;
-                        steps.push({ type: 'PLACE', arr: [...arr], sorted: [j], msg: `Placed ${temp} at index ${j}`, lines: LINES.shell.insert, log: `Placed ${temp} at ${j}` });
+                        steps.push({ type: 'PLACE', arr: [...arr], sorted: [j], msg: `Placed ${temp} at index ${j}`, lines: LINES.shell.place, log: `Placed ${temp} at ${j}` });
                     }
                 }
             }
             
-            steps.push({ type: 'DONE', arr: [...arr], sorted: arr.map((_, i) => i), msg: 'Sorted!', lines: {go: 9, java: 9, python: 9}, log: 'Sorting complete' });
+            steps.push({ type: 'DONE', arr: [...arr], sorted: arr.map((_, i) => i), msg: 'Sorted!', lines: {go: 99, java: 99, python: 99}, log: 'Sorting complete' });
         }
 
         function renderCode(algo, lang) {
@@ -919,16 +1012,22 @@ def heapify(arr, n, i):
             const lines = code.split('\n');
             let html = '';
             lines.forEach((line, i) => {
-                // Simple syntax highlighting (very basic)
-                let formatted = line.replace(/\b(func|void|def|for|if|return|int|var)\b/g, '<span class="kwd">$1</span>');
+                let safeLine = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                let commentChar = lang === 'python' ? '#' : '//';
+                let parts = safeLine.split(commentChar);
+                let codePart = parts[0];
+                let commentPart = parts.length > 1 ? commentChar + parts.slice(1).join(commentChar) : '';
+
+                codePart = codePart
+                    .replace(/\b(func|void|def|for|if|else|return|var|int|len|range|break|continue|class|public|private|static|while|new|import|package)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\b(true|false|null|nil)\b/g, '<span class="typ">$1</span>')
+                    .replace(/\b(\d+)\b/g, '<span class="num">$1</span>');
+
+                if (commentPart) commentPart = `<span class="com">${commentPart}</span>`;
+                let formatted = codePart + commentPart;
                 html += `<div class="code-line" id="${algo}-${lang}-${i+1}"><span class="ln">${i+1}</span>${formatted}</div>`;
             });
             codeContainer.innerHTML = html;
-        }
-
-        function copyCode() {
-            const code = ALGO_CODES[currentAlgo] && ALGO_CODES[currentAlgo][currentLang] ? ALGO_CODES[currentAlgo][currentLang] : "";
-            navigator.clipboard.writeText(code);
         }
 
         function render(stepIndex) {
@@ -987,9 +1086,10 @@ def heapify(arr, n, i):
                     const bucketContainer = auxContainer.querySelector('.buckets-container');
                     
                     state.aux.forEach((bucket, bIdx) => {
+                        const label = state.auxLabels ? state.auxLabels[bIdx] : `B${bIdx}`;
                         const bDiv = document.createElement('div');
                         bDiv.className = 'bucket';
-                        bDiv.innerHTML = `<div class="bucket-label">B${bIdx}</div>`;
+                        bDiv.innerHTML = `<div class="bucket-label">${label}</div>`;
                         
                         if (state.activeBucket === bIdx) {
                             bDiv.style.borderColor = 'var(--accent-color)';
@@ -1031,8 +1131,10 @@ def heapify(arr, n, i):
                     const lineNum = state.lines[currentLang];
                     if (lineNum) {
                         const el = document.getElementById(`${algo}-${currentLang}-${lineNum}`);
-                        if (el) el.classList.add('active');
-                        el.scrollIntoView({behavior: "smooth", block: "nearest"});
+                        if (el) {
+                            el.classList.add('active');
+                            el.scrollIntoView({behavior: "smooth", block: "nearest"});
+                        }
                     }
                 }
             }
@@ -1047,9 +1149,8 @@ def heapify(arr, n, i):
             const navEl = document.getElementById(`nav-${algo}`);
             if (navEl) navEl.classList.add('active');
             
-            reset();
             renderCode(algo, currentLang);
-            generateSteps(algo);
+            reset();
         }
 
         function togglePlay() {
@@ -1088,7 +1189,7 @@ def heapify(arr, n, i):
 
         function reset() {
             if (isPlaying) togglePlay();
-            array = Array.from({length: 15}, () => Math.floor(Math.random() * 50) + 1);
+            array = Array.from({length: 15}, () => Math.floor(Math.random() * 20) + 1);
             currentStep = 0;
             document.getElementById('log-panel').innerHTML = '<div class="log-entry">Ready to start...</div>';
             generateSteps(currentAlgo);

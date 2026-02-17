@@ -1,76 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>System Design Checklist - SDE Prep</title>
-  <link rel="stylesheet" href="styles.css">
-  <style>
-    .checklist-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 15px;
-      padding: 15px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      margin-bottom: 15px;
-      transition: transform 0.2s;
-      cursor: pointer;
-    }
-    .checklist-item:hover {
-      transform: translateX(5px);
-      border-color: var(--accent-color);
-    }
-    .checkbox {
-      width: 24px;
-      height: 24px;
-      border: 2px solid var(--text-muted);
-      border-radius: 6px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .checklist-item.checked .checkbox {
-      background-color: var(--callout-green);
-      border-color: var(--callout-green);
-    }
-    .checklist-item.checked .checkbox::after {
-      content: '✓';
-      color: white;
-      font-weight: bold;
-    }
-    .item-content h3 {
-      margin: 0 0 5px 0;
-      color: var(--text-primary);
-      font-size: 1.1rem;
-    }
-    .item-content p {
-      margin: 0;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-    .time-badge {
-      background: rgba(59, 130, 246, 0.1);
-      color: var(--callout-blue);
-      padding: 2px 8px;
-      border-radius: 12px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      margin-left: 10px;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <h1>Software Systems</h1>
-        <p>Coding Interview Prep</p>
-      </div>
-      <nav class="sidebar-nav">
+import os
+import re
+
+# Define the new sidebar structure (Root Level)
+ROOT_SIDEBAR = """      <nav class="sidebar-nav">
         <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
     
         <!-- Linear Data Structures -->
@@ -138,12 +70,12 @@
         </details>
     
         <!-- System Design -->
-        <details class="nav-section" open>
+        <details class="nav-section">
           <summary class="nav-section-title">System Design</summary>
           <a href="system-design.html" class="nav-item">System Design Basics</a>
           <a href="system-design-masterclass.html" class="nav-item">Masterclass (Part 1)</a>
           <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
-          <a href="system-design-checklist.html" class="nav-item active">System Design Checklist</a>
+          <a href="system-design-checklist.html" class="nav-item">System Design Checklist</a>
           <a href="system-design-case-studies.html" class="nav-item">Case Studies</a>
           <a href="system-design-quiz.html" class="nav-item">System Design Quiz</a>
         </details>
@@ -169,113 +101,100 @@
           <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
           <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
         </details>
-      </nav>
-    </aside>
+      </nav>"""
 
-    <main class="main-content">
-      <div class="content-header">
-        <h1>🏗️ System Design Interview Checklist</h1>
-        <p>A 45-minute structured guide to ace your system design interview.</p>
-      </div>
+# Generate Pattern Level Sidebar (Adjust links to ../)
+PATTERN_SIDEBAR = ROOT_SIDEBAR.replace('href="patterns/', 'href="').replace('href="', 'href="../')
+PATTERN_SIDEBAR = PATTERN_SIDEBAR.replace('href="../index.html"', 'href="../index.html"') # Fix index link
 
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">⏱️</span> Phase 1: Clarification & Scope (5-10 min)
-        </div>
+# Files to skip (Visualizers with custom sidebars or already updated files)
+SKIP_FILES = {
+    "index.html",
+    "interview-approach.html",
+    "amazon-two-pointers-questions.html",
+    "patterns/linked-lists.html",
+    # Visualizers
+    "patterns/sorting-visualizer.html",
+    "patterns/graph-visualizer.html",
+    "patterns/pathfinding-visualizer.html",
+    "patterns/topological-sort-visualizer.html",
+    "patterns/mst-visualizer.html",
+    "patterns/union-find.html",
+    "patterns/heap-visualizer.html",
+    "patterns/trie-visualizer.html",
+    "patterns/stack-visualizer.html",
+    "patterns/queue-visualizer.html",
+    "patterns/linked-list-reversal.html",
+    "patterns/linked-list-visualizer.html",
+    "patterns/n-queens.html",
+    "patterns/sudoku-solver.html",
+    "patterns/maze-generator.html",
+    "patterns/two-pointers-visualizer.html",
+    "patterns/sliding-window-visualizer.html",
+    "patterns/binary-search-visualizer.html",
+    "patterns/hash-map-visualizer.html",
+    "patterns/bst-visualizer.html",
+    "patterns/bfs-graph.html",
+    "patterns/dp-lcs.html"
+}
+
+def update_file(filepath, is_pattern_level):
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Find the active link to preserve it
+        active_match = re.search(r'<a href="([^"]+)" class="nav-item active"', content)
+        active_href = active_match.group(1) if active_match else None
+
+        # Select correct sidebar template
+        new_sidebar = PATTERN_SIDEBAR if is_pattern_level else ROOT_SIDEBAR
+
+        # Restore active class
+        if active_href:
+            # Remove 'active' from template first to be safe
+            new_sidebar = new_sidebar.replace(' class="nav-item active"', ' class="nav-item"')
+            # Add 'active' to the correct link
+            # We need to match exact href in the template
+            target_str = f'href="{active_href}" class="nav-item"'
+            replacement_str = f'href="{active_href}" class="nav-item active"'
+            
+            if target_str in new_sidebar:
+                new_sidebar = new_sidebar.replace(target_str, replacement_str)
+            
+            # Also check for indent items if active was one of them
+            target_indent = f'href="{active_href}" class="nav-item indent"'
+            replacement_indent = f'href="{active_href}" class="nav-item indent active"'
+            if target_indent in new_sidebar:
+                new_sidebar = new_sidebar.replace(target_indent, replacement_indent)
+
+        # Regex to replace the nav block
+        # Matches <nav class="sidebar-nav"> ... </nav>
+        # Uses dotall flag to match across newlines
+        pattern = r'<nav class="sidebar-nav">.*?</nav>'
         
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>1. Define Functional Requirements <span class="time-badge">2 min</span></h3>
-            <p>What exactly does the system do? (e.g., Users can post tweets, follow others, view timeline). Limit to top 3-4 core features.</p>
-          </div>
-        </div>
+        if re.search(pattern, content, re.DOTALL):
+            new_content = re.sub(pattern, new_sidebar, content, flags=re.DOTALL)
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                f.write(new_content)
+            print(f"✅ Updated {filepath}")
+        else:
+            print(f"⚠️  Skipped {filepath} (No sidebar found)")
 
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>2. Define Non-Functional Requirements <span class="time-badge">2 min</span></h3>
-            <p>Scalability (DAU/MAU), Latency (p99), Availability (CAP theorem), Consistency (Strong vs Eventual), Durability.</p>
-          </div>
-        </div>
+    except Exception as e:
+        print(f"❌ Error updating {filepath}: {e}")
 
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>3. Back-of-the-Envelope Estimations <span class="time-badge">3 min</span></h3>
-            <p>Traffic (QPS), Storage (TB/year), Bandwidth (Mbps). Do this ONLY if relevant to design choices (e.g., sharding).</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">📐</span> Phase 2: High-Level Design (10-15 min)
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>4. API Design <span class="time-badge">3 min</span></h3>
-            <p>Define endpoints. <code>POST /tweet (user_id, content)</code>, <code>GET /feed (user_id, cursor)</code>. Keep it REST/gRPC.</p>
-          </div>
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>5. Database Schema <span class="time-badge">3 min</span></h3>
-            <p>SQL vs NoSQL decision. Define tables/collections. Primary keys, Partition keys. Relationships (1:N, M:N).</p>
-          </div>
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>6. High-Level Diagram <span class="time-badge">5 min</span></h3>
-            <p>Draw boxes: Client -> LB -> Service -> DB. Add Cache, Queue, CDN where appropriate. Walk through the flow.</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">🔍</span> Phase 3: Deep Dive (15-20 min)
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>7. Scaling & Bottlenecks <span class="time-badge">5 min</span></h3>
-            <p>Identify single points of failure. Discuss Sharding (DB), Replication (Read/Write), Load Balancing strategies.</p>
-          </div>
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>8. Specific Component Drill-down <span class="time-badge">10 min</span></h3>
-            <p>Interviewer's choice. E.g., "How to generate unique IDs?", "How to handle fan-out?", "How to secure data?".</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">🏁</span> Phase 4: Wrap Up (2-3 min)
-        </div>
-
-        <div class="checklist-item" onclick="this.classList.toggle('checked')">
-          <div class="checkbox"></div>
-          <div class="item-content">
-            <h3>9. Summary & Trade-offs <span class="time-badge">2 min</span></h3>
-            <p>Recap the design. Admit flaws (e.g., "Latency might be high for cross-region users"). Suggest future improvements.</p>
-          </div>
-        </div>
-      </div>
-
-    </main>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html>
+# Walk through directories
+for root, dirs, files in os.walk("."):
+    for file in files:
+        if file.endswith(".html"):
+            path = os.path.join(root, file)
+            # Normalize path for check
+            rel_path = os.path.relpath(path, ".").replace("\\", "/")
+            if rel_path in SKIP_FILES:
+                continue
+                
+            # Check if it's in patterns/ subdir
+            is_pattern = "patterns" in root
+            update_file(path, is_pattern)

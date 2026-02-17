@@ -13,50 +13,106 @@
         <h1>🌑 Software Systems</h1>
         <p>Coding Interview Prep</p>
       </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Learning Resources</div>
-        <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
-        <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
-        <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
-        <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
-        <a href="../system-design.html" class="nav-item">System Design Basics</a>
-        <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
-        <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Fundamental Patterns</div>
-        <a href="two-pointers.html" class="nav-item" data-pattern="two-pointers">Two Pointers</a>
-        <a href="sliding-window.html" class="nav-item" data-pattern="sliding-window">Sliding Window</a>
-        <a href="binary-search.html" class="nav-item" data-pattern="binary-search">Binary Search</a>
-        <a href="hash-maps.html" class="nav-item" data-pattern="hash-maps">Hash Maps & Sets</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Data Structures</div>
-        <a href="linked-lists.html" class="nav-item" data-pattern="linked-lists">Linked Lists</a>
-        <a href="stack.html" class="nav-item" data-pattern="stack">Stack</a>
-        <a href="heap.html" class="nav-item" data-pattern="heap">Heap (Priority Queue)</a>
-        <a href="trees.html" class="nav-item" data-pattern="trees">Trees</a>
-        <a href="tries.html" class="nav-item" data-pattern="tries">Tries</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Advanced Algorithms</div>
-        <a href="graphs.html" class="nav-item" data-pattern="graphs">Graphs</a>
-        <a href="backtracking.html" class="nav-item" data-pattern="backtracking">Backtracking</a>
-        <a href="dynamic-programming.html" class="nav-item" data-pattern="dynamic-programming">Dynamic Programming</a>
-        <a href="greedy.html" class="nav-item" data-pattern="greedy">Greedy</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Specialized Topics</div>
-        <a href="fast-slow-pointers.html" class="nav-item" data-pattern="fast-slow-pointers">Fast & Slow Pointers</a>
-        <a href="intervals.html" class="nav-item" data-pattern="intervals">Intervals</a>
-        <a href="prefix-sum.html" class="nav-item" data-pattern="prefix-sum">Prefix Sum</a>
-        <a href="bit-manipulation.html" class="nav-item" data-pattern="bit-manipulation">Bit Manipulation</a>
-        <a href="math-geometry.html" class="nav-item" data-pattern="math-geometry">Math & Geometry</a>
-      </div>
-      <div class="nav-section">
-        <div class="nav-section-title">Reference</div>
-        <a href="sort-search.html" class="nav-item" data-pattern="sort-search">Sort & Search</a>
-      </div>
+      <nav class="sidebar-nav">
+        <a href="../index.html" class="nav-item">🏠 Home Dashboard</a>
+    
+        <!-- Linear Data Structures -->
+        <details class="nav-section">
+          <summary class="nav-section-title">Linear Data Structures</summary>
+          <a href="linked-lists.html" class="nav-item">Linked Lists</a>
+          <a href="linked-list-reversal.html" class="nav-item indent">↳ Visualizer: Reversal</a>
+          <a href="linked-list-visualizer.html" class="nav-item indent">↳ Visualizer: Operations</a>
+          <a href="stack.html" class="nav-item">Stacks</a>
+          <a href="stack-visualizer.html" class="nav-item indent">↳ Visualizer: Stack</a>
+          <a href="queues.html" class="nav-item">Queues</a>
+          <a href="queue-visualizer.html" class="nav-item indent">↳ Visualizer: Queue</a>
+        </details>
+    
+        <!-- Non-Linear Data Structures -->
+        <details class="nav-section">
+          <summary class="nav-section-title">Non-Linear Data Structures</summary>
+          <a href="hash-maps.html" class="nav-item">Hash Maps</a>
+          <a href="hash-map-visualizer.html" class="nav-item indent">↳ Visualizer: Hash Map</a>
+          <a href="trees.html" class="nav-item">Trees</a>
+          <a href="bst-visualizer.html" class="nav-item indent">↳ Visualizer: BST</a>
+          <a href="graphs.html" class="nav-item">Graphs</a>
+          <a href="graph-visualizer.html" class="nav-item indent">↳ Visualizer: Graph Algo</a>
+          <a href="bfs-graph.html" class="nav-item indent">↳ Visualizer: BFS</a>
+          <a href="pathfinding-visualizer.html" class="nav-item indent">↳ Visualizer: Pathfinding</a>
+          <a href="topological-sort-visualizer.html" class="nav-item indent">↳ Visualizer: Topo Sort</a>
+          <a href="mst-visualizer.html" class="nav-item indent">↳ Visualizer: MST</a>
+          <a href="union-find.html" class="nav-item indent">↳ Visualizer: Union-Find</a>
+          <a href="heap.html" class="nav-item">Heaps</a>
+          <a href="heap-visualizer.html" class="nav-item indent">↳ Visualizer: Heap</a>
+          <a href="tries.html" class="nav-item">Tries</a>
+          <a href="trie-visualizer.html" class="nav-item indent">↳ Visualizer: Trie</a>
+          <a href="segment-tree.html" class="nav-item">Segment Trees</a>
+        </details>
+    
+        <!-- Algorithms -->
+        <details class="nav-section" open>
+          <summary class="nav-section-title">Algorithms</summary>
+          <a href="sort-search.html" class="nav-item">Sorting & Search</a>
+          <a href="sorting-visualizer.html" class="nav-item indent">↳ Visualizer: Sorting</a>
+          <a href="binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary Search</a>
+          <a href="dynamic-programming.html" class="nav-item active">Dynamic Programming</a>
+          <a href="knapsack-dp.html" class="nav-item indent">↳ Visualizer: Knapsack</a>
+          <a href="dp-lcs.html" class="nav-item indent">↳ Visualizer: LCS</a>
+          <a href="backtracking.html" class="nav-item">Backtracking</a>
+          <a href="n-queens.html" class="nav-item indent">↳ Visualizer: N-Queens</a>
+          <a href="sudoku-solver.html" class="nav-item indent">↳ Visualizer: Sudoku</a>
+          <a href="maze-generator.html" class="nav-item indent">↳ Visualizer: Maze</a>
+          <a href="greedy.html" class="nav-item">Greedy</a>
+          <a href="bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+          <a href="math-geometry.html" class="nav-item">Math & Geometry</a>
+        </details>
+
+        <!-- Patterns -->
+        <details class="nav-section">
+          <summary class="nav-section-title">Patterns</summary>
+          <a href="two-pointers.html" class="nav-item">Two Pointers</a>
+          <a href="two-pointers-visualizer.html" class="nav-item indent">↳ Visualizer: Two Pointers</a>
+          <a href="sliding-window.html" class="nav-item">Sliding Window</a>
+          <a href="sliding-window-visualizer.html" class="nav-item indent">↳ Visualizer: Sliding Window</a>
+          <a href="fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+          <a href="binary-search.html" class="nav-item">Binary Search</a>
+          <a href="intervals.html" class="nav-item">Intervals</a>
+          <a href="prefix-sum.html" class="nav-item">Prefix Sum</a>
+        </details>
+    
+        <!-- System Design -->
+        <details class="nav-section">
+          <summary class="nav-section-title">System Design</summary>
+          <a href="../system-design.html" class="nav-item">System Design Basics</a>
+          <a href="../system-design-masterclass.html" class="nav-item">Masterclass (Part 1)</a>
+          <a href="../system-design-patterns.html" class="nav-item">System Design Patterns</a>
+          <a href="../system-design-checklist.html" class="nav-item">System Design Checklist</a>
+          <a href="../system-design-case-studies.html" class="nav-item">Case Studies</a>
+          <a href="../system-design-quiz.html" class="nav-item">System Design Quiz</a>
+        </details>
+
+        <!-- Guides & Tools -->
+        <details class="nav-section">
+          <summary class="nav-section-title">Guides & Tools</summary>
+          <a href="../pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+          <a href="../interview-approach.html" class="nav-item">Interview Approach</a>
+          <a href="../complexity-guide.html" class="nav-item">Complexity Analysis</a>
+          <a href="../dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+          <a href="../mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+          <a href="../cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
+          <a href="../golang-guide.html" class="nav-item">Go Language Guide</a>
+          <a href="../osi-layers.html" class="nav-item">OSI Model Deep Dive</a>
+          <a href="../tcp-ip-model.html" class="nav-item">TCP/IP Model Deep Dive</a>
+          <a href="../go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+          <a href="../google-interview-questions.html" class="nav-item">Google Interview Questions</a>
+          <a href="../amazon-two-pointers-questions.html" class="nav-item">Amazon Two Pointers Questions</a>
+          <a href="../go-interview-plan.html" class="nav-item">📅 14-Day Interview Plan</a>
+          <a href="../google-roadmap.html" class="nav-item">🗺️ Google Roadmap</a>
+          <a href="../cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+          <a href="../dashboard.html" class="nav-item">📊 My Dashboard</a>
+          <a href="../mobile-access.html" class="nav-item">📱 Mobile Access</a>
+        </details>
+      </nav>
     </aside>
 
     <main class="main-content">

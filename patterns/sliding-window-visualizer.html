@@ -305,6 +305,7 @@
             font-size: 14px;
             line-height: 1.6;
             overflow-x: auto;
+            white-space: pre;
         }
         .line {
             display: block;
@@ -350,6 +351,35 @@
             font-family: monospace;
             color: var(--success);
             font-size: 0.9rem;
+        }
+        
+        /* Log Panel */
+        .log-panel {
+            background-color: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .log-entry { margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 4px; }
+        .log-entry.highlight { color: var(--accent); }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .viz-container {
+                flex-direction: column;
+            }
+            .viz-left, .viz-right {
+                width: 100%;
+                flex: none;
+            }
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
     </style>
@@ -412,13 +442,16 @@
                         Operations: 0 | Memory: ~3 integers
                     </div>
                 </div>
+
+                <!-- 5. Log Panel -->
+                <div class="log-panel" id="log-panel">
+                    <div class="log-entry">Ready to start...</div>
+                </div>
             </div>
 
             <div class="viz-right">
                 <div class="lang-tabs">
-                    <button class="tab-btn active" onclick="switchTab('go')">Go</button>
-                    <button class="tab-btn" onclick="switchTab('java')">Java</button>
-                    <button class="tab-btn" onclick="switchTab('python')">Python</button>
+                    <button class="tab-btn active" onclick="switchTab('go', this)">Go</button>
                 </div>
                 
                 <!-- Go Code -->
@@ -437,35 +470,6 @@
 <span class="line" id="go-12">    }</span>
 <span class="line" id="go-13">    <span class="kwd">return</span> maxSum</span>
 <span class="line" id="go-14">}</span>
-                </div>
-
-                <!-- Java Code -->
-                <div id="code-java" class="code-content" style="display: none;">
-<span class="line" id="java-1"><span class="kwd">public int</span> maxSum(<span class="type">int</span>[] arr, <span class="type">int</span> k) {</span>
-<span class="line" id="java-2">    <span class="type">int</span> maxSum = <span class="num">0</span>, windowSum = <span class="num">0</span>;</span>
-<span class="line" id="java-3">    <span class="kwd">for</span> (<span class="type">int</span> i = <span class="num">0</span>; i < k; i++) {</span>
-<span class="line" id="java-4">        windowSum += arr[i];</span>
-<span class="line" id="java-5">    }</span>
-<span class="line" id="java-6">    maxSum = windowSum;</span>
-<span class="line" id="java-7">    <span class="kwd">for</span> (<span class="type">int</span> i = k; i < arr.length; i++) {</span>
-<span class="line" id="java-8">        windowSum += arr[i] - arr[i-k];</span>
-<span class="line" id="java-9">        maxSum = Math.max(maxSum, windowSum);</span>
-<span class="line" id="java-10">    }</span>
-<span class="line" id="java-11">    <span class="kwd">return</span> maxSum;</span>
-<span class="line" id="java-12">}</span>
-                </div>
-
-                <!-- Python Code -->
-                <div id="code-python" class="code-content" style="display: none;">
-<span class="line" id="python-1"><span class="kwd">def</span> max_sum(arr, k):</span>
-<span class="line" id="python-2">    window_sum = <span class="num">0</span></span>
-<span class="line" id="python-3">    <span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(k):</span>
-<span class="line" id="python-4">        window_sum += arr[i]</span>
-<span class="line" id="python-5">    max_sum = window_sum</span>
-<span class="line" id="python-6">    <span class="kwd">for</span> i <span class="kwd">in</span> <span class="func">range</span>(k, <span class="func">len</span>(arr)):</span>
-<span class="line" id="python-7">        window_sum += arr[i] - arr[i-k]</span>
-<span class="line" id="python-8">        max_sum = <span class="func">max</span>(max_sum, window_sum)</span>
-<span class="line" id="python-9">    <span class="kwd">return</span> max_sum</span>
                 </div>
             </div>
         </div>
@@ -495,9 +499,7 @@
         let opsCount = 0;
 
         const lineMap = {
-            go: { init: 2, expand_loop: 3, expand_add: 4, set_max: 6, slide_loop: 7, slide_calc: 8, check_max: 9, update_max: 10, done: 13 },
-            java: { init: 2, expand_loop: 3, expand_add: 4, set_max: 6, slide_loop: 7, slide_calc: 8, update_max: 9, done: 11 },
-            python: { init: 2, expand_loop: 3, expand_add: 4, set_max: 5, slide_loop: 6, slide_calc: 7, update_max: 8, done: 9 }
+            go: { init: 2, expand_loop: 3, expand_add: 4, set_max: 6, slide_loop: 7, slide_calc: 8, check_max: 9, update_max: 10, done: 13 }
         };
 
         // DOM Elements
@@ -508,6 +510,7 @@
         const stepText = document.getElementById('step-text');
         const playBtn = document.getElementById('playBtn');
         const liveStats = document.getElementById('live-stats');
+        const logPanel = document.getElementById('log-panel');
 
         function init() {
             renderArray();
@@ -551,7 +554,9 @@
                 max: 0,
                 msg: "Start with an empty window.",
                 action: 'init',
-                ops: ++ops
+                codeKey: 'init',
+                ops: ++ops,
+                log: "Initialized variables."
             });
 
             // Build first window
@@ -566,7 +571,9 @@
                     msg: `Expand window: Add ${ARRAY[i]} (Index ${i})`,
                     action: 'expand',
                     targetIdx: i,
-                    ops: ops
+                    codeKey: 'expand_add',
+                    ops: ops,
+                    log: `Added ${ARRAY[i]} to window. Sum: ${windowSum}`
                 });
             }
 
@@ -578,7 +585,9 @@
                 max: maxSum,
                 msg: `Window size ${K} reached. Initial Max Sum = ${maxSum}`,
                 action: 'check',
-                ops: ++ops
+                codeKey: 'set_max',
+                ops: ++ops,
+                log: `Initial window complete. Max Sum set to ${maxSum}`
             });
 
             // Slide window
@@ -587,7 +596,6 @@
                 let entering = ARRAY[i];
                 
                 windowSum = windowSum - leaving + entering;
-                maxSum = Math.max(maxSum, windowSum);
                 ops += 2; // Sub + Add + Max check
 
                 steps.push({
@@ -599,8 +607,25 @@
                     action: 'slide',
                     addIdx: i,
                     removeIdx: i-K,
-                    ops: ops
+                    codeKey: 'slide_calc',
+                    ops: ops,
+                    log: `Slide: -${leaving} +${entering}. New Sum: ${windowSum}`
                 });
+
+                if (windowSum > maxSum) {
+                    maxSum = windowSum;
+                    steps.push({
+                        windowStart: i-K+1,
+                        windowEnd: i,
+                        sum: windowSum,
+                        max: maxSum,
+                        msg: `New Max Found! ${windowSum} > old max`,
+                        action: 'slide',
+                        codeKey: 'update_max',
+                        ops: ops,
+                        log: `Updated Max Sum to ${maxSum}`
+                    });
+                }
             }
 
             steps.push({
@@ -610,7 +635,9 @@
                 max: maxSum,
                 msg: `Finished! Maximum Sum is ${maxSum}`,
                 action: 'done',
-                ops: ops
+                codeKey: 'done',
+                ops: ops,
+                log: "Algorithm finished."
             });
         }
 
@@ -649,26 +676,46 @@
             maxSumEl.textContent = state.max;
             stepText.textContent = state.msg;
             liveStats.textContent = `Operations: ${state.ops} | Memory: ~3 integers`;
+
+            // Highlight Code
+            if (state.codeKey) {
+                highlightLine(state.codeKey);
+            }
+
+            // Log
+            if (state.log) {
+                const entry = document.createElement('div');
+                entry.className = 'log-entry highlight';
+                entry.textContent = `[Step ${stepIndex}] ${state.log}`;
+                logPanel.appendChild(entry);
+                logPanel.scrollTop = logPanel.scrollHeight;
+            }
         }
 
-        function highlightLine(stepKey) {
+        function highlightLine(key) {
             document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
-            
-            // Map logical step to line number based on language
-            const lineNum = lineMap[currentLang][stepKey];
+            const lineNum = lineMap[currentLang][key];
             if (lineNum) {
                 const el = document.getElementById(`${currentLang}-${lineNum}`);
                 if (el) el.classList.add('active');
             }
         }
 
-        function switchTab(lang) {
+        function switchTab(lang, btn) {
             currentLang = lang;
             document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
             document.getElementById('code-' + lang).style.display = 'block';
             
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            event.target.classList.add('active');
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                // Fallback for initial load
+                const buttons = document.querySelectorAll('.tab-btn');
+                buttons.forEach(b => {
+                    if (b.textContent.toLowerCase() === lang) b.classList.add('active');
+                });
+            }
             
             // Re-highlight current step
             if (steps[currentStep]) updateView(currentStep);
@@ -712,6 +759,7 @@
         function reset() {
             if (isPlaying) togglePlay();
             currentStep = 0;
+            logPanel.innerHTML = '<div class="log-entry">Ready to start...</div>';
             updateView(0);
         }
 

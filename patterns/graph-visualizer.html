@@ -135,9 +135,9 @@
               <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
               <span>Algorithm Code</span>
               <div class="btn-group">
-                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
-                <button class="tab-btn" onclick="switchLang('java')">Java</button>
-                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                <button class="tab-btn active" onclick="switchLang('go', this)">Go</button>
+                <button class="tab-btn" onclick="switchLang('java', this)">Java</button>
+                <button class="tab-btn" onclick="switchLang('python', this)">Python</button>
               </div>
             </div>
 
@@ -736,10 +736,39 @@
 <div class="code-line" id="bidirectional-go-17">}</div>
               </div>
               <div id="code-bidirectional-java" class="lang-code">
-                 <div style="padding: 20px; color: var(--text-secondary);">Java implementation coming soon...</div>
+<div class="code-line" id="bidirectional-java-1"><span class="kwd">void</span> <span class="func">bidirectionalSearch</span>(<span class="type">int</span> start, <span class="type">int</span> end) {</div>
+<div class="code-line" id="bidirectional-java-2">&nbsp;&nbsp;Queue&lt;Integer> q1 = <span class="kwd">new</span> LinkedList<>(), q2 = <span class="kwd">new</span> LinkedList<>();</div>
+<div class="code-line" id="bidirectional-java-3">&nbsp;&nbsp;q1.add(start); q2.add(end);</div>
+<div class="code-line" id="bidirectional-java-4">&nbsp;&nbsp;vis1.add(start); vis2.add(end);</div>
+<div class="code-line" id="bidirectional-java-5">&nbsp;&nbsp;<span class="kwd">while</span> (!q1.isEmpty() && !q2.isEmpty()) {</div>
+<div class="code-line" id="bidirectional-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (bfsStep(q1, vis1, vis2)) <span class="kwd">return</span>;</div>
+<div class="code-line" id="bidirectional-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (bfsStep(q2, vis2, vis1)) <span class="kwd">return</span>;</div>
+<div class="code-line" id="bidirectional-java-8">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bidirectional-java-9">}</div>
+<div class="code-line" id="bidirectional-java-10"><span class="type">boolean</span> <span class="func">bfsStep</span>(Queue q, Set vis, Set otherVis) {</div>
+<div class="code-line" id="bidirectional-java-11">&nbsp;&nbsp;<span class="type">int</span> u = (int) q.poll();</div>
+<div class="code-line" id="bidirectional-java-12">&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">int</span> v : graph.get(u)) {</div>
+<div class="code-line" id="bidirectional-java-13">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (otherVis.contains(v)) <span class="kwd">return true</span>;</div>
+<div class="code-line" id="bidirectional-java-14">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (vis.add(v)) q.add(v);</div>
+<div class="code-line" id="bidirectional-java-15">&nbsp;&nbsp;}</div>
+<div class="code-line" id="bidirectional-java-16">&nbsp;&nbsp;<span class="kwd">return false</span>;</div>
+<div class="code-line" id="bidirectional-java-17">}</div>
               </div>
               <div id="code-bidirectional-python" class="lang-code">
-                 <div style="padding: 20px; color: var(--text-secondary);">Python implementation coming soon...</div>
+<div class="code-line" id="bidirectional-python-1"><span class="kwd">def</span> <span class="func">bidirectional_search</span>(start, end):</div>
+<div class="code-line" id="bidirectional-python-2">&nbsp;&nbsp;q1, q2 = deque([start]), deque([end])</div>
+<div class="code-line" id="bidirectional-python-3">&nbsp;&nbsp;vis1, vis2 = {start}, {end}</div>
+<div class="code-line" id="bidirectional-python-4">&nbsp;&nbsp;<span class="kwd">while</span> q1 <span class="kwd">and</span> q2:</div>
+<div class="code-line" id="bidirectional-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> bfs_step(q1, vis1, vis2): <span class="kwd">return</span></div>
+<div class="code-line" id="bidirectional-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> bfs_step(q2, vis2, vis1): <span class="kwd">return</span></div>
+<div class="code-line" id="bidirectional-python-7"></div>
+<div class="code-line" id="bidirectional-python-8"><span class="kwd">def</span> <span class="func">bfs_step</span>(q, vis, other_vis):</div>
+<div class="code-line" id="bidirectional-python-9">&nbsp;&nbsp;u = q.popleft()</div>
+<div class="code-line" id="bidirectional-python-10">&nbsp;&nbsp;<span class="kwd">for</span> v <span class="kwd">in</span> graph[u]:</div>
+<div class="code-line" id="bidirectional-python-11">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">in</span> other_vis: <span class="kwd">return True</span></div>
+<div class="code-line" id="bidirectional-python-12">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> v <span class="kwd">not in</span> vis:</div>
+<div class="code-line" id="bidirectional-python-13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;vis.add(v); q.append(v)</div>
+<div class="code-line" id="bidirectional-python-14">&nbsp;&nbsp;<span class="kwd">return False</span></div>
               </div>
             </div>
 

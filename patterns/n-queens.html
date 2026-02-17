@@ -163,9 +163,9 @@
           <!-- Code Tracking Section (Right) -->
           <div class="code-display">
             <div class="lang-tabs">
-              <button class="tab-btn active" onclick="switchTab('go')">Go</button>
-              <button class="tab-btn" onclick="switchTab('java')">Java</button>
-              <button class="tab-btn" onclick="switchTab('python')">Python</button>
+              <button class="tab-btn active" onclick="switchTab('go', this)">Go</button>
+              <button class="tab-btn" onclick="switchTab('java', this)">Java</button>
+              <button class="tab-btn" onclick="switchTab('python', this)">Python</button>
             </div>
             
             <div id="code-go" class="code-content" style="display: block;">
@@ -270,13 +270,13 @@
       }
     }
 
-    function switchTab(lang) {
+    function switchTab(lang, btn) {
       currentLang = lang;
       document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
       document.getElementById('code-' + lang).style.display = 'block';
       
       document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-      event.target.classList.add('active');
+      if (btn) btn.classList.add('active');
     }
 
     async function startViz() {
