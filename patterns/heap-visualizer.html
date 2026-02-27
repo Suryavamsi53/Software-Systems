@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,11 +41,25 @@
         }
 
         /* Animation Classes */
-        .highlight { stroke: #facc15 !important; fill: rgba(250, 204, 21, 0.2) !important; }
-        .compare { stroke: #fb923c !important; }
-        .cell-active { background-color: #facc15; color: #000; }
-        .cell-compare { background-color: #fb923c; color: #000; }
-        
+        .highlight {
+            stroke: #facc15 !important;
+            fill: rgba(250, 204, 21, 0.2) !important;
+        }
+
+        .compare {
+            stroke: #fb923c !important;
+        }
+
+        .cell-active {
+            background-color: #facc15;
+            color: #000;
+        }
+
+        .cell-compare {
+            background-color: #fb923c;
+            color: #000;
+        }
+
         .control-input {
             width: 100%;
             padding: 8px;
@@ -62,6 +77,7 @@
             height: 100%;
             min-height: 400px;
         }
+
         .canvas-section {
             flex: 2;
             display: flex;
@@ -71,6 +87,7 @@
             border: 1px solid var(--border-color);
             overflow: hidden;
         }
+
         .code-section {
             flex: 1;
             background-color: var(--bg-tertiary);
@@ -81,14 +98,16 @@
             overflow: hidden;
             min-width: 300px;
         }
+
         .code-header {
             padding: 10px 15px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: rgba(255,255,255,0.05);
+            background-color: rgba(255, 255, 255, 0.05);
         }
+
         .algo-code {
             padding: 15px;
             overflow-y: auto;
@@ -98,14 +117,32 @@
             color: var(--text-secondary);
             flex: 1;
         }
-        .code-line { padding: 2px 5px; border-radius: 4px; }
+
+        .code-line {
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
+
         .code-line.active {
             background-color: rgba(250, 204, 21, 0.2);
             border-left: 3px solid #facc15;
             color: #facc15;
         }
-        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
-        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+
+        .ln {
+            color: var(--text-muted);
+            margin-right: 10px;
+            user-select: none;
+        }
+
+        .kwd {
+            color: #f472b6;
+        }
+
+        .com {
+            color: #6b7280;
+            font-style: italic;
+        }
 
         /* Complexity Analysis Section */
         .complexity-section {
@@ -113,17 +150,20 @@
             border-top: 1px solid var(--border-color);
             background-color: rgba(0, 0, 0, 0.2);
         }
+
         .complexity-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
         .comp-card {
             background: rgba(255, 255, 255, 0.03);
             padding: 10px;
             border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.05);
         }
+
         .comp-title {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -131,12 +171,14 @@
             margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
+
         .comp-val {
             font-family: 'Consolas', monospace;
             font-size: 1.1rem;
             font-weight: bold;
             color: var(--accent-color);
         }
+
         .comp-desc {
             font-size: 0.8rem;
             color: var(--text-secondary);
@@ -154,30 +196,37 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
         }
-        .log-entry { margin-bottom: 4px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 2px; }
+
+        .log-entry {
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 2px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h1>🌑 Software Systems</h1>
-                <p>Heap Visualizer</p>
+                <h1>🏥 ER Triage</h1>
+                <p>Min-Heap Priority Queue</p>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Back</div>
-                <a href="../index.html" class="nav-item">← Dashboard</a>
+                <a href="../visualizer-dashboard.html" class="nav-item">← Dashboard</a>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Controls</div>
                 <div class="control-group">
-                    <label>Value</label>
-                    <input type="number" id="val-input" class="control-input" placeholder="Enter number..." max="999">
-                    <button class="action-btn" onclick="insertVal()">Insert</button>
-                    <button class="action-btn" onclick="extractMin()">Extract Min</button>
+                    <label>Severity Level (1=Highest)</label>
+                    <input type="number" id="val-input" class="control-input" placeholder="e.g. 1" max="100">
+                    <button class="action-btn" onclick="insertVal()">Admit Patient</button>
+                    <button class="action-btn" style="background:#059669;color:white;border-color:#34d399"
+                        onclick="extractMin()">Treat Next Patient</button>
                 </div>
                 <div class="control-group">
-                    <button class="action-btn warning" onclick="resetHeap()">Reset Heap</button>
+                    <button class="action-btn warning" onclick="resetHeap()">Reset ER Triage</button>
                 </div>
             </div>
         </aside>
@@ -185,9 +234,10 @@
         <main class="main-content no-padding">
             <div class="viz-container">
                 <div class="algo-toolbar">
-                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Min-Heap property: Parent <= Children.</div>
+                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. ER
+                        Waitlist: Lower number means higher priority.</div>
                 </div>
-                
+
                 <div class="split-view">
                     <!-- Left: Visualization -->
                     <div class="canvas-section">
@@ -196,22 +246,21 @@
                         </div>
                         <div class="array-view" id="array-view"></div>
                         <div class="log-section" id="log-panel">
-                            <div class="log-entry">> Ready to start...</div>
+                            <div class="log-entry">> Hospital ER door open. Ready for admissions...</div>
                         </div>
                     </div>
 
                     <!-- Right: Code Panel -->
                     <div class="code-section">
                         <div class="code-header">
-                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
-                            <div class="btn-group">
+                            <div class="btn-group" style="width: 100%;">
                                 <button class="tab-btn active" onclick="switchLang('go')">Go</button>
                                 <button class="tab-btn" onclick="switchLang('java')">Java</button>
                                 <button class="tab-btn" onclick="switchLang('python')">Python</button>
                             </div>
                         </div>
-                        <div id="code-display" class="algo-code"></div>
-                        
+                        <div id="code-display" class="algo-code active"></div>
+
                         <!-- Complexity Analysis -->
                         <div class="complexity-section">
                             <div class="complexity-grid">
@@ -234,7 +283,7 @@
     </div>
 
     <script>
-        let heap = [10, 20, 15, 30, 40];
+        let heap = [2, 5, 4, 8, 9];
         const svg = document.getElementById('heap-svg');
         const arrayView = document.getElementById('array-view');
         const statusText = document.getElementById('status-text');
@@ -243,6 +292,7 @@
         const VERTICAL_SPACING = 60;
         let currentLang = 'go';
         let currentOp = 'insert';
+        let isAnimating = false;
 
         const CODES = {
             insert: {
@@ -357,22 +407,29 @@ def _bubble_down(self, idx):
         }
 
         function insertVal() {
+            if (isAnimating) return;
             const val = parseInt(input.value);
             if (isNaN(val)) return;
+            if (heap.length >= 31) {
+                alert("ER Queue is full (Max 31 visualization nodes).");
+                return;
+            }
             animateInsert(val);
             input.value = '';
         }
 
         function extractMin() {
+            if (isAnimating) return;
             if (heap.length === 0) return;
             animateExtractMin();
         }
 
         function resetHeap() {
-            heap = [10, 20, 15, 30, 40];
+            if (isAnimating) return;
+            heap = [2, 5, 4, 8, 9];
             draw();
-            statusText.textContent = "Heap reset.";
-            log("Heap reset to initial state.");
+            statusText.textContent = "ER Queue Reset.";
+            log("ER waitroom queue reset to initial state.");
         }
 
         // Drawing Logic
@@ -399,18 +456,18 @@ def _bubble_down(self, idx):
             // Calculate positions
             const positions = [];
             const levels = Math.floor(Math.log2(heap.length)) + 1;
-            
+
             for (let i = 0; i < heap.length; i++) {
                 const level = Math.floor(Math.log2(i + 1));
                 const posInLevel = i - Math.pow(2, level) + 1;
                 const totalInLevel = Math.pow(2, level);
-                
+
                 // Width of canvas divided by (nodes in this level + 1)
                 // Simple layout logic
-                const width = 900;
+                const width = svg.clientWidth || 800;
                 const x = (width / (totalInLevel + 1)) * (posInLevel + 1);
                 const y = 50 + level * VERTICAL_SPACING;
-                positions.push({x, y});
+                positions.push({ x, y });
             }
 
             // Draw Edges
@@ -418,12 +475,13 @@ def _bubble_down(self, idx):
                 const parentIdx = Math.floor((i - 1) / 2);
                 const start = positions[parentIdx];
                 const end = positions[i];
-                
+
                 const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
                 line.setAttribute("x1", start.x);
                 line.setAttribute("y1", start.y);
                 line.setAttribute("x2", end.x);
                 line.setAttribute("y2", end.y);
+                line.setAttribute("class", "edge-line");
                 svg.appendChild(line);
             }
 
@@ -431,15 +489,17 @@ def _bubble_down(self, idx):
             positions.forEach((pos, idx) => {
                 const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 g.setAttribute("id", `node-${idx}`);
-                
+
                 const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
                 circle.setAttribute("cx", pos.x);
                 circle.setAttribute("cy", pos.y);
                 circle.setAttribute("r", NODE_RADIUS);
-                
+                circle.setAttribute("class", "node-circle");
+
                 const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                 text.setAttribute("x", pos.x);
                 text.setAttribute("y", pos.y);
+                text.setAttribute("class", "node-label");
                 text.textContent = heap[idx];
 
                 g.appendChild(circle);
@@ -450,15 +510,16 @@ def _bubble_down(self, idx):
 
         // Animations
         async function animateInsert(val) {
+            isAnimating = true;
             renderCode('insert');
             highlightLine(2); // Append
             heap.push(val);
             draw();
-            
+
             let idx = heap.length - 1;
             highlight(idx, 'highlight');
-            statusText.textContent = `Inserted ${val} at end. Bubbling up...`;
-            log(`Inserted ${val} at index ${idx}. Starting bubble up.`);
+            statusText.textContent = `Admitted patient with priority ${val} (lower=higher severity). Escalating triage...`;
+            log(`Admitted patient priority ${val}. Starting triage bubble up.`);
             await sleep(800);
 
             highlightLine(3); // Call bubbleUp
@@ -467,11 +528,11 @@ def _bubble_down(self, idx):
             while (idx > 0) {
                 highlightLine(6); // Loop check
                 let parentIdx = Math.floor((idx - 1) / 2);
-                
+
                 highlight(idx, 'highlight');
                 highlight(parentIdx, 'compare');
-                statusText.textContent = `Comparing ${heap[idx]} with parent ${heap[parentIdx]}`;
-                log(`Comparing node ${heap[idx]} (idx ${idx}) with parent ${heap[parentIdx]} (idx ${parentIdx})`);
+                statusText.textContent = `Comparing patient priority ${heap[idx]} against ${heap[parentIdx]}`;
+                log(`Checking if patient ${heap[idx]} has more severe condition than queue item ${heap[parentIdx]}`);
                 highlightLine(8); // Compare
                 await sleep(800);
 
@@ -481,32 +542,34 @@ def _bubble_down(self, idx):
                     [heap[idx], heap[parentIdx]] = [heap[parentIdx], heap[idx]];
                     draw();
                     highlight(parentIdx, 'highlight'); // New position
-                    statusText.textContent = `Swapped!`;
-                    log(`Swapped ${heap[parentIdx]} and ${heap[idx]} because child < parent.`);
+                    statusText.textContent = `Priority ${heap[parentIdx]} promoted!`;
+                    log(`Swapped! Patient ${heap[parentIdx]} is more urgent than ${heap[idx]}.`);
                     await sleep(600);
                     idx = parentIdx;
                 } else {
-                    statusText.textContent = `Heap property satisfied.`;
-                    log(`Heap property satisfied. ${heap[idx]} >= ${heap[parentIdx]}.`);
+                    statusText.textContent = `Triage escalation complete.`;
+                    log(`Triage sequence valid. Patient ${heap[idx]} is less/equal urgency than ${heap[parentIdx]}.`);
                     break;
                 }
             }
             unhighlightAll();
-            log(`Insert operation complete.`);
+            log(`Admission triage complete.`);
+            isAnimating = false;
         }
 
         async function animateExtractMin() {
+            isAnimating = true;
             renderCode('extractMin');
             const min = heap[0];
             const last = heap.pop();
-            
+
             if (heap.length > 0) {
                 heap[0] = last;
                 draw();
                 highlightStep('swapRoot');
-                statusText.textContent = `Removed min ${min}. Moved last element ${last} to root. Bubbling down...`;
-                log(`Extracted min ${min}. Moved last element ${last} to root (idx 0).`);
-                
+                statusText.textContent = `Treated highest priority patient ${min}. Moving last patient ${last} to evaluating...`;
+                log(`Doctor treated urgent patient ${min}. Re-evaluating waiting list with patient ${last} at index 0.`);
+
                 let idx = 0;
                 highlight(idx, 'highlight');
                 await sleep(800);
@@ -528,8 +591,8 @@ def _bubble_down(self, idx):
                     if (smallest !== idx) {
                         highlight(idx, 'compare');
                         highlight(smallest, 'highlight');
-                        statusText.textContent = `Swapping with smaller child ${heap[smallest]}`;
-                        log(`Swapping ${heap[idx]} with smaller child ${heap[smallest]} (idx ${smallest}).`);
+                        statusText.textContent = `Patient ${heap[smallest]} has higher severity. Swapping...`;
+                        log(`Swapping patient ${heap[idx]} with higher priority patient ${heap[smallest]}.`);
                         await sleep(800);
 
                         highlightStep('swap');
@@ -539,17 +602,18 @@ def _bubble_down(self, idx):
                         highlight(idx, 'highlight');
                         await sleep(600);
                     } else {
-                        log(`Heap property satisfied. Node is smaller than children.`);
+                        log(`ER queue reorder complete. Priority queue stabilized.`);
                         break;
                     }
                 }
             } else {
                 draw();
-                statusText.textContent = `Removed last element ${min}. Heap empty.`;
-                log(`Extracted last element ${min}. Heap is now empty.`);
+                statusText.textContent = `Treated last patient ${min}. ER waiting room empty.`;
+                log(`Doctor treated patient ${min}. ER is now empty.`);
             }
             unhighlightAll();
-            log(`Extract Min operation complete.`);
+            log(`Treatment complete. Ready for next.`);
+            isAnimating = false;
         }
 
         function highlight(idx, className) {
@@ -569,16 +633,16 @@ def _bubble_down(self, idx):
             const code = CODES[op][currentLang];
             const display = document.getElementById('code-display');
             display.innerHTML = '';
-            
+
             const lines = code.split('\n');
             lines.forEach((line, i) => {
                 const div = document.createElement('div');
                 div.className = 'code-line';
-                div.id = `line-${i+1}`;
+                div.id = `line-${i + 1}`;
                 let html = line
                     .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true)\b/g, '<span class="kwd">$1</span>')
                     .replace(/\/\/.*/g, '<span class="com">$&</span>');
-                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                div.innerHTML = `<span class="ln">${i + 1}</span>${html}`;
                 display.appendChild(div);
             });
         }
@@ -589,15 +653,18 @@ def _bubble_down(self, idx):
             if (line) line.classList.add('active');
         }
 
-        function copyCode() {
-            const code = CODES[currentOp][currentLang];
-            navigator.clipboard.writeText(code);
-        }
-
         function switchLang(lang) {
             currentLang = lang;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
+            if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            } else {
+                // Fallback in case event is not accessible easily
+                const btns = document.querySelectorAll('.tab-btn');
+                btns.forEach(b => {
+                    if (b.textContent.toLowerCase() === lang) b.classList.add('active');
+                });
+            }
             renderCode(currentOp);
         }
 
@@ -617,4 +684,5 @@ def _bubble_down(self, idx):
         init();
     </script>
 </body>
+
 </html>

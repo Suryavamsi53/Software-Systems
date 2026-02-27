@@ -99,6 +99,7 @@ ROOT_SIDEBAR = """      <nav class="sidebar-nav">
           <a href="google-roadmap.html" class="nav-item">🗺️ Google Roadmap</a>
           <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
           <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+          <a href="visualizer-dashboard.html" class="nav-item">🎨 Visualizer Dashboard</a>
           <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
         </details>
       </nav>"""

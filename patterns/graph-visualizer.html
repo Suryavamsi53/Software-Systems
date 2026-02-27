@@ -132,7 +132,6 @@
           <!-- Code Panel -->
           <div class="code-section">
             <div class="code-header">
-              <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
               <span>Algorithm Code</span>
               <div class="btn-group">
                 <button class="tab-btn active" onclick="switchLang('go', this)">Go</button>
@@ -642,6 +641,7 @@
 <div class="code-line" id="bellman-python-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> u, v, w <span class="kwd">in</span> edges:</div>
 <div class="code-line" id="bellman-python-6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> dist[u] + w < dist[v]:</div>
 <div class="code-line" id="bellman-python-7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dist[v] = dist[u] + w</div>
+<div class="code-line" id="bellman-python-8">&nbsp;&nbsp;<span class="com"># Check negative cycle</span></div>
               </div>
             </div>
 
@@ -707,10 +707,36 @@
 <div class="code-line" id="astar-go-16">}</div>
               </div>
               <div id="code-astar-java" class="lang-code">
-                 <div style="padding: 20px; color: var(--text-secondary);">Java implementation coming soon...</div>
+<div class="code-line" id="astar-java-1"><span class="kwd">void</span> <span class="func">astar</span>(<span class="type">Node</span> start, <span class="type">Node</span> end) {</div>
+<div class="code-line" id="astar-java-2">&nbsp;&nbsp;<span class="type">PriorityQueue</span>&lt;<span class="type">Node</span>&gt; openSet = <span class="kwd">new</span> <span class="type">PriorityQueue</span>&lt;&gt;();</div>
+<div class="code-line" id="astar-java-3">&nbsp;&nbsp;openSet.<span class="func">add</span>(start); gScore.<span class="func">put</span>(start, <span class="num">0</span>);</div>
+<div class="code-line" id="astar-java-4">&nbsp;&nbsp;<span class="kwd">while</span> (!openSet.<span class="func">isEmpty</span>()) {</div>
+<div class="code-line" id="astar-java-5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">Node</span> current = openSet.<span class="func">poll</span>();</div>
+<div class="code-line" id="astar-java-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (current.<span class="func">equals</span>(end)) <span class="kwd">return</span>;</div>
+<div class="code-line" id="astar-java-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> (<span class="type">Node</span> neighbor : <span class="func">getNeighbors</span>(current)) {</div>
+<div class="code-line" id="astar-java-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> tentativeG = gScore.<span class="func">get</span>(current) + <span class="func">dist</span>(current, neighbor);</div>
+<div class="code-line" id="astar-java-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> (tentativeG < gScore.<span class="func">getOrDefault</span>(neighbor, <span class="type">Integer</span>.MAX_VALUE)) {</div>
+<div class="code-line" id="astar-java-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gScore.<span class="func">put</span>(neighbor, tentativeG);</div>
+<div class="code-line" id="astar-java-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="type">int</span> fScore = tentativeG + <span class="func">heuristic</span>(neighbor, end);</div>
+<div class="code-line" id="astar-java-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;openSet.<span class="func">add</span>(<span class="kwd">new</span> <span class="type">Node</span>(neighbor, fScore));</div>
+<div class="code-line" id="astar-java-13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-java-14">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-java-15">&nbsp;&nbsp;}</div>
+<div class="code-line" id="astar-java-16">}</div>
               </div>
               <div id="code-astar-python" class="lang-code">
-                 <div style="padding: 20px; color: var(--text-secondary);">Python implementation coming soon...</div>
+<div class="code-line" id="astar-python-1"><span class="kwd">def</span> <span class="func">astar</span>(start, end):</div>
+<div class="code-line" id="astar-python-2">&nbsp;&nbsp;open_set = [(<span class="num">0</span>, start)]</div>
+<div class="code-line" id="astar-python-3">&nbsp;&nbsp;g_score = {start: <span class="num">0</span>}</div>
+<div class="code-line" id="astar-python-4">&nbsp;&nbsp;<span class="kwd">while</span> open_set:</div>
+<div class="code-line" id="astar-python-5">&nbsp;&nbsp;&nbsp;&nbsp;_, current = heapq.<span class="func">heappop</span>(open_set)</div>
+<div class="code-line" id="astar-python-6">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> current == end: <span class="kwd">return</span></div>
+<div class="code-line" id="astar-python-7">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> neighbor <span class="kwd">in</span> <span class="func">get_neighbors</span>(current):</div>
+<div class="code-line" id="astar-python-8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tentative_g = g_score[current] + <span class="func">dist</span>(current, neighbor)</div>
+<div class="code-line" id="astar-python-9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> tentative_g < g_score.<span class="func">get</span>(neighbor, <span class="func">float</span>(<span class="str">'inf'</span>)):</div>
+<div class="code-line" id="astar-python-10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;g_score[neighbor] = tentative_g</div>
+<div class="code-line" id="astar-python-11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f_score = tentative_g + <span class="func">heuristic</span>(neighbor, end)</div>
+<div class="code-line" id="astar-python-12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;heapq.<span class="func">heappush</span>(open_set, (f_score, neighbor))</div>
               </div>
             </div>
 
@@ -824,14 +850,6 @@
       </div>
     </main>
   </div>
-  <script>
-    function copyCode() {
-      const activeCodeBlock = document.querySelector('.algo-code.active .lang-code.active');
-      if (activeCodeBlock) {
-        navigator.clipboard.writeText(activeCodeBlock.innerText);
-      }
-    }
-  </script>
 
   <script src="graph-visualizer.js"></script>
 </body>

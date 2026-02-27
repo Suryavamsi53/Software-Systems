@@ -1,10 +1,817 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta http-equiv="refresh" content="0; url=binary-search.html">
-    <title>Redirecting...</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Database Index Visualizer</title>
+    <link rel="stylesheet" href="../styles.css">
+    <style>
+        /* Array View Specific */
+        .array-view {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 40px 20px 80px 20px;
+            /* Extra bottom padding for pointers */
+            flex-wrap: wrap;
+            height: 100%;
+            background: var(--bg-secondary);
+        }
+
+        .array-cell-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-tertiary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--text-primary);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .array-index {
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* Pointer Arrows */
+        .pointer {
+            position: absolute;
+            bottom: -35px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+        }
+
+        .pointer.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .ptr-left {
+            color: #38bdf8;
+            border: 1px solid #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            bottom: -35px;
+        }
+
+        .ptr-right {
+            color: #f472b6;
+            border: 1px solid #f472b6;
+            background: rgba(244, 114, 182, 0.1);
+            bottom: -65px;
+        }
+
+        .ptr-mid {
+            color: #facc15;
+            border: 1px solid #facc15;
+            background: rgba(250, 204, 21, 0.1);
+            bottom: -95px;
+        }
+
+        /* Animation Classes */
+        .cell-mid {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-color: #facc15;
+            color: #facc15;
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .cell-dimmed {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        .cell-found {
+            background-color: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+            color: #22c55e;
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+            z-index: 10;
+        }
+
+        .control-input {
+            width: 100%;
+            padding: 10px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-family: inherit;
+        }
+
+        /* Layout & Code Panel */
+        .no-padding {
+            padding: 0 !important;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viz-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: var(--bg-primary);
+        }
+
+        .algo-toolbar {
+            padding: 15px 20px;
+            background-color: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .split-view {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .code-section {
+            flex: 1;
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            min-width: 380px;
+        }
+
+        .code-header {
+            padding: 10px 15px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-group {
+            display: flex;
+            width: 100%;
+            gap: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab-btn.active {
+            background: var(--bg-secondary);
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .algo-code {
+            display: none;
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .algo-code.active {
+            display: block;
+        }
+
+        .code-line {
+            padding: 2px 8px;
+            border-radius: 4px;
+            border-left: 3px solid transparent;
+        }
+
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.15);
+            color: #facc15;
+            border-left-color: #facc15;
+        }
+
+        .ln {
+            color: var(--text-muted);
+            margin-right: 15px;
+            user-select: none;
+            display: inline-block;
+            width: 20px;
+            text-align: right;
+        }
+
+        .kwd {
+            color: #c678dd;
+            font-weight: bold;
+        }
+
+        .func {
+            color: #61afef;
+        }
+
+        .com {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .log-section {
+            height: 200px;
+            background-color: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding: 15px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .log-entry {
+            margin-bottom: 6px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.4;
+        }
+
+        .log-highlight {
+            color: #facc15;
+            font-weight: bold;
+        }
+
+        .action-btn {
+            width: 100%;
+            margin-bottom: 8px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .scenario-box {
+            padding: 15px;
+            background: rgba(56, 189, 248, 0.05);
+            border-left: 4px solid #38bdf8;
+            margin: 15px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+    </style>
 </head>
+
 <body>
-    <p>Redirecting to <a href="binary-search.html">Binary Search</a>...</p>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1 style="color: #e5e7eb; font-size: 1.4rem;">Database Indexing</h1>
+                <p>Binary Search Visualizer</p>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Navigation</div>
+                <a href="../visualizer-dashboard.html" class="nav-item">Back to Dashboard</a>
+            </div>
+
+            <div class="nav-section">
+                <div class="nav-section-title">Query Operations</div>
+                <div style="padding: 0 20px;">
+                    <label
+                        style="display:block; margin-bottom:5px; font-size:0.8rem; color:var(--text-muted); text-transform:uppercase;">Target
+                        User ID</label>
+                    <input type="number" id="target-input" class="control-input" value="459">
+
+                    <button class="action-btn btn-primary" onclick="startSearch('exact')">Find Exact ID</button>
+                    <button class="action-btn btn-secondary" onclick="startSearch('first')">Find First
+                        Occurrence</button>
+                    <button class="action-btn btn-secondary" onclick="startSearch('last')">Find Last Occurrence</button>
+
+                    <div style="margin-top: 20px;">
+                        <button class="action-btn btn-secondary" style="border-color: #ef4444; color: #ef4444;"
+                            onclick="resetArray()">Reset Database</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text"
+                        style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">
+                        Status: <span style="color: #38bdf8;">Waiting for query...</span>
+                    </div>
+                </div>
+
+                <div class="split-view">
+                    <!-- Left: Visualization -->
+                    <div class="canvas-section">
+
+                        <div class="scenario-box">
+                            <strong style="color: #e5e7eb; display:block; margin-bottom:5px;">Real-World System
+                                Scenario:</strong>
+                            In massive databases (like Top Tech's order history), seeking a specific record via linear
+                            scan is O(N)—too slow for millions of rows.
+                            Instead, databases maintain <strong>Sorted B-Trees/Indexes</strong>. Searching these sorted
+                            indexes uses Binary Search to find a target in <strong>O(log N)</strong> time, rapidly
+                            halving the search space.
+                        </div>
+
+                        <div class="array-view" id="array-container">
+                            <!-- Array cells injected by JS -->
+                        </div>
+
+                        <div class="log-section" id="log-panel">
+                            <div class="log-entry">> Database engine initialized. Sorted index loaded into memory.</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <div class="btn-group">
+                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
+                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
+                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div id="code-display" class="algo-code active"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Core App Scripting -->
+    <script src="../script.js"></script>
+    <script>
+        const ARRAY_DATA = [102, 245, 310, 310, 310, 459, 622, 622, 700, 819, 934, 1056];
+        const container = document.getElementById('array-container');
+        const statusText = document.getElementById('status-text');
+        const logPanel = document.getElementById('log-panel');
+        const input = document.getElementById('target-input');
+
+        let currentLang = 'go';
+        let currentMode = 'exact';
+        let isAnimating = false;
+
+        const CODES = {
+            exact: {
+                go: `func binarySearch(arr []int, target int) int {
+    left, right := 0, len(arr)-1
+    
+    for left <= right {
+        mid := left + (right-left)/2
+        
+        if arr[mid] == target {
+            return mid
+        } else if arr[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return -1 // Target not found
+}`,
+                java: `public int binarySearch(int[] arr, int target) {
+    int left = 0, right = arr.length - 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            return mid;
+        } else if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return -1;
+}`,
+                python: `def binary_search(arr, target):
+    left, right = 0, len(arr) - 1
+    
+    while left <= right:
+        mid = left + (right - left) // 2
+        
+        if arr[mid] == target:
+            return mid
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return -1`
+            },
+            first: {
+                go: `func findFirst(arr []int, target int) int {
+    left, right := 0, len(arr)-1
+    res := -1
+    
+    for left <= right {
+        mid := left + (right-left)/2
+        
+        if arr[mid] == target {
+            res = mid
+            right = mid - 1 // Search left half
+        } else if arr[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return res
+}`,
+                java: `public int findFirst(int[] arr, int target) {
+    int left = 0, right = arr.length - 1;
+    int res = -1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            res = mid;
+            right = mid - 1; // Keep searching left
+        } else if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return res;
+}`,
+                python: `def find_first(arr, target):
+    left, right = 0, len(arr) - 1
+    res = -1
+    
+    while left <= right:
+        mid = left + (right - left) // 2
+        
+        if arr[mid] == target:
+            res = mid
+            right = mid - 1 # Keep searching left
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return res`
+            },
+            last: {
+                go: `func findLast(arr []int, target int) int {
+    left, right := 0, len(arr)-1
+    res := -1
+    
+    for left <= right {
+        mid := left + (right-left)/2
+        
+        if arr[mid] == target {
+            res = mid
+            left = mid + 1 // Search right half
+        } else if arr[mid] < target {
+            left = mid + 1
+        } else {
+            right = mid - 1
+        }
+    }
+    return res
+}`,
+                java: `public int findLast(int[] arr, int target) {
+    int left = 0, right = arr.length - 1;
+    int res = -1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            res = mid;
+            left = mid + 1; // Keep searching right
+        } else if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    return res;
+}`,
+                python: `def find_last(arr, target):
+    left, right = 0, len(arr) - 1
+    res = -1
+    
+    while left <= right:
+        mid = left + (right - left) // 2
+        
+        if arr[mid] == target:
+            res = mid
+            left = mid + 1 # Keep searching right
+        elif arr[mid] < target:
+            left = mid + 1
+        else:
+            right = mid - 1
+            
+    return res`
+            }
+        };
+
+        const LINE_MAP = {
+            exact: { init: 2, loop: 4, mid: 5, checkEq: 7, retEq: 8, checkLess: 9, moveLeft: 10, checkGreater: 11, moveRight: 12, notFound: 15 },
+            first: { init: 2, loop: 5, mid: 6, checkEq: 8, recMid: 9, moveLeftEq: 10, checkLess: 11, moveLeft: 12, checkGreater: 13, moveRight: 14, notFound: 17 },
+            last: { init: 2, loop: 5, mid: 6, checkEq: 8, recMid: 9, moveRightEq: 10, checkLess: 11, moveLeft: 12, checkGreater: 13, moveRight: 14, notFound: 17 }
+        };
+
+        function drawArray() {
+            container.innerHTML = '';
+            ARRAY_DATA.forEach((val, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'array-cell-container';
+
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                cell.id = \`cell-\${idx}\`;
+                cell.textContent = val;
+
+                const indexLab = document.createElement('div');
+                indexLab.className = 'array-index';
+                indexLab.textContent = \`[\${idx}]\`;
+
+                const ptrL = document.createElement('div');
+                ptrL.className = 'pointer ptr-left';
+                ptrL.id = \`ptr-l-\${idx}\`;
+                ptrL.textContent = 'L';
+
+                const ptrR = document.createElement('div');
+                ptrR.className = 'pointer ptr-right';
+                ptrR.id = \`ptr-r-\${idx}\`;
+                ptrR.textContent = 'R';
+
+                const ptrM = document.createElement('div');
+                ptrM.className = 'pointer ptr-mid';
+                ptrM.id = \`ptr-m-\${idx}\`;
+                ptrM.textContent = 'M';
+
+                wrapper.appendChild(cell);
+                wrapper.appendChild(indexLab);
+                wrapper.appendChild(ptrL);
+                wrapper.appendChild(ptrR);
+                wrapper.appendChild(ptrM);
+                
+                container.appendChild(wrapper);
+            });
+        }
+
+        function renderCode(mode) {
+            currentMode = mode;
+            const code = CODES[mode][currentLang];
+            const display = document.getElementById('code-display');
+            display.innerHTML = '';
+
+            const lines = code.split('\\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = \`line-\${i + 1}\`;
+                
+                let html = line
+                    .replace(/\\b(func|var|return|if|else|elif|for|while|def|class|public|int|bool)\\b/g, '<span class="kwd">$&</span>')
+                    .replace(/\\b(binarySearch|findFirst|findLast)\\b/g, '<span class="func">$&</span>')
+                    .replace(/\\/\\/.*/g, '<span class="com">$&</span>')
+                    .replace(/#.*/g, '<span class="com">$&</span>');
+                    
+                div.innerHTML = \`<span class="ln">\${i + 1}</span>\${html}\`;
+                display.appendChild(div);
+            });
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (window.event && window.event.target) {
+                window.event.target.classList.add('active');
+            }
+            renderCode(currentMode);
+        }
+
+        function highlightLine(key) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const map = LINE_MAP[currentMode];
+            if (map && map[key]) {
+                const line = document.getElementById(\`line-\${map[key]}\`);
+                if (line) {
+                    line.classList.add('active');
+                    line.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        function log(msg) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = \`> \${msg}\`;
+            logPanel.appendChild(entry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        function clearPointers() {
+            document.querySelectorAll('.pointer').forEach(p => p.classList.remove('show'));
+            document.querySelectorAll('.array-cell').forEach(c => {
+                c.classList.remove('cell-mid', 'cell-dimmed', 'cell-found');
+            });
+        }
+
+        function setPointer(type, idx) {
+            document.querySelectorAll(\`.ptr-\${type}\`).forEach(p => p.classList.remove('show'));
+            if (idx >= 0 && idx < ARRAY_DATA.length) {
+                const p = document.getElementById(\`ptr-\${type.charAt(0)}-\${idx}\`);
+                if (p) p.classList.add('show');
+            }
+        }
+
+        function dimOutside(left, right) {
+            ARRAY_DATA.forEach((_, idx) => {
+                const cell = document.getElementById(\`cell-\${idx}\`);
+                if (idx < left || idx > right) {
+                    cell.classList.add('cell-dimmed');
+                } else {
+                    cell.classList.remove('cell-dimmed');
+                }
+            });
+        }
+
+        const sleep = ms => new Promise(res => setTimeout(res, ms));
+
+        async function startSearch(mode) {
+            if (isAnimating) return;
+            const target = parseInt(input.value);
+            if (isNaN(target)) return;
+            
+            isAnimating = true;
+            resetArray();
+            renderCode(mode);
+            
+            statusText.innerHTML = \`Status: <span style="color: #facc15;">Searching index for User ID \${target}...</span>\`;
+            log(\`Starting \${mode} binary search for Target = <span class="log-highlight">\${target}</span>\`);
+
+            let left = 0;
+            let right = ARRAY_DATA.length - 1;
+            let result = -1;
+
+            highlightLine('init');
+            setPointer('left', left);
+            setPointer('right', right);
+            await sleep(1000);
+
+            while (left <= right) {
+                highlightLine('loop');
+                dimOutside(left, right);
+                log(\`\\nSearch space narrowed to indices [\${left} ... \${right}]\`);
+                await sleep(800);
+
+                highlightLine('mid');
+                let mid = Math.floor(left + (right - left) / 2);
+                setPointer('mid', mid);
+                const midCell = document.getElementById(\`cell-\${mid}\`);
+                midCell.classList.add('cell-mid');
+                
+                log(\`Calculated Mid = \${mid}. Value at array[\${mid}] is <span class="log-highlight">\${ARRAY_DATA[mid]}</span>\`);
+                statusText.innerHTML = \`Status: <span style="color: #facc15;">Comparing \${ARRAY_DATA[mid]} with target \${target}...</span>\`;
+                await sleep(1500);
+
+                highlightLine('checkEq');
+                await sleep(800);
+
+                if (ARRAY_DATA[mid] === target) {
+                    midCell.classList.remove('cell-mid');
+                    midCell.classList.add('cell-found');
+                    
+                    if (mode === 'exact') {
+                        highlightLine('retEq');
+                        result = mid;
+                        log(\`Target match found exactly at index \${mid}! Search terminates in O(log N).\`);
+                        break;
+                    } else if (mode === 'first') {
+                        highlightLine('recMid');
+                        result = mid;
+                        log(\`Found match at index \${mid}. Recording as potential first occurrence.\`);
+                        await sleep(800);
+                        highlightLine('moveLeftEq');
+                        right = mid - 1;
+                        log(\`Since we want FIRST occurrence, moving RIGHT pointer to \${mid - 1} to search left half.\`);
+                    } else if (mode === 'last') {
+                        highlightLine('recMid');
+                        result = mid;
+                        log(\`Found match at index \${mid}. Recording as potential last occurrence.\`);
+                        await sleep(800);
+                        highlightLine('moveRightEq');
+                        left = mid + 1;
+                        log(\`Since we want LAST occurrence, moving LEFT pointer to \${mid + 1} to search right half.\`);
+                    }
+                } else {
+                    highlightLine('checkLess');
+                    await sleep(600);
+                    if (ARRAY_DATA[mid] < target) {
+                        highlightLine('moveLeft');
+                        log(\`\${ARRAY_DATA[mid]} < \${target}. Target must be in right half. Moving LEFT pointer to \${mid + 1}.\`);
+                        left = mid + 1;
+                    } else {
+                        highlightLine('checkGreater');
+                        await sleep(400);
+                        highlightLine('moveRight');
+                        log(\`\${ARRAY_DATA[mid]} > \${target}. Target must be in left half. Moving RIGHT pointer to \${mid - 1}.\`);
+                        right = mid - 1;
+                    }
+                }
+
+                midCell.classList.remove('cell-mid');
+                setPointer('left', left);
+                setPointer('right', right);
+                document.getElementById(\`ptr-m-\${mid}\`).classList.remove('show');
+                await sleep(1000);
+            }
+
+            if (result !== -1) {
+                statusText.innerHTML = \`Status: <span style="color: #22c55e; font-weight: bold;">Mission Accomplished. Found ID \${target} at index \${result}.</span>\`;
+                log(\`\\n✅ Final Answer: Index \${result}.\`);
+                
+                clearPointers();
+                if (result !== -1) {
+                    document.getElementById(\`cell-\${result}\`).classList.add('cell-found');
+                    dimOutside(result, result);
+                }
+            } else {
+                highlightLine('notFound');
+                statusText.innerHTML = \`Status: <span style="color: #ef4444; font-weight: bold;">Record not found.</span>\`;
+                log(\`\\n❌ Search exhausted. Target ID \${target} does not exist in the database index.\`);
+                clearPointers();
+                dimOutside(-1, -1); // Dim everything
+            }
+
+            isAnimating = false;
+        }
+
+        function resetArray() {
+            if (isAnimating) return;
+            clearPointers();
+            dimOutside(-1, ARRAY_DATA.length); // undim all
+            logPanel.innerHTML = '<div class="log-entry">> Database engine initialized. Sorted index loaded into memory.</div>';
+            statusText.innerHTML = 'Status: <span style="color: #38bdf8;">Waiting for query...</span>';
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+        }
+
+        // Init
+        drawArray();
+        renderCode('exact');
+        if (typeof initThemeToggle === 'function') initThemeToggle();
+    </script>
 </body>
+
 </html>

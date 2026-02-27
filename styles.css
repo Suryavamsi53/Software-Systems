@@ -9,29 +9,64 @@
 }
 
 :root {
-  /* Dark Navy Base */
-  --bg-primary: #0f172a;
-  --bg-secondary: #020617;
-  --bg-tertiary: #1e293b;
-  
+  /* Pure Black Dark Theme Base */
+  --bg-primary: #000000;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #171717;
+
   /* Text Colors */
-  --text-primary: #e5e7eb;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+
   /* Callout Colors */
-  --callout-green: #22c55e;      /* Amazon expects */
-  --callout-red: #ef4444;        /* Common mistakes */
-  --callout-blue: #38bdf8;       /* Key intuition */
-  --callout-yellow: #facc15;     /* Interview tip */
-  --callout-purple: #a78bfa;     /* Advanced follow-up */
-  
+  --callout-green: #10b981;
+  /* Success */
+  --callout-red: #ef4444;
+  /* Error */
+  --callout-blue: #3b82f6;
+  /* Info */
+  --callout-yellow: #f59e0b;
+  /* Warning */
+  --callout-purple: #8b5cf6;
+  /* Advanced */
+
   /* Other */
-  --border-color: #334155;
+  --border-color: #262626;
   --accent-color: #3b82f6;
 }
 
-html, body {
+/* Light Theme Variables */
+body.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f4f4f5;
+
+  --text-primary: #000000;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+
+  --border-color: #e4e4e7;
+  --accent-color: #2563eb;
+}
+
+html,
+body,
+.sidebar,
+.main-content,
+.nav-item,
+.callout,
+.code-block,
+button,
+.collapsible,
+input,
+div,
+span {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html,
+body {
   width: 100%;
   height: 100%;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -456,6 +491,7 @@ button:hover {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -588,7 +624,8 @@ button:hover {
   font-size: 2rem;
   cursor: pointer;
   line-height: 1;
-  display: none; /* Hidden on desktop */
+  display: none;
+  /* Hidden on desktop */
   z-index: 1002;
 }
 
@@ -615,7 +652,7 @@ body.sidebar-active .sidebar-overlay {
   .sidebar {
     width: 240px;
   }
-  
+
   .main-content {
     padding: 30px;
   }
@@ -623,7 +660,8 @@ body.sidebar-active .sidebar-overlay {
 
 @media (max-width: 768px) {
   .container {
-    flex-direction: row; /* Keep row but sidebar is fixed */
+    flex-direction: row;
+    /* Keep row but sidebar is fixed */
   }
 
   .hamburger-btn {
@@ -633,33 +671,34 @@ body.sidebar-active .sidebar-overlay {
   .sidebar-close-btn {
     display: block;
   }
-  
+
   .sidebar {
     position: fixed;
-    left: -280px; /* Hide off-screen */
+    left: -280px;
+    /* Hide off-screen */
     top: 0;
     height: 100vh;
     width: 280px;
     z-index: 1000;
     transition: left 0.3s ease-in-out;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
     border-right: 1px solid var(--border-color);
   }
 
   body.sidebar-active .sidebar {
     left: 0;
   }
-  
+
   .main-content {
     padding: 20px;
     flex: 1;
     overflow-y: auto;
   }
-  
+
   .content-header h1 {
     font-size: 2rem;
   }
-  
+
   .section-title {
     font-size: 1.3rem;
   }
@@ -695,11 +734,11 @@ body.sidebar-active .sidebar-overlay {
   .sidebar {
     display: none;
   }
-  
+
   .main-content {
     padding: 0;
   }
-  
+
   .collapsible-content {
     display: block !important;
   }

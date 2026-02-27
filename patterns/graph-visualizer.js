@@ -126,10 +126,13 @@ class Renderer {
                     <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
                 </marker>
             </defs>
-            <g id="edges-layer"></g>
-            <g id="nodes-layer"></g>
+            <g id="viewport">
+                <g id="edges-layer"></g>
+                <g id="nodes-layer"></g>
+            </g>
         `;
         
+        this.viewport = document.getElementById('viewport');
         this.edgesLayer = document.getElementById('edges-layer');
         this.nodesLayer = document.getElementById('nodes-layer');
     }
@@ -281,6 +284,58 @@ class Renderer {
             if (this.graph.isDirected) el.setAttribute('marker-end', 'url(#arrowhead)');
         });
     }
+
+    setTransform(x, y, k) {
+        this.viewport.setAttribute('transform', `translate(${x}, ${y}) scale(${k})`);
+    }
+
+    updateNodePosition(node) {
+        const el = document.getElementById(`node-${node.id}`);
+        if (!el) return;
+
+        if (this.graph.isGrid) {
+            const CELL_SIZE = 40;
+            el.setAttribute('x', node.x * CELL_SIZE);
+            el.setAttribute('y', node.y * CELL_SIZE);
+        } else {
+            // Update Node Group
+            const group = el.closest('.node-group');
+            if (group) group.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+
+            // Update Connected Edges
+            this.graph.edges.forEach(edge => {
+                if (edge.source === node.id || edge.target === node.id) {
+                    const line = document.getElementById(`edge-${edge.source}-${edge.target}`);
+                    if (line) {
+                        const otherId = edge.source === node.id ? edge.target : edge.source;
+                        const other = this.graph.nodes.find(n => n.id === otherId);
+                        if (other) {
+                            if (edge.source === node.id) {
+                                line.setAttribute('x1', node.x);
+                                line.setAttribute('y1', node.y);
+                            } else {
+                                line.setAttribute('x2', other.x);
+                                line.setAttribute('y2', other.y);
+                                line.setAttribute('x2', node.x);
+                                line.setAttribute('y2', node.y);
+                            }
+                            
+                            // Update Weight Label
+                            if (this.graph.isWeighted) {
+                                const midX = (node.x + other.x) / 2;
+                                const midY = (node.y + other.y) / 2;
+                                const g = line.parentElement;
+                                const rect = g.querySelector('rect');
+                                const text = g.querySelector('text');
+                                if (rect) { rect.setAttribute('x', midX - 10); rect.setAttribute('y', midY - 10); }
+                                if (text) { text.setAttribute('x', midX); text.setAttribute('y', midY); }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
 }
 
 // ============================================================
@@ -326,25 +381,29 @@ class Algorithms {
     static *dfs(graph, startId) {
         const adj = graph.getAdjacencyList();
         const visited = new Set();
+        const stack = [];
         
         // Recursive generator
         function* recurse(u) {
-            yield { type: 'visit', node: u, msg: `DFS(${u}) called`, lines: { go: 1, java: 1, python: 1 } };
+            stack.push(u);
+            yield { type: 'visit', node: u, queue: [...stack], msg: `DFS(${u}) called`, lines: { go: 1, java: 1, python: 1 } };
             
             if (visited.has(u)) {
-                yield { type: 'check', node: u, msg: `${u} visited. Return.`, lines: { go: 2, java: 2, python: 2 } };
+                stack.pop();
+                yield { type: 'check', node: u, queue: [...stack], msg: `${u} visited. Return.`, lines: { go: 2, java: 2, python: 2 } };
                 return;
             }
 
             visited.add(u);
-            yield { type: 'process', node: u, msg: `Mark ${u} visited`, lines: { go: 3, java: 3, python: 3 } };
+            yield { type: 'process', node: u, queue: [...stack], msg: `Mark ${u} visited`, lines: { go: 3, java: 3, python: 3 } };
 
             const neighbors = adj.get(u) || [];
             for (const { to: v } of neighbors) {
-                yield { type: 'explore', edge: [u, v], msg: `Loop neighbor ${v}`, lines: { go: 5, java: 5, python: 5 } };
+                yield { type: 'explore', edge: [u, v], queue: [...stack], msg: `Loop neighbor ${v}`, lines: { go: 5, java: 5, python: 5 } };
                 yield* recurse(v);
             }
-            yield { type: 'backtrack', node: u, msg: `Finished ${u}`, lines: { go: 8, java: 8, python: 6 } };
+            stack.pop();
+            yield { type: 'backtrack', node: u, queue: [...stack], msg: `Finished ${u}`, lines: { go: 8, java: 8, python: 6 } };
         }
 
         yield* recurse(startId);
@@ -360,14 +419,14 @@ class Algorithms {
         graph.nodes.forEach(n => dist.set(n.id, Infinity));
         dist.set(startId, 0);
 
-        yield { type: 'init', dist: new Map(dist), msg: `Initialize distances. Start: ${startId}`, lines: { go: 2, java: 2, python: 2 } };
+        yield { type: 'init', dist: new Map(dist), queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Initialize distances. Start: ${startId}`, lines: { go: 2, java: 2, python: 2 } };
 
         while (pq.length > 0) {
             // Sort to simulate Min-Priority Queue
             pq.sort((a, b) => a.dist - b.dist);
             const { id: u, dist: d } = pq.shift();
 
-            yield { type: 'process', node: u, dist: new Map(dist), msg: `Processing node ${u} (dist: ${d})`, lines: { go: 6, java: 6, python: 5 } };
+            yield { type: 'process', node: u, dist: new Map(dist), queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Processing node ${u} (dist: ${d})`, lines: { go: 6, java: 6, python: 5 } };
 
             if (d > dist.get(u)) continue;
 
@@ -378,7 +437,7 @@ class Algorithms {
                     dist.set(v, alt);
                     prev.set(v, u);
                     pq.push({ id: v, dist: alt });
-                    yield { type: 'relax', edge: [u, v], dist: new Map(dist), msg: `Relaxing edge ${u}->${v}. New dist: ${alt}`, lines: { go: 10, java: 10, python: 9 } };
+                    yield { type: 'relax', edge: [u, v], dist: new Map(dist), queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Relaxing edge ${u}->${v}. New dist: ${alt}`, lines: { go: 10, java: 10, python: 9 } };
                 }
             }
         }
@@ -462,7 +521,7 @@ class Algorithms {
                         if(!visited.has(v)) {
                             visited.add(v);
                             queue.push(v);
-                            yield { type: 'visit', node: v, edge: [u, v], msg: `Mark ${v} as part of Component #${count}`, lines: { go: 5, java: 5, python: 5 } };
+                            yield { type: 'visit', node: v, edge: [u, v], queue: [...queue], msg: `Mark ${v} as part of Component #${count}`, lines: { go: 5, java: 5, python: 5 } };
                         }
                     }
                 }
@@ -475,6 +534,7 @@ class Algorithms {
         const adj = graph.getAdjacencyList();
         const visited = new Set();
         const visiting = new Set(); // Recursion stack for directed
+        const stack = [];
         let cycleFound = false;
 
         function* dfs(u, parent) {
@@ -482,24 +542,25 @@ class Algorithms {
             
             visiting.add(u);
             visited.add(u);
-            yield { type: 'visit', node: u, msg: `Visiting ${u}`, lines: { go: 2, java: 2, python: 2 } };
+            stack.push(u);
+            yield { type: 'visit', node: u, queue: [...stack], msg: `Visiting ${u}`, lines: { go: 2, java: 2, python: 2 } };
 
             const neighbors = adj.get(u) || [];
             for (const {to: v} of neighbors) {
                 if (cycleFound) return;
                 
-                yield { type: 'explore', edge: [u, v], msg: `Checking edge ${u}->${v}`, lines: { go: 3, java: 3, python: 3 } };
+                yield { type: 'explore', edge: [u, v], queue: [...stack], msg: `Checking edge ${u}->${v}`, lines: { go: 3, java: 3, python: 3 } };
 
                 if (graph.isDirected) {
                     if (visiting.has(v)) {
                         cycleFound = true;
-                        yield { type: 'process', node: v, edge: [u, v], msg: `Cycle detected! Back edge to ${v}`, lines: { go: 4, java: 4, python: 4 } };
+                        yield { type: 'process', node: v, edge: [u, v], queue: [...stack], msg: `Cycle detected! Back edge to ${v}`, lines: { go: 4, java: 4, python: 4 } };
                         return;
                     }
                 } else {
                     if (visited.has(v) && v !== parent) {
                         cycleFound = true;
-                        yield { type: 'process', node: v, edge: [u, v], msg: `Cycle detected! Back edge to ${v}`, lines: { go: 4, java: 4, python: 4 } };
+                        yield { type: 'process', node: v, edge: [u, v], queue: [...stack], msg: `Cycle detected! Back edge to ${v}`, lines: { go: 4, java: 4, python: 4 } };
                         return;
                     }
                 }
@@ -510,7 +571,8 @@ class Algorithms {
             }
             
             visiting.delete(u);
-            yield { type: 'backtrack', node: u, msg: `Finished ${u}`, lines: { go: 9, java: 9, python: 9 } };
+            stack.pop();
+            yield { type: 'backtrack', node: u, queue: [...stack], msg: `Finished ${u}`, lines: { go: 9, java: 9, python: 9 } };
         }
 
         for (const node of graph.nodes) {
@@ -547,7 +609,7 @@ class Algorithms {
                         colors.set(v, newColor);
                         queue.push(v);
                         yield { 
-                            type: 'visit', node: v, edge: [u, v], 
+                            type: 'visit', node: v, edge: [u, v], queue: [...queue],
                             msg: `Color ${v} ${newColor===0?'Red':'Blue'} (${newColor})`, 
                             lines: { go: 9, java: 9, python: 9 } 
                         };
@@ -591,18 +653,18 @@ class Algorithms {
             return false;
         }
         
-        yield { type: 'init', msg: 'Sort edges by weight', lines: { go: 2, java: 2, python: 2 } };
+        yield { type: 'init', queue: edges.map(e=>`${e.source}-${e.target}:${e.weight||1}`), msg: 'Sort edges by weight', lines: { go: 2, java: 2, python: 2 } };
         
         let mstWeight = 0;
         
         for (const edge of edges) {
-            yield { type: 'explore', edge: [edge.source, edge.target], msg: `Check edge ${edge.source}-${edge.target} (w:${edge.weight||1})`, lines: { go: 4, java: 4, python: 4 } };
+            yield { type: 'explore', edge: [edge.source, edge.target], queue: edges.map(e=>`${e.source}-${e.target}:${e.weight||1}`), msg: `Check edge ${edge.source}-${edge.target} (w:${edge.weight||1})`, lines: { go: 4, java: 4, python: 4 } };
             
             if (union(edge.source, edge.target)) {
                 mstWeight += (edge.weight || 1);
-                yield { type: 'relax', edge: [edge.source, edge.target], msg: `Add to MST. Total: ${mstWeight}`, lines: { go: 6, java: 5, python: 5 } };
+                yield { type: 'relax', edge: [edge.source, edge.target], queue: edges.map(e=>`${e.source}-${e.target}:${e.weight||1}`), msg: `Add to MST. Total: ${mstWeight}`, lines: { go: 6, java: 5, python: 5 } };
             } else {
-                yield { type: 'process', edge: [edge.source, edge.target], msg: `Cycle detected. Skip.`, lines: { go: 4, java: 4, python: 4 } };
+                yield { type: 'process', edge: [edge.source, edge.target], queue: edges.map(e=>`${e.source}-${e.target}:${e.weight||1}`), msg: `Cycle detected. Skip.`, lines: { go: 4, java: 4, python: 4 } };
             }
         }
         
@@ -619,7 +681,7 @@ class Algorithms {
         graph.nodes.forEach(n => dist.set(n.id, Infinity));
         dist.set(startId, 0);
 
-        yield { type: 'init', msg: `Start Prim's from ${startId}`, lines: { go: 2, java: 2, python: 2 } };
+        yield { type: 'init', queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Start Prim's from ${startId}`, lines: { go: 2, java: 2, python: 2 } };
 
         let mstCost = 0;
 
@@ -629,7 +691,7 @@ class Algorithms {
             const { id: u, dist: d } = pq.shift();
 
             if (visited.has(u)) {
-                yield { type: 'check', node: u, msg: `Node ${u} already visited. Skip.`, lines: { go: 6, java: 6, python: 6 } };
+                yield { type: 'check', node: u, queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Node ${u} already visited. Skip.`, lines: { go: 6, java: 6, python: 6 } };
                 continue;
             }
 
@@ -637,20 +699,20 @@ class Algorithms {
             mstCost += d;
             
             if (parent.has(u)) {
-                yield { type: 'relax', edge: [parent.get(u), u], msg: `Add edge ${parent.get(u)}-${u} to MST. Cost: ${mstCost}`, lines: { go: 7, java: 7, python: 7 } };
+                yield { type: 'relax', edge: [parent.get(u), u], queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Add edge ${parent.get(u)}-${u} to MST. Cost: ${mstCost}`, lines: { go: 7, java: 7, python: 7 } };
             } else {
-                yield { type: 'process', node: u, msg: `Visit ${u}. Cost: ${mstCost}`, lines: { go: 7, java: 7, python: 7 } };
+                yield { type: 'process', node: u, queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Visit ${u}. Cost: ${mstCost}`, lines: { go: 7, java: 7, python: 7 } };
             }
 
             const neighbors = adj.get(u) || [];
             for (const { to: v, weight } of neighbors) {
-                yield { type: 'explore', edge: [u, v], msg: `Check neighbor ${v} (w:${weight})`, lines: { go: 8, java: 8, python: 8 } };
+                yield { type: 'explore', edge: [u, v], queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Check neighbor ${v} (w:${weight})`, lines: { go: 8, java: 8, python: 8 } };
                 
                 if (!visited.has(v) && weight < dist.get(v)) {
                     dist.set(v, weight);
                     parent.set(v, u);
                     pq.push({ id: v, dist: weight });
-                    yield { type: 'visit', node: v, msg: `Update ${v} dist to ${weight}`, lines: { go: 10, java: 10, python: 10 } };
+                    yield { type: 'visit', node: v, queue: pq.map(n=>`${n.id}:${n.dist}`), msg: `Update ${v} dist to ${weight}`, lines: { go: 10, java: 10, python: 10 } };
                 }
             }
         }
@@ -675,27 +737,27 @@ class Algorithms {
             low.set(at, idCounter);
             idCounter++;
             
-            yield { type: 'visit', node: at, msg: `Visit ${at}. ID/Low: ${ids.get(at)}`, lines: { go: 7, java: 6, python: 6 } };
+            yield { type: 'visit', node: at, queue: [...stack], msg: `Visit ${at}. ID/Low: ${ids.get(at)}`, lines: { go: 7, java: 6, python: 6 } };
 
             const neighbors = adj.get(at) || [];
             for (const { to } of neighbors) {
                 if (ids.get(to) === -1) {
                     yield* dfs(to);
                     low.set(at, Math.min(low.get(at), low.get(to)));
-                    yield { type: 'process', node: at, msg: `Update low[${at}] via DFS child ${to}: ${low.get(at)}`, lines: { go: 11, java: 10, python: 10 } };
+                    yield { type: 'process', node: at, queue: [...stack], msg: `Update low[${at}] via DFS child ${to}: ${low.get(at)}`, lines: { go: 11, java: 10, python: 10 } };
                 } else if (onStack.has(to)) {
                     low.set(at, Math.min(low.get(at), ids.get(to)));
-                    yield { type: 'process', node: at, msg: `Update low[${at}] via back-edge ${to}: ${low.get(at)}`, lines: { go: 13, java: 12, python: 12 } };
+                    yield { type: 'process', node: at, queue: [...stack], msg: `Update low[${at}] via back-edge ${to}: ${low.get(at)}`, lines: { go: 13, java: 12, python: 12 } };
                 }
             }
 
             if (ids.get(at) === low.get(at)) {
                 sccCount++;
-                yield { type: 'process', node: at, msg: `SCC #${sccCount} found (Root: ${at})`, lines: { go: 16, java: 15, python: 13 } };
+                yield { type: 'process', node: at, queue: [...stack], msg: `SCC #${sccCount} found (Root: ${at})`, lines: { go: 16, java: 15, python: 13 } };
                 while (stack.length > 0) {
                     const node = stack.pop();
                     onStack.delete(node);
-                    yield { type: 'relax', node: node, msg: `Pop ${node} from stack (SCC #${sccCount})`, lines: { go: 17, java: 16, python: 14 } };
+                    yield { type: 'visit', node: node, queue: [...stack], msg: `Pop ${node} from stack (SCC #${sccCount})`, lines: { go: 17, java: 16, python: 14 } };
                     if (node === at) break;
                 }
             }
@@ -714,26 +776,26 @@ class Algorithms {
         graph.nodes.forEach(n => dist.set(n.id, Infinity));
         dist.set(startId, 0);
         
-        yield { type: 'init', msg: `Init Bellman-Ford. Start: ${startId}`, lines: { go: 2, java: 2, python: 3 } };
+        yield { type: 'init', dist: new Map(dist), msg: `Init Bellman-Ford. Start: ${startId}`, lines: { go: 2, java: 2, python: 3 } };
 
         const n = graph.nodes.length;
         let changed = false;
 
         for (let i = 0; i < n - 1; i++) {
             changed = false;
-            yield { type: 'visit', msg: `Iteration ${i+1}/${n-1}`, lines: { go: 3, java: 3, python: 4 } };
+            yield { type: 'visit', dist: new Map(dist), msg: `Iteration ${i+1}/${n-1}`, lines: { go: 3, java: 3, python: 4 } };
             
             for (const edge of graph.edges) {
                 const u = edge.source;
                 const v = edge.target;
                 const w = edge.weight || 1;
                 
-                yield { type: 'explore', edge: [u, v], msg: `Check ${u}->${v} (w:${w})`, lines: { go: 4, java: 4, python: 5 } };
+                yield { type: 'explore', edge: [u, v], dist: new Map(dist), msg: `Check ${u}->${v} (w:${w})`, lines: { go: 4, java: 4, python: 5 } };
 
                 if (dist.get(u) !== Infinity && dist.get(u) + w < dist.get(v)) {
                     dist.set(v, dist.get(u) + w);
                     changed = true;
-                    yield { type: 'relax', edge: [u, v], msg: `Relax ${u}->${v}. New dist: ${dist.get(v)}`, lines: { go: 6, java: 6, python: 7 } };
+                    yield { type: 'relax', edge: [u, v], dist: new Map(dist), msg: `Relax ${u}->${v}. New dist: ${dist.get(v)}`, lines: { go: 6, java: 6, python: 7 } };
                 }
             }
             if (!changed) break;
@@ -745,12 +807,12 @@ class Algorithms {
             const v = edge.target;
             const w = edge.weight || 1;
             if (dist.get(u) !== Infinity && dist.get(u) + w < dist.get(v)) {
-                yield { type: 'process', edge: [u, v], msg: `Negative Cycle Detected!`, lines: { go: 10, java: 10, python: 7 } };
+                yield { type: 'process', edge: [u, v], dist: new Map(dist), msg: `Negative Cycle Detected!`, lines: { go: 10, java: 10, python: 8 } };
                 return;
             }
         }
         
-        yield { type: 'done', msg: 'Bellman-Ford Complete', lines: { go: 11, java: 11, python: 7 } };
+        yield { type: 'done', dist: new Map(dist), msg: 'Bellman-Ford Complete', lines: { go: 11, java: 11, python: 7 } };
     }
 
     static *floydWarshall(graph) {
@@ -780,7 +842,7 @@ class Algorithms {
                 for (let j = 0; j < n; j++) {
                     if (dist[i][j] > dist[i][k] + dist[k][j]) {
                         dist[i][j] = dist[i][k] + dist[k][j];
-                        yield { type: 'relax', msg: `Update dist[${graph.nodes[i].id}][${graph.nodes[j].id}] via ${graph.nodes[k].id} to ${dist[i][j]}`, matrix: getMatrix(), lines: { go: 7, java: 7, python: 7 } };
+                        yield { type: 'check', msg: `Update dist[${graph.nodes[i].id}][${graph.nodes[j].id}] via ${graph.nodes[k].id} to ${dist[i][j]}`, matrix: getMatrix(), lines: { go: 7, java: 7, python: 7 } };
                     }
                 }
             }
@@ -802,7 +864,7 @@ class Algorithms {
         graph.nodes.forEach(n => gScore.set(n.id, Infinity));
         gScore.set(startId, 0);
         
-        yield { type: 'init', msg: `Start A* from (${startNode.x},${startNode.y}) to (${endNode.x},${endNode.y})`, lines: { go: 2, java: 2, python: 2 } };
+        yield { type: 'init', queue: openSet.map(n=>`${n.id}:${n.f.toFixed(1)}`), msg: `Start A* from (${startNode.x},${startNode.y}) to (${endNode.x},${endNode.y})`, lines: { go: 2, java: 2, python: 2 } };
 
         while (openSet.length > 0) {
             openSet.sort((a, b) => a.f - b.f);
@@ -814,14 +876,14 @@ class Algorithms {
                 // Reconstruct path
                 let curr = endId;
                 while (cameFrom.has(curr)) {
-                    yield { type: 'relax', edge: [cameFrom.get(curr), curr], msg: 'Reconstructing Path', lines: { go: 6, java: 6, python: 6 } };
+                    yield { type: 'relax', edge: [cameFrom.get(curr), curr], queue: openSet.map(n=>`${n.id}:${n.f.toFixed(1)}`), msg: 'Reconstructing Path', lines: { go: 6, java: 6, python: 6 } };
                     curr = cameFrom.get(curr);
                 }
                 yield { type: 'done', msg: 'Path Found!', lines: { go: 6, java: 6, python: 6 } };
                 return;
             }
 
-            yield { type: 'process', node: u, msg: `Visit (${uNode.x},${uNode.y})`, lines: { go: 5, java: 5, python: 5 } };
+            yield { type: 'process', node: u, queue: openSet.map(n=>`${n.id}:${n.f.toFixed(1)}`), msg: `Visit (${uNode.x},${uNode.y})`, lines: { go: 5, java: 5, python: 5 } };
 
             // Implicit grid edges: up, down, left, right
             // For simplicity, using pre-calculated adjacency list if available, or calculating on fly for grid
@@ -835,11 +897,11 @@ class Algorithms {
                     const vNode = graph.nodes.find(n => n.id === v);
                     const f = tentativeG + heuristic(vNode, endNode);
                     openSet.push({ id: v, f: f });
-                    yield { type: 'visit', node: v, msg: `Update neighbor. f=${f}`, lines: { go: 10, java: 10, python: 10 } };
+                    yield { type: 'visit', node: v, queue: openSet.map(n=>`${n.id}:${n.f.toFixed(1)}`), msg: `Update neighbor. f=${f}`, lines: { go: 10, java: 10, python: 10 } };
                 }
             }
         }
-        yield { type: 'done', msg: 'No Path Found', lines: { go: 16, java: 16, python: 16 } };
+        yield { type: 'done', msg: 'No Path Found', lines: { go: 16, java: 16, python: 12 } };
     }
 
     static *bidirectionalSearch(graph, startId, endId) {
@@ -851,13 +913,13 @@ class Algorithms {
         const parent1 = new Map();
         const parent2 = new Map();
 
-        yield { type: 'init', msg: `Start Bidirectional Search from ${startId} and ${endId}`, lines: { go: 2, java: 2, python: 2 } };
+        yield { type: 'init', queue: [...q1, '|', ...q2], msg: `Start Bidirectional Search from ${startId} and ${endId}`, lines: { go: 2, java: 2, python: 2 } };
 
         while (q1.length > 0 && q2.length > 0) {
             // Step from Start
             if (q1.length > 0) {
                 const u = q1.shift();
-                yield { type: 'process', node: u, msg: `Forward Search: Visit ${u}`, lines: { go: 6, java: 6, python: 6 } };
+                yield { type: 'process', node: u, queue: [...q1, '|', ...q2], msg: `Forward Search: Visit ${u}`, lines: { go: 6, java: 6, python: 6 } };
                 
                 const neighbors = adj.get(u) || [];
                 for (const { to: v } of neighbors) {
@@ -870,7 +932,7 @@ class Algorithms {
                         visited1.add(v);
                         parent1.set(v, u);
                         q1.push(v);
-                        yield { type: 'visit', node: v, edge: [u, v], msg: `Forward: Enqueue ${v}`, lines: { go: 14, java: 14, python: 14 } };
+                        yield { type: 'visit', node: v, edge: [u, v], queue: [...q1, '|', ...q2], msg: `Forward: Enqueue ${v}`, lines: { go: 14, java: 14, python: 14 } };
                     }
                 }
             }
@@ -878,7 +940,7 @@ class Algorithms {
             // Step from End
             if (q2.length > 0) {
                 const u = q2.shift();
-                yield { type: 'process', node: u, msg: `Backward Search: Visit ${u}`, lines: { go: 7, java: 7, python: 7 } };
+                yield { type: 'process', node: u, queue: [...q1, '|', ...q2], msg: `Backward Search: Visit ${u}`, lines: { go: 7, java: 7, python: 7 } };
                 
                 const neighbors = adj.get(u) || [];
                 for (const { to: v } of neighbors) {
@@ -891,7 +953,7 @@ class Algorithms {
                         visited2.add(v);
                         parent2.set(v, u);
                         q2.push(v);
-                        yield { type: 'visit', node: v, edge: [u, v], msg: `Backward: Enqueue ${v}`, lines: { go: 14, java: 14, python: 14 } };
+                        yield { type: 'visit', node: v, edge: [u, v], queue: [...q1, '|', ...q2], msg: `Backward: Enqueue ${v}`, lines: { go: 14, java: 14, python: 14 } };
                     }
                 }
             }
@@ -917,7 +979,12 @@ class Controller {
         this.speed = 1000; // ms
         this.currentLang = 'go';
         
+        this.view = { x: 0, y: 0, k: 1 };
+        this.isPanning = false;
+        this.lastMouse = { x: 0, y: 0 };
+        
         this.initEventListeners();
+        this.injectViewControls();
         this.loadExample('tree');
     }
 
@@ -959,6 +1026,7 @@ class Controller {
         svg.addEventListener('mousedown', (e) => this.handleMouseDown(e));
         svg.addEventListener('mousemove', (e) => this.handleMouseMove(e));
         svg.addEventListener('mouseup', (e) => this.handleMouseUp(e));
+        svg.addEventListener('wheel', (e) => this.handleWheel(e));
         
         // Playback
         document.getElementById('btn-start').onclick = () => this.startAlgo();
@@ -992,15 +1060,40 @@ class Controller {
         });
     }
 
-    updateCodePanel(algo) {
-        document.querySelectorAll('.algo-code').forEach(el => el.classList.remove('active'));
-        const codeBlock = document.getElementById(`code-${algo}`);
-        if (codeBlock) codeBlock.classList.add('active');
-    }
-
-    setMode(mode) {
-        this.mode = mode;
-        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+    injectViewControls() {
+        const container = document.querySelector('.canvas-section');
+        if (!container) return;
+        
+        const controls = document.createElement('div');
+        controls.style.position = 'absolute';
+        controls.style.top = '10px';
+        controls.style.right = '10px';
+        controls.style.display = 'flex';
+        controls.style.gap = '5px';
+        controls.style.zIndex = '100';
+        
+        const btnReset = document.createElement('button');
+        btnReset.textContent = 'Reset View';
+        btnReset.className = 'action-btn';
+        btnReset.style.padding = '4px 8px';
+        btnReset.style.fontSize = '0.8rem';
+        btnReset.onclick = () => this.resetView();
+        
+        const btnFit = document.createElement('button');
+        btnFit.textContent = 'Fit Screen';
+        btnFit.className = 'action-btn';
+        btnFit.style.padding = '4px 8px';
+        btnFit.style.fontSize = '0.8rem';
+        btnFit.onclick = () => this.fitToScreen();
+        
+        controls.appendChild(btnReset);
+        controls.appendChild(btnFit);
+        
+        if (getComputedStyle(container).position === 'static') {
+            container.style.position = 'relative';
+        }
+        container.appendChild(controls);
+    } eetE`nt.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(`mode-${mode}`).classList.add('active');
         
         const svg = document.getElementById('graph-canvas');
@@ -1016,7 +1109,13 @@ class Controller {
     }
 
     handleMouseDown(e) {
-        const pos = this.getMousePos(e);
+        const rawPos = this.getMousePos(e);
+        // Convert to graph coordinates
+        const pos = {
+            x: (rawPos.x - this.view.x) / this.view.k,
+            y: (rawPos.y - this.view.y) / this.view.k
+        };
+
         const target = e.target.closest('.node-group');
         const nodeId = target ? parseInt(target.dataset.id) : null;
 
@@ -1028,10 +1127,15 @@ class Controller {
                 this.graph.removeNode(nodeId);
                 this.updateUI();
             }
-            // Edge deletion logic could go here (requires edge hit detection)
-        } else if (this.mode === 'move' && nodeId !== null) {
-            this.isDragging = true;
-            this.dragNode = this.graph.nodes.find(n => n.id === nodeId);
+        } else if (this.mode === 'move') {
+            if (nodeId !== null) {
+                this.isDragging = true;
+                this.dragNode = this.graph.nodes.find(n => n.id === nodeId);
+            } else {
+                this.isPanning = true;
+                this.lastMouse = rawPos;
+                this.renderer.svg.style.cursor = 'grabbing';
+            }
         } else if (this.mode === 'edge' && nodeId !== null) {
             this.isDragging = true;
             this.edgeStartNode = nodeId;
@@ -1039,19 +1143,49 @@ class Controller {
     }
 
     handleMouseMove(e) {
+        const rawPos = this.getMousePos(e);
+        
+        if (this.isPanning) {
+            const dx = rawPos.x - this.lastMouse.x;
+            const dy = rawPos.y - this.lastMouse.y;
+            this.view.x += dx;
+            this.view.y += dy;
+            this.renderer.setTransform(this.view.x, this.view.y, this.view.k);
+            this.lastMouse = rawPos;
+            return;
+        }
+
         if (!this.isDragging) return;
-        const pos = this.getMousePos(e);
+
+        // Graph coordinates
+        const pos = {
+            x: (rawPos.x - this.view.x) / this.view.k,
+            y: (rawPos.y - this.view.y) / this.view.k
+        };
 
         if (this.mode === 'move' && this.dragNode) {
-            this.dragNode.x = pos.x;
-            this.dragNode.y = pos.y;
-            this.renderer.draw(); // Redraw for smooth drag
+            if (this.graph.isGrid) {
+                // Snap to grid logic if needed, or just update raw
+                // For grid mode, x/y are indices.
+                const CELL_SIZE = 40;
+                this.dragNode.x = Math.round(pos.x / CELL_SIZE);
+                this.dragNode.y = Math.round(pos.y / CELL_SIZE);
+            } else {
+                this.dragNode.x = pos.x;
+                this.dragNode.y = pos.y;
+            }
+            this.renderer.updateNodePosition(this.dragNode);
         } else if (this.mode === 'edge' && this.edgeStartNode !== null) {
             // Draw temporary line (optional, skipping for simplicity)
         }
     }
 
     handleMouseUp(e) {
+        if (this.isPanning) {
+            this.isPanning = false;
+            this.renderer.svg.style.cursor = 'default';
+        }
+
         if (this.mode === 'edge' && this.edgeStartNode !== null) {
             const target = e.target.closest('.node-group');
             if (target) {
@@ -1066,6 +1200,70 @@ class Controller {
         this.isDragging = false;
         this.dragNode = null;
         this.edgeStartNode = null;
+    }
+
+    handleWheel(e) {
+        e.preventDefault();
+        const zoomSensitivity = 0.001;
+        const delta = -e.deltaY * zoomSensitivity;
+        const newK = Math.min(Math.max(0.5, this.view.k * (1 + delta)), 3);
+        
+        const rawPos = this.getMousePos(e);
+        // Calculate graph point under mouse
+        const gx = (rawPos.x - this.view.x) / this.view.k;
+        const gy = (rawPos.y - this.view.y) / this.view.k;
+        
+        // Update scale
+        this.view.k = newK;
+        
+        // Update translate to keep point under mouse stable
+        this.view.x = rawPos.x - gx * newK;
+        this.view.y = rawPos.y - gy * newK;
+        
+        this.renderer.setTransform(this.view.x, this.view.y, this.view.k);
+    }
+
+    resetView() {
+        this.view = { x: 0, y: 0, k: 1 };
+        this.renderer.setTransform(0, 0, 1);
+    }
+
+    fitToScreen() {
+        if (this.graph.nodes.length === 0) return;
+        
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        const CELL_SIZE = this.graph.isGrid ? 40 : 1;
+        
+        this.graph.nodes.forEach(n => {
+            const nx = n.x * CELL_SIZE;
+            const ny = n.y * CELL_SIZE;
+            minX = Math.min(minX, nx);
+            minY = Math.min(minY, ny);
+            maxX = Math.max(maxX, nx);
+            maxY = Math.max(maxY, ny);
+        });
+        
+        // Add padding
+        const padding = 50;
+        const width = maxX - minX + padding * 2;
+        const height = maxY - minY + padding * 2;
+        
+        const svgWidth = this.renderer.width;
+        const svgHeight = this.renderer.height;
+        
+        const scaleX = svgWidth / width;
+        const scaleY = svgHeight / height;
+        let k = Math.min(scaleX, scaleY);
+        k = Math.min(Math.max(0.5, k), 2); // Clamp
+        
+        const cx = (minX + maxX) / 2;
+        const cy = (minY + maxY) / 2;
+        
+        this.view.k = k;
+        this.view.x = (svgWidth / 2) - cx * k;
+        this.view.y = (svgHeight / 2) - cy * k;
+        
+        this.renderer.setTransform(this.view.x, this.view.y, this.view.k);
     }
 
     updateUI() {
@@ -1329,6 +1527,7 @@ class Controller {
         }
         
         this.updateUI();
+        setTimeout(() => this.fitToScreen(), 100);
     }
 
     generateMaze() {

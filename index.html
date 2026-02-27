@@ -1,11 +1,239 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SDE Coding Interview Prep - Dark Edition</title>
+  <title>SDE Prep Dashboard - Premium Edition</title>
   <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Dashboard Specific Styles */
+    .dashboard-hero {
+      position: relative;
+      padding: 60px 40px;
+      margin-bottom: 40px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-bg-glow {
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-color);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+      padding: 12px 24px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .dash-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .dash-card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      background: var(--bg-tertiary);
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .dash-card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .dash-card-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .dash-card-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #3b82f6, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .quick-stats {
+        flex-direction: column;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
+
 <body>
   <div class="sidebar-overlay"></div>
   <button class="hamburger-btn" aria-label="Open Menu">
@@ -17,331 +245,153 @@
     <!-- SIDEBAR NAVIGATION -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1> Computer World</h1>
-        <p>Coding Interview Prep</p>
+        <h1>🌑 SDE Prep</h1>
+        <p>Premium Coding Interview</p>
       </div>
       <div class="search-container">
         <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
       </div>
-      <div class="sidebar-controls">
-        <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
-        <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
-      </div>
       <nav class="sidebar-nav">
         <a href="index.html" class="nav-item active">🏠 Home Dashboard</a>
-    
-        <!-- Linear Data Structures -->
+        <a href="visualizer-dashboard.html" class="nav-item">✨ Visualizers Center</a>
+
         <details class="nav-section" open>
           <summary class="nav-section-title">Linear Data Structures</summary>
           <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
-          <a href="patterns/linked-list-reversal.html" class="nav-item indent">↳ Visualizer: Reversal</a>
-          <a href="patterns/linked-list-visualizer.html" class="nav-item indent">↳ Visualizer: Operations</a>
           <a href="patterns/stack.html" class="nav-item">Stacks</a>
-          <a href="patterns/stack-visualizer.html" class="nav-item indent">↳ Visualizer: Stack</a>
           <a href="patterns/queues.html" class="nav-item">Queues</a>
-          <a href="patterns/queue-visualizer.html" class="nav-item indent">↳ Visualizer: Queue</a>
-        </details>
-    
-        <!-- Non-Linear Data Structures -->
-        <details class="nav-section" open>
-          <summary class="nav-section-title">Non-Linear Data Structures</summary>
-          <a href="patterns/hash-maps.html" class="nav-item">Hash Maps</a>
-          <a href="patterns/hash-map-visualizer.html" class="nav-item indent">↳ Visualizer: Hash Map</a>
-          <a href="patterns/trees.html" class="nav-item">Trees</a>
-          <a href="patterns/bst-visualizer.html" class="nav-item indent">↳ Visualizer: BST</a>
-          <a href="patterns/graphs.html" class="nav-item">Graphs</a>
-          <a href="patterns/graph-visualizer.html" class="nav-item indent">↳ Visualizer: Graph Algo</a>
-          <a href="patterns/bfs-graph.html" class="nav-item indent">↳ Visualizer: BFS</a>
-          <a href="patterns/pathfinding-visualizer.html" class="nav-item indent">↳ Visualizer: Pathfinding</a>
-          <a href="patterns/topological-sort-visualizer.html" class="nav-item indent">↳ Visualizer: Topo Sort</a>
-          <a href="patterns/mst-visualizer.html" class="nav-item indent">↳ Visualizer: MST</a>
-          <a href="patterns/union-find.html" class="nav-item indent">↳ Visualizer: Union-Find</a>
-          <a href="patterns/heap.html" class="nav-item">Heaps</a>
-          <a href="patterns/heap-visualizer.html" class="nav-item indent">↳ Visualizer: Heap</a>
-          <a href="patterns/tries.html" class="nav-item">Tries</a>
-          <a href="patterns/trie-visualizer.html" class="nav-item indent">↳ Visualizer: Trie</a>
-          <a href="patterns/segment-tree.html" class="nav-item">Segment Trees</a>
-        </details>
-    
-        <!-- Algorithms -->
-        <details class="nav-section">
-          <summary class="nav-section-title">Algorithms</summary>
-          <a href="patterns/sort-search.html" class="nav-item">Sorting & Search</a>
-          <a href="patterns/sorting-visualizer.html" class="nav-item indent">↳ Visualizer: Sorting</a>
-          <a href="patterns/binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary Search</a>
-          <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
-          <a href="patterns/knapsack-dp.html" class="nav-item indent">↳ Visualizer: Knapsack</a>
-          <a href="patterns/dp-lcs.html" class="nav-item indent">↳ Visualizer: LCS</a>
-          <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
-          <a href="patterns/n-queens.html" class="nav-item indent">↳ Visualizer: N-Queens</a>
-          <a href="patterns/sudoku-solver.html" class="nav-item indent">↳ Visualizer: Sudoku</a>
-          <a href="patterns/maze-generator.html" class="nav-item indent">↳ Visualizer: Maze</a>
-          <a href="patterns/greedy.html" class="nav-item">Greedy</a>
-          <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
-          <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
         </details>
 
-        <!-- Patterns -->
-        <details class="nav-section">
-          <summary class="nav-section-title">Patterns</summary>
-          <a href="patterns/two-pointers.html" class="nav-item" data-id="dsa-1">Two Pointers</a>
-          <a href="patterns/two-pointers-visualizer.html" class="nav-item indent">↳ Visualizer: Two Pointers</a>
-          <a href="patterns/sliding-window.html" class="nav-item" data-id="dsa-2">Sliding Window</a>
-          <a href="patterns/sliding-window-visualizer.html" class="nav-item indent">↳ Visualizer: Sliding Window</a>
-          <a href="patterns/fast-slow-pointers.html" class="nav-item" data-id="dsa-3">Fast & Slow Pointers</a>
-          <a href="patterns/binary-search.html" class="nav-item" data-id="dsa-4">Binary Search</a>
-          <a href="patterns/intervals.html" class="nav-item" data-id="dsa-5">Intervals</a>
-          <a href="patterns/prefix-sum.html" class="nav-item" data-id="dsa-6">Prefix Sum</a>
+        <details class="nav-section" open>
+          <summary class="nav-section-title">Non-Linear Structures</summary>
+          <a href="patterns/hash-maps.html" class="nav-item">Hash Maps</a>
+          <a href="patterns/trees.html" class="nav-item">Trees</a>
+          <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+          <a href="patterns/heap.html" class="nav-item">Heaps</a>
+          <a href="patterns/tries.html" class="nav-item">Tries</a>
         </details>
-    
-        <!-- System Design -->
+
+        <details class="nav-section">
+          <summary class="nav-section-title">Algorithms & Patterns</summary>
+          <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+          <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+          <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+          <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+          <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+        </details>
+
         <details class="nav-section">
           <summary class="nav-section-title">System Design</summary>
-          <a href="system-design.html" class="nav-item" data-id="sd-1">System Design Basics</a>
-          <a href="system-design-masterclass.html" class="nav-item" data-id="sd-5">Masterclass (Part 1)</a>
-          <a href="system-design-patterns.html" class="nav-item" data-id="sd-2">System Design Patterns</a>
-          <a href="system-design-checklist.html" class="nav-item" data-id="sd-3">System Design Checklist</a>
-          <a href="system-design-case-studies.html" class="nav-item" data-id="sd-4">Case Studies</a>
-          <a href="system-design-quiz.html" class="nav-item" data-id="sd-6">System Design Quiz</a>
-        </details>
-
-        <!-- Section 8: Guides & Tools -->
-        <details class="nav-section">
-          <summary class="nav-section-title">
-            <span>Guides & Tools</span>
-            <div class="progress-indicator"><div class="progress-bar"></div></div>
-          </summary>
-          <a href="pattern-recognition-guide.html" class="nav-item" data-id="prep-1">Pattern Recognition</a>
-          <a href="interview-approach.html" class="nav-item" data-id="prep-2">Interview Approach</a>
-          <a href="complexity-guide.html" class="nav-item" data-id="prep-3">Complexity Analysis</a>
-          <a href="dsa-roadmap.html" class="nav-item" data-id="prep-4">DSA Roadmap</a>
-          <a href="mock-interview-checklist.html" class="nav-item" data-id="prep-5">Mock Interview Checklist</a>
-          <a href="cs-fundamentals.html" class="nav-item" data-id="tool-0">CS Fundamentals</a>
-          <a href="golang-guide.html" class="nav-item" data-id="tool-1">Go Language Guide</a>
-          <a href="osi-layers.html" class="nav-item" data-id="tool-9">OSI Model Deep Dive</a>
-          <a href="tcp-ip-model.html" class="nav-item" data-id="tool-10">TCP/IP Model Deep Dive</a>
-          <a href="go-interview-questions.html" class="nav-item" data-id="tool-2">Go Interview Questions</a>
-          <a href="google-interview-questions.html" class="nav-item" data-id="tool-7">Google Interview Questions</a>
-          <a href="amazon-two-pointers-questions.html" class="nav-item" data-id="tool-11">Amazon Two Pointers Questions</a>
-          <a href="go-interview-plan.html" class="nav-item" data-id="tool-6">📅 14-Day Interview Plan</a>
-          <a href="google-roadmap.html" class="nav-item" data-id="tool-8">🗺️ Google Roadmap</a>
-          <a href="cheat-sheet.html" class="nav-item" data-id="tool-3">Pattern Cheat Sheet</a>
-          <a href="dashboard.html" class="nav-item" data-id="tool-4">📊 My Dashboard</a>
-          <a href="mobile-access.html" class="nav-item" data-id="tool-5">📱 Mobile Access</a>
+          <a href="system-design.html" class="nav-item">System Design Basics</a>
+          <a href="system-design-masterclass.html" class="nav-item">Masterclass</a>
         </details>
       </nav>
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN DASHBOARD CONTENT -->
     <main class="main-content">
-      <div class="content-header">
-        <h1>🚀  SDE Coding Interview Patterns</h1>
-        <p>Master 18 essential DSA patterns used in real  interviews</p>
-      </div>
 
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">📖</span> Welcome to Your Interview Prep Hub
+      <!-- Premium Hero Section -->
+      <section class="dashboard-hero">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-badge">SDE Prep V2.0</div>
+        <h1 class="hero-title">Master the Interview.<br><span class="gradient-text">Visualize the Code.</span></h1>
+        <p class="hero-subtitle">Stop memorizing text. Start interacting with data structures, simulating real
+          enterprise scenarios, and executing step-by-step algorithms designed to fast-track your coding skills.</p>
+        <div class="hero-actions">
+          <a href="visualizer-dashboard.html" class="btn-primary">🎮 Launch Visualizers</a>
+          <a href="patterns/two-pointers.html" class="btn-secondary">📘 Read the Patterns</a>
         </div>
-        <p>This is a self-hosted, pattern-focused preparation guide designed for  SDE-1 / SDE-2 coding interviews.</p>
-        <p style="margin-top: 15px; color: var(--text-secondary);">Built with insights from ByteByteGo methodology and real interview experiences, each pattern page covers:</p>
-        
-        <div style="margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
-            <strong style="color: var(--callout-green);">✅ What  Expects</strong>
-            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Time/space complexity, communication signals, and satisfaction criteria</p>
-          </div>
-          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
-            <strong style="color: var(--callout-blue);">🧠 Core Concept Theory</strong>
-            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">When to use, recognition keywords, and edge cases</p>
-          </div>
-          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
-            <strong style="color: var(--callout-yellow);">🎯 Real-World  Scenarios</strong>
-            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Business applications: request limiting, ranking, microservices</p>
-          </div>
-          <div style="background-color: var(--bg-tertiary); padding: 15px; border-radius: 8px;">
-            <strong style="color: var(--callout-purple);">⚙️ Follow-up Questions</strong>
-            <p style="margin-top: 8px; color: var(--text-secondary); font-size: 0.9rem;">Streaming data, memory constraints, parallelization</p>
-          </div>
+      </section>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-box">
+          <div class="stat-val">18+</div>
+          <div class="stat-label">Core Patterns</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">12</div>
+          <div class="stat-label">Interactive Playgrounds</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Languages (Go, Java, Py)</div>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">🎯</span> How to Use This Guide
-        </div>
-        <ol style="margin-left: 20px; line-height: 2;">
-          <li><strong>Select a pattern</strong> from the sidebar</li>
-          <li><strong>Understand the expectation</strong> (green section) - what  is checking for</li>
-          <li><strong>Read the theory</strong> (blue section) - when and why to apply the pattern</li>
-          <li><strong>Study the real-world scenario</strong> (yellow) - context beyond DSA terminology</li>
-          <li><strong>Review the canonical  problem</strong> - the most common question</li>
-          <li><strong>Analyze brute force vs optimized</strong> - see what  rejects and accepts</li>
-          <li><strong>Walk through the Go code</strong> - interview-quality implementation</li>
-          <li><strong>Practice follow-ups</strong> (purple) - prepare for deeper questions</li>
-        </ol>
+      <!-- Quick Navigation Cards -->
+      <div class="section-title">
+        <span class="emoji">🚀</span> Quick Launch
+      </div>
+      <div class="dashboard-grid">
+        <a href="visualizer-dashboard.html" class="dash-card">
+          <span class="dash-card-badge">HOT 🔥</span>
+          <div class="dash-card-icon">🕹️</div>
+          <h3 class="dash-card-title">Visualizer Center</h3>
+          <p class="dash-card-desc">Interactive sandboxes for Graphs, Trees, Linked Lists, and Sliding Windows. Run code
+            line-by-line.</p>
+        </a>
+
+        <a href="patterns/graphs.html" class="dash-card">
+          <div class="dash-card-icon">🕸️</div>
+          <h3 class="dash-card-title">Graph Algorithms</h3>
+          <p class="dash-card-desc">Deep dive into BFS, DFS, Dijkstra's, and Union-Find with enterprise use-cases.</p>
+        </a>
+
+        <a href="system-design-masterclass.html" class="dash-card">
+          <div class="dash-card-icon">🏗️</div>
+          <h3 class="dash-card-title">System Design</h3>
+          <p class="dash-card-desc">Architecture components, load balancing, caching, and database scaling principles.
+          </p>
+        </a>
+
+        <a href="expert-roadmap-flow.html" class="dash-card">
+          <div class="dash-card-icon">🗺️</div>
+          <h3 class="dash-card-title">The Expert Roadmap</h3>
+          <p class="dash-card-desc">Interactive, zoomable flowchart revealing the path from basic CS fundamentals to
+            Principal system design.</p>
+        </a>
+
+        <a href="expert-roadmap-flow.html" class="dash-card">
+          <div class="dash-card-icon">🗺️</div>
+          <h3 class="dash-card-title">The Expert Roadmap</h3>
+          <p class="dash-card-desc">Interactive, zoomable flowchart mapping the journey from basic CS fundamentals to Principal-level system design.</p>
+        </a>
+
+        <a href="go-interview-plan.html" class="dash-card">
+          <div class="dash-card-icon">📅</div>
+          <h3 class="dash-card-title">14-Day Study Plan</h3>
+          <p class="dash-card-desc">A structured learning path optimized for high-retention and comprehensive pattern
+            coverage.</p>
+        </a>
       </div>
 
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">🌟</span>  Interview Format
-        </div>
-        <div class="callout -expects">
-          <div class="callout-title">✅ What Interviewers Are Looking For</div>
-          <div class="callout-content">
-            <ul>
-              <li><strong>Problem-solving approach:</strong> Can you think systematically?</li>
-              <li><strong>Pattern recognition:</strong> Do you identify the problem type quickly?</li>
-              <li><strong>Time complexity consciousness:</strong> Do you optimize without over-engineering?</li>
-              <li><strong>Clear communication:</strong> Can you explain your logic aloud?</li>
-              <li><strong>Edge case handling:</strong> Do you think about boundary conditions?</li>
-              <li><strong>Code quality:</strong> Is it readable, well-named, maintainable?</li>
-              <li><strong>Follow-up readiness:</strong> Can you adapt your solution to new constraints?</li>
-            </ul>
-          </div>
-        </div>
+      <!-- Philosophy Section -->
+      <div class="section-title">
+        <span class="emoji">🧠</span> The Philosophy
       </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">💡</span> Key Interview Tips
+      <div class="dashboard-grid">
+        <div class="dash-card" style="cursor: default; transform: none; box-shadow: none;">
+          <h3 class="dash-card-title" style="color: var(--callout-green);">✅ Scenario-First</h3>
+          <p class="dash-card-desc">Every algorithm is taught through a real-world enterprise situation—like DB
+            indexing, Load Balancer queues, or Payment processors.</p>
         </div>
-        <div class="callout interview-tip">
-          <div class="callout-title">⭐ Golden Rules</div>
-          <div class="callout-content">
-            <ul>
-              <li><strong>Clarify FIRST:</strong> Ask about constraints, edge cases, expected input ranges</li>
-              <li><strong>Brute force before optimization:</strong> Explain naive approach, then improve</li>
-              <li><strong>Complexity analysis:</strong> Always state time and space complexity explicitly</li>
-              <li><strong>Code as you think:</strong> Don't stay silent; explain your logic step-by-step</li>
-              <li><strong>Test with examples:</strong> Walk through small inputs before submitting</li>
-              <li><strong>Handle edge cases:</strong> Empty input, single element, duplicates, negative numbers</li>
-              <li><strong>Optimize memory when asked:</strong> Sometimes interviewers want O(1) space solutions</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">📊</span> Pattern Coverage Map
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Pattern</th>
-              <th>Difficulty</th>
-              <th>Frequency in Interviews</th>
-              <th>Key Skill</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>Two Pointers</strong></td>
-              <td>⭐ Easy-Medium</td>
-              <td>🔴 Very High</td>
-              <td>Index manipulation</td>
-            </tr>
-            <tr>
-              <td><strong>Sliding Window</strong></td>
-              <td>⭐⭐ Medium</td>
-              <td>🔴 Very High</td>
-              <td>Window management</td>
-            </tr>
-            <tr>
-              <td><strong>Binary Search</strong></td>
-              <td>⭐ Easy-Medium</td>
-              <td>🔴 Very High</td>
-              <td>Search optimization</td>
-            </tr>
-            <tr>
-              <td><strong>Hash Maps & Sets</strong></td>
-              <td>⭐ Easy</td>
-              <td>🔴 Very High</td>
-              <td>Lookup optimization</td>
-            </tr>
-            <tr>
-              <td><strong>Dynamic Programming</strong></td>
-              <td>⭐⭐⭐ Hard</td>
-              <td>🟠 High</td>
-              <td>Problem decomposition</td>
-            </tr>
-            <tr>
-              <td><strong>Graphs</strong></td>
-              <td>⭐⭐ Medium-Hard</td>
-              <td>🟠 High</td>
-              <td>Traversal & pathfinding</td>
-            </tr>
-            <tr>
-              <td><strong>Trees</strong></td>
-              <td>⭐⭐ Medium</td>
-              <td>🟠 High</td>
-              <td>Tree traversal</td>
-            </tr>
-            <tr>
-              <td><strong>Backtracking</strong></td>
-              <td>⭐⭐ Medium</td>
-              <td>🟡 Medium</td>
-              <td>Exploration & pruning</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">⚠️</span> Common Interview Mistakes
-        </div>
-        <div class="callout common-mistakes">
-          <div class="callout-title">🔴 What Leads to Rejection</div>
-          <div class="callout-content">
-            <ul>
-              <li>Not clarifying the problem → solving the wrong problem</li>
-              <li>Jumping to code without explaining → unclear thinking</li>
-              <li>Ignoring edge cases → code crashes on test cases</li>
-              <li>Wrong complexity analysis → claims efficiency they don't have</li>
-              <li>Messy variable names → unreadable, hard to follow logic</li>
-              <li>Brute forcing everything → signals limited problem-solving</li>
-              <li>Silent debugging → interviewer can't evaluate thought process</li>
-            </ul>
-          </div>
+        <div class="dash-card" style="cursor: default; transform: none; box-shadow: none;">
+          <h3 class="dash-card-title" style="color: var(--callout-blue);">🔍 Visual Debugging</h3>
+          <p class="dash-card-desc">Instead of reading dry code chunks, our Visualizers highlight the exact line running
+            alongside an animating data structure.</p>
         </div>
       </div>
 
-      <div class="section">
-        <div class="section-title">
-          <span class="emoji">📚</span> Study Recommendations
-        </div>
-        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 15px;">
-          <p><strong>Daily revision mode (30 minutes):</strong></p>
-          <ul style="margin-top: 12px; margin-left: 20px;">
-            <li>Pick one pattern from sidebar</li>
-            <li>Read the "What  Expects" section (2 min)</li>
-            <li>Review the canonical problem and solution (5 min)</li>
-            <li>Walk through complexity analysis (3 min)</li>
-            <li>Implement the solution in Go from scratch (20 min)</li>
-          </ul>
-        </div>
-        <div style="background-color: var(--bg-tertiary); padding: 20px; border-radius: 8px; margin-top: 15px;">
-          <p><strong>Deep dive mode (2 hours):</strong></p>
-          <ul style="margin-top: 12px; margin-left: 20px;">
-            <li>Read all 10 sections of a pattern</li>
-            <li>Code both brute force and optimized solutions</li>
-            <li>Try variations and edge cases</li>
-            <li>Answer follow-up questions without looking</li>
-            <li>Explain everything out loud (simulate interview)</li>
-          </ul>
-        </div>
+      <div style="margin-top: 60px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <p>Built with 💙 for SDE Candidates. Elevate your prep.</p>
       </div>
 
-      <div class="section" style="margin-bottom: 80px;">
-        <p style="color: var(--text-secondary); font-size: 0.95rem; text-align: center;">
-          Built with 💚 for  SDE candidates • Self-hosted, daily revision mode • Interview-grade explanations
-        </p>
-      </div>
     </main>
   </div>
 
   <script src="script.js"></script>
 </body>
+
 </html>

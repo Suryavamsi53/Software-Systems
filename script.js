@@ -3,7 +3,8 @@
 // GEMINI CODE ASSIST - ENHANCED SIDEBAR
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
+  initThemeToggle();
   initializeNavigation();
   initializeMobileSidebar();
   initializeAccordions();
@@ -25,9 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeNavigation() {
   const navItems = document.querySelectorAll('.nav-item');
-  
+
   navItems.forEach(item => {
-    item.addEventListener('click', function(e) {
+    item.addEventListener('click', function (e) {
       // The page will reload, so active class is set on load.
       // We just need to store the last clicked item for progress.
       // Store in localStorage
@@ -70,7 +71,7 @@ function initializeDailyChallenge() {
 
   const today = new Date().toISOString().split('T')[0];
   let challenge = {};
-  
+
   try {
     challenge = JSON.parse(localStorage.getItem('dailyChallenge') || '{}');
   } catch (e) {
@@ -92,7 +93,7 @@ function initializeDailyChallenge() {
 
   if (nameEl) nameEl.textContent = patternName;
   if (linkEl) linkEl.href = challenge.pattern;
-  
+
   challengeSection.style.display = 'flex';
 }
 
@@ -104,7 +105,7 @@ function addPageNavigation() {
   const path = window.location.pathname;
   const page = path.split('/').pop();
   const isPattern = path.includes('/patterns/');
-  
+
   // Define study sequence
   const studySequence = [
     'interview-approach.html',
@@ -218,7 +219,7 @@ function initializeBackToTop() {
 function setActiveNavItem() {
   const currentPage = window.location.pathname.split('/').pop();
   const navItems = document.querySelectorAll('.nav-item');
-  
+
   navItems.forEach(item => {
     const href = item.getAttribute('href').replace('../', '');
     if (href.includes(currentPage) || (currentPage === '' && href === 'patterns/two-pointers.html')) {
@@ -231,12 +232,64 @@ function initializeSidebarToggle() {
 }
 
 // ============================================================
+// THEME TOGGLE (DARK/LIGHT)
+// ============================================================
+
+function initThemeToggle() {
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  const storedTheme = localStorage.getItem('theme');
+
+  // Determine current theme
+  let isDark = true;
+  if (storedTheme === 'light' || (!storedTheme && !prefersDark)) {
+    isDark = false;
+    document.body.classList.add('light-theme');
+  }
+
+  // Create floating button
+  const btn = document.createElement('button');
+  btn.id = 'theme-toggle-btn';
+  btn.innerHTML = isDark ? '☀️' : '🌙';
+  btn.title = 'Toggle Dark/Light Mode';
+  btn.style.cssText = `
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 9999;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-size: 1.2rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 6px -1px var(--bg-primary);
+        transition: all 0.2s;
+    `;
+
+  btn.onmouseover = () => btn.style.transform = 'scale(1.1)';
+  btn.onmouseout = () => btn.style.transform = 'scale(1)';
+
+  btn.onclick = () => {
+    const isCurrentlyLight = document.body.classList.toggle('light-theme');
+    localStorage.setItem('theme', isCurrentlyLight ? 'light' : 'dark');
+    btn.innerHTML = isCurrentlyLight ? '🌙' : '☀️';
+  };
+
+  document.body.appendChild(btn);
+}
+
+// ============================================================
 // CODE BLOCK COPY FUNCTIONALITY
 // ============================================================
 
 function addCopyButtons() {
   const codeBlocks = document.querySelectorAll('.code-block');
-  
+
   codeBlocks.forEach((block, index) => {
     const copyBtn = document.createElement('button');
     copyBtn.textContent = '📋 Copy';
@@ -249,11 +302,11 @@ function addCopyButtons() {
       background-color: rgba(59, 130, 246, 0.6);
       border: 1px solid rgba(59, 130, 246, 0.8);
     `;
-    
+
     block.style.position = 'relative';
     block.appendChild(copyBtn);
-    
-    copyBtn.addEventListener('click', function() {
+
+    copyBtn.addEventListener('click', function () {
       const codeText = block.innerText;
       navigator.clipboard.writeText(codeText).then(() => {
         copyBtn.textContent = '✅ Copied!';
@@ -271,10 +324,10 @@ function addCopyButtons() {
 
 function highlightGoSyntax() {
   const codeBlocks = document.querySelectorAll('.code-block');
-  
+
   codeBlocks.forEach(block => {
     let code = block.innerHTML;
-    
+
     // Keywords
     const keywords = [
       'package', 'import', 'func', 'type', 'struct', 'interface',
@@ -282,19 +335,19 @@ function highlightGoSyntax() {
       'var', 'const', 'defer', 'go', 'chan', 'range', 'break', 'continue',
       'map', 'select', 'true', 'false', 'nil'
     ];
-    
+
     keywords.forEach(keyword => {
       const regex = new RegExp(`\\b${keyword}\\b`, 'g');
       code = code.replace(regex, `<span style="color: #a78bfa;">${keyword}</span>`);
     });
-    
+
     // Built-in functions
     const builtins = ['make', 'len', 'append', 'copy', 'delete', 'complex', 'real', 'imag', 'min', 'max'];
     builtins.forEach(builtin => {
       const regex = new RegExp(`\\b${builtin}\\b`, 'g');
       code = code.replace(regex, `<span style="color: #38bdf8;">${builtin}</span>`);
     });
-    
+
     block.innerHTML = code;
   });
 }
@@ -304,7 +357,7 @@ function highlightGoSyntax() {
 // ============================================================
 
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-  anchor.addEventListener('click', function(e) {
+  anchor.addEventListener('click', function (e) {
     e.preventDefault();
     const target = document.querySelector(this.getAttribute('href'));
     if (target) {
@@ -321,17 +374,17 @@ function trackPageView() {
   const currentPage = window.location.pathname;
   try {
     const pageViews = JSON.parse(localStorage.getItem('pageViews') || '{}');
-    
+
     if (!pageViews[currentPage]) {
       pageViews[currentPage] = 0;
     }
     pageViews[currentPage]++;
-    
+
     localStorage.setItem('pageViews', JSON.stringify(pageViews));
   } catch (e) {
     console.warn('Page tracking disabled (localStorage unavailable)');
   }
-  
+
   // Track daily activity for dashboard
   trackStudyDay();
   trackDailyGoal();
@@ -344,13 +397,13 @@ trackPageView();
 // KEYBOARD SHORTCUTS
 // ============================================================
 
-document.addEventListener('keydown', function(e) {
+document.addEventListener('keydown', function (e) {
   // Ctrl/Cmd + K: Open navigation search (future feature)
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
     console.log('Navigation search would open here');
   }
-  
+
   // Ctrl/Cmd + Shift + D: Toggle dark mode (already dark, but placeholder)
   if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'D') {
     e.preventDefault();
@@ -372,10 +425,10 @@ if (document.readyState === 'loading') {
 // EXPORT: Study stats to console
 // ============================================================
 
-window.getStudyStats = function() {
+window.getStudyStats = function () {
   const pageViews = JSON.parse(localStorage.getItem('pageViews') || '{}');
   const lastPattern = localStorage.getItem('lastPattern');
-  
+
   return {
     'Page Views': pageViews,
     'Last Pattern Studied': lastPattern,
@@ -393,175 +446,175 @@ function trackStudyDay() {
   const today = new Date().toISOString().split('T')[0];
   try {
     const history = JSON.parse(localStorage.getItem('studyHistory') || '{}');
-    
+
     if (!history[today]) {
       history[today] = 0;
     }
     history[today]++;
-    
+
     localStorage.setItem('studyHistory', JSON.stringify(history));
   } catch (e) {
     console.warn('Study tracking unavailable (localStorage disabled)');
   }
 }
 
-window.renderDashboard = function() {
-    let history = {};
-    let pageViews = {};
-    try {
-        history = JSON.parse(localStorage.getItem('studyHistory') || '{}');
-        pageViews = JSON.parse(localStorage.getItem('pageViews') || '{}');
-    } catch (e) {
-        console.warn('Dashboard rendering limited (localStorage unavailable)');
+window.renderDashboard = function () {
+  let history = {};
+  let pageViews = {};
+  try {
+    history = JSON.parse(localStorage.getItem('studyHistory') || '{}');
+    pageViews = JSON.parse(localStorage.getItem('pageViews') || '{}');
+  } catch (e) {
+    console.warn('Dashboard rendering limited (localStorage unavailable)');
+  }
+
+  // 1. Calculate Stats
+  const dates = Object.keys(history);
+  const totalDays = dates.length;
+  const streak = calculateStreak(history);
+
+  // 2. Update DOM Elements
+  const streakEl = document.getElementById('current-streak');
+  if (streakEl) streakEl.textContent = streak;
+
+  const totalEl = document.getElementById('total-days');
+  if (totalEl) totalEl.textContent = totalDays;
+
+  // Patterns Progress Logic
+  const allPatterns = [
+    'patterns/two-pointers.html', 'patterns/sliding-window.html', 'patterns/binary-search.html',
+    'patterns/hash-maps.html', 'patterns/linked-lists.html', 'patterns/stack.html',
+    'patterns/heap.html', 'patterns/trees.html', 'patterns/tries.html',
+    'patterns/graphs.html', 'patterns/backtracking.html', 'patterns/dynamic-programming.html',
+    'patterns/greedy.html', 'patterns/fast-slow-pointers.html', 'patterns/intervals.html',
+    'patterns/prefix-sum.html', 'patterns/bit-manipulation.html', 'patterns/math-geometry.html',
+    'patterns/sort-search.html'
+  ];
+
+  let visitedCount = 0;
+  const visitedPaths = Object.keys(pageViews);
+
+  allPatterns.forEach(pattern => {
+    const filename = pattern.split('/').pop();
+    if (visitedPaths.some(path => path.endsWith(filename))) {
+      visitedCount++;
     }
-    
-    // 1. Calculate Stats
-    const dates = Object.keys(history);
-    const totalDays = dates.length;
-    const streak = calculateStreak(history);
-    
-    // 2. Update DOM Elements
-    const streakEl = document.getElementById('current-streak');
-    if(streakEl) streakEl.textContent = streak;
-    
-    const totalEl = document.getElementById('total-days');
-    if(totalEl) totalEl.textContent = totalDays;
-    
-    // Patterns Progress Logic
-    const allPatterns = [
-        'patterns/two-pointers.html', 'patterns/sliding-window.html', 'patterns/binary-search.html',
-        'patterns/hash-maps.html', 'patterns/linked-lists.html', 'patterns/stack.html',
-        'patterns/heap.html', 'patterns/trees.html', 'patterns/tries.html',
-        'patterns/graphs.html', 'patterns/backtracking.html', 'patterns/dynamic-programming.html',
-        'patterns/greedy.html', 'patterns/fast-slow-pointers.html', 'patterns/intervals.html',
-        'patterns/prefix-sum.html', 'patterns/bit-manipulation.html', 'patterns/math-geometry.html',
-        'patterns/sort-search.html'
-    ];
+  });
 
-    let visitedCount = 0;
-    const visitedPaths = Object.keys(pageViews);
-    
-    allPatterns.forEach(pattern => {
-        const filename = pattern.split('/').pop();
-        if (visitedPaths.some(path => path.endsWith(filename))) {
-            visitedCount++;
-        }
-    });
+  const patternsEl = document.getElementById('patterns-count');
+  if (patternsEl) patternsEl.textContent = visitedCount;
 
-    const patternsEl = document.getElementById('patterns-count');
-    if(patternsEl) patternsEl.textContent = visitedCount;
+  const progressText = document.getElementById('progress-text');
+  const progressBar = document.getElementById('total-progress-bar');
 
-    const progressText = document.getElementById('progress-text');
-    const progressBar = document.getElementById('total-progress-bar');
-    
-    if (progressText) progressText.textContent = `${visitedCount} / ${allPatterns.length}`;
-    if (progressBar) progressBar.style.width = `${(visitedCount / allPatterns.length) * 100}%`;
-    
-    // 3. Render Heatmap
-    renderHeatmapGrid(history);
-    
-    // 4. Render Daily Goal
-    renderDailyGoal();
+  if (progressText) progressText.textContent = `${visitedCount} / ${allPatterns.length}`;
+  if (progressBar) progressBar.style.width = `${(visitedCount / allPatterns.length) * 100}%`;
+
+  // 3. Render Heatmap
+  renderHeatmapGrid(history);
+
+  // 4. Render Daily Goal
+  renderDailyGoal();
 };
 
 function calculateStreak(history) {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    let streak = 0;
-    let d = new Date(today);
-    
-    // If no activity today, check if streak ended yesterday
-    if (!history[todayStr]) {
-        d.setDate(d.getDate() - 1);
-        const yesterdayStr = d.toISOString().split('T')[0];
-        if (!history[yesterdayStr]) return 0;
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  let streak = 0;
+  let d = new Date(today);
+
+  // If no activity today, check if streak ended yesterday
+  if (!history[todayStr]) {
+    d.setDate(d.getDate() - 1);
+    const yesterdayStr = d.toISOString().split('T')[0];
+    if (!history[yesterdayStr]) return 0;
+  }
+
+  // Count backwards
+  while (true) {
+    const dateStr = d.toISOString().split('T')[0];
+    if (history[dateStr]) {
+      streak++;
+      d.setDate(d.getDate() - 1);
+    } else {
+      break;
     }
-    
-    // Count backwards
-    while (true) {
-        const dateStr = d.toISOString().split('T')[0];
-        if (history[dateStr]) {
-            streak++;
-            d.setDate(d.getDate() - 1);
-        } else {
-            break;
-        }
-    }
-    return streak;
+  }
+  return streak;
 }
 
 function renderHeatmapGrid(history) {
-    const grid = document.getElementById('heatmap-grid');
-    if (!grid) return;
-    
-    grid.innerHTML = '';
-    
-    // Generate last 365 days (approx 52 weeks)
-    const today = new Date();
-    const startDate = new Date(today);
-    startDate.setDate(startDate.getDate() - 364);
-    
-    // Align start date to Sunday for proper grid alignment
-    while (startDate.getDay() !== 0) {
-        startDate.setDate(startDate.getDate() - 1);
-    }
-    
-    const endDate = new Date(today);
-    let currentDate = new Date(startDate);
-    
-    while (currentDate <= endDate) {
-        const dateStr = currentDate.toISOString().split('T')[0];
-        const count = history[dateStr] || 0;
-        
-        const cell = document.createElement('div');
-        cell.className = 'day-cell';
-        cell.title = `${dateStr}: ${count} activities`;
-        
-        // LeetCode style levels
-        if (count > 0) cell.classList.add('level-1');
-        if (count > 2) cell.classList.add('level-2');
-        if (count > 5) cell.classList.add('level-3');
-        if (count > 10) cell.classList.add('level-4');
-        
-        grid.appendChild(cell);
-        
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
+  const grid = document.getElementById('heatmap-grid');
+  if (!grid) return;
+
+  grid.innerHTML = '';
+
+  // Generate last 365 days (approx 52 weeks)
+  const today = new Date();
+  const startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - 364);
+
+  // Align start date to Sunday for proper grid alignment
+  while (startDate.getDay() !== 0) {
+    startDate.setDate(startDate.getDate() - 1);
+  }
+
+  const endDate = new Date(today);
+  let currentDate = new Date(startDate);
+
+  while (currentDate <= endDate) {
+    const dateStr = currentDate.toISOString().split('T')[0];
+    const count = history[dateStr] || 0;
+
+    const cell = document.createElement('div');
+    cell.className = 'day-cell';
+    cell.title = `${dateStr}: ${count} activities`;
+
+    // LeetCode style levels
+    if (count > 0) cell.classList.add('level-1');
+    if (count > 2) cell.classList.add('level-2');
+    if (count > 5) cell.classList.add('level-3');
+    if (count > 10) cell.classList.add('level-4');
+
+    grid.appendChild(cell);
+
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
 }
 
 // ============================================================
 // DEMO DATA & RESET UTILS
 // ============================================================
 
-window.seedDemoData = function() {
-    const history = {};
-    const today = new Date();
-    
-    // Generate ~1 year of data
-    for (let i = 0; i < 365; i++) {
-        const d = new Date(today);
-        d.setDate(d.getDate() - i);
-        const dateStr = d.toISOString().split('T')[0];
-        
-        // Random activity (40% chance of studying)
-        if (Math.random() > 0.6) {
-            // Random intensity (1-15 actions)
-            history[dateStr] = Math.floor(Math.random() * 15) + 1;
-        }
+window.seedDemoData = function () {
+  const history = {};
+  const today = new Date();
+
+  // Generate ~1 year of data
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+
+    // Random activity (40% chance of studying)
+    if (Math.random() > 0.6) {
+      // Random intensity (1-15 actions)
+      history[dateStr] = Math.floor(Math.random() * 15) + 1;
     }
-    
-    localStorage.setItem('studyHistory', JSON.stringify(history));
-    if (window.renderDashboard) window.renderDashboard();
+  }
+
+  localStorage.setItem('studyHistory', JSON.stringify(history));
+  if (window.renderDashboard) window.renderDashboard();
 };
 
-window.resetProgress = function() {
-    if(confirm('Are you sure you want to clear all progress?')) {
-        localStorage.removeItem('studyHistory');
-        localStorage.removeItem('pageViews');
-        localStorage.removeItem('lastPattern');
-        localStorage.removeItem('collapsibleState');
-        location.reload();
-    }
+window.resetProgress = function () {
+  if (confirm('Are you sure you want to clear all progress?')) {
+    localStorage.removeItem('studyHistory');
+    localStorage.removeItem('pageViews');
+    localStorage.removeItem('lastPattern');
+    localStorage.removeItem('collapsibleState');
+    location.reload();
+  }
 };
 
 // ============================================================
@@ -569,73 +622,73 @@ window.resetProgress = function() {
 // ============================================================
 
 function trackDailyGoal() {
-    const currentPath = window.location.pathname;
-    // Only track pattern pages
-    if (!currentPath.includes('/patterns/') || !currentPath.endsWith('.html')) return;
-    
-    const patternId = currentPath.split('/').pop();
-    const today = new Date().toISOString().split('T')[0];
-    
-    try {
-        let goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{}');
-        
-        // Initialize or Reset if new day
-        if (goalData.date !== today) {
-            goalData = {
-                date: today,
-                target: goalData.target || 2, // Keep existing target or default to 2
-                patterns: []
-            };
-        }
-        
-        // Add pattern if not already tracked
-        if (!goalData.patterns.includes(patternId)) {
-            goalData.patterns.push(patternId);
-            localStorage.setItem('dailyGoal', JSON.stringify(goalData));
-        }
-    } catch (e) {
-        console.warn('Daily goal tracking failed');
+  const currentPath = window.location.pathname;
+  // Only track pattern pages
+  if (!currentPath.includes('/patterns/') || !currentPath.endsWith('.html')) return;
+
+  const patternId = currentPath.split('/').pop();
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    let goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{}');
+
+    // Initialize or Reset if new day
+    if (goalData.date !== today) {
+      goalData = {
+        date: today,
+        target: goalData.target || 2, // Keep existing target or default to 2
+        patterns: []
+      };
     }
+
+    // Add pattern if not already tracked
+    if (!goalData.patterns.includes(patternId)) {
+      goalData.patterns.push(patternId);
+      localStorage.setItem('dailyGoal', JSON.stringify(goalData));
+    }
+  } catch (e) {
+    console.warn('Daily goal tracking failed');
+  }
 }
 
 function renderDailyGoal() {
-    const goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{"target": 2, "patterns": []}');
-    const today = new Date().toISOString().split('T')[0];
-    
-    let count = 0;
-    let target = goalData.target || 2;
-    
-    if (goalData.date === today) {
-        count = goalData.patterns ? goalData.patterns.length : 0;
-    }
-    
-    const goalEl = document.getElementById('daily-goal');
-    const progressEl = document.getElementById('daily-goal-progress');
-    
-    if (goalEl) {
-        goalEl.textContent = `${count}/${target}`;
-        goalEl.style.color = count >= target ? 'var(--callout-green)' : 'var(--callout-blue)';
-    }
-    
-    if (progressEl) {
-        const percent = Math.min(100, (count / target) * 100);
-        progressEl.style.width = `${percent}%`;
-        progressEl.style.backgroundColor = count >= target ? 'var(--callout-green)' : 'var(--callout-blue)';
-    }
+  const goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{"target": 2, "patterns": []}');
+  const today = new Date().toISOString().split('T')[0];
+
+  let count = 0;
+  let target = goalData.target || 2;
+
+  if (goalData.date === today) {
+    count = goalData.patterns ? goalData.patterns.length : 0;
+  }
+
+  const goalEl = document.getElementById('daily-goal');
+  const progressEl = document.getElementById('daily-goal-progress');
+
+  if (goalEl) {
+    goalEl.textContent = `${count}/${target}`;
+    goalEl.style.color = count >= target ? 'var(--callout-green)' : 'var(--callout-blue)';
+  }
+
+  if (progressEl) {
+    const percent = Math.min(100, (count / target) * 100);
+    progressEl.style.width = `${percent}%`;
+    progressEl.style.backgroundColor = count >= target ? 'var(--callout-green)' : 'var(--callout-blue)';
+  }
 }
 
-window.editDailyGoal = function() {
-    const goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{"target": 2}');
-    const newTarget = prompt("Set your daily pattern goal:", goalData.target || 2);
-    
-    if (newTarget !== null) {
-        const target = parseInt(newTarget);
-        if (!isNaN(target) && target > 0) {
-            goalData.target = target;
-            localStorage.setItem('dailyGoal', JSON.stringify(goalData));
-            if (window.renderDashboard) window.renderDashboard();
-        }
+window.editDailyGoal = function () {
+  const goalData = JSON.parse(localStorage.getItem('dailyGoal') || '{"target": 2}');
+  const newTarget = prompt("Set your daily pattern goal:", goalData.target || 2);
+
+  if (newTarget !== null) {
+    const target = parseInt(newTarget);
+    if (!isNaN(target) && target > 0) {
+      goalData.target = target;
+      localStorage.setItem('dailyGoal', JSON.stringify(goalData));
+      if (window.renderDashboard) window.renderDashboard();
     }
+  }
 };
 
 // ============================================================
@@ -645,7 +698,7 @@ window.editDailyGoal = function() {
 function initializeMobileSidebar() {
   const hamburger = document.querySelector('.hamburger-btn');
   const overlay = document.querySelector('.sidebar-overlay');
-  
+
   if (!hamburger || !overlay) return;
 
   hamburger.addEventListener('click', () => {
@@ -661,7 +714,7 @@ function initializeMobileSidebar() {
   if (sidebarHeader && !document.querySelector('.sidebar-close-btn')) {
     // Ensure header is relative for absolute positioning of close btn
     sidebarHeader.style.position = 'relative';
-    
+
     const closeBtn = document.createElement('button');
     closeBtn.className = 'sidebar-close-btn';
     closeBtn.innerHTML = '&times;'; // HTML entity for multiplication sign (X)
@@ -676,11 +729,11 @@ function initializeAccordions() {
 
   detailsElements.forEach(details => {
     const summary = details.querySelector('summary');
-    
+
     summary.addEventListener('click', (event) => {
       // Prevent default behavior to handle animation
       event.preventDefault();
-      
+
       // Check if it's open or closing
       if (details.open) {
         details.removeAttribute('open');
@@ -693,9 +746,9 @@ function initializeAccordions() {
 
 function initializeCollapsibles() {
   const collapsibles = document.querySelectorAll('.collapsible');
-  
+
   collapsibles.forEach(collapsible => {
-    collapsible.addEventListener('click', function() {
+    collapsible.addEventListener('click', function () {
       this.classList.toggle('active');
       const content = this.nextElementSibling;
       if (content && content.classList.contains('collapsible-content')) {
@@ -732,38 +785,38 @@ function initializeSidebarControls() {
 }
 
 function updateProgress() {
-    const visitedPages = JSON.parse(localStorage.getItem('pageViews') || '{}');
-    const visitedHrefs = Object.keys(visitedPages).map(path => {
-        // Normalize path for comparison
-        return path.substring(path.indexOf('/amazon-coding-patterns/') + '/amazon-coding-patterns/'.length);
+  const visitedPages = JSON.parse(localStorage.getItem('pageViews') || '{}');
+  const visitedHrefs = Object.keys(visitedPages).map(path => {
+    // Normalize path for comparison
+    return path.substring(path.indexOf('/amazon-coding-patterns/') + '/amazon-coding-patterns/'.length);
+  });
+
+  document.querySelectorAll('.nav-section').forEach(section => {
+    const items = section.querySelectorAll('.nav-item');
+    if (items.length === 0) return;
+
+    let completedCount = 0;
+    items.forEach(item => {
+      const href = item.getAttribute('href').replace('../', '');
+      if (visitedHrefs.includes(href)) {
+        completedCount++;
+        item.classList.add('completed');
+      }
     });
 
-    document.querySelectorAll('.nav-section').forEach(section => {
-        const items = section.querySelectorAll('.nav-item');
-        if (items.length === 0) return;
-
-        let completedCount = 0;
-        items.forEach(item => {
-            const href = item.getAttribute('href').replace('../', '');
-            if (visitedHrefs.includes(href)) {
-                completedCount++;
-                item.classList.add('completed');
-            }
-        });
-
-        const progress = (completedCount / items.length) * 100;
-        const progressBar = section.querySelector('.progress-bar');
-        if (progressBar) {
-            progressBar.style.width = `${progress}%`;
-        }
-    });
+    const progress = (completedCount / items.length) * 100;
+    const progressBar = section.querySelector('.progress-bar');
+    if (progressBar) {
+      progressBar.style.width = `${progress}%`;
+    }
+  });
 }
 
 // ============================================================
 // LANGUAGE TABS
 // ============================================================
 
-window.switchTab = function(lang) {
+window.switchTab = function (lang) {
   // Update buttons
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.remove('active');
@@ -776,12 +829,12 @@ window.switchTab = function(lang) {
   document.querySelectorAll('.lang-content').forEach(content => {
     content.classList.remove('active');
   });
-  
+
   const activeContent = document.getElementById(lang);
   if (activeContent) {
     activeContent.classList.add('active');
   }
-  
+
   // Save preference
   localStorage.setItem('preferredLanguage', lang);
 };
@@ -801,7 +854,7 @@ function initializeSearch() {
   const searchInput = document.getElementById('pattern-search');
   if (!searchInput) return;
 
-  searchInput.addEventListener('input', function(e) {
+  searchInput.addEventListener('input', function (e) {
     const term = e.target.value.toLowerCase();
     const navSections = document.querySelectorAll('.nav-section');
 
@@ -819,7 +872,7 @@ function initializeSearch() {
     navSections.forEach(section => {
       let hasVisibleItems = false;
       const items = section.querySelectorAll('.nav-item');
-      
+
       items.forEach(item => {
         const text = item.textContent.toLowerCase();
         if (text.includes(term)) {

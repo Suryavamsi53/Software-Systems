@@ -3,99 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topological Sort Visualizer - SDE Prep</title>
+    <title>Topological Sort Visualizer - Software Systems Prep</title>
     <link rel="stylesheet" href="../styles.css">
     <link rel="stylesheet" href="graph-visualizer.css">
+    <!-- Prism.js for Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <style>
-        /* Specific overrides for Topo Sort */
-        .node { fill: var(--bg-tertiary); stroke: var(--text-secondary); stroke-width: 2px; transition: all 0.5s ease; }
-        .node.active { stroke: var(--accent-color); stroke-width: 3px; fill: rgba(250, 204, 21, 0.1); }
-        .node.visited { stroke: #22c55e; stroke-width: 3px; fill: rgba(34, 197, 94, 0.1); }
-        .node.processing { stroke: #3b82f6; stroke-width: 3px; fill: rgba(59, 130, 246, 0.1); }
+        /* Custom styles for Topo Sort specific elements */
+        .node circle {
+            transition: all 0.3s ease;
+            fill: var(--bg-tertiary);
+            stroke: var(--text-secondary);
+            stroke-width: 2px;
+        }
+        .node.active circle { stroke: var(--accent-color); stroke-width: 3px; fill: rgba(59, 130, 246, 0.2); }
+        .node.processed circle { stroke: #22c55e; fill: rgba(34, 197, 94, 0.2); }
+        .node.queue circle { stroke: #facc15; fill: rgba(250, 204, 21, 0.2); }
         
-        .node-text { fill: var(--text-primary); font-weight: bold; font-family: monospace; font-size: 14px; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
-        .edge { stroke: var(--text-muted); stroke-width: 2px; marker-end: url(#arrow); transition: all 0.5s ease; }
-        .edge.active { stroke: var(--accent-color); stroke-width: 3px; marker-end: url(#arrow-active); }
-        
-        .indegree-badge {
-            font-size: 10px;
-            fill: #fff;
+        .node text {
+            font-weight: bold;
+            pointer-events: none;
+            fill: var(--text-primary);
             text-anchor: middle;
             dominant-baseline: middle;
-        }
-        .indegree-bg {
-            fill: #ef4444;
-            r: 8px;
+            font-family: monospace;
+            font-size: 14px;
         }
 
-        /* Queue Visualization */
-        .queue-container {
-            display: flex;
-            gap: 5px;
+        .edge {
+            stroke: var(--text-muted);
+            stroke-width: 2px;
+            marker-end: url(#arrow);
+            transition: all 0.3s ease;
+        }
+        .edge.active { stroke: var(--accent-color); stroke-width: 3px; marker-end: url(#arrow-active); }
+        .edge.faded { opacity: 0.2; }
+
+        .badge-bg { fill: var(--danger); transition: fill 0.3s; }
+        .badge-bg.zero { fill: #22c55e; }
+        .badge { fill: white; font-size: 10px; font-weight: bold; text-anchor: middle; dominant-baseline: middle; }
+
+        /* Queue & Result Panels */
+        .panel-container {
             padding: 10px;
+            border-top: 1px solid var(--border-color);
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            min-height: 50px;
-            align-items: center;
-            overflow-x: auto;
-        }
-        .queue-item {
-            width: 30px;
-            height: 30px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--accent-color);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 4px;
-            font-weight: bold;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn { from { transform: translateX(10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-        /* Result List */
-        .result-list {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        .result-item {
-            padding: 5px 10px;
-            background: rgba(34, 197, 94, 0.2);
-            border: 1px solid #22c55e;
-            border-radius: 4px;
-            color: #22c55e;
-            font-weight: bold;
-        }
-
-        /* Code Panel Styles */
-        .split-view {
-            display: flex;
-            gap: 20px;
-            height: 100%;
-            min-height: 500px;
-        }
-        .canvas-section {
-            flex: 2;
             display: flex;
             flex-direction: column;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
+            gap: 10px;
         }
-        .code-section {
+        .data-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .data-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            width: 80px;
+        }
+        .data-content {
             flex: 1;
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        .data-item {
+            padding: 4px 8px;
             background-color: var(--bg-tertiary);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            color: var(--text-primary);
+        }
+        
+        /* Code Panel Styles Override */
+        .code-section {
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            min-width: 350px;
         }
         .code-header {
             padding: 10px 15px;
@@ -114,14 +102,30 @@
             color: var(--text-secondary);
             flex: 1;
         }
-        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line { padding: 2px 5px; border-radius: 4px; white-space: pre; }
         .code-line.active {
             background-color: rgba(250, 204, 21, 0.2);
             border-left: 3px solid #facc15;
             color: #facc15;
         }
-        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
-        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; display: inline-block; width: 20px; text-align: right; }
+        .kwd { color: #f472b6; } 
+        .com { color: #6b7280; font-style: italic; }
+        .typ { color: #60a5fa; }
+        .num { color: #facc15; }
+
+        .cycle-warning {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #ef4444;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 100;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -129,7 +133,7 @@
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h1>🌑 Software Systems</h1>
-                <p>Topological Sort</p>
+                <p>Topo Sort</p>
             </div>
             <div class="nav-section">
                 <div class="nav-section-title">Back</div>
@@ -139,13 +143,34 @@
             <div class="nav-section">
                 <div class="nav-section-title">Controls</div>
                 <div class="control-group">
-                    <button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
-                    <button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
-                    <button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
-                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                    <label>Scenario</label>
+                    <select id="scenario-select" onchange="loadScenario(this.value)" style="width: 100%; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                        <option value="random">🎲 Random Graph</option>
+                        <option value="course">📚 Course Prerequisites</option>
+                        <option value="build">🔨 Build System</option>
+                        <option value="cicd">⚙️ CI/CD Pipeline</option>
+                        <option value="recipe">🍳 Recipe Steps</option>
+                    </select>
                 </div>
                 <div class="control-group">
-                    <button class="action-btn" onclick="generateGraph()">🎲 New Graph</button>
+                    <label>Mode</label>
+                    <select id="mode-select" onchange="setMode(this.value)" style="width: 100%; padding: 8px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); border-radius: 4px;">
+                        <option value="beginner">👶 Beginner Mode (Guided)</option>
+                        <option value="intermediate">🎓 Intermediate Mode (Predict)</option>
+                        <option value="expert">🚀 Expert Mode (Manual)</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="action-btn warning" onclick="reset()">Reset</button>
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Legend</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 5px;">
+                    <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%;"></span> Active</div>
+                    <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: #22c55e; border-radius: 50%;"></span> Processed</div>
+                    <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: #facc15; border-radius: 50%;"></span> In Queue</div>
+                    <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%;"></span> Dependency</div>
                 </div>
             </div>
         </aside>
@@ -153,36 +178,51 @@
         <main class="main-content no-padding">
             <div class="viz-container">
                 <div class="algo-toolbar">
-                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Kahn's Algorithm (BFS based).</div>
+                    <div class="playback-controls">
+                        <button id="btn-play" onclick="togglePlay()">▶ Play</button>
+                        <button id="btn-step" onclick="stepForward()">👟 Step</button>
+                        <button id="btn-back" onclick="stepBackward()">↩ Back</button>
+                        <input type="range" id="speed-range" min="100" max="2000" value="1000" oninput="setSpeed(this.value)" title="Speed">
+                    </div>
+                    <div id="status-msg" style="margin-left: auto; font-family: monospace; color: var(--accent-color);">Ready.</div>
+                    <div id="step-counter" style="margin-left: 15px; font-family: monospace; color: var(--text-muted);">Step 0/0</div>
                 </div>
                 
                 <div class="split-view">
-                    <!-- Left: Visualization -->
+                    <!-- Left: Canvas -->
                     <div class="canvas-section">
-                        <div style="flex: 1; position: relative;">
-                            <svg id="graph-svg" width="100%" height="100%">
-                                <defs>
-                                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
-                                        <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
-                                    </marker>
-                                    <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
-                                        <path d="M0,0 L0,6 L9,3 z" fill="#facc15" />
-                                    </marker>
-                                </defs>
-                            </svg>
+                        <svg id="graph-svg" width="100%" height="100%">
+                            <defs>
+                                <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                                </marker>
+                                <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                                    <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6" />
+                                </marker>
+                            </defs>
+                        </svg>
+                        
+                        <div id="cycle-warning" class="cycle-warning">
+                            <h3 style="color: #ef4444; margin-top: 0;">⚠️ Cycle Detected!</h3>
+                            <p style="color: var(--text-primary);">Topological Sort is not possible on cyclic graphs.</p>
+                            <button class="action-btn" onclick="reset()">Reset</button>
                         </div>
-                        <div style="padding: 15px; border-top: 1px solid var(--border-color); background: var(--bg-tertiary);">
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px;">Queue (Nodes with In-Degree 0)</div>
-                            <div id="queue-container" class="queue-container"></div>
-                            <div style="font-size: 0.8rem; color: var(--text-muted); margin: 10px 0 5px;">Sorted Order</div>
-                            <div id="result-list" class="result-list"></div>
+
+                        <div class="panel-container">
+                            <div class="data-row">
+                                <div class="data-label">Queue (0 In-Deg)</div>
+                                <div class="data-content" id="queue-viz"></div>
+                            </div>
+                            <div class="data-row">
+                                <div class="data-label">Result Order</div>
+                                <div class="data-content" id="result-viz"></div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Right: Code Panel -->
+                    <!-- Right: Code -->
                     <div class="code-section">
                         <div class="code-header">
-                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
                             <div class="btn-group">
                                 <button class="tab-btn active" onclick="switchLang('go')">Go</button>
                                 <button class="tab-btn" onclick="switchLang('java')">Java</button>
@@ -190,392 +230,637 @@
                             </div>
                         </div>
                         <div id="code-display" class="algo-code"></div>
+                        <div style="padding: 15px; border-top: 1px solid var(--border-color); background: rgba(0,0,0,0.2);">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 5px;">Explanation</div>
+                            <div id="explanation" style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.4;">
+                                Ready to start. Kahn's Algorithm repeatedly removes nodes with 0 in-degree.
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
+    <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
+    
     <script>
-        const NUM_NODES = 6;
+        // --- Configuration & State ---
+        const width = 800, height = 600;
         let nodes = [];
         let edges = [];
+        let simulation = null;
+        let svg = d3.select("#graph-svg");
+        
+        // Algorithm State
         let steps = [];
         let currentStep = 0;
         let isPlaying = false;
-        let intervalId = null;
+        let speed = 1000;
+        let timer = null;
+        let mode = 'beginner'; // beginner, intermediate, expert
         let currentLang = 'go';
-        const ANIMATION_SPEED = 1000;
+        
+        // --- Scenarios ---
+        const SCENARIOS = {
+            random: {
+                nodes: [
+                    { id: 'A', label: 'A' }, { id: 'B', label: 'B' }, { id: 'C', label: 'C' },
+                    { id: 'D', label: 'D' }, { id: 'E', label: 'E' }, { id: 'F', label: 'F' }
+                ],
+                edges: [
+                    { from: 'A', to: 'B' }, { from: 'A', to: 'C' },
+                    { from: 'B', to: 'D' }, { from: 'C', to: 'D' },
+                    { from: 'D', to: 'E' }, { from: 'E', to: 'F' }
+                ]
+            },
+            course: {
+                nodes: [
+                    { id: 'CS101', label: 'CS101' }, { id: 'CS102', label: 'CS102' },
+                    { id: 'DATA', label: 'Data Struct' }, { id: 'ALGO', label: 'Algorithms' },
+                    { id: 'OS', label: 'OS' }, { id: 'NET', label: 'Networks' }
+                ],
+                edges: [
+                    { from: 'CS101', to: 'CS102' }, { from: 'CS102', to: 'DATA' },
+                    { from: 'DATA', to: 'ALGO' }, { from: 'CS102', to: 'OS' },
+                    { from: 'OS', to: 'NET' }
+                ]
+            },
+            build: {
+                nodes: [
+                    { id: 'src', label: 'Source' }, { id: 'lib', label: 'Library' },
+                    { id: 'comp', label: 'Compile' }, { id: 'link', label: 'Link' },
+                    { id: 'test', label: 'Test' }, { id: 'pkg', label: 'Package' }
+                ],
+                edges: [
+                    { from: 'src', to: 'comp' }, { from: 'lib', to: 'comp' },
+                    { from: 'comp', to: 'link' }, { from: 'link', to: 'test' },
+                    { from: 'test', to: 'pkg' }
+                ]
+            },
+            cicd: {
+                nodes: [
+                    { id: 'git', label: 'Git Push' }, { id: 'build', label: 'Build' },
+                    { id: 'unit', label: 'Unit Tests' }, { id: 'int', label: 'Integration' },
+                    { id: 'deploy', label: 'Deploy' }, { id: 'monitor', label: 'Monitor' }
+                ],
+                edges: [
+                    { from: 'git', to: 'build' }, { from: 'build', to: 'unit' },
+                    { from: 'unit', to: 'int' }, { from: 'int', to: 'deploy' },
+                    { from: 'deploy', to: 'monitor' }
+                ]
+            },
+            recipe: {
+                nodes: [
+                    { id: 'prep', label: 'Prep' }, { id: 'mix', label: 'Mix' },
+                    { id: 'oven', label: 'Preheat' }, { id: 'bake', label: 'Bake' },
+                    { id: 'cool', label: 'Cool' }, { id: 'eat', label: 'Eat' }
+                ],
+                edges: [
+                    { from: 'prep', to: 'mix' }, { from: 'oven', to: 'bake' },
+                    { from: 'mix', to: 'bake' }, { from: 'bake', to: 'cool' },
+                    { from: 'cool', to: 'eat' }
+                ]
+            }
+        };
 
-        const svg = document.getElementById('graph-svg');
-        const statusText = document.getElementById('status-text');
-        const queueContainer = document.getElementById('queue-container');
-        const resultList = document.getElementById('result-list');
-        const playBtn = document.getElementById('playBtn');
-
-        const CODES = {
-            kahn: {
-                go: `func topologicalSort(n int, edges [][]int) []int {
+        // --- Code Snippets ---
+        const CODE_SNIPPETS = {
+            go: `func kahn(n int, edges [][]int) []int {
+    adj := make([][]int, n)
     inDegree := make([]int, n)
-    graph := make(map[int][]int)
     for _, e := range edges {
-        graph[e[0]] = append(graph[e[0]], e[1])
+        adj[e[0]] = append(adj[e[0]], e[1])
         inDegree[e[1]]++
     }
-
+    
     queue := []int{}
-    for i := 0; i < n; i++ {
-        if inDegree[i] == 0 { queue = append(queue, i) }
+    for i, d := range inDegree {
+        if d == 0 { queue = append(queue, i) }
     }
-
-    var result []int
+    
+    res := []int{}
     for len(queue) > 0 {
         u := queue[0]; queue = queue[1:]
-        result = append(result, u)
-
-        for _, v := range graph[u] {
+        res = append(res, u)
+        
+        for _, v := range adj[u] {
             inDegree[v]--
             if inDegree[v] == 0 {
                 queue = append(queue, v)
             }
         }
     }
-    return result
+    return res
 }`,
-                java: `public int[] topologicalSort(int n, int[][] edges) {
+            java: `public List<Integer> kahn(int n, int[][] edges) {
+    List<List<Integer>> adj = new ArrayList<>();
     int[] inDegree = new int[n];
-    List<List<Integer>> graph = new ArrayList<>();
-    for(int i=0; i<n; i++) graph.add(new ArrayList<>());
-    for(int[] e : edges) {
-        graph.get(e[0]).add(e[1]);
+    for (int i=0; i<n; i++) adj.add(new ArrayList<>());
+    for (int[] e : edges) {
+        adj.get(e[0]).add(e[1]);
         inDegree[e[1]]++;
     }
-
+    
     Queue<Integer> q = new LinkedList<>();
-    for(int i=0; i<n; i++) if(inDegree[i] == 0) q.add(i);
-
-    int[] res = new int[n]; int idx = 0;
-    while(!q.isEmpty()) {
+    for (int i = 0; i < n; i++) 
+        if (inDegree[i] == 0) q.add(i);
+        
+    List<Integer> res = new ArrayList<>();
+    while (!q.isEmpty()) {
         int u = q.poll();
-        res[idx++] = u;
-        for(int v : graph.get(u)) {
+        res.add(u);
+        
+        for (int v : adj.get(u)) {
             inDegree[v]--;
-            if(inDegree[v] == 0) q.add(v);
+            if (inDegree[v] == 0) q.add(v);
         }
     }
     return res;
 }`,
-                python: `def topological_sort(n, edges):
-    in_degree = {i: 0 for i in range(n)}
-    graph = {i: [] for i in range(n)}
+            python: `def kahn(n, edges):
+    adj = defaultdict(list)
+    in_degree = [0] * n
     for u, v in edges:
-        graph[u].append(v)
+        adj[u].append(v)
         in_degree[v] += 1
-
-    queue = deque([i for i in in_degree if in_degree[i] == 0])
-    result = []
-
+        
+    queue = deque([i for i in range(n) if in_degree[i] == 0])
+    res = []
+    
     while queue:
         u = queue.popleft()
-        result.append(u)
-
-        for v in graph[u]:
+        res.append(u)
+        
+        for v in adj[u]:
             in_degree[v] -= 1
             if in_degree[v] == 0:
                 queue.append(v)
-    
-    return result`
-            }
+                
+    return res`
         };
 
-        const LINES = {
-            go: { init: 2, build: 5, qInit: 9, loop: 12, pop: 13, addRes: 14, neighborLoop: 16, dec: 17, checkZero: 18, push: 19 },
-            java: { init: 2, build: 6, qInit: 9, loop: 11, pop: 12, addRes: 13, neighborLoop: 14, dec: 15, checkZero: 16, push: 16 }, // Java compact
-            python: { init: 2, build: 5, qInit: 7, loop: 10, pop: 11, addRes: 12, neighborLoop: 14, dec: 15, checkZero: 16, push: 17 }
+        const LINE_MAP = {
+            go: { init: 2, q_init: 10, loop: 15, pop: 16, process: 17, neighbor: 19, dec: 20, push: 22 },
+            java: { init: 3, q_init: 11, loop: 16, pop: 17, process: 18, neighbor: 20, dec: 21, push: 22 },
+            python: { init: 3, q_init: 8, loop: 11, pop: 12, process: 13, neighbor: 15, dec: 16, push: 18 }
         };
 
+        // --- Initialization ---
         function init() {
-            renderCode('kahn');
-            generateGraph();
+            loadScenario('random');
+            renderCode();
+            setupDrag();
         }
 
-        function generateGraph() {
-            nodes = [];
-            edges = [];
-            // Create DAG
-            // Layered approach to ensure no cycles
-            const layers = [[0], [1, 2], [3, 4], [5]];
+        function loadScenario(key) {
+            reset();
+            const data = SCENARIOS[key];
             
-            // Assign positions
-            const width = 800;
-            const height = 400;
-            const layerHeight = height / (layers.length + 1);
+            // Deep copy to avoid mutation
+            nodes = JSON.parse(JSON.stringify(data.nodes));
+            edges = JSON.parse(JSON.stringify(data.edges));
             
-            layers.forEach((layer, lIdx) => {
-                const layerWidth = width / (layer.length + 1);
-                layer.forEach((nodeId, nIdx) => {
-                    nodes.push({
-                        id: nodeId,
-                        x: (nIdx + 1) * layerWidth,
-                        y: (lIdx + 1) * layerHeight,
-                        inDegree: 0
-                    });
-                });
-            });
+            // Layout nodes (Simple Force Layout)
+            simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink(edges).id(d => d.id).distance(100))
+                .force("charge", d3.forceManyBody().strength(-300))
+                .force("center", d3.forceCenter(width / 2, height / 2))
+                .stop();
 
-            // Add edges (only forward)
-            const addEdge = (u, v) => {
-                edges.push({ u, v });
-                nodes.find(n => n.id === v).inDegree++;
-            };
-
-            addEdge(0, 1); addEdge(0, 2);
-            addEdge(1, 3); addEdge(1, 4);
-            addEdge(2, 4);
-            addEdge(3, 5); addEdge(4, 5);
-
+            // Run simulation for static layout
+            for (let i = 0; i < 300; ++i) simulation.tick();
+            
+            drawGraph();
             generateSteps();
-            render(0);
         }
 
+        function drawGraph() {
+            svg.selectAll("*").remove(); // Clear
+            
+            // Defs (Arrows)
+            const defs = svg.append("defs");
+            defs.append("marker")
+                .attr("id", "arrow")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 25) // Offset for node radius
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#94a3b8");
+
+            defs.append("marker")
+                .attr("id", "arrow-active")
+                .attr("viewBox", "0 -5 10 10")
+                .attr("refX", 25)
+                .attr("refY", 0)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M0,-5L10,0L0,5")
+                .attr("fill", "#38bdf8");
+
+            // Edges
+            const link = svg.append("g")
+                .selectAll("line")
+                .data(edges)
+                .enter().append("line")
+                .attr("class", "edge")
+                .attr("id", d => `edge-${d.source.id}-${d.target.id}`)
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            // Nodes
+            const node = svg.append("g")
+                .selectAll("g")
+                .data(nodes)
+                .enter().append("g")
+                .attr("class", "node")
+                .attr("id", d => `node-${d.id}`)
+                .attr("transform", d => `translate(${d.x},${d.y})`)
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            node.append("circle")
+                .attr("r", 20);
+
+            node.append("text")
+                .text(d => d.label)
+                .attr("dy", 4);
+
+            // In-Degree Badge
+            const badge = node.append("g")
+                .attr("class", "badge-group")
+                .attr("transform", "translate(15, -15)");
+            
+            badge.append("circle")
+                .attr("r", 8)
+                .attr("class", "badge-bg")
+                .attr("id", d => `badge-bg-${d.id}`);
+            
+            badge.append("text")
+                .attr("class", "badge")
+                .attr("id", d => `badge-val-${d.id}`)
+                .attr("dy", 3)
+                .text("0");
+        }
+
+        // --- Algorithm Logic ---
         function generateSteps() {
             steps = [];
-            // Deep copy for simulation
-            let simNodes = JSON.parse(JSON.stringify(nodes));
-            let simEdges = JSON.parse(JSON.stringify(edges));
-            let queue = [];
-            let result = [];
             
-            // Step 0: Initial State
+            // 1. Calculate In-Degrees
+            const inDegree = {};
+            const adj = {};
+            nodes.forEach(n => {
+                inDegree[n.id] = 0;
+                adj[n.id] = [];
+            });
+            
+            edges.forEach(e => {
+                // D3 converts source/target to objects, access ID
+                const u = e.source.id;
+                const v = e.target.id;
+                adj[u].push(v);
+                inDegree[v]++;
+            });
+
+            // Initial State
             steps.push({
-                nodes: JSON.parse(JSON.stringify(simNodes)),
+                type: 'init',
+                inDegree: {...inDegree},
                 queue: [],
                 result: [],
-                msg: "Calculate In-Degrees for all nodes.",
+                msg: "Initialized in-degrees.",
                 line: 'init'
             });
 
-            // Step 1: Add 0-indegree to queue
-            simNodes.forEach(n => {
-                if (n.inDegree === 0) queue.push(n.id);
+            // 2. Init Queue
+            const queue = [];
+            nodes.forEach(n => {
+                if (inDegree[n.id] === 0) queue.push(n.id);
             });
+            
             steps.push({
-                nodes: JSON.parse(JSON.stringify(simNodes)),
+                type: 'queue_init',
+                inDegree: {...inDegree},
                 queue: [...queue],
                 result: [],
-                msg: `Nodes with 0 In-Degree added to Queue: ${queue.join(', ')}`,
-                line: 'qInit'
+                msg: `Nodes with 0 in-degree added to queue: ${queue.join(', ')}`,
+                line: 'q_init'
             });
 
+            const result = [];
+            
+            // 3. Process
             while (queue.length > 0) {
-                // Pop
-                let u = queue.shift();
-                result.push(u);
-                
+                // Snapshot before pop
                 steps.push({
-                    nodes: JSON.parse(JSON.stringify(simNodes)),
+                    type: 'loop_start',
+                    inDegree: {...inDegree},
+                    queue: [...queue],
+                    result: [...result],
+                    msg: "Queue is not empty, processing next node.",
+                    line: 'loop'
+                });
+
+                const u = queue.shift();
+                result.push(u);
+
+                steps.push({
+                    type: 'process',
+                    inDegree: {...inDegree},
                     queue: [...queue],
                     result: [...result],
                     activeNode: u,
-                    msg: `Process Node ${u}. Add to result.`,
-                    line: 'pop'
+                    msg: `Processed ${u}. Added to topological order.`,
+                    line: 'process'
                 });
 
                 // Neighbors
-                let neighbors = simEdges.filter(e => e.u === u).map(e => e.v);
-                for (let v of neighbors) {
-                    let vNode = simNodes.find(n => n.id === v);
-                    vNode.inDegree--;
+                const neighbors = adj[u] || [];
+                for (const v of neighbors) {
+                    inDegree[v]--;
                     
                     steps.push({
-                        nodes: JSON.parse(JSON.stringify(simNodes)),
+                        type: 'neighbor',
+                        inDegree: {...inDegree},
                         queue: [...queue],
                         result: [...result],
                         activeNode: u,
                         activeEdge: {u, v},
-                        msg: `Reduce In-Degree of neighbor ${v}. New In-Degree: ${vNode.inDegree}`,
+                        msg: `Removing edge ${u} -> ${v}. ${v} in-degree becomes ${inDegree[v]}.`,
                         line: 'dec'
                     });
 
-                    if (vNode.inDegree === 0) {
+                    if (inDegree[v] === 0) {
                         queue.push(v);
                         steps.push({
-                            nodes: JSON.parse(JSON.stringify(simNodes)),
+                            type: 'push',
+                            inDegree: {...inDegree},
                             queue: [...queue],
                             result: [...result],
                             activeNode: u,
                             activeEdge: {u, v},
-                            msg: `Node ${v} has 0 In-Degree. Add to Queue.`,
+                            msg: `${v} has 0 in-degree! Added to queue.`,
                             line: 'push'
                         });
                     }
                 }
             }
 
-            steps.push({
-                nodes: JSON.parse(JSON.stringify(simNodes)),
-                queue: [],
-                result: [...result],
-                msg: "Topological Sort Complete!",
-                line: 'loop' // End
-            });
-        }
-
-        function render(stepIndex) {
-            const state = steps[stepIndex];
-            svg.innerHTML = `
-                <defs>
-                    <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
-                    </marker>
-                    <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
-                        <path d="M0,0 L0,6 L9,3 z" fill="#facc15" />
-                    </marker>
-                </defs>
-            `;
-
-            // Draw Edges
-            edges.forEach(e => {
-                const u = state.nodes.find(n => n.id === e.u);
-                const v = state.nodes.find(n => n.id === e.v);
-                const isActive = state.activeEdge && state.activeEdge.u === e.u && state.activeEdge.v === e.v;
-                
-                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                line.setAttribute("x1", u.x); line.setAttribute("y1", u.y);
-                line.setAttribute("x2", v.x); line.setAttribute("y2", v.y);
-                line.setAttribute("class", `edge ${isActive ? 'active' : ''}`);
-                svg.appendChild(line);
-            });
-
-            // Draw Nodes
-            state.nodes.forEach(n => {
-                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                const isActive = state.activeNode === n.id;
-                const isVisited = state.result.includes(n.id);
-                
-                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y);
-                circle.setAttribute("r", 20);
-                circle.setAttribute("class", `node ${isActive ? 'active' : ''} ${isVisited ? 'visited' : ''}`);
-                
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", n.x); text.setAttribute("y", n.y);
-                text.setAttribute("class", "node-text");
-                text.textContent = n.id;
-
-                // In-Degree Badge
-                if (!isVisited) {
-                    const badge = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                    badge.setAttribute("cx", n.x + 15); badge.setAttribute("cy", n.y - 15);
-                    badge.setAttribute("class", "indegree-bg");
-                    
-                    const badgeText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    badgeText.setAttribute("x", n.x + 15); badgeText.setAttribute("y", n.y - 15);
-                    badgeText.setAttribute("class", "indegree-badge");
-                    badgeText.textContent = n.inDegree;
-                    
-                    g.appendChild(badge);
-                    g.appendChild(badgeText);
-                }
-
-                g.appendChild(circle);
-                g.appendChild(text);
-                svg.appendChild(g);
-            });
-
-            // Update UI
-            statusText.textContent = state.msg;
-            queueContainer.innerHTML = state.queue.map(id => `<div class="queue-item">${id}</div>`).join('');
-            resultList.innerHTML = state.result.map(id => `<div class="result-item">${id}</div>`).join('');
-
-            // Highlight Code
-            if (state.line) highlightLine(state.line);
-        }
-
-        function highlightLine(key) {
-            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
-            const lineNum = LINES[currentLang][key];
-            if (lineNum) {
-                const el = document.getElementById(`${currentLang === 'go' ? 'kahn' : 'kahn'}-${currentLang}-${lineNum}`); // ID fix logic if needed
-                // Actually IDs are like kahn-go-1
-                const realId = `kahn-${currentLang}-${lineNum}`;
-                const el2 = document.getElementById(realId);
-                if (el2) el2.classList.add('active');
-            }
-        }
-
-        function renderCode(algo) {
-            const code = CODES[algo][currentLang];
-            const display = document.getElementById('code-display');
-            display.innerHTML = '';
-            
-            const lines = code.split('\n');
-            lines.forEach((line, i) => {
-                const div = document.createElement('div');
-                div.className = 'code-line';
-                div.id = `kahn-${currentLang}-${i+1}`;
-                let html = line
-                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true|false)\b/g, '<span class="kwd">$1</span>')
-                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
-                    .replace(/#.*/g, '<span class="com">$&</span>');
-                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
-                display.appendChild(div);
-            });
-        }
-
-        function copyCode() {
-            navigator.clipboard.writeText(CODES['kahn'][currentLang]);
-        }
-
-        function switchLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderCode('kahn');
-            render(currentStep);
-        }
-
-        // Controls
-        function togglePlay() {
-            if (isPlaying) {
-                clearInterval(intervalId);
-                isPlaying = false;
-                playBtn.textContent = "Play";
+            // Cycle Check
+            if (result.length !== nodes.length) {
+                steps.push({
+                    type: 'cycle',
+                    inDegree: {...inDegree},
+                    queue: [],
+                    result: [...result],
+                    msg: "Cycle Detected! Queue empty but nodes remain.",
+                    isError: true
+                });
             } else {
-                if (currentStep >= steps.length - 1) currentStep = 0;
-                isPlaying = true;
-                playBtn.textContent = "Pause";
-                intervalId = setInterval(() => {
-                    if (currentStep < steps.length - 1) {
-                        currentStep++;
-                        render(currentStep);
-                    } else {
-                        togglePlay();
-                    }
-                }, ANIMATION_SPEED);
+                steps.push({
+                    type: 'done',
+                    inDegree: {...inDegree},
+                    queue: [],
+                    result: [...result],
+                    msg: "Topological Sort Complete!",
+                    isDone: true
+                });
+            }
+            
+            // Update total steps
+            document.getElementById('step-counter').innerText = `Step 0/${steps.length - 1}`;
+        }
+
+        // --- Visualization Engine ---
+        function updateView(stepIdx) {
+            const s = steps[stepIdx];
+            if (!s) return;
+
+            // 1. Update Text
+            document.getElementById('step-counter').innerText = `Step ${stepIdx}/${steps.length - 1}`;
+            document.getElementById('explanation').innerText = s.msg;
+            
+            // 2. Update Queue Viz
+            const qContainer = document.getElementById('queue-viz');
+            qContainer.innerHTML = '';
+            if (s.queue.length === 0) {
+                qContainer.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.8rem;">Empty</span>';
+            } else {
+                s.queue.forEach(id => {
+                    const el = document.createElement('div');
+                    el.className = 'node-card';
+                    el.innerText = getNodeLabel(id);
+                    qContainer.appendChild(el);
+                });
+            }
+
+            // 3. Update Result Viz
+            const rContainer = document.getElementById('result-viz');
+            rContainer.innerHTML = '';
+            if (s.result.length === 0) {
+                rContainer.innerHTML = '<span style="color: var(--text-secondary); font-size: 0.8rem;">Empty</span>';
+            } else {
+                s.result.forEach(id => {
+                    const el = document.createElement('div');
+                    el.className = 'result-node';
+                    el.innerText = getNodeLabel(id);
+                    rContainer.appendChild(el);
+                });
+            }
+
+            // 4. Update Graph Styles
+            // Reset
+            d3.selectAll('.node').classed('active', false).classed('processed', false).classed('queue', false);
+            d3.selectAll('.edge').classed('active', false).classed('faded', false);
+            d3.select('#cycle-warning').style('display', 'none');
+
+            // Apply State
+            // Processed nodes
+            s.result.forEach(id => d3.select(`#node-${id}`).classed('processed', true));
+            // Queue nodes
+            s.queue.forEach(id => d3.select(`#node-${id}`).classed('queue', true));
+            // Active Node
+            if (s.activeNode) {
+                d3.select(`#node-${s.activeNode}`).classed('active', true);
+            }
+            // Active Edge
+            if (s.activeEdge) {
+                d3.select(`#edge-${s.activeEdge.u}-${s.activeEdge.v}`).classed('active', true);
+            }
+            // Faded edges (processed)
+            edges.forEach(e => {
+                if (s.result.includes(e.source.id)) {
+                    d3.select(`#edge-${e.source.id}-${e.target.id}`).classed('faded', true);
+                }
+            });
+
+            // 5. Update Badges
+            nodes.forEach(n => {
+                const val = s.inDegree[n.id];
+                d3.select(`#badge-val-${n.id}`).text(val);
+                d3.select(`#badge-bg-${n.id}`).classed('zero', val === 0);
+            });
+
+            // 6. Code Highlight
+            if (s.line) highlightLine(s.line);
+
+            // 7. Cycle Warning
+            if (s.isError) {
+                d3.select('#cycle-warning').style('display', 'block');
             }
         }
 
+        function getNodeLabel(id) {
+            const n = nodes.find(x => x.id === id);
+            return n ? n.label : id;
+        }
+
+        // --- Controls ---
         function stepForward() {
             if (currentStep < steps.length - 1) {
                 currentStep++;
-                render(currentStep);
+                updateView(currentStep);
+            } else {
+                isPlaying = false;
+                document.getElementById('play-btn').innerHTML = '<i class="fas fa-play"></i> Play';
             }
         }
 
         function stepBackward() {
             if (currentStep > 0) {
                 currentStep--;
-                render(currentStep);
+                updateView(currentStep);
+            }
+        }
+
+        function togglePlay() {
+            const btn = document.getElementById('play-btn');
+            if (isPlaying) {
+                isPlaying = false;
+                clearInterval(timer);
+                btn.innerHTML = '<i class="fas fa-play"></i> Play';
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                timer = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        stepForward();
+                    } else {
+                        togglePlay();
+                    }
+                }, speed);
             }
         }
 
         function reset() {
-            if (isPlaying) togglePlay();
+            isPlaying = false;
+            clearInterval(timer);
             currentStep = 0;
-            render(0);
+            document.getElementById('play-btn').innerHTML = '<i class="fas fa-play"></i> Play';
+            updateView(0);
         }
 
+        function setSpeed(val) {
+            speed = 2100 - val; // Invert so right is faster
+            if (isPlaying) {
+                clearInterval(timer);
+                togglePlay(); togglePlay(); // Restart
+            }
+        }
+
+        function setMode(m) {
+            mode = m;
+            // Logic to hide/show elements based on mode
+            const exp = document.getElementById('explanation');
+            if (mode === 'intermediate') {
+                exp.style.filter = 'blur(4px)';
+                exp.title = "Hidden in Intermediate Mode";
+            } else {
+                exp.style.filter = 'none';
+            }
+            // Expert mode logic would go here (manual clicking)
+            if (mode === 'expert') {
+                alert("Expert Mode: Click nodes with in-degree 0 to process them manually! (Logic implementation pending)");
+            }
+        }
+
+        // --- Code Display ---
+        function renderCode() {
+            const codeBlock = document.getElementById('code-block');
+            codeBlock.className = `language-${currentLang}`;
+            codeBlock.textContent = CODE_SNIPPETS[currentLang];
+            Prism.highlightElement(codeBlock);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            renderCode();
+            // Re-highlight current line
+            if (steps[currentStep] && steps[currentStep].line) {
+                highlightLine(steps[currentStep].line);
+            }
+        }
+
+        function highlightLine(key) {
+            // Prism.js line highlighting logic
+            const lineNum = LINE_MAP[currentLang][key];
+            if (!lineNum) return;
+
+            const pre = document.querySelector('pre');
+            if (pre) {
+                pre.setAttribute('data-line', lineNum);
+                Prism.highlightElement(document.getElementById('code-block'));
+            }
+        }
+
+        // --- Dragging ---
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+            // Update positions manually since simulation is stopped
+            d.x = event.x;
+            d.y = event.y;
+            d3.select(this).attr("transform", `translate(${d.x},${d.y})`);
+            
+            // Update connected edges
+            d3.selectAll(".edge")
+                .attr("x1", l => l.source.x)
+                .attr("y1", l => l.source.y)
+                .attr("x2", l => l.target.x)
+                .attr("y2", l => l.target.y);
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function setupDrag() {
+            // D3 handles this in drawGraph
+        }
+
+        function copyCode() { navigator.clipboard.writeText(CODE_SNIPPETS[currentLang]); }
+
+        // Start
         init();
     </script>
 </body>

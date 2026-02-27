@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topological Sort - Interactive Learning Visualizer</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        body.dark-mode {
+            background: #0f172a;
+            color: #e2e8f0;
+        }
+        
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .header {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .dark-mode .header {
+            background: #1e293b;
+            border-bottom-color: #334155;
+        }
+        
+        .header-left h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+        
+        .dark-mode .header-left h1 {
+            color: #f1f5f9;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #334155;
+        }
+        
+        .dark-mode .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        
+        .dark-mode .btn-secondary:hover {
+            background: #475569;
+        }
+        
+        .theme-toggle {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 0.5rem;
+            background: #e2e8f0;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .dark-mode .theme-toggle {
+            background: #334155;
+        }
+        
+        .content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1rem;
+            padding: 1rem;
+        }
+        
+        .main-panel {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .dark-mode .main-panel {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .sidebar-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            overflow-y: auto;
+        }
+        
+        .panel {
+            background: white;
+            border-radius: 0.75rem;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        
+        .dark-mode .panel {
+            background: #1e293b;
+            border-color: #334155;
+        }
+        
+        .panel-header {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+        
+        .dark-mode .panel-header {
+            background: #0f172a;
+            border-bottom-color: #334155;
+            color: #94a3b8;
+        }
+        
+        .panel-body {
+            padding: 1rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+        
+        .canvas {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            cursor: grab;
+            user-select: none;
+        }
+        
+        .dark-mode .canvas {
+            background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+        }
+        
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .node {
+            cursor: move;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.1));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .node circle {
+            stroke-width: 2;
+            transition: all 0.3s;
+        }
+        
+        .node.active circle {
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+        
+        .node text {
+            font-weight: 700;
+            pointer-events: none;
+            user-select: none;
+        }
+        
+        .edge {
+            stroke-linecap: round;
+            transition: all 0.3s;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));
+        }
+        
+        .edge.active {
+            filter: drop-shadow(0 0 6px currentColor);
+        }
+        
+        .indegree-badge {
+            font-size: 10px;
+            font-weight: 700;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .speed-control input {
+            width: 100px;
+        }
+        
+        .mode-selector {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .mode-btn {
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .dark-mode .mode-btn {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        .mode-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .mode-btn:hover {
+            border-color: #3b82f6;
+        }
+        
+        .preset-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+        
+        .preset-btn {
+            padding: 0.75rem;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        .dark-mode .preset-btn {
+            background: #0f172a;
+            border-color: #334155;
+            color: #e2e8f0;
+        }
+        
+        .preset-btn:hover {
+            background: #f1f5f9;
+            border-color: #3b82f6;
+        }
+        
+        .dark-mode .preset-btn:hover {
+            background: #1e293b;
+            border-color: #3b82f6;
+        }
+        
+        .queue-display {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            min-height: 2.5rem;
+            align-items: center;
+        }
+        
+        .dark-mode .queue-display {
+            background: #0f172a;
+        }
+        
+        .queue-item {
+            padding: 0.5rem 0.75rem;
+            background: #dbeafe;
+            color: #0c4a6e;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .dark-mode .queue-item {
+            background: #1e3a8a;
+            color: #93c5fd;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .result-display {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding: 0.75rem;
+            background: #f0fdf4;
+            border-radius: 0.5rem;
+            min-height: 2.5rem;
+            align-items: center;
+        }
+        
+        .dark-mode .result-display {
+            background: #051f1f;
+        }
+        
+        .result-item {
+            padding: 0.5rem 0.75rem;
+            background: #bbf7d0;
+            color: #166534;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .dark-mode .result-item {
+            background: #065f46;
+            color: #86efac;
+        }
+        
+        .step-counter {
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            background: #fef3c7;
+            border-radius: 0.5rem;
+            border-left: 4px solid #f59e0b;
+            font-weight: 600;
+        }
+        
+        .dark-mode .step-counter {
+            background: #78350f;
+            color: #fde047;
+            border-left-color: #f59e0b;
+        }
+        
+        .explanation-box {
+            padding: 1rem;
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: #1e40af;
+        }
+        
+        .dark-mode .explanation-box {
+            background: #0c2d5a;
+            color: #93c5fd;
+        }
+        
+        .indegree-table {
+            width: 100%;
+            font-size: 0.875rem;
+            border-collapse: collapse;
+        }
+        
+        .indegree-table th,
+        .indegree-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .dark-mode .indegree-table th,
+        .dark-mode .indegree-table td {
+            border-color: #334155;
+        }
+        
+        .indegree-table th {
+            background: #f1f5f9;
+            font-weight: 700;
+            color: #475569;
+        }
+        
+        .dark-mode .indegree-table th {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+        
+        .indegree-table td {
+            background: #f8fafc;
+        }
+        
+        .dark-mode .indegree-table td {
+            background: #1e293b;
+        }
+        
+        .indegree-table td.zero {
+            background: #d1fae5;
+            font-weight: 700;
+            color: #065f46;
+        }
+        
+        .dark-mode .indegree-table td.zero {
+            background: #064e3b;
+            color: #86efac;
+        }
+        
+        .status-bar {
+            padding: 0.75rem 1rem;
+            background: #f1f5f9;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.875rem;
+            color: #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .dark-mode .status-bar {
+            background: #0f172a;
+            border-top-color: #334155;
+            color: #cbd5e1;
+        }
+        
+        .cycle-warning {
+            padding: 0.75rem;
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            border-radius: 0.5rem;
+            color: #991b1b;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .dark-mode .cycle-warning {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+        
+        .toolbar {
+            padding: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        
+        .dark-mode .toolbar {
+            background: #0f172a;
+            border-bottom-color: #334155;
+        }
+        
+        @media (max-width: 1024px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .main-panel {
+                flex: 1;
+            }
+            
+            .sidebar-panel {
+                flex: 1;
+                max-height: 40vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+
+        // Utility functions for graph algorithms
+        const createDAG = (scenario = 'random') => {
+            let nodes = [];
+            let edges = [];
+            
+            if (scenario === 'prerequisites') {
+                nodes = [
+                    { id: 'DS', label: 'Data Structures', x: 100, y: 100 },
+                    { id: 'ALGO', label: 'Algorithms', x: 300, y: 100 },
+                    { id: 'OOP', label: 'OOP', x: 500, y: 100 },
+                    { id: 'DESIGN', label: 'System Design', x: 700, y: 100 },
+                    { id: 'ML', label: 'ML Basics', x: 200, y: 250 },
+                    { id: 'ADVANCED', label: 'Advanced', x: 450, y: 250 }
+                ];
+                edges = [
+                    { from: 'DS', to: 'ALGO' },
+                    { from: 'DS', to: 'OOP' },
+                    { from: 'ALGO', to: 'DESIGN' },
+                    { from: 'OOP', to: 'DESIGN' },
+                    { from: 'DS', to: 'ML' },
+                    { from: 'ALGO', to: 'ADVANCED' },
+                    { from: 'OOP', to: 'ADVANCED' }
+                ];
+            } else if (scenario === 'build') {
+                nodes = [
+                    { id: 'src', label: 'src', x: 100, y: 50 },
+                    { id: 'test', label: 'test', x: 300, y: 50 },
+                    { id: 'compile', label: 'compile', x: 500, y: 150 },
+                    { id: 'link', label: 'link', x: 700, y: 150 },
+                    { id: 'package', label: 'package', x: 900, y: 250 },
+                    { id: 'deploy', label: 'deploy', x: 1050, y: 250 }
+                ];
+                edges = [
+                    { from: 'src', to: 'compile' },
+                    { from: 'test', to: 'compile' },
+                    { from: 'compile', to: 'link' },
+                    { from: 'link', to: 'package' },
+                    { from: 'package', to: 'deploy' }
+                ];
+            } else if (scenario === 'pipeline') {
+                nodes = [
+                    { id: 'trigger', label: 'Trigger', x: 100, y: 100 },
+                    { id: 'clone', label: 'Clone', x: 300, y: 100 },
+                    { id: 'build', label: 'Build', x: 500, y: 100 },
+                    { id: 'test', label: 'Test', x: 700, y: 100 },
+                    { id: 'deploy_dev', label: 'Deploy Dev', x: 850, y: 50 },
+                    { id: 'deploy_prod', label: 'Deploy Prod', x: 850, y: 150 },
+                    { id: 'monitor', label: 'Monitor', x: 1000, y: 100 }
+                ];
+                edges = [
+                    { from: 'trigger', to: 'clone' },
+                    { from: 'clone', to: 'build' },
+                    { from: 'build', to: 'test' },
+                    { from: 'test', to: 'deploy_dev' },
+                    { from: 'test', to: 'deploy_prod' },
+                    { from: 'deploy_dev', to: 'monitor' },
+                    { from: 'deploy_prod', to: 'monitor' }
+                ];
+            } else {
+                // Random DAG
+                const n = 8;
+                for (let i = 0; i < n; i++) {
+                    nodes.push({
+                        id: String(i),
+                        label: String(i),
+                        x: 100 + (i % 4) * 200,
+                        y: 100 + Math.floor(i / 4) * 150
+                    });
+                }
+                
+                // Random layered edges to ensure DAG
+                for (let i = 0; i < n - 1; i++) {
+                    const numEdges = Math.floor(Math.random() * 3) + 1;
+                    for (let j = 0; j < numEdges; j++) {
+                        const target = i + 1 + Math.floor(Math.random() * (n - i - 1));
+                        if (!edges.find(e => e.from === String(i) && e.to === String(target))) {
+                            edges.push({ from: String(i), to: String(target) });
+                        }
+                    }
+                }
+            }
+            
+            return { nodes, edges };
+        };
+
+        const detectCycle = (nodes, edges) => {
+            const graph = {};
+            const inDegree = {};
+            const visited = new Set();
+            const recStack = new Set();
+            
+            nodes.forEach(n => {
+                graph[n.id] = [];
+                inDegree[n.id] = 0;
+            });
+            
+            edges.forEach(e => {
+                graph[e.from].push(e.to);
+                inDegree[e.to]++;
+            });
+            
+            const hasCycleDFS = (node) => {
+                visited.add(node);
+                recStack.add(node);
+                
+                for (let neighbor of graph[node]) {
+                    if (!visited.has(neighbor)) {
+                        if (hasCycleDFS(neighbor)) return true;
+                    } else if (recStack.has(neighbor)) {
+                        return true;
+                    }
+                }
+                
+                recStack.delete(node);
+                return false;
+            };
+            
+            for (let node of Object.keys(graph)) {
+                if (!visited.has(node)) {
+                    if (hasCycleDFS(node)) return true;
+                }
+            }
+            return false;
+        };
+
+        const kahn = (nodes, edges) => {
+            const steps = [];
+            const graph = {};
+            const inDegree = {};
+            
+            nodes.forEach(n => {
+                graph[n.id] = [];
+                inDegree[n.id] = 0;
+            });
+            
+            edges.forEach(e => {
+                graph[e.from].push(e.to);
+                inDegree[e.to]++;
+            });
+            
+            steps.push({
+                message: 'Initialize: Build graph and calculate in-degrees',
+                queue: [],
+                result: [],
+                inDegree: { ...inDegree },
+                activeNode: null,
+                activeEdges: []
+            });
+            
+            let queue = Object.keys(inDegree).filter(n => inDegree[n] === 0);
+            steps.push({
+                message: `Add all nodes with in-degree 0 to queue: ${queue.join(', ')}`,
+                queue: [...queue],
+                result: [],
+                inDegree: { ...inDegree },
+                activeNode: null,
+                activeEdges: []
+            });
+            
+            const result = [];
+            while (queue.length > 0) {
+                const node = queue.shift();
+                result.push(node);
+                
+                steps.push({
+                    message: `Process node ${node}: Add to result`,
+                    queue: [...queue],
+                    result: [...result],
+                    inDegree: { ...inDegree },
+                    activeNode: node,
+                    activeEdges: []
+                });
+                
+                const neighbors = graph[node];
+                for (let neighbor of neighbors) {
+                    const edgeId = `${node}-${neighbor}`;
+                    steps.push({
+                        message: `Remove edge ${node}→${neighbor}. Decrease in-degree of ${neighbor}`,
+                        queue: [...queue],
+                        result: [...result],
+                        inDegree: { ...inDegree },
+                        activeNode: node,
+                        activeEdges: [edgeId]
+                    });
+                    
+                    inDegree[neighbor]--;
+                    
+                    if (inDegree[neighbor] === 0) {
+                        queue.push(neighbor);
+                        steps.push({
+                            message: `Node ${neighbor} now has in-degree 0. Add to queue.`,
+                            queue: [...queue],
+                            result: [...result],
+                            inDegree: { ...inDegree },
+                            activeNode: node,
+                            activeEdges: [edgeId]
+                        });
+                    }
+                }
+            }
+            
+            steps.push({
+                message: `Topological sort complete! Result: ${result.join(' → ')}`,
+                queue: [],
+                result: [...result],
+                inDegree: { ...inDegree },
+                activeNode: null,
+                activeEdges: [],
+                isComplete: true
+            });
+            
+            return steps;
+        };
+
+        // Main App Component
+        function TopoSortVisualizer() {
+            const [nodes, setNodes] = useState([]);
+            const [edges, setEdges] = useState([]);
+            const [mode, setMode] = useState('beginner'); // beginner, intermediate, expert
+            const [scenario, setScenario] = useState('random');
+            const [currentStep, setCurrentStep] = useState(0);
+            const [steps, setSteps] = useState([]);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [darkMode, setDarkMode] = useState(false);
+            const [speed, setSpeed] = useState(1000);
+            const [hasCycle, setHasCycle] = useState(false);
+            const [draggedNode, setDraggedNode] = useState(null);
+            const [zoom, setZoom] = useState(1);
+            const [pan, setPan] = useState({ x: 0, y: 0 });
+            const intervalRef = useRef(null);
+            const svgRef = useRef(null);
+
+            // Initialize graph
+            useEffect(() => {
+                const { nodes: newNodes, edges: newEdges } = createDAG(scenario);
+                setNodes(newNodes);
+                setEdges(newEdges);
+                setHasCycle(detectCycle(newNodes, newEdges));
+                setCurrentStep(0);
+                setIsPlaying(false);
+                const newSteps = kahn(newNodes, newEdges);
+                setSteps(newSteps);
+            }, [scenario]);
+
+            useEffect(() => {
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            }, [darkMode]);
+
+            // Auto-play
+            useEffect(() => {
+                if (isPlaying && currentStep < steps.length - 1) {
+                    intervalRef.current = setInterval(() => {
+                        setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
+                    }, speed);
+                } else {
+                    if (intervalRef.current) clearInterval(intervalRef.current);
+                }
+                return () => {
+                    if (intervalRef.current) clearInterval(intervalRef.current);
+                };
+            }, [isPlaying, currentStep, steps.length, speed]);
+
+            const currentStepData = steps[currentStep];
+            const canvasHeight = 400;
+            const canvasWidth = 1000;
+
+            return (
+                <div className="app-container" style={darkMode ? { background: '#0f172a', color: '#e2e8f0' } : {}}>
+                    {/* Header */}
+                    <div className="header">
+                        <div className="header-left">
+                            <h1>🔄 Topological Sort Visualizer</h1>
+                        </div>
+                        <div className="header-right">
+                            <button className="btn btn-secondary" onClick={() => setDarkMode(!darkMode)}>
+                                {darkMode ? '☀️' : '🌙'} Theme
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Main Content */}
+                    <div className="content">
+                        {/* Main Visualization Panel */}
+                        <div className="main-panel">
+                            <div className="toolbar">
+                                <button className="btn btn-primary" onClick={() => setIsPlaying(!isPlaying)}>
+                                    {isPlaying ? '⏸' : '▶'} {isPlaying ? 'Pause' : 'Play'}
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}>
+                                    ⬅ Previous
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}>
+                                    ➡ Next
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => { setCurrentStep(0); setIsPlaying(false); }}>
+                                    🔄 Reset
+                                </button>
+                                <button className="btn btn-secondary" onClick={() => {
+                                    const { nodes: newNodes, edges: newEdges } = createDAG(scenario);
+                                    setNodes(newNodes);
+                                    setEdges(newEdges);
+                                    setCurrentStep(0);
+                                    setIsPlaying(false);
+                                    const newSteps = kahn(newNodes, newEdges);
+                                    setSteps(newSteps);
+                                }}>
+                                    🎲 New Graph
+                                </button>
+                                <div className="speed-control">
+                                    <span>Speed:</span>
+                                    <input type="range" min="200" max="2000" step="100" value={speed} onChange={(e) => setSpeed(parseInt(e.target.value))} />
+                                    <span>{speed}ms</span>
+                                </div>
+                            </div>
+
+                            <div className="canvas" ref={svgRef}>
+                                <svg width="100%" height="100%">
+                                    <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
+                                        {/* Draw Edges */}
+                                        {edges.map((edge, i) => {
+                                            const fromNode = nodes.find(n => n.id === edge.from);
+                                            const toNode = nodes.find(n => n.id === edge.to);
+                                            if (!fromNode || !toNode) return null;
+                                            const isActive = currentStepData?.activeEdges?.includes(`${edge.from}-${edge.to}`);
+                                            return (
+                                                <g key={`edge-${i}`}>
+                                                    <defs>
+                                                        <marker id={`arrow-${i}`} markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto">
+                                                            <path d="M0,0 L0,6 L9,3 z" fill={isActive ? '#3b82f6' : '#cbd5e1'} />
+                                                        </marker>
+                                                    </defs>
+                                                    <line
+                                                        x1={fromNode.x}
+                                                        y1={fromNode.y}
+                                                        x2={toNode.x}
+                                                        y2={toNode.y}
+                                                        stroke={isActive ? '#3b82f6' : darkMode ? '#64748b' : '#cbd5e1'}
+                                                        strokeWidth={isActive ? 3 : 2}
+                                                        markerEnd={`url(#arrow-${i})`}
+                                                        className={`edge ${isActive ? 'active' : ''}`}
+                                                    />
+                                                </g>
+                                            );
+                                        })}
+
+                                        {/* Draw Nodes */}
+                                        {nodes.map(node => {
+                                            const isActive = currentStepData?.activeNode === node.id;
+                                            const isInResult = currentStepData?.result?.includes(node.id);
+                                            const inDeg = currentStepData?.inDegree[node.id];
+                                            const inQueue = currentStepData?.queue?.includes(node.id);
+                                            
+                                            return (
+                                                <g key={`node-${node.id}`} className="node" onMouseDown={(e) => setDraggedNode(node.id)}>
+                                                    <circle
+                                                        cx={node.x}
+                                                        cy={node.y}
+                                                        r="25"
+                                                        fill={isInResult ? '#22c55e' : isActive ? '#3b82f6' : inQueue ? '#f59e0b' : darkMode ? '#1e293b' : '#e2e8f0'}
+                                                        stroke={isInResult ? '#16a34a' : isActive ? '#2563eb' : inQueue ? '#d97706' : '#64748b'}
+                                                        strokeWidth={isActive ? 3 : 2}
+                                                    />
+                                                    <text
+                                                        x={node.x}
+                                                        y={node.y}
+                                                        textAnchor="middle"
+                                                        dominantBaseline="middle"
+                                                        fontSize="14"
+                                                        fontWeight="700"
+                                                        fill={isInResult ? '#065f46' : isActive ? '#0c4a6e' : '#334155'}
+                                                    >
+                                                        {node.label}
+                                                    </text>
+                                                    {inDeg !== undefined && !isInResult && (
+                                                        <g>
+                                                            <circle cx={node.x + 18} cy={node.y - 18} r="10" fill={inDeg === 0 ? '#22c55e' : '#ef4444'} />
+                                                            <text
+                                                                x={node.x + 18}
+                                                                y={node.y - 18}
+                                                                textAnchor="middle"
+                                                                dominantBaseline="middle"
+                                                                fontSize="12"
+                                                                fontWeight="700"
+                                                                fill="white"
+                                                                className="indegree-badge"
+                                                            >
+                                                                {inDeg}
+                                                            </text>
+                                                        </g>
+                                                    )}
+                                                </g>
+                                            );
+                                        })}
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <div className="status-bar">
+                                <span>Step {currentStep + 1} / {steps.length}</span>
+                                <span className={currentStepData?.isComplete ? 'status-complete' : ''}>{currentStepData?.message}</span>
+                            </div>
+                        </div>
+
+                        {/* Sidebar Panels */}
+                        <div className="sidebar-panel">
+                            {/* Learning Mode Panel */}
+                            <div className="panel">
+                                <div className="panel-header">Learning Mode</div>
+                                <div className="panel-body">
+                                    <div className="mode-selector">
+                                        <button
+                                            className={`mode-btn ${mode === 'beginner' ? 'active' : ''}`}
+                                            onClick={() => setMode('beginner')}
+                                        >
+                                            👶 Beginner
+                                        </button>
+                                        <button
+                                            className={`mode-btn ${mode === 'intermediate' ? 'active' : ''}`}
+                                            onClick={() => setMode('intermediate')}
+                                        >
+                                            🎓 Intermediate
+                                        </button>
+                                        <button
+                                            className={`mode-btn ${mode === 'expert' ? 'active' : ''}`}
+                                            onClick={() => setMode('expert')}
+                                        >
+                                            🚀 Expert
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Scenario Presets */}
+                            <div className="panel">
+                                <div className="panel-header">Presets</div>
+                                <div className="panel-body">
+                                    <div className="preset-grid">
+                                        <button className={`preset-btn ${scenario === 'random' ? 'active' : ''}`} onClick={() => setScenario('random')}>
+                                            🎲 Random DAG
+                                        </button>
+                                        <button className={`preset-btn ${scenario === 'prerequisites' ? 'active' : ''}`} onClick={() => setScenario('prerequisites')}>
+                                            📚 Prerequisites
+                                        </button>
+                                        <button className={`preset-btn ${scenario === 'build' ? 'active' : ''}`} onClick={() => setScenario('build')}>
+                                            🔨 Build System
+                                        </button>
+                                        <button className={`preset-btn ${scenario === 'pipeline' ? 'active' : ''}`} onClick={() => setScenario('pipeline')}>
+                                            ⚙️ CI/CD Pipeline
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Algorithm Info */}
+                            <div className="panel">
+                                <div className="panel-header">Algorithm</div>
+                                <div className="panel-body">
+                                    <div className="step-counter">
+                                        Step: {currentStep + 1} / {steps.length}
+                                    </div>
+                                    {mode === 'beginner' && (
+                                        <>
+                                            <div style={{ marginTop: '1rem' }}>
+                                                <div style={{ fontWeight: '600', marginBottom: '0.5rem' }}>In-Degrees:</div>
+                                                <table className="indegree-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Node</th>
+                                                            <th>In-Degree</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {nodes.map(node => (
+                                                            <tr key={node.id}>
+                                                                <td>{node.label}</td>
+                                                                <td className={currentStepData?.inDegree[node.id] === 0 ? 'zero' : ''}>
+                                                                    {currentStepData?.inDegree[node.id]}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Status Panel */}
+                            <div className="panel">
+                                <div className="panel-header">Status</div>
+                                <div className="panel-body">
+                                    <div style={{ marginBottom: '1rem' }}>
+                                        <strong>Queue:</strong>
+                                        <div className="queue-display">
+                                            {currentStepData?.queue?.length > 0 ? (
+                                                currentStepData.queue.map(n => (
+                                                    <span key={n} className="queue-item">{n}</span>
+                                                ))
+                                            ) : (
+                                                <span style={{ color: '#94a3b8' }}>Empty</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <strong>Result:</strong>
+                                        <div className="result-display">
+                                            {currentStepData?.result?.length > 0 ? (
+                                                currentStepData.result.map((n, i) => (
+                                                    <span key={i} className="result-item">{n}</span>
+                                                ))
+                                            ) : (
+                                                <span style={{ color: '#94a3b8' }}>Empty</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {hasCycle && (
+                                        <div className="cycle-warning" style={{ marginTop: '1rem' }}>
+                                            ⚠️ Cycle Detected! This graph is not a DAG.
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<TopoSortVisualizer />, document.getElementById('root'));
+    </script>
+</body>
+</html>

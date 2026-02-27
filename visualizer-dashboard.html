@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizer Dashboard - SDE Prep</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --card-bg: var(--bg-tertiary, #171717);
+            --card-border: var(--border-color);
+            --card-hover-border: var(--accent-color);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hero header */
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Filter tabs */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color, #3b82f6);
+            color: #fff;
+            border-color: var(--accent-color, #3b82f6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Grid layout */
+        .visualizer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* Modern Card */
+        .vis-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vis-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--card-hover-border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .vis-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-wrapper {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .vis-card:hover .card-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+            transition: transform 0.3s ease;
+        }
+
+        /* Colors by category */
+        .vis-card[data-category="data-structures"] .card-icon-wrapper {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .vis-card[data-category="graphs"] .card-icon-wrapper {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .vis-card[data-category="sorting"] .card-icon-wrapper {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .vis-card[data-category="dp"] .card-icon-wrapper {
+            background: rgba(236, 72, 153, 0.1);
+            color: #f472b6;
+            border-color: rgba(236, 72, 153, 0.2);
+        }
+
+        .vis-card[data-category="patterns"] .card-icon-wrapper {
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .complexity-tag {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .play-btn {
+            color: var(--accent-color, #3b82f6);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+
+        .vis-card:hover .play-btn {
+            color: #60a5fa;
+        }
+
+        .play-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            transition: transform 0.2s;
+        }
+
+        .vis-card:hover .play-btn svg {
+            transform: translateX(3px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-overlay"></div>
+    <button class="hamburger-btn" aria-label="Open Menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 NeoAlgo</h1>
+                <p>Coding Interview Prep</p>
+            </div>
+            <div class="search-container">
+                <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+            </div>
+            <div class="sidebar-controls">
+                <button id="expand-all-btn" class="sidebar-control-btn">Expand All</button>
+                <button id="collapse-all-btn" class="sidebar-control-btn">Collapse All</button>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
+
+                <!-- Linear Data Structures -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">Linear Data Structures</summary>
+                    <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+                    <a href="patterns/linked-list-reversal.html" class="nav-item indent">↳ Visualizer: Reversal</a>
+                    <a href="patterns/linked-list-visualizer.html" class="nav-item indent">↳ Visualizer: Operations</a>
+                    <a href="patterns/stack.html" class="nav-item">Stacks</a>
+                    <a href="patterns/stack-visualizer.html" class="nav-item indent">↳ Visualizer: Stack</a>
+                    <a href="patterns/queues.html" class="nav-item">Queues</a>
+                    <a href="patterns/queue-visualizer.html" class="nav-item indent">↳ Visualizer: Queue</a>
+                </details>
+
+                <!-- Non-Linear Data Structures -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">Non-Linear Data Structures</summary>
+                    <a href="patterns/hash-maps.html" class="nav-item">Hash Maps</a>
+                    <a href="patterns/hash-map-visualizer.html" class="nav-item indent">↳ Visualizer: Hash Map</a>
+                    <a href="patterns/trees.html" class="nav-item">Trees</a>
+                    <a href="patterns/bst-visualizer.html" class="nav-item indent">↳ Visualizer: BST</a>
+                    <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+                    <a href="patterns/graph-visualizer.html" class="nav-item indent">↳ Visualizer: Graph Algo</a>
+                    <a href="patterns/bfs-graph.html" class="nav-item indent">↳ Visualizer: BFS</a>
+                    <a href="patterns/pathfinding-visualizer.html" class="nav-item indent">↳ Visualizer: Pathfinding</a>
+                    <a href="patterns/topological-sort-visualizer.html" class="nav-item indent">↳ Visualizer: Topo
+                        Sort</a>
+                    <a href="patterns/mst-visualizer.html" class="nav-item indent">↳ Visualizer: MST</a>
+                    <a href="patterns/union-find.html" class="nav-item indent">↳ Visualizer: Union-Find</a>
+                    <a href="patterns/heap.html" class="nav-item">Heaps</a>
+                    <a href="patterns/heap-visualizer.html" class="nav-item indent">↳ Visualizer: Heap</a>
+                    <a href="patterns/tries.html" class="nav-item">Tries</a>
+                    <a href="patterns/trie-visualizer.html" class="nav-item indent">↳ Visualizer: Trie</a>
+                    <a href="patterns/segment-tree.html" class="nav-item">Segment Trees</a>
+                </details>
+
+                <!-- Algorithms -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">Algorithms</summary>
+                    <a href="patterns/sort-search.html" class="nav-item">Sorting & Search</a>
+                    <a href="patterns/sorting-visualizer.html" class="nav-item indent">↳ Visualizer: Sorting</a>
+                    <a href="patterns/binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary
+                        Search</a>
+                    <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+                    <a href="patterns/knapsack-dp.html" class="nav-item indent">↳ Visualizer: Knapsack</a>
+                    <a href="patterns/dp-lcs.html" class="nav-item indent">↳ Visualizer: LCS</a>
+                    <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+                    <a href="patterns/n-queens.html" class="nav-item indent">↳ Visualizer: N-Queens</a>
+                    <a href="patterns/sudoku-solver.html" class="nav-item indent">↳ Visualizer: Sudoku</a>
+                    <a href="patterns/maze-generator.html" class="nav-item indent">↳ Visualizer: Maze</a>
+                    <a href="patterns/greedy.html" class="nav-item">Greedy</a>
+                    <a href="patterns/bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+                    <a href="patterns/math-geometry.html" class="nav-item">Math & Geometry</a>
+                </details>
+
+                <!-- Patterns -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">Patterns</summary>
+                    <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+                    <a href="patterns/two-pointers-visualizer.html" class="nav-item indent">↳ Visualizer: Two
+                        Pointers</a>
+                    <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+                    <a href="patterns/sliding-window-visualizer.html" class="nav-item indent">↳ Visualizer: Sliding
+                        Window</a>
+                    <a href="patterns/fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+                    <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+                    <a href="patterns/intervals.html" class="nav-item">Intervals</a>
+                    <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
+                </details>
+
+                <!-- System Design -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">System Design</summary>
+                    <a href="system-design.html" class="nav-item">System Design Basics</a>
+                    <a href="system-design-masterclass.html" class="nav-item">Masterclass (Part 1)</a>
+                    <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
+                    <a href="system-design-checklist.html" class="nav-item">System Design Checklist</a>
+                    <a href="system-design-case-studies.html" class="nav-item">Case Studies</a>
+                    <a href="system-design-quiz.html" class="nav-item">System Design Quiz</a>
+                </details>
+
+                <!-- Guides & Tools -->
+                <details class="nav-section">
+                    <summary class="nav-section-title">Guides & Tools</summary>
+                    <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
+                    <a href="interview-approach.html" class="nav-item">Interview Approach</a>
+                    <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
+                    <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
+                    <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
+                    <a href="cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
+                    <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
+                    <a href="osi-layers.html" class="nav-item">OSI Model Deep Dive</a>
+                    <a href="tcp-ip-model.html" class="nav-item">TCP/IP Model Deep Dive</a>
+                    <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
+                    <a href="google-interview-questions.html" class="nav-item">Google Interview Questions</a>
+                    <a href="amazon-two-pointers-questions.html" class="nav-item">Top Tech Two Pointers Questions</a>
+                    <a href="go-interview-plan.html" class="nav-item">📅 14-Day Interview Plan</a>
+                    <a href="google-roadmap.html" class="nav-item">🗺️ Google Roadmap</a>
+                    <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
+                    <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
+                    <a href="visualizer-dashboard.html" class="nav-item active">🎨 Visualizer Dashboard</a>
+                    <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
+                </details>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="dashboard-header">
+                <h1>Interactive Algorithms</h1>
+                <p>Master data structures and algorithms through rich, dynamic animations. Visualize how code execution
+                    works step-by-step.</p>
+            </div>
+
+            <div class="filter-container" id="vis-filters">
+                <button class="filter-btn active" data-filter="all">All Visualizers</button>
+                <button class="filter-btn" data-filter="data-structures">Data Structures</button>
+                <button class="filter-btn" data-filter="graphs">Graphs & Trees</button>
+                <button class="filter-btn" data-filter="sorting">Sorting & Searching</button>
+                <button class="filter-btn" data-filter="dp">Backtracking & DP</button>
+                <button class="filter-btn" data-filter="patterns">Coding Patterns</button>
+            </div>
+
+            <div class="visualizer-grid" id="vis-grid">
+
+                <!-- Data Structures -->
+                <a href="patterns/linked-list-visualizer.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">🔗</div>
+                    <h3 class="card-title">Linked List Operations</h3>
+                    <p class="card-desc">Visualize insertion, deletion, and traversal in a singly linked list.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/linked-list-reversal.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">🔄</div>
+                    <h3 class="card-title">Linked List Reversal</h3>
+                    <p class="card-desc">Step-by-step pointers manipulation to reverse a linked list.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/stack-visualizer.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">📚</div>
+                    <h3 class="card-title">Stack Operations</h3>
+                    <p class="card-desc">Push, pop, and peek using LIFO (Last-In-First-Out) principles.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(1)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/queue-visualizer.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">🧑‍🤝‍🧑</div>
+                    <h3 class="card-title">Queue Operations</h3>
+                    <p class="card-desc">Enqueue and dequeue using FIFO (First-In-First-Out) principles.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(1)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/hash-map-visualizer.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">🗄️</div>
+                    <h3 class="card-title">Hash Map Collision</h3>
+                    <p class="card-desc">Understand hashing, bucketing, and collision resolution techniques.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(1) avg</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/heap-visualizer.html" class="vis-card" data-category="data-structures">
+                    <div class="card-icon-wrapper">⛰️</div>
+                    <h3 class="card-title">Min/Max Heap</h3>
+                    <p class="card-desc">Visualize insertion, deletion, and heapify in priority queues.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(log n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <!-- Graphs & Trees -->
+                <a href="patterns/bst-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🌳</div>
+                    <h3 class="card-title">Binary Search Tree</h3>
+                    <p class="card-desc">Insert, search, and delete nodes while maintaining BST properties.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(h)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/trie-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🌲</div>
+                    <h3 class="card-title">Prefix Trie</h3>
+                    <p class="card-desc">Efficient string storage and retrieval for auto-completion systems.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(m)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/graph-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🕸️</div>
+                    <h3 class="card-title">Graph Playground</h3>
+                    <p class="card-desc">Interactive building of graphs with nodes and edges connections.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(V+E)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/bfs-graph.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🌊</div>
+                    <h3 class="card-title">Breadth-First Search</h3>
+                    <p class="card-desc">Explore graphs layer-by-layer to find shortest paths.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(V+E)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/pathfinding-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🧭</div>
+                    <h3 class="card-title">Pathfinding Algorithms</h3>
+                    <p class="card-desc">Visualize Dijkstra and A* finding optimal routes on a grid.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(E log V)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/topological-sort-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">📋</div>
+                    <h3 class="card-title">Topological Sort</h3>
+                    <p class="card-desc">Resolve dependencies and task scheduling in a Directed Acyclic Graph.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(V+E)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/mst-visualizer.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🌐</div>
+                    <h3 class="card-title">Minimum Spanning Tree</h3>
+                    <p class="card-desc">Connect all nodes with minimum total edge weight (Kruskal/Prim).</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(E log V)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/union-find.html" class="vis-card" data-category="graphs">
+                    <div class="card-icon-wrapper">🤝</div>
+                    <h3 class="card-title">Union-Find (Disjoint Set)</h3>
+                    <p class="card-desc">Efficiently group elements and detect cycles in undirected graphs.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(α(n))</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <!-- Sorting & Searching -->
+                <a href="patterns/sorting-visualizer.html" class="vis-card" data-category="sorting">
+                    <div class="card-icon-wrapper">📊</div>
+                    <h3 class="card-title">Sorting Sandbox</h3>
+                    <p class="card-desc">Compare Bubble, Quick, Merge, and Insertion sort algorithms.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(n log n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/binary-search-visualizer.html" class="vis-card" data-category="sorting">
+                    <div class="card-icon-wrapper">🔍</div>
+                    <h3 class="card-title">Binary Search</h3>
+                    <p class="card-desc">Divide and conquer to search for elements in a sorted array.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(log n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <!-- Backtracking & DP -->
+                <a href="patterns/n-queens.html" class="vis-card" data-category="dp">
+                    <div class="card-icon-wrapper">👑</div>
+                    <h3 class="card-title">N-Queens Solver</h3>
+                    <p class="card-desc">Backtracking visualized to place N queens safely on an NxN board.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(N!)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/sudoku-solver.html" class="vis-card" data-category="dp">
+                    <div class="card-icon-wrapper">🔢</div>
+                    <h3 class="card-title">Sudoku Solver</h3>
+                    <p class="card-desc">Watch backtracking systematically attempt and undo number placements.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(9^(n*m))</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/maze-generator.html" class="vis-card" data-category="dp">
+                    <div class="card-icon-wrapper">🏰</div>
+                    <h3 class="card-title">Maze Generation</h3>
+                    <p class="card-desc">Recursive backtracking carving out a perfect maze step-by-step.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(V+E)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/knapsack-dp.html" class="vis-card" data-category="dp">
+                    <div class="card-icon-wrapper">🧳</div>
+                    <h3 class="card-title">0/1 Knapsack DP</h3>
+                    <p class="card-desc">Dynamic programming grid filling process for capacity optimization.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(N*W)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/dp-lcs.html" class="vis-card" data-category="dp">
+                    <div class="card-icon-wrapper">🧬</div>
+                    <h3 class="card-title">Longest Common Subsequence</h3>
+                    <p class="card-desc">2D DP table visualization matching characters across two strings.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(m*n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <!-- Coding Patterns -->
+                <a href="patterns/two-pointers-visualizer.html" class="vis-card" data-category="patterns">
+                    <div class="card-icon-wrapper">👈👉</div>
+                    <h3 class="card-title">Two Pointers Method</h3>
+                    <p class="card-desc">Converging pointers to solve problems like Two Sum II or Palindrome.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+                <a href="patterns/sliding-window-visualizer.html" class="vis-card" data-category="patterns">
+                    <div class="card-icon-wrapper">🖼️</div>
+                    <h3 class="card-title">Sliding Window Pattern</h3>
+                    <p class="card-desc">Dynamic window expansion and contraction for subarray optimization.</p>
+                    <div class="card-footer">
+                        <span class="complexity-tag">O(n)</span>
+                        <span class="play-btn">Launch <svg viewBox="0 0 24 24">
+                                <path d="M5 3l14 9-14 9v-18z" />
+                            </svg></span>
+                    </div>
+                </a>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Filtering logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.vis-card');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    // Filter cards with simple animation
+                    cards.forEach(card => {
+                        if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+                            card.style.display = 'flex';
+                            // Trigger reflow for animation
+                            void card.offsetWidth;
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                if (filterValue !== 'all' && card.getAttribute('data-category') !== filterValue) {
+                                    card.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

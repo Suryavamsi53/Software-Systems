@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDE Expert Roadmap - NeoAlgo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/viz.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/viz.js/2.1.2/full.render.js"></script>
+    <style>
+        .roadmap-container {
+            width: 100%;
+            height: 100%;
+            flex: 1;
+            min-height: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .roadmap-toolbar {
+            padding: 15px 20px;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 10px;
+            background: var(--bg-primary);
+            padding: 5px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .zoom-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .zoom-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--accent-color);
+        }
+
+        #graph-renderer {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            cursor: grab;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #graph-renderer:active {
+            cursor: grabbing;
+        }
+
+        #graph-renderer svg {
+            width: 100%;
+            height: 100%;
+            transform-origin: 0 0;
+        }
+
+        /* Override Graphviz default white background polygon */
+        #graph-renderer svg>g.graph>polygon {
+            fill: transparent !important;
+            stroke: none !important;
+        }
+
+        /* Style the generated SVG nodes */
+        .node polygon,
+        .node ellipse,
+        .node rect {
+            fill: var(--bg-tertiary) !important;
+            stroke: var(--accent-color) !important;
+            stroke-width: 2px !important;
+            transition: all 0.3s ease;
+            rx: 8px;
+            ry: 8px;
+        }
+
+        .node:hover polygon,
+        .node:hover ellipse,
+        .node:hover rect {
+            fill: rgba(59, 130, 246, 0.1) !important;
+            stroke: #60a5fa !important;
+            stroke-width: 3px !important;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+            cursor: pointer;
+        }
+
+        .node text {
+            fill: #f8fafc !important;
+            /* Extremely readable bright white/off-white */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            transition: fill 0.3s ease;
+        }
+
+        .node:hover text {
+            fill: #38bdf8 !important;
+            /* Hovers to sky blue */
+        }
+
+        .edge path {
+            stroke: var(--text-muted) !important;
+            stroke-width: 2px !important;
+        }
+
+        .edge polygon {
+            fill: var(--text-muted) !important;
+            stroke: var(--text-muted) !important;
+        }
+
+        /* specific node types by class (injected via graphviz) */
+        .cluster polygon {
+            fill: var(--bg-secondary) !important;
+            stroke: var(--border-color) !important;
+            stroke-dasharray: 5, 5;
+        }
+
+        .cluster text {
+            fill: var(--text-secondary) !important;
+            font-size: 16px !important;
+            font-weight: bold !important;
+        }
+
+        .legend-panel {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-overlay"></div>
+    <button class="hamburger-btn" aria-label="Open Menu">
+        <span></span><span></span><span></span>
+    </button>
+
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 NeoAlgo</h1>
+                <p>Expert SDE Roadmap</p>
+            </div>
+            <div class="nav-section">
+                <a href="index.html" class="nav-item">← Back to Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Roadmap Phases</div>
+                <a href="#fundamentals" class="nav-item" onclick="centerOn('Fundamentals')">Phase 1: Fundamentals</a>
+                <a href="#dsa" class="nav-item" onclick="centerOn('DSAPatterns')">Phase 2: DSA Patterns</a>
+                <a href="#advanced-algo" class="nav-item" onclick="centerOn('AdvancedAlgo')">Phase 3: Advanced
+                    Algorithms</a>
+                <a href="#sys-design" class="nav-item" onclick="centerOn('SystemDesign')">Phase 4: System Design</a>
+                <a href="#behavioral" class="nav-item" onclick="centerOn('Behavioral')">Phase 5: Behavioral & Soft
+                    Skills</a>
+                <a href="#expert" class="nav-item" onclick="centerOn('Expert')">Phase 6: The Expert</a>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding"
+            style="display: flex; flex-direction: column; height: 100vh; overflow: hidden;">
+            <div class="content-header"
+                style="padding: 20px 40px; margin-bottom: 0; border-bottom: none; flex-shrink: 0;">
+                <h1>🗺️ The SDE Expert Journey</h1>
+                <p>An interactive, scrollable roadmap from beginner fundamentals to Principal Engineer system design.
+                </p>
+            </div>
+
+            <div style="padding: 0 40px 40px 40px; height: calc(100vh - 120px); display: flex; flex-direction: column;">
+                <div class="roadmap-container" style="flex: 1;">
+                    <div class="roadmap-toolbar">
+                        <span style="color: var(--text-secondary); font-size: 0.9rem;">Drag to pan. Scroll or use
+                            controls to zoom.</span>
+                        <div class="zoom-controls">
+                            <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">➖</button>
+                            <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">🔄</button>
+                            <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">➕</button>
+                        </div>
+                    </div>
+
+                    <div id="graph-renderer">
+                        <!-- SVG will be injected here -->
+                    </div>
+
+                    <div class="legend-panel">
+                        <h4 style="color: var(--text-primary); margin-bottom: 10px; font-size: 0.9rem;">Legend</h4>
+                        <div
+                            style="display:flex; align-items:center; gap:8px; margin-bottom:5px; font-size:0.85rem; color:var(--text-secondary)">
+                            <div
+                                style="width:15px; height:15px; background:var(--bg-tertiary); border:2px solid var(--accent-color); border-radius:4px;">
+                            </div> Module / Topic
+                        </div>
+                        <div
+                            style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:var(--text-secondary)">
+                            <div
+                                style="width:15px; height:15px; background:transparent; border:2px dashed var(--border-color); border-radius:4px;">
+                            </div> Phase Boundary
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // System Flow defined in Graphviz DOT Language
+        const dotGraph = `
+      digraph "SDE_Roadmap" {
+        bgcolor="transparent";
+        rankdir=TB;
+        nodesep=0.7;
+        ranksep=1.0;
+        pad=0.5;
+        
+        node [shape=box, style="rounded,filled", fillcolor="#171717", fontcolor="#f8fafc", color="#3b82f6", fontname="Arial", margin="0.2,0.1"];
+        
+        // Start
+        Start [label="Start: Aspiring SDE", shape=ellipse, URL="index.html"];
+
+        subgraph cluster_0 {
+            label = "Phase 1: CS Fundamentals";
+            ProgLang [label="Pick ONE Language\n(Go, Java, Python, C++)", URL="golang-guide.html"];
+            TimeSpace [label="Time & Space Complexity\n(Big O Notation)", URL="complexity-guide.html"];
+            BasicDS [label="Basic Data Structures\n(Arrays, Strings, Pointers)", URL="cs-fundamentals.html"];
+            MemoryModel [label="Memory Management\n(Stack vs Heap, Garbage Collection)", URL="cs-fundamentals.html"];
+            
+            ProgLang -> TimeSpace -> BasicDS -> MemoryModel;
+        }
+
+        subgraph cluster_1 {
+            label = "Phase 2: Core DSA Patterns";
+            TwoPointers [label="Two Pointers / Sliding Window", URL="patterns/sliding-window-visualizer.html"];
+            FastSlow [label="Fast & Slow Pointers", URL="patterns/fast-slow-pointers.html"];
+            BinarySearch [label="Binary Search Variants", URL="patterns/binary-search-visualizer.html"];
+            Hashing [label="Hash Maps & Sets", URL="patterns/hash-map-visualizer.html"];
+            LinkedLists [label="Linked Lists (Reverse, Cycle)", URL="patterns/linked-list-visualizer.html"];
+            Trees [label="Trees (Traversals, BST)", URL="patterns/bst-visualizer.html"];
+            StacksQueues [label="Stacks & Queues (Monotonic)", URL="patterns/stack-visualizer.html"];
+            
+            TwoPointers -> BinarySearch;
+            TwoPointers -> FastSlow;
+            Hashing -> LinkedLists -> Trees;
+            StacksQueues -> Trees;
+        }
+
+        subgraph cluster_2 {
+            label = "Phase 3: Advanced Algorithms";
+            Graphs [label="Graphs (BFS, DFS, TopoSort)", URL="patterns/graph-visualizer.html"];
+            ShortestPath [label="Shortest Path (Dijkstra, Bellman-Ford)", URL="patterns/pathfinding-visualizer.html"];
+            UnionFind [label="Disjoint Sets (Union-Find)", URL="patterns/union-find.html"];
+            Heaps [label="Priority Queues (Heaps)", URL="patterns/heap-visualizer.html"];
+            DP [label="Dynamic Programming\n(Memoization & Tabulation)", URL="patterns/dp-lcs.html"];
+            Tries [label="Tries (Prefix Trees)", URL="patterns/trie-visualizer.html"];
+            Backtracking [label="Backtracking (Combinations, Permutations)", URL="patterns/n-queens.html"];
+            
+            Trees -> Graphs;
+            Graphs -> ShortestPath;
+            Graphs -> UnionFind;
+            Trees -> Heaps;
+            Trees -> Tries;
+            Graphs -> Backtracking -> DP;
+        }
+
+        subgraph cluster_3 {
+            label = "Phase 4: System Design";
+            Networking [label="Networking (TCP/UDP, HTTP, DNS)", URL="osi-layers.html"];
+            Databases [label="Databases (SQL vs NoSQL, Sharding, Indexing)", URL="system-design-masterclass.html"];
+            Caching [label="Caching (Redis, Memcached, Eviction)", URL="system-design-masterclass.html"];
+            LB [label="Load Balancing (Nginx, Round Robin, Consistent Hashing)", URL="system-design-masterclass.html"];
+            Messaging [label="Message Queues (Kafka, RabbitMQ)", URL="system-design-masterclass.html"];
+            Microservices [label="Microservices & API Design (REST, gRPC)", URL="system-design-masterclass.html"];
+            DistSys [label="Distributed Systems (CAP Theorem, PACELC)", URL="system-design-masterclass.html"];
+            MockDesign [label="Mock Case Studies\n(Design Youtube, Uber, Rate Limiter)", URL="system-design-case-studies.html"];
+            
+            Networking -> Databases;
+            Databases -> Caching -> LB;
+            LB -> Messaging -> Microservices -> DistSys;
+            DistSys -> MockDesign;
+        }
+
+        subgraph cluster_4 {
+            label = "Phase 5: The Complete Engineer";
+            VersionControl [label="Git & Version Control", URL="cs-fundamentals.html"];
+            CI_CD [label="CI/CD & Deployment (Docker, Kubernetes)", URL="system-design-masterclass.html"];
+            Testing [label="Automated Testing (Unit, Integration, TDD)", URL="cs-fundamentals.html"];
+            Behavioral [label="Behavioral Interviews\n(STAR Method, Leadership Principles)", URL="interview-approach.html"];
+            MockInterviews [label="Peer Mock Interviews", URL="mock-interview-checklist.html"];
+            
+            VersionControl -> Testing -> CI_CD;
+            Behavioral -> MockInterviews;
+        }
+
+        Expert [label="Goal: SDE Expert", shape=star, style="filled", URL="visualizer-dashboard.html"];
+
+        // Connect Phases
+        Start -> ProgLang;
+        MemoryModel -> TwoPointers [minlen=2];
+        MemoryModel -> Hashing [minlen=2];
+        MemoryModel -> StacksQueues;
+        
+        BinarySearch -> Graphs;
+        DP -> Networking [minlen=2];
+        MockDesign -> VersionControl;
+        MockDesign -> Behavioral;
+        
+        CI_CD -> Expert;
+        MockInterviews -> Expert;
+      }
+    `;
+
+        // Initialize SVG Renderer
+        const container = document.getElementById('graph-renderer');
+        let svgElement = null;
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+
+        // Pan State
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+
+        const viz = new Viz();
+        viz.renderSVGElement(dotGraph)
+            .then(function (element) {
+                svgElement = element;
+                container.appendChild(element);
+
+                // Override Graphviz explicit sizes to let us control viewport
+                element.style.width = '100%';
+                element.style.height = '100%';
+
+                const viewBox = element.getAttribute('viewBox').split(' ');
+                const svgW = parseFloat(viewBox[2]);
+                const svgH = parseFloat(viewBox[3]);
+
+                const rect = container.getBoundingClientRect();
+
+                // Start zoomed in to ensure high readability immediately, instead of zooming out to fit all
+                if (svgW > rect.width) {
+                    scale = 1.2;
+                } else {
+                    scale = 1.2;
+                }
+
+                // Center Horizontally, push down slightly from the top toolbar
+                translateX = (rect.width - (svgW * scale)) / 2;
+                translateY = 40;
+
+                // Initial setup for transform
+                updateTransform();
+
+                // Mouse Events for Panning
+                container.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                });
+
+                window.addEventListener('mouseup', () => {
+                    isDragging = false;
+                });
+
+                window.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    translateX = e.clientX - startX;
+                    translateY = e.clientY - startY;
+                    updateTransform();
+                });
+
+                // Wheel Event for Zooming
+                container.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const zoomSensitivity = 0.001;
+                    const delta = e.deltaY * -zoomSensitivity;
+                    // Math to zoom towards mouse pointer
+                    const newScale = Math.min(Math.max(0.2, scale + delta), 8);
+
+                    // Math to zoom towards mouse pointer
+                    const rect = container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    translateX = mouseX - (mouseX - translateX) * (newScale / scale);
+                    translateY = mouseY - (mouseY - translateY) * (newScale / scale);
+                    scale = newScale;
+
+                    updateTransform();
+                });
+            })
+            .catch(error => {
+                viz = new Viz();
+                console.error(error);
+                container.innerHTML = `<div style="color:red; padding:20px;">Error rendering graph: ${error}</div>`;
+            });
+
+        // Toolbar Controls
+        function updateTransform() {
+            if (!svgElement) return;
+            // Find the inner <g> element created by Graphviz which holds all nodes
+            const g = svgElement.querySelector('g');
+            if (g) {
+                g.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+            }
+        }
+
+        function zoomIn() {
+            scale = Math.min(8, scale * 1.25);
+            updateTransform();
+        }
+
+        function zoomOut() {
+            scale = Math.max(0.2, scale / 1.25);
+            updateTransform();
+        }
+
+        function resetZoom() {
+            scale = 1;
+
+            // Re-center on reset
+            const rect = container.getBoundingClientRect();
+            if (svgElement) {
+                const viewBox = svgElement.getAttribute('viewBox').split(' ');
+                const svgW = parseFloat(viewBox[2]);
+
+                // Maintain zoomed in readability on reset
+                if (svgW > rect.width) {
+                    scale = 1.2;
+                } else {
+                    scale = 1.2;
+                }
+                translateX = (rect.width - (svgW * scale)) / 2;
+                translateY = 40;
+            } else {
+                translateX = 0;
+                translateY = 0;
+            }
+
+            updateTransform();
+        }
+
+        function centerOn(phase) {
+            if (!svgElement) return;
+            resetZoom();
+        }
+    </script>
+</body>
+
+</html>
