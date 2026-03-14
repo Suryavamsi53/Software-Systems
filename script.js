@@ -106,10 +106,7 @@ function addPageNavigation() {
   const page = path.split('/').pop();
   const isPattern = path.includes('/patterns/');
 
-  // Define study sequence
   const studySequence = [
-    'interview-approach.html',
-    'complexity-guide.html',
     'patterns/two-pointers.html',
     'patterns/sliding-window.html',
     'patterns/binary-search.html',
