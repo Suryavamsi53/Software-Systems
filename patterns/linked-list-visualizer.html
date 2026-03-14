@@ -1,889 +1,1245 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Linked List Operations Visualizer - Software Systems Prep</title>
-    <link rel="stylesheet" href="../styles.css">
-    <link rel="stylesheet" href="graph-visualizer.css">
+    <title>LinkedList Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <style>
-        /* Specific styles for Linked List Visualizer */
-        .memory-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 10px;
-            padding: 15px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            margin-top: 20px;
-            max-height: 250px;
-            overflow-y: auto;
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --neon-yellow: #f2cc60;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
         }
-        .memory-block {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            padding: 8px;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            position: relative;
-            height: 70px;
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 4px;
-            transition: all 0.3s ease;
+            overflow: hidden;
         }
-        .memory-block.occupied {
-            border-color: var(--accent-color);
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--text-primary);
-        }
-        .memory-block.highlight {
-            background: rgba(250, 204, 21, 0.2);
-            border-color: #facc15;
-        }
-        .memory-addr {
-            position: absolute;
-            top: 2px;
-            left: 4px;
-            font-size: 0.65rem;
-            color: var(--text-muted);
-            font-family: monospace;
-        }
-        .memory-val { font-weight: bold; font-size: 1.1rem; }
-        .memory-next { font-size: 0.7rem; color: var(--callout-green); margin-top: 2px; font-family: monospace; }
 
-        .node-rect { fill: var(--bg-tertiary); stroke: var(--accent-color); stroke-width: 2; transition: all 0.5s ease; }
-        .node-text { fill: var(--text-primary); font-weight: bold; font-family: monospace; font-size: 14px; text-anchor: middle; dominant-baseline: middle; }
-        .ptr-text { fill: var(--text-muted); font-size: 12px; font-family: monospace; }
-        
-        .control-input {
-            width: 100%;
-            padding: 8px;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
             border-radius: 4px;
-            margin-bottom: 10px;
         }
-        
-        .canvas-wrapper {
-            overflow-x: auto;
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-blue {
+            color: var(--neon-blue);
+        }
+
+        .text-green {
+            color: var(--neon-green);
+        }
+
+        .text-red {
+            color: var(--neon-red);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i {
+            color: var(--neon-cyan);
+        }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col {
             overflow-y: hidden;
-            cursor: grab;
-            user-select: none;
         }
-        .canvas-wrapper.active {
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input,
+        .form-select {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .btn-primary {
+            background: rgba(31, 111, 235, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .btn-primary:hover {
+            background: rgba(31, 111, 235, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.15);
+        }
+
+        .btn-success {
+            background: rgba(46, 160, 67, 0.1);
+            border-color: rgba(63, 185, 80, 0.4);
+            color: var(--neon-green);
+        }
+
+        .btn-success:hover {
+            background: rgba(46, 160, 67, 0.2);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(63, 185, 80, 0.15);
+        }
+
+        .btn-danger {
+            background: rgba(248, 81, 73, 0.1);
+            border-color: rgba(248, 81, 73, 0.4);
+            color: var(--neon-red);
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 81, 73, 0.2);
+            border-color: var(--neon-red);
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.15);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* VIZ CANVAS */
+        .viz-viewport {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .viz-viewport:active {
             cursor: grabbing;
         }
 
-        #ll-svg {
-            min-width: 100%;
-            cursor: inherit;
-        }
-        .code-line.active {
-            background-color: rgba(250, 204, 21, 0.2);
-            border-left: 3px solid #facc15;
-            color: #facc15;
-        }
-        /* Code Panel Styles */
-        .split-view {
+        .zoom-controls {
             display: flex;
-            gap: 20px;
-            height: 100%;
-            min-height: 400px;
+            gap: 8px;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 4px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            backdrop-filter: blur(4px);
         }
-        .canvas-section {
-            flex: 2;
+
+        .zoom-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
             display: flex;
-            flex-direction: column;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-        .code-section {
-            flex: 1;
-            background-color: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-width: 300px;
-        }
-        .code-header {
-            padding: 10px 15px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            background-color: rgba(255,255,255,0.05);
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .algo-code {
-            padding: 15px;
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--text-secondary);
+
+        .zoom-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .zoom-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-main);
+            width: 45px;
+            user-select: none;
+        }
+
+        .viz-canvas {
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            position: relative;
+        }
+
+        #links-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 10;
+        }
+
+        .link-path {
+            fill: none;
+            stroke: var(--text-muted);
+            stroke-width: 3;
+            transition: all 0.3s;
+        }
+
+        .link-path.active {
+            stroke: var(--neon-cyan);
+            stroke-width: 4;
+            filter: drop-shadow(0 0 5px rgba(88, 166, 255, 0.5));
+        }
+
+        /* Linked List Node */
+        .ll-node {
+            position: absolute;
+            display: flex;
+            align-items: stretch;
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            z-index: 20;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            width: 70px;
+            height: 40px;
+            display: flex;
+        }
+
+        .ll-val {
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: white;
+            border-right: 1px solid #30363d;
         }
-        .code-line { padding: 2px 5px; border-radius: 4px; }
-        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
-        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+
+        .ll-ptr {
+            width: 20px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .ll-node.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .ll-node.found {
+            border-color: var(--neon-green);
+            background: rgba(46, 160, 67, 0.2);
+            box-shadow: 0 0 20px rgba(63, 185, 80, 0.6);
+            transform: scale(1.15);
+        }
+
+        .ll-node.delete {
+            border-color: var(--neon-red);
+            opacity: 0.5;
+            transform: scale(0.9);
+        }
+
+        .node-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--neon-purple);
+            text-shadow: 0 0 5px rgba(188, 140, 255, 0.5);
+            white-space: nowrap;
+        }
+
+        .pointer-arrow {
+            position: absolute;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--neon-cyan);
+            z-index: 30;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            font-weight: bold;
+            opacity: 0;
+        }
+
+        .pointer-arrow i {
+            width: 20px;
+            height: 20px;
+        }
+
+        .pointer-arrow.top {
+            top: -45px;
+        }
+
+        .pointer-arrow.bottom {
+            top: 50px;
+            flex-direction: column-reverse;
+        }
+
+
+        /* Code Tracer */
+        .code-tracer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            margin-top: 1rem;
+        }
+
+        .code-tabs {
+            display: flex;
+            border-bottom: 1px solid #30363d;
+            background: #010409;
+        }
+
+        .code-tab {
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .code-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .code-tab.active {
+            color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        .code-highlight {
+            background-color: rgba(0, 243, 255, 0.15) !important;
+            border-left: 3px solid var(--neon-cyan) !important;
+            box-sizing: border-box;
+        }
+
+        #monaco-container {
+            flex: 1;
+            width: 100%;
+            min-height: 250px;
+        }
+
+        /* Terminal box */
+        .terminal-box {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            line-height: 1.5;
+            color: var(--text-main);
+            position: relative;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.25rem;
+            word-break: break-all;
+        }
+
+        .log-info {
+            color: var(--neon-cyan);
+        }
+
+        .log-eval {
+            color: var(--neon-purple);
+        }
+
+        .log-success {
+            color: var(--neon-green);
+        }
+
+        .log-warn {
+            color: var(--neon-yellow);
+        }
+
+        .log-error {
+            color: var(--neon-red);
+        }
+
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            position: sticky;
+            top: -0.75rem;
+            background: #0d1117;
+            z-index: 10;
+            padding-top: 0.25rem;
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .mac-btn {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mac-close {
+            background: #ff5f56;
+        }
+
+        .mac-min {
+            background: #ffbd2e;
+        }
+
+        .mac-max {
+            background: #27c93f;
+        }
+
+        /* Footer animation controls */
+        .anim-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1rem;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+        }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h1>🌑 Software Systems</h1>
-                <p>Linked List Ops</p>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Back</div>
-                <a href="../index.html" class="nav-item">← Dashboard</a>
-                <a href="linked-lists.html" class="nav-item">← Linked Lists Pattern</a>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Controls</div>
-                <div class="control-group">
-                    <div class="toggle-row">
-                        <span>Doubly Linked List</span>
-                        <label class="switch">
-                            <input type="checkbox" id="dll-toggle" onchange="toggleDLL()">
-                            <span class="slider round"></span>
-                        </label>
-                    </div>
-                    <label>Value</label>
-                    <input type="number" id="val-input" class="control-input" placeholder="Enter value..." value="10">
-                    <button class="action-btn" onclick="insertHead()">Insert at Head</button>
-                    <button class="action-btn" onclick="insertTail()">Insert at Tail</button>
-                    <button class="action-btn" onclick="searchNode()">Search Value</button>
-                    <button class="action-btn danger" onclick="deleteNode()">Delete Value</button>
+    <header class="app-header">
+        <div class="app-title">
+            <i data-lucide="link"></i>
+            LinkedList Visualizer
+        </div>
+        <div style="display: flex; gap: 1rem; font-size: 0.9rem; color: var(--text-muted);">
+            <span><i data-lucide="activity" style="display:inline; width:14px;height:14px;"></i> Interactive
+                Analytics</span>
+            <span><i data-lucide="file-code" style="display:inline; width:14px;height:14px;"></i> Execution
+                Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- Left Column: Controls -->
+        <div class="column">
+            <div class="panel">
+                <div class="panel-header">
+                    <i data-lucide="settings"></i> List Configuration
                 </div>
                 <div class="control-group">
-                    <button class="action-btn warning" onclick="resetList()">Reset List</button>
+                    <label>LinkedList Type</label>
+                    <select id="list-type" class="form-select">
+                        <option value="singly">Singly LinkedList</option>
+                        <option value="doubly">Doubly LinkedList</option>
+                        <option value="circular">Circular LinkedList</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Initial Values (comma separated)</label>
+                    <input type="text" id="init-input" class="form-input" value="10, 20, 30, 40">
+                </div>
+                <button id="btn-init" class="btn btn-primary" style="width:100%;"><i data-lucide="refresh-cw"></i>
+                    Initialize List</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <i data-lucide="play-circle"></i> Operations
+                </div>
+                <div class="control-group">
+                    <input type="number" id="val-input" class="form-input" placeholder="Value (e.g. 50)">
+                </div>
+                <div class="btn-group" style="margin-bottom: 0.5rem;">
+                    <button id="btn-insert-head" class="btn"><i data-lucide="arrow-right-to-line"></i> Prepend</button>
+                    <button id="btn-insert-tail" class="btn"><i data-lucide="arrow-down-to-line"></i> Append</button>
+                </div>
+                <div class="btn-group" style="margin-bottom: 0.5rem;">
+                    <button id="btn-search" class="btn"><i data-lucide="search"></i> Search</button>
+                    <button id="btn-delete" class="btn btn-danger"><i data-lucide="trash-2"></i> Delete</button>
+                </div>
+                <button id="btn-reverse" class="btn" style="width: 100%;"><i data-lucide="move-horizontal"></i> Reverse
+                    List</button>
+            </div>
+
+            <div class="panel" style="flex:1;">
+                <div class="terminal-box" id="logs-container">
+                    <div class="terminal-header">
+                        <div class="mac-btns">
+                            <div class="mac-btn mac-close"></div>
+                            <div class="mac-btn mac-min"></div>
+                            <div class="mac-btn mac-max"></div>
+                        </div>
+                        bash - linkedlist_tracer.sh
+                    </div>
+                    <div class="terminal-line"><span class="log-info">[SYS] Visualization Engine Ready.</span></div>
                 </div>
             </div>
-        </aside>
+        </div>
 
-        <main class="main-content no-padding">
-            <div class="viz-container">
-                <div class="algo-toolbar">
-                    <div id="status-text" style="font-family: monospace; color: var(--accent-color);">Ready. Nodes are allocated non-contiguously in Heap Memory.</div>
+        <!-- Middle Column: Canvas -->
+        <div class="column center-col">
+            <div class="panel" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="panel-header">
+                    <i data-lucide="monitor-play"></i> Algorithm Visualization Studio
                 </div>
-                
-                <div class="split-view">
-                    <!-- Visualization -->
-                    <div class="canvas-section">
-                        <div style="padding: 10px; border-bottom: 1px solid var(--border-color); background: var(--bg-secondary);">
-                            <strong style="color: var(--text-primary);">Logical View</strong> (Pointers)
-                        </div>
-                        <div class="canvas-wrapper" id="logical-view-container" style="flex: 2; min-height: 250px;">
-                            <svg id="ll-svg" width="100%" height="100%"></svg>
-                        </div>
-                        <div style="padding: 10px; border-top: 1px solid var(--border-color); background: var(--bg-secondary);">
-                            <div style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 10px; display: flex; justify-content: space-between;">
-                                <span><strong>Physical View</strong> (Heap Memory Simulation)</span>
-                                <span style="font-size: 0.8rem; color: var(--text-muted);">Random Addresses</span>
+
+                <div class="viz-viewport" id="viz-viewport">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out"><i data-lucide="zoom-out"
+                                style="width:16px;height:16px;"></i></button>
+                        <div class="zoom-value" id="zoom-val">100%</div>
+                        <button class="zoom-btn" id="btn-zoom-in" title="Zoom In"><i data-lucide="zoom-in"
+                                style="width:16px;height:16px;"></i></button>
+                        <button class="zoom-btn" id="btn-zoom-reset" title="Reset View"><i data-lucide="maximize"
+                                style="width:16px;height:16px;"></i></button>
+                    </div>
+
+                    <div class="viz-canvas" id="viz-canvas">
+                        <svg id="links-svg"></svg>
+                        <div id="nodes-container"
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+                        <div id="pointers-container"
+                            style="position: absolute; top:0; left:0; width:100%; height: 100%; pointer-events:none; z-index:30;">
+                            <div id="ptr-head" class="pointer-arrow top" style="opacity: 0;">
+                                <div>HEAD</div><i data-lucide="arrow-down"></i>
                             </div>
-                            <div id="memory-view" class="memory-container">
-                                <!-- Memory blocks injected here -->
+                            <div id="ptr-tail" class="pointer-arrow top" style="opacity: 0;">
+                                <div>TAIL</div><i data-lucide="arrow-down"></i>
+                            </div>
+                            <div id="ptr-curr" class="pointer-arrow bottom" style="opacity: 0;">
+                                <div>CURR</div><i data-lucide="arrow-up"></i>
+                            </div>
+                            <div id="ptr-prev" class="pointer-arrow bottom" style="opacity: 0;">
+                                <div>PREV</div><i data-lucide="arrow-up"></i>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Code Panel -->
-                    <div class="code-section">
-                        <div class="code-header">
-                            <button class="action-btn" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyCode()">📋 Copy</button>
-                            <div class="btn-group">
-                                <button class="tab-btn active" onclick="switchLang('go')">Go</button>
-                                <button class="tab-btn" onclick="switchLang('java')">Java</button>
-                                <button class="tab-btn" onclick="switchLang('python')">Python</button>
-                            </div>
-                        </div>
-                        <div id="code-display" class="algo-code"></div>
+                <div class="anim-controls">
+                    <div style="flex: 1;">
+                        <span
+                            style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Animation
+                            Speed</span>
+                        <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1"
+                            style="width: 150px;">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-prev" class="btn"><i data-lucide="chevron-left"></i></button>
+                        <button id="btn-play" class="btn btn-success" style="width: 100px;"><i data-lucide="play"></i>
+                            Play</button>
+                        <button id="btn-next" class="btn"><i data-lucide="chevron-right"></i></button>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
+
+        <!-- Right Column: Profiler -->
+        <div class="column">
+            <div class="panel" style="flex: 1;">
+                <div class="panel-header">
+                    <i data-lucide="code-2"></i> Implementation Detail
+                </div>
+
+                <div class="code-tracer">
+                    <div class="code-tabs">
+                        <div class="code-tab active" data-lang="go">main.go</div>
+                        <div class="code-tab" data-lang="java">List.java</div>
+                        <div class="code-tab" data-lang="python">list.py</div>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">TIME
+                            COMPLEXITY</div>
+                        <div id="time-complex"
+                            style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-cyan);">
+                            O(N)</div>
+                    </div>
+                    <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">SPACE
+                            COMPLEXITY</div>
+                        <div id="space-complex"
+                            style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-green);">
+                            O(1)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    <!-- MAIN SCRIPT -->
     <script>
-        // Memory Simulation
-        const MEMORY_SIZE = 24;
-        const memorySlots = Array(MEMORY_SIZE).fill(null);
-        let head = null;
-        let isDLL = false;
-        let isAnimating = false;
-        let currentLang = 'go';
-        let currentOp = 'insertHead';
+        lucide.createIcons();
 
-        // DOM Elements
-        const logicalContainer = document.getElementById('logical-view-container');
-        const svg = document.getElementById('ll-svg');
-        const memoryView = document.getElementById('memory-view');
-        const statusText = document.getElementById('status-text');
-        const input = document.getElementById('val-input');
-        const codeDisplay = document.getElementById('code-display');
-
-        // Code Snippets
         const CODES = {
-            insertHead: {
-                go: `func insertHead(head *Node, val int) *Node {
-    newNode := &Node{Val: val} // Allocates memory
-    newNode.Next = head        // Point to old head
-    return newNode             // New head
-}`,
-                java: `public Node insertHead(Node head, int val) {
-    Node newNode = new Node(val); // Heap allocation
-    newNode.next = head;
-    return newNode;
-}`,
-                python: `def insert_head(head, val):
-    new_node = Node(val) # Heap object
-    new_node.next = head
-    return new_node`
-            },
-            insertTail: {
-                go: `func insertTail(head *Node, val int) *Node {
-    newNode := &Node{Val: val}
-    if head == nil { return newNode }
-    curr := head
-    for curr.Next != nil {
-        curr = curr.Next
-    }
-    curr.Next = newNode
-    return head
-}`,
-                java: `public Node insertTail(Node head, int val) {
-    Node newNode = new Node(val);
-    if (head == null) return newNode;
-    Node curr = head;
-    while (curr.next != null) {
-        curr = curr.next;
-    }
-    curr.next = newNode;
-    return head;
-}`,
-                python: `def insert_tail(head, val):
-    new_node = Node(val)
-    if not head: return new_node
-    curr = head
-    while curr.next:
-        curr = curr.next
-    curr.next = new_node
-    return head`
-            },
-            delete: {
-                go: `func delete(head *Node, val int) *Node {
-    if head == nil { return nil }
-    if head.Val == val { return head.Next }
-    curr := head
-    for curr.Next != nil && curr.Next.Val != val {
-        curr = curr.Next
-    }
-    if curr.Next != nil {
-        curr.Next = curr.Next.Next // Unlink
-    }
-    return head
-}`,
-                java: `public Node delete(Node head, int val) {
-    if (head == null) return null;
-    if (head.val == val) return head.next;
-    Node curr = head;
-    while (curr.next != null && curr.next.val != val) {
-        curr = curr.next;
-    }
-    if (curr.next != null) {
-        curr.next = curr.next.next;
-    }
-    return head;
-}`,
-                python: `def delete(head, val):
-    if not head: return None
-    if head.val == val: return head.next
-    curr = head
-    while curr.next and curr.next.val != val:
-        curr = curr.next
-    if curr.next:
-        curr.next = curr.next.next
-    return head`
-            }
-        };
-        
-        const CODES_DLL = {
-            insertHead: {
-                go: `func insertHead(head *Node, val int) *Node {
-    newNode := &Node{Val: val}
-    if head != nil {
-        head.Prev = newNode
-        newNode.Next = head
-    }
-    return newNode
-}`,
-                java: `public Node insertHead(Node head, int val) {
-    Node newNode = new Node(val);
-    if (head != null) {
-        head.prev = newNode;
-        newNode.next = head;
-    }
-    return newNode;
-}`,
-                python: `def insert_head(head, val):
-    new_node = Node(val)
-    if head:
-        head.prev = new_node
-        new_node.next = head
-    return new_node`
-            },
-            insertTail: {
-                go: `func insertTail(head *Node, val int) *Node {
-    newNode := &Node{Val: val}
-    if head == nil { return newNode }
-    curr := head
-    for curr.Next != nil { curr = curr.Next }
-    curr.Next = newNode
-    newNode.Prev = curr
-    return head
-}`,
-                java: `public Node insertTail(Node head, int val) {
-    Node newNode = new Node(val);
-    if (head == null) return newNode;
-    Node curr = head;
-    while (curr.next != null) curr = curr.next;
-    curr.next = newNode;
-    newNode.prev = curr;
-    return head;
-}`,
-                python: `def insert_tail(head, val):
-    new_node = Node(val)
-    if not head: return new_node
-    curr = head
-    while curr.next: curr = curr.next
-    curr.next = new_node
-    new_node.prev = curr
-    return head`
-            },
-            delete: {
-                go: `func delete(head *Node, val int) *Node {
-    if head == nil { return nil }
-    if head.Val == val {
-        if head.Next != nil { head.Next.Prev = nil }
-        return head.Next
-    }
-    curr := head
-    for curr != nil && curr.Val != val { curr = curr.Next }
-    if curr != nil {
-        if curr.Next != nil { curr.Next.Prev = curr.Prev }
-        if curr.Prev != nil { curr.Prev.Next = curr.Next }
-    }
-    return head
-}`,
-                java: `public Node delete(Node head, int val) {
-    if (head == null) return null;
-    if (head.val == val) {
-        if (head.next != null) head.next.prev = null;
-        return head.next;
-    }
-    Node curr = head;
-    while (curr != null && curr.val != val) curr = curr.next;
-    if (curr != null) {
-        if (curr.next != null) curr.next.prev = curr.prev;
-        if (curr.prev != null) curr.prev.next = curr.next;
-    }
-    return head;
-}`,
-                python: `def delete(head, val):
-    if not head: return None
-    if head.val == val:
-        if head.next: head.next.prev = None
-        return head.next
-    curr = head
-    while curr and curr.val != val: curr = curr.next
-    if curr:
-        if curr.next: curr.next.prev = curr.prev
-        if curr.prev: curr.prev.next = curr.next
-    return head`
-            },
-            search: CODES.search, // Same logic
-            reverse: {
-                go: `func reverse(head *Node) *Node {
-    var temp *Node
-    curr := head
-    for curr != nil {
-        temp = curr.Prev
-        curr.Prev = curr.Next
-        curr.Next = temp
-        curr = curr.Prev
-    }
-    if temp != nil { head = temp.Prev }
-    return head
-}`,
-                java: `public Node reverse(Node head) {
-    Node temp = null; Node curr = head;
-    while (curr != null) {
-        temp = curr.prev; curr.prev = curr.next;
-        curr.next = temp; curr = curr.prev;
-    }
-    if (temp != null) head = temp.prev;
-    return head;
-}`,
-                python: `def reverse(head):
-    temp = None; curr = head
-    while curr:
-        temp = curr.prev; curr.prev = curr.next
-        curr.next = temp; curr = curr.prev
-    if temp: head = temp.prev
-    return head`
+            singly: {
+                search: {
+                    go: `func (l *LinkedList) Search(val int) bool {\n    curr := l.Head\n    for curr != nil {\n        if curr.Val == val {\n            return true\n        }\n        curr = curr.Next\n    }\n    return false\n}`,
+                    java: `public boolean search(int val) {\n    Node curr = head;\n    while (curr != null) {\n        if (curr.val == val) {\n            return true;\n        }\n        curr = curr.next;\n    }\n    return false;\n}`,
+                    python: `def search(self, val):\n    curr = self.head\n    while curr:\n        if curr.val == val:\n            return True\n        curr = curr.next\n    return False`
+                },
+                insertHead: {
+                    go: `func (l *LinkedList) InsertHead(val int) {\n    newNode := &Node{Val: val}\n    newNode.Next = l.Head\n    l.Head = newNode\n}`,
+                    java: `public void insertHead(int val) {\n    Node newNode = new Node(val);\n    newNode.next = head;\n    head = newNode;\n}`,
+                    python: `def insert_head(self, val):\n    new_node = Node(val)\n    new_node.next = self.head\n    self.head = new_node`
+                },
+                insertTail: {
+                    go: `func (l *LinkedList) InsertTail(val int) {\n    newNode := &Node{Val: val}\n    if l.Head == nil {\n        l.Head = newNode\n        return\n    }\n    curr := l.Head\n    for curr.Next != nil {\n        curr = curr.Next\n    }\n    curr.Next = newNode\n}`,
+                    java: `public void insertTail(int val) {\n    Node newNode = new Node(val);\n    if (head == null) {\n        head = newNode;\n        return;\n    }\n    Node curr = head;\n    while (curr.next != null) {\n        curr = curr.next;\n    }\n    curr.next = newNode;\n}`,
+                    python: `def insert_tail(self, val):\n    new_node = Node(val)\n    if not self.head:\n        self.head = new_node\n        return\n    curr = self.head\n    while curr.next:\n        curr = curr.next\n    curr.next = new_node`
+                },
+                reverse: {
+                    go: `func (l *LinkedList) Reverse() {\n    var prev *Node\n    curr := l.Head\n    for curr != nil {\n        nextTemp := curr.Next\n        curr.Next = prev\n        prev = curr\n        curr = nextTemp\n    }\n    l.Head = prev\n}`,
+                    java: `public void reverse() {\n    Node prev = null;\n    Node curr = head;\n    while (curr != null) {\n        Node nextTemp = curr.next;\n        curr.next = prev;\n        prev = curr;\n        curr = nextTemp;\n    }\n    head = prev;\n}`,
+                    python: `def reverse(self):\n    prev = None\n    curr = self.head\n    while curr:\n        next_temp = curr.next\n        curr.next = prev\n        prev = curr\n        curr = next_temp\n    self.head = prev`
+                },
+                delete: {
+                    go: `func (l *LinkedList) Delete(val int) {\n    if l.Head == nil { return }\n    if l.Head.Val == val {\n        l.Head = l.Head.Next\n        return\n    }\n    curr := l.Head\n    for curr.Next != nil && curr.Next.Val != val {\n        curr = curr.Next\n    }\n    if curr.Next != nil {\n        curr.Next = curr.Next.Next\n    }\n}`,
+                    java: `public void delete(int val) {\n    if (head == null) return;\n    if (head.val == val) {\n        head = head.next;\n        return;\n    }\n    Node curr = head;\n    while (curr.next != null && curr.next.val != val) {\n        curr = curr.next;\n    }\n    if (curr.next != null) {\n        curr.next = curr.next.next;\n    }\n}`,
+                    python: `def delete(self, val):\n    if not self.head: return\n    if self.head.val == val:\n        self.head = self.head.next\n        return\n    curr = self.head\n    while curr.next and curr.next.val != val:\n        curr = curr.next\n    if curr.next:\n        curr.next = curr.next.next`
+                }
             }
         };
 
-        // Initialize
-        initMemory();
-        renderCode('insertHead');
-        render();
-        initDragScroll();
+        const DOM = {
+            listType: document.getElementById('list-type'),
+            initInput: document.getElementById('init-input'),
+            valInput: document.getElementById('val-input'),
+            btnInit: document.getElementById('btn-init'),
+            btnInsertHead: document.getElementById('btn-insert-head'),
+            btnInsertTail: document.getElementById('btn-insert-tail'),
+            btnSearch: document.getElementById('btn-search'),
+            btnDelete: document.getElementById('btn-delete'),
+            btnReverse: document.getElementById('btn-reverse'),
 
-        function toggleDLL() {
-            isDLL = document.getElementById('dll-toggle').checked;
-            resetList();
-            statusText.textContent = isDLL ? "Switched to Doubly Linked List mode." : "Switched to Singly Linked List mode.";
-            renderCode('insertHead');
+            viewport: document.getElementById('viz-viewport'),
+            canvas: document.getElementById('viz-canvas'),
+            nodesGroup: document.getElementById('nodes-container'),
+            svgGroup: document.getElementById('links-svg'),
+
+            ptrHead: document.getElementById('ptr-head'),
+            ptrTail: document.getElementById('ptr-tail'),
+            ptrCurr: document.getElementById('ptr-curr'),
+            ptrPrev: document.getElementById('ptr-prev'),
+
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            speedControl: document.getElementById('anim-speed'),
+
+            zoomIn: document.getElementById('btn-zoom-in'),
+            zoomOut: document.getElementById('btn-zoom-out'),
+            zoomReset: document.getElementById('btn-zoom-reset'),
+            zoomValText: document.getElementById('zoom-val'),
+
+            logs: document.getElementById('logs-container'),
+            codeTabs: document.querySelectorAll('.code-tab')
+        };
+
+        let state = {
+            type: 'singly',
+            nodes: [], // {id, val, x, y, nextId, prevId}
+            links: [],
+            steps: [],
+            currStep: -1,
+            isPlaying: false,
+            playTimer: null,
+            baseDelay: 800,
+            zoom: 1.0,
+            panX: 0,
+            panY: 0,
+            activeLang: 'go',
+            activeOp: 'search',
+            nodeCounter: 0
+        };
+
+        function highlightLines(lines) {
+            if (!window.editor || !lines || lines.length === 0) return;
+            const decorations = lines.map(line => ({
+                range: new monaco.Range(line, 1, line, 1),
+                options: { isWholeLine: true, className: 'code-highlight' }
+            }));
+            window.decorations = window.editor.deltaDecorations(window.decorations || [], decorations);
+            window.editor.revealLineInCenter(lines[0]);
         }
 
-        function initMemory() {
-            memoryView.innerHTML = '';
-            for(let i=0; i<MEMORY_SIZE; i++) {
-                const addr = `0x${(1000 + i * 8).toString(16).toUpperCase()}`;
-                const block = document.createElement('div');
-                block.className = 'memory-block';
-                block.id = `mem-${i}`;
-                block.innerHTML = `<span class="memory-addr">${addr}</span><span class="memory-val"></span><span class="memory-next"></span>`;
-                memoryView.appendChild(block);
-            }
-        }
+        // ZOOM PAN LOGIC
+        function setupZoomPan() {
+            let isDragging = false;
+            let startX, startY;
 
-        function renderCode(op) {
-            currentOp = op;
-            const codeSet = isDLL ? CODES_DLL : CODES;
-            const code = codeSet[op][currentLang];
-            codeDisplay.innerHTML = '';
-            
-            const lines = code.split('\n');
-            lines.forEach((line, i) => {
-                const div = document.createElement('div');
-                div.className = 'code-line';
-                div.id = `line-${i+1}`;
-                let html = line
-                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|Node|new|null|nil|None)\b/g, '<span class="kwd">$1</span>')
-                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
-                    .replace(/#.*/g, '<span class="com">$&</span>');
-                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
-                codeDisplay.appendChild(div);
-            });
-        }
-
-        function highlightLine(num) {
-            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
-            const line = document.getElementById(`line-${num}`);
-            if (line) line.classList.add('active');
-        }
-
-        function copyCode() {
-            const codeSet = isDLL ? CODES_DLL : CODES;
-            const code = codeSet[currentOp][currentLang];
-            navigator.clipboard.writeText(code);
-        }
-
-        function allocateNode(val) {
-            const emptyIndices = memorySlots.map((v, i) => v === null ? i : -1).filter(i => i !== -1);
-            if (emptyIndices.length === 0) {
-                statusText.textContent = "Memory Full! Cannot allocate new node.";
-                return null;
-            }
-            const idx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-            const addr = `0x${(1000 + idx * 8).toString(16).toUpperCase()}`;
-            
-            const node = {
-                val: val,
-                next: null,
-                prev: null,
-                addr: addr,
-                memIdx: idx
-            };
-            memorySlots[idx] = node;
-            return node;
-        }
-
-        function freeNode(node) {
-            if(node && node.memIdx !== undefined) {
-                memorySlots[node.memIdx] = null;
-            }
-        }
-
-        async function insertHead() {
-            if (isAnimating) return;
-            const val = parseInt(input.value);
-            if (isNaN(val)) return;
-            
-            isAnimating = true;
-            renderCode('insertHead');
-            highlightLine(1);
-            await sleep(300);
-
-            statusText.textContent = `Allocating new node with value ${val}...`;
-            highlightLine(2);
-
-            const newNode = allocateNode(val);
-            if (!newNode) { isAnimating = false; return; }
-            
-            render();
-            highlightMemory(newNode.memIdx);
-            await sleep(800);
-            
-            if (isDLL) {
-                highlightLine(3);
-                if (head) {
-                    highlightLine(4);
-                    highlightLine(5);
-                }
-            } else {
-                highlightLine(3);
+            function updateTransform() {
+                DOM.canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+                DOM.zoomValText.textContent = `${Math.round(state.zoom * 100)}%`;
             }
 
-            newNode.next = head;
-            if (isDLL && head) head.prev = newNode;
-            head = newNode;
-            
-            statusText.textContent = `Node allocated at ${newNode.addr}. Pointing to old head.`;
-            render();
-            await sleep(500);
-            
-            highlightLine(isDLL ? 7 : 4);
-            unhighlightMemory();
-            isAnimating = false;
-        }
+            DOM.zoomIn.addEventListener('click', () => { state.zoom = Math.min(state.zoom + 0.1, 2.5); updateTransform(); });
+            DOM.zoomOut.addEventListener('click', () => { state.zoom = Math.max(state.zoom - 0.1, 0.3); updateTransform(); });
+            DOM.zoomReset.addEventListener('click', () => { state.zoom = 1.0; state.panX = 0; state.panY = 0; updateTransform(); });
 
-        async function insertTail() {
-            if (isAnimating) return;
-            const val = parseInt(input.value);
-            if (isNaN(val)) return;
-
-            isAnimating = true;
-            renderCode('insertTail');
-            highlightLine(1);
-            await sleep(300);
-            
-            highlightLine(2);
-            const newNode = allocateNode(val);
-            if (!newNode) { isAnimating = false; return; }
-            
-            render();
-            highlightMemory(newNode.memIdx);
-            statusText.textContent = `Allocated node at ${newNode.addr}. Traversing to tail...`;
-            await sleep(800);
-
-            highlightLine(3);
-            if (!head) {
-                head = newNode;
-                render();
-                statusText.textContent = "List was empty. New node is head.";
-                unhighlightMemory();
-                isAnimating = false;
-                return;
-            } else {
-                highlightLine(4);
-                let curr = head;
-                
-                if (isDLL) highlightLine(5); else highlightLine(5);
-                while (curr.next) {
-                    if (!isDLL) highlightLine(6);
-                    highlightNode(curr);
-                    await sleep(400);
-                    curr = curr.next;
-                    if (isDLL) highlightLine(5); else highlightLine(5);
-                }
-                highlightNode(curr);
-                await sleep(400);
-                
-                if (isDLL) { highlightLine(6); highlightLine(7); } else { highlightLine(8); }
-                curr.next = newNode;
-                if (isDLL) newNode.prev = curr;
-            }
-            
-            render();
-            statusText.textContent = "Linked new node to tail.";
-            highlightLine(isDLL ? 8 : 9);
-            unhighlightMemory();
-            isAnimating = false;
-        }
-
-        async function deleteNode() {
-            if (isAnimating || !head) return;
-            const val = parseInt(input.value);
-            if (isNaN(val)) return;
-
-            isAnimating = true;
-            renderCode('delete');
-            highlightLine(1);
-            await sleep(300);
-
-            statusText.textContent = `Searching for value ${val} to delete...`;
-
-            highlightLine(2);
-            if (!head) { isAnimating = false; return; }
-
-            highlightLine(3);
-            if (head.val === val) {
-                if (isDLL) highlightLine(4);
-                const toDelete = head;
-                head = head.next;
-                if (isDLL && head) head.prev = null;
-                freeNode(toDelete);
-                render();
-                statusText.textContent = `Deleted head node. Memory freed.`;
-                highlightLine(isDLL ? 5 : 3);
-                isAnimating = false;
-                return;
-            }
-
-            if (isDLL) {
-                // DLL Logic (Find node itself)
-                highlightLine(7);
-                let curr = head;
-                
-                highlightLine(8);
-                while (curr != null && curr.val !== val) {
-                    highlightNode(curr);
-                    await sleep(400);
-                    curr = curr.next;
-                    highlightLine(8);
-                }
-
-                highlightLine(9);
-                if (curr != null) {
-                    highlightNode(curr);
-                    statusText.textContent = `Found ${val} at ${curr.addr}. Unlinking...`;
-                    await sleep(800);
-
-                    highlightLine(10);
-                    if (curr.next != null) curr.next.prev = curr.prev;
-                    highlightLine(11);
-                    if (curr.prev != null) curr.prev.next = curr.next;
-                    
-                    freeNode(curr);
-                    render();
-                    statusText.textContent = "Node deleted and memory freed.";
-                } else {
-                    statusText.textContent = "Value not found.";
-                }
-                highlightLine(13);
-            } else {
-                // SLL Logic (Find prev node)
-                highlightLine(4);
-                let curr = head;
-                highlightLine(5);
-                while (curr.next && curr.next.val !== val) {
-                    highlightLine(6);
-                    highlightNode(curr);
-                    await sleep(400);
-                    curr = curr.next;
-                    highlightLine(5);
-                }
-
-                highlightLine(8);
-                if (curr.next) {
-                    highlightLine(9);
-                    const toDelete = curr.next;
-                    highlightNode(toDelete);
-                    statusText.textContent = `Found ${val} at ${toDelete.addr}. Unlinking...`;
-                    await sleep(800);
-                    
-                    curr.next = curr.next.next;
-                    freeNode(toDelete);
-                    render();
-                    statusText.textContent = "Node deleted and memory freed.";
-                } else {
-                    statusText.textContent = "Value not found.";
-                }
-                highlightLine(11);
-            }
-            
-            isAnimating = false;
-        }
-
-        function resetList() {
-            if (isAnimating) return;
-            head = null;
-            for(let i=0; i<MEMORY_SIZE; i++) memorySlots[i] = null;
-            render();
-            statusText.textContent = "List reset. Memory cleared.";
-        }
-
-        function render() {
-            // Render Memory View
-            for(let i=0; i<MEMORY_SIZE; i++) {
-                const block = document.getElementById(`mem-${i}`);
-                const data = memorySlots[i];
-                if (data) {
-                    block.classList.add('occupied');
-                    block.querySelector('.memory-val').textContent = data.val;
-                    block.querySelector('.memory-next').textContent = data.next ? `→ ${data.next.addr}` : '→ null';
-                } else {
-                    block.classList.remove('occupied', 'highlight');
-                    block.querySelector('.memory-val').textContent = '';
-                    block.querySelector('.memory-next').textContent = '';
-                }
-            }
-
-            // Render Logical View (SVG)
-            svg.innerHTML = '';
-            if (!head) {
-                svg.style.width = '100%';
-                return;
-            }
-
-            let curr = head;
-            let prevNode = null;
-            let x = 50;
-            const y = 100;
-            const gap = 100;
-
-            // Arrow Marker
-            const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            defs.innerHTML = `<marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" /></marker>`;
-            svg.appendChild(defs);
-
-            while (curr) {
-                // Draw Node
-                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                g.setAttribute("id", `node-${curr.memIdx}`);
-                
-                // Rect
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                rect.setAttribute("x", x);
-                rect.setAttribute("y", y - 20);
-                rect.setAttribute("width", 60);
-                rect.setAttribute("height", 40);
-                rect.setAttribute("rx", 5);
-                rect.setAttribute("class", "node-rect");
-                g.appendChild(rect);
-
-                // Value
-                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                text.setAttribute("x", x + 30);
-                text.setAttribute("y", y);
-                text.setAttribute("class", "node-text");
-                text.textContent = curr.val;
-                g.appendChild(text);
-
-                // Address Label
-                const addrText = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                addrText.setAttribute("x", x + 30);
-                addrText.setAttribute("y", y + 35);
-                addrText.setAttribute("class", "ptr-text");
-                addrText.textContent = curr.addr;
-                g.appendChild(addrText);
-
-                svg.appendChild(g);
-
-                // Draw Arrow
-                if (curr.next) {
-                    const yOffset = isDLL ? -8 : 0;
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", x + 60);
-                    line.setAttribute("y1", y + yOffset);
-                    line.setAttribute("x2", x + gap);
-                    line.setAttribute("y2", y + yOffset);
-                    line.setAttribute("stroke", "#94a3b8");
-                    line.setAttribute("stroke-width", "2");
-                    line.setAttribute("marker-end", "url(#arrow)");
-                    svg.appendChild(line);
-                }
-
-                if (isDLL && curr.prev === prevNode && prevNode !== null) {
-                    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-                    line.setAttribute("x1", x);
-                    line.setAttribute("y1", y + 8);
-                    line.setAttribute("x2", x - gap + 60);
-                    line.setAttribute("y2", y + 8);
-                    line.setAttribute("stroke", "#facc15");
-                    line.setAttribute("stroke-width", "2");
-                    line.setAttribute("marker-end", "url(#arrow)");
-                    svg.appendChild(line);
-                }
-
-                prevNode = curr;
-                curr = curr.next;
-                x += gap;
-            }
-            
-            // Update SVG width to allow scrolling
-            const requiredWidth = Math.max(logicalContainer.clientWidth, x + 50);
-            svg.style.width = `${requiredWidth}px`;
-        }
-
-        function highlightMemory(idx) {
-            document.getElementById(`mem-${idx}`)?.classList.add('highlight');
-        }
-
-        function unhighlightMemory() {
-            document.querySelectorAll('.memory-block').forEach(b => b.classList.remove('highlight'));
-        }
-
-        function highlightNode(node) {
-            const g = document.getElementById(`node-${node.memIdx}`);
-            if (g) {
-                g.querySelector('rect').style.stroke = '#facc15';
-                setTimeout(() => g.querySelector('rect').style.stroke = '', 400);
-            }
-        }
-
-        function switchLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            renderCode('insertHead'); // Default
-        }
-
-        function initDragScroll() {
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            logicalContainer.addEventListener('mousedown', (e) => {
-                isDown = true;
-                logicalContainer.classList.add('active');
-                startX = e.pageX - logicalContainer.offsetLeft;
-                scrollLeft = logicalContainer.scrollLeft;
-            });
-
-            logicalContainer.addEventListener('mouseleave', () => {
-                isDown = false;
-                logicalContainer.classList.remove('active');
-            });
-
-            logicalContainer.addEventListener('mouseup', () => {
-                isDown = false;
-                logicalContainer.classList.remove('active');
-            });
-
-            logicalContainer.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
+            DOM.viewport.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const x = e.pageX - logicalContainer.offsetLeft;
-                const walk = (x - startX) * 1.5; // Scroll speed multiplier
-                logicalContainer.scrollLeft = scrollLeft - walk;
+                if (e.ctrlKey || e.metaKey) {
+                    const zoomDelta = e.deltaY > 0 ? -0.1 : 0.1;
+                    const rect = DOM.viewport.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+                    const oldZoom = state.zoom;
+                    state.zoom = Math.max(0.3, Math.min(2.5, state.zoom + zoomDelta));
+                    if (oldZoom !== state.zoom) {
+                        const zoomRatio = state.zoom / oldZoom;
+                        state.panX = mouseX - (mouseX - state.panX) * zoomRatio;
+                        state.panY = mouseY - (mouseY - state.panY) * zoomRatio;
+                        updateTransform();
+                    }
+                } else {
+                    state.panX -= e.deltaX; state.panY -= e.deltaY; updateTransform();
+                }
+            }, { passive: false });
+
+            DOM.viewport.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.zoom-controls') || e.target.closest('.ll-node')) return;
+                isDragging = true;
+                startX = e.clientX - state.panX;
+                startY = e.clientY - state.panY;
             });
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                state.panX = e.clientX - startX;
+                state.panY = e.clientY - startY;
+                updateTransform();
+            });
+            window.addEventListener('mouseup', () => { isDragging = false; });
         }
 
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+        // MONACO EDITOR
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.editor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES.singly.search.go,
+                language: 'go',
+                theme: 'vs-dark',
+                readOnly: true,
+                minimap: { enabled: false },
+                fontSize: 13,
+                fontFamily: "'Fira Code', monospace"
+            });
+            initApp();
+        });
+
+        function logTerminal(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'terminal-line';
+            div.innerHTML = `<span class="log-${type}">[${new Date().toLocaleTimeString()}] ${msg}</span>`;
+            DOM.logs.appendChild(div);
+            DOM.logs.scrollTop = DOM.logs.scrollHeight;
+        }
+
+        function initApp() {
+            setupZoomPan();
+            DOM.btnInit.addEventListener('click', initList);
+            DOM.btnInsertHead.addEventListener('click', () => doOp('insertHead'));
+            DOM.btnInsertTail.addEventListener('click', () => doOp('insertTail'));
+            DOM.btnSearch.addEventListener('click', () => doOp('search'));
+            DOM.btnDelete.addEventListener('click', () => doOp('delete'));
+            DOM.btnReverse.addEventListener('click', () => doOp('reverse'));
+
+            DOM.btnPlay.addEventListener('click', togglePlay);
+            DOM.btnNext.addEventListener('click', stepNext);
+            DOM.btnPrev.addEventListener('click', stepPrev);
+
+            DOM.codeTabs.forEach(t => t.addEventListener('click', (e) => {
+                DOM.codeTabs.forEach(c => c.classList.remove('active'));
+                e.target.classList.add('active');
+                state.activeLang = e.target.dataset.lang;
+                if (window.editor) window.editor.setValue(CODES.singly[state.activeOp][state.activeLang] || "// Code not available");
+                monaco.editor.setModelLanguage(window.editor.getModel(), state.activeLang);
+            }));
+
+            logTerminal("App Initialized. Select List Type and Initialize.");
+        }
+
+        // RENDER LOGIC
+        function drawList() {
+            DOM.nodesGroup.innerHTML = '';
+            DOM.svgGroup.innerHTML = '';
+
+            // Draw Nodes
+            state.nodes.forEach((n, index) => {
+                const el = document.createElement('div');
+                el.className = 'll-node' + (n.active ? ' active' : '') + (n.found ? ' found' : '');
+                el.id = 'node-' + n.id;
+
+                // Base Y is 150, Space horizontally 150px
+                const x = 50 + (index * 150);
+                const y = 150;
+                n.x = x; n.y = y; // update internal struct
+
+                el.style.left = x + 'px';
+                el.style.top = y + 'px';
+
+                const valEl = document.createElement('div');
+                valEl.className = 'll-val';
+                valEl.textContent = n.val;
+
+                const ptrEl = document.createElement('div');
+                ptrEl.className = 'll-ptr';
+
+                el.appendChild(valEl);
+                el.appendChild(ptrEl);
+
+                if (index === 0) {
+                    const lbl = document.createElement('div'); lbl.className = 'node-label'; lbl.textContent = 'HEAD'; el.appendChild(lbl);
+                }
+
+                DOM.nodesGroup.appendChild(el);
+            });
+
+            // Draw Links
+            for (let i = 0; i < state.nodes.length - 1; i++) {
+                drawArrow(state.nodes[i], state.nodes[i + 1]);
+            }
+            if (state.type === 'doubly') {
+                for (let i = state.nodes.length - 1; i > 0; i--) {
+                    drawArrow(state.nodes[i], state.nodes[i - 1], true); // true = double reverse arrow
+                }
+            }
+            if (state.type === 'circular' && state.nodes.length > 0) {
+                drawArrow(state.nodes[state.nodes.length - 1], state.nodes[0], false, true); // true = circular
+            }
+
+            positionPointers();
+        }
+
+        function drawArrow(n1, n2, isReverse = false, isCircular = false) {
+            const svgNS = "http://www.w3.org/2000/svg";
+            const path = document.createElementNS(svgNS, "path");
+            path.setAttribute("class", "link-path");
+
+            const fromX = isReverse ? n1.x : n1.x + 70; // 70 is node width
+            const fromY = n1.y + 20; // 20 is half height
+            const toX = isReverse ? n2.x + 70 : n2.x;
+            const toY = n2.y + 20;
+
+            let d = `M ${fromX} ${fromY}`;
+
+            if (isCircular) {
+                // Draw curve from tail back to head over top
+                d += ` C ${fromX + 50} ${fromY + 100}, ${toX - 50} ${toY + 100}, ${toX} ${toY}`;
+            } else if (isReverse) {
+                // draw slightly below
+                d += ` C ${fromX - 30} ${fromY + 30}, ${toX + 30} ${toY + 30}, ${toX} ${toY + 10}`;
+            } else {
+                d += ` L ${toX} ${toY}`;
+            }
+
+            path.setAttribute("d", d);
+
+            // Create arrowhead marker
+            const arrow = document.createElementNS(svgNS, "polygon");
+            arrow.setAttribute("fill", "var(--text-muted)");
+
+            let angle = Math.atan2(toY - fromY, toX - fromX);
+            if (isCircular) { angle = Math.atan2(toY - (toY + 100), toX - (toX - 50)); }
+            else if (isReverse) { angle = Math.atan2(toY + 10 - (fromY + 30), toX - (toX + 30)); }
+
+            // simple rotation for arrowhead
+            // ... (keeping arrow logic minimal for baseline)
+
+            DOM.svgGroup.appendChild(path);
+        }
+
+        function positionPointers() {
+            // Place HEAD, TAIL, CURR pointers
+            // (Placeholder logic for baseline drawing, we'll refine pointer movement in steps)
+            if (state.nodes.length > 0) {
+                DOM.ptrHead.style.opacity = 1;
+                DOM.ptrHead.style.left = state.nodes[0].x + 35 - 10 + 'px';
+                DOM.ptrHead.style.top = state.nodes[0].y - 50 + 'px';
+            } else {
+                DOM.ptrHead.style.opacity = 0;
+            }
+            DOM.ptrCurr.style.opacity = 0;
+            DOM.ptrPrev.style.opacity = 0;
+            DOM.ptrTail.style.opacity = 0;
+        }
+
+        // SIMULATION LOGIC
+        function initList() {
+            state.type = DOM.listType.value;
+            state.nodeCounter = 0;
+            let vals = DOM.initInput.value.split(',').map(s => s.trim()).filter(s => s !== '').map(Number);
+            state.nodes = vals.map(v => ({ id: state.nodeCounter++, val: v, active: false, found: false }));
+            logTerminal(`Initialized ${state.type} LinkedList with ${vals.length} elements.`, 'success');
+            drawList();
+        }
+
+        function doOp(opName) {
+            let valStr = DOM.valInput.value.trim();
+            let val = parseInt(valStr);
+            if (isNaN(val) && opName !== 'reverse') return alert('Enter a valid number');
+
+            logTerminal(`Starting ${opName} operation...`, 'eval');
+
+            state.activeOp = opName;
+            if (window.editor) {
+                window.editor.setValue(CODES.singly[opName][state.activeLang] || "// Code not available");
+            }
+
+            let currentNodes = JSON.parse(JSON.stringify(state.nodes)); // deep copy clone
+            let steps = [];
+
+            if (opName === 'search') {
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Searching for ${val}`, lines: [2, 3] });
+                let found = false;
+                for (let i = 0; i < currentNodes.length; i++) {
+                    currentNodes[i].active = true;
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Checking node ${i}`, lines: [4, 5] });
+                    if (currentNodes[i].val === val) {
+                        currentNodes[i].found = true;
+                        currentNodes[i].active = false;
+                        steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Found ${val}!`, success: true, lines: [6] });
+                        found = true;
+                        break;
+                    }
+                    currentNodes[i].active = false;
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Moving to next`, lines: [7] });
+                }
+                if (!found) {
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `${val} not found in the list.`, error: true, lines: [9] });
+                }
+            }
+
+            if (opName === 'insertHead') {
+                let newNode = { id: state.nodeCounter++, val: val, active: true, found: false };
+                currentNodes.unshift(newNode);
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Allocated new node ${val} and pointing to existing Head`, lines: [2] });
+                currentNodes[0].active = false;
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Head pointer moved to new node.`, lines: [3, 4] });
+            }
+
+            if (opName === 'insertTail') {
+                let newNode = { id: state.nodeCounter++, val: val, active: true, found: false };
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Allocating new node`, lines: [2] });
+                if (currentNodes.length === 0) {
+                    currentNodes.push(newNode);
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `List is empty, new node becomes Head.`, lines: [3, 4] });
+                } else {
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Head is not nil, initializing traversal`, lines: [7, 8] });
+                    for (let i = 0; i < currentNodes.length; i++) {
+                        currentNodes[i].active = true;
+                        steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Traversing to find Tail...`, lines: [8, 9] });
+                        currentNodes[i].active = false;
+                    }
+                    currentNodes.push(newNode);
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: currentNodes.length - 2, log: `Linked tail to new node.`, lines: [11] });
+                }
+                currentNodes[currentNodes.length - 1].active = false;
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Insertion complete.` });
+            }
+
+            if (opName === 'reverse') {
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Starting In-place Reversal`, lines: [2, 3] });
+                let reversed = [];
+                for (let i = 0; i < currentNodes.length; i++) {
+                    currentNodes[i].active = true;
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Current = ${currentNodes[i].val}, adjusting pointers...`, lines: [5, 6] });
+                    currentNodes[i].active = false;
+                    reversed.unshift(currentNodes[i]);
+                    steps.push({ nodes: JSON.parse(JSON.stringify(reversed.concat(currentNodes.slice(i + 1)))), currIdx: i, log: `Pointer reversed.`, lines: [7, 8] });
+                }
+                currentNodes = reversed;
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Reversal complete. Head reset.`, lines: [10] });
+            }
+
+            if (opName === 'delete') {
+                steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Attempting to delete ${val}`, lines: [2] });
+                if (currentNodes.length > 0 && currentNodes[0].val === val) {
+                    currentNodes.shift();
+                    steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Deleted Head!`, lines: [3, 4] });
+                } else {
+                    let found = false;
+                    for (let i = 0; i < currentNodes.length - 1; i++) {
+                        currentNodes[i].active = true;
+                        steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Checking next node for ${val}`, lines: [7, 8] });
+                        currentNodes[i].active = false;
+                        if (currentNodes[i + 1].val === val) {
+                            currentNodes[i + 1].delete = true;
+                            steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Found matching node to delete`, lines: [11] });
+                            currentNodes.splice(i + 1, 1);
+                            steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Node removed from links`, lines: [12] });
+                            found = true;
+                            break;
+                        } else {
+                            steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), currIdx: i, log: `Iterating further`, lines: [9] });
+                        }
+                    }
+                    if (!found) {
+                        steps.push({ nodes: JSON.parse(JSON.stringify(currentNodes)), log: `Value ${val} not found`, error: true, lines: [14] });
+                    }
+                }
+            }
+
+            state.steps = steps;
+            state.currStep = -1;
+            DOM.valInput.value = '';
+            playAnim();
+        }
+
+        // ANIMATION PLAYBACK
+        function applyStep(stepIdx) {
+            if (stepIdx < 0 || stepIdx >= state.steps.length) return;
+            let step = state.steps[stepIdx];
+
+            // update state array to match step
+            state.nodes = step.nodes;
+
+            if (step.lines) {
+                highlightLines(step.lines);
+            }
+
+            if (step.log) {
+                if (step.success) logTerminal(step.log, 'success');
+                else if (step.error) logTerminal(step.log, 'error');
+                else logTerminal(step.log, 'eval');
+            }
+
+            drawList();
+
+            // Pointers
+            if (step.currIdx !== undefined && step.currIdx >= 0 && step.currIdx < state.nodes.length) {
+                DOM.ptrCurr.style.opacity = 1;
+                DOM.ptrCurr.style.left = state.nodes[step.currIdx].x + 35 - 10 + 'px';
+                DOM.ptrCurr.style.top = state.nodes[step.currIdx].y + 50 + 'px';
+            } else {
+                DOM.ptrCurr.style.opacity = 0;
+            }
+        }
+
+        function stepNext() {
+            if (state.currStep < state.steps.length - 1) {
+                state.currStep++;
+                applyStep(state.currStep);
+            } else {
+                pauseAnim();
+            }
+        }
+        function stepPrev() {
+            if (state.currStep > 0) {
+                state.currStep--;
+                applyStep(state.currStep);
+            }
+        }
+
+        function playAnim() {
+            if (state.playTimer) clearInterval(state.playTimer);
+            state.isPlaying = true;
+            DOM.btnPlay.innerHTML = '<i data-lucide="pause"></i> Pause';
+            lucide.createIcons();
+
+            // if done, reset
+            if (state.currStep >= state.steps.length - 1) state.currStep = -1;
+
+            state.playTimer = setInterval(() => {
+                stepNext();
+            }, state.baseDelay / parseFloat(DOM.speedControl.value));
+        }
+
+        function pauseAnim() {
+            clearInterval(state.playTimer);
+            state.isPlaying = false;
+            DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+            DOM.btnPlay.className = "btn btn-success";
+            lucide.createIcons();
+        }
+
+        function togglePlay() {
+            if (state.isPlaying) pauseAnim();
+            else playAnim();
+        }
+
+        // Initialize empty baseline first
+        initList();
     </script>
 </body>
+
 </html>
