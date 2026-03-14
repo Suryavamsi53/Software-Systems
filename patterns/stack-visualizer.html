@@ -677,59 +677,59 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="anim-controls">
-            <div style="flex: 1;">
-                <span style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Animation
-                    Speed</span>
-                <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 150px;">
-            </div>
-            <div style="display: flex; gap: 0.5rem;">
-                <button id="btn-prev" class="btn"><i data-lucide="chevron-left"></i></button>
-                <button id="btn-play" class="btn btn-success" style="width: 100px;"><i data-lucide="play"></i>
-                    Play</button>
-                <button id="btn-next" class="btn"><i data-lucide="chevron-right"></i></button>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Right Column: Profiler -->
-    <div class="column">
-        <div class="panel" style="flex: 1;">
-            <div class="panel-header">
-                <i data-lucide="code-2"></i> Implementation Detail
-            </div>
-
-            <div class="code-tracer">
-                <div class="code-tabs">
-                    <div class="code-tab active" data-lang="go">main.go</div>
-                    <div class="code-tab" data-lang="java">List.java</div>
-                    <div class="code-tab" data-lang="python">list.py</div>
-                </div>
-                <div id="monaco-container"></div>
-            </div>
-
-            <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
-                <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">TIME
-                        COMPLEXITY</div>
-                    <div id="time-complex"
-                        style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-cyan);">
-                        O(N)</div>
-                </div>
-                <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
-                    <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">SPACE
-                        COMPLEXITY</div>
-                    <div id="space-complex"
-                        style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-green);">
-                        O(1)</div>
+                <div class="anim-controls">
+                    <div style="flex: 1;">
+                        <span
+                            style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; display: block;">Animation
+                            Speed</span>
+                        <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1"
+                            style="width: 150px;">
+                    </div>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-prev" class="btn"><i data-lucide="chevron-left"></i></button>
+                        <button id="btn-play" class="btn btn-success" style="width: 100px;"><i data-lucide="play"></i>
+                            Play</button>
+                        <button id="btn-next" class="btn"><i data-lucide="chevron-right"></i></button>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+
+        <!-- Right Column: Profiler -->
+        <div class="column">
+            <div class="panel" style="flex: 1;">
+                <div class="panel-header">
+                    <i data-lucide="code-2"></i> Implementation Detail
+                </div>
+
+                <div class="code-tracer">
+                    <div class="code-tabs">
+                        <div class="code-tab active" data-lang="go">main.go</div>
+                        <div class="code-tab" data-lang="java">List.java</div>
+                        <div class="code-tab" data-lang="python">list.py</div>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">TIME
+                            COMPLEXITY</div>
+                        <div id="time-complex"
+                            style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-cyan);">
+                            O(N)</div>
+                    </div>
+                    <div style="flex: 1; border: 1px solid #30363d; border-radius: 8px; padding: 1rem;">
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem;">SPACE
+                            COMPLEXITY</div>
+                        <div id="space-complex"
+                            style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: bold; color: var(--neon-green);">
+                            O(1)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 
