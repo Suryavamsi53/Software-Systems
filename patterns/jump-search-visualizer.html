@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Binary Search Visualizer - Pro</title>
+    <title>Jump Search Visualizer - Pro</title>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -747,7 +747,7 @@
 
 <body>
     <header class="app-header">
-        <div class="app-title"><i data-lucide="binary"></i> Binary Search </div>
+        <div class="app-title"><i data-lucide="skip-forward"></i> Jump Search </div>
         <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
             <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance
                 Analytics</span>
@@ -830,13 +830,13 @@
                     </div>
                     <div class="pointers-container">
                         <div class="pointer pointer-l" id="ptr-l">
-                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">L</span>
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">PREV</span>
                         </div>
                         <div class="pointer pointer-m" id="ptr-m">
-                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">M</span>
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">CHK</span>
                         </div>
                         <div class="pointer pointer-r" id="ptr-r">
-                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">R</span>
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">STEP</span>
                         </div>
                     </div>
                 </div>
@@ -846,7 +846,7 @@
                     <span style="display:flex; align-items:center; gap:6px;">
                         <div
                             style="width:12px;height:12px;background:rgba(88,166,255,0.1);border:1px dashed var(--neon-cyan);border-radius:2px;">
-                        </div> Search Space
+                        </div> Block Bounds
                     </span>
                     <span style="display:flex; align-items:center; gap:6px;">
                         <div
@@ -856,7 +856,7 @@
                     <span style="display:flex; align-items:center; gap:6px;">
                         <div
                             style="width:12px;height:12px;background:rgba(188,140,255,0.15);border:1px solid var(--neon-purple);border-radius:2px;">
-                        </div> Mid Pointer
+                        </div> Check Pointer
                     </span>
                     <span style="display:flex; align-items:center; gap:6px;">
                         <div
@@ -874,7 +874,7 @@
                 <div class="metrics-grid">
                     <div class="metric-card m-time">
                         <div class="metric-label">Time Complexity</div>
-                        <div class="metric-val text-blue">O(log n)</div>
+                        <div class="metric-val text-blue">O(√n)</div>
                     </div>
                     <div class="metric-card m-space">
                         <div class="metric-label">Space Complexity</div>
@@ -921,56 +921,61 @@
 
         // Template Code
         const CODES = {
-            go: `func binarySearch(arr []int, target int) int {
-    left, right := 0, len(arr)-1
-    for left <= right {
-        mid := left + (right - left) / 2
-        
-        if arr[mid] == target {
-            return mid
+            go: `import "math"
+func jumpSearch(arr []int, target int) int {
+    n := len(arr)
+    step := int(math.Floor(math.Sqrt(float64(n))))
+    prev := 0
+    for arr[int(math.Min(float64(step), float64(n)))-1] < target {
+        prev = step
+        step += int(math.Floor(math.Sqrt(float64(n))))
+        if prev >= n {
+            return -1
         }
-        
-        if arr[mid] < target {
-            left = mid + 1
-        } else {
-            right = mid - 1
+    }
+    for arr[prev] < target {
+        prev++
+        if prev == int(math.Min(float64(step), float64(n))) {
+            return -1
         }
+    }
+    if arr[prev] == target {
+        return prev
     }
     return -1
 }`,
-            java: `public int binarySearch(int[] arr, int target) {
-    int left = 0;
-    int right = arr.length - 1;
-    
-    while (left <= right) {
-        int mid = left + (right - left) / 2;
-        
-        if (arr[mid] == target) {
-            return mid;
-        }
-        
-        if (arr[mid] < target) {
-            left = mid + 1;
-        } else {
-            right = mid - 1;
-        }
+            java: `public int jumpSearch(int[] arr, int target) {
+    int n = arr.length;
+    int step = (int)Math.floor(Math.sqrt(n));
+    int prev = 0;
+    while (arr[Math.min(step, n)-1] < target) {
+        prev = step;
+        step += (int)Math.floor(Math.sqrt(n));
+        if (prev >= n) return -1;
     }
+    while (arr[prev] < target) {
+        prev++;
+        if (prev == Math.min(step, n)) return -1;
+    }
+    if (arr[prev] == target) return prev;
     return -1;
 }`,
-            python: `def binary_search(arr, target):
-    left, right = 0, len(arr) - 1
-    
-    while left <= right:
-        mid = left + (right - left) // 2
-        
-        if arr[mid] == target:
-            return mid
-            
-        if arr[mid] < target:
-            left = mid + 1
-        else:
-            right = mid - 1
-            
+            python: `import math
+def jump_search(arr, target):
+    n = len(arr)
+    step = int(math.floor(math.sqrt(n)))
+    prev = 0
+    while arr[min(step, n) - 1] < target:
+        prev = step
+        step += int(math.floor(math.sqrt(n)))
+        if prev >= n:
+            return -1
+    while arr[prev] < target:
+        prev += 1
+        if prev == min(step, n):
+            return -1
+    if arr[prev] == target:
+        return prev
     return -1`
         };
 
@@ -1130,40 +1135,61 @@
         // Algo compilation
         function buildSteps() {
             const arr = state.array; const trg = state.target;
-            let steps = []; let L = 0; let R = arr.length - 1; let ops = 0;
+            let steps = []; let ops = 0;
+            const n = arr.length;
+            if (n === 0) return;
 
-            steps.push({ L, R, M: null, line: { go: 2, java: 2, python: 2 }, log: `Initialize: L=0, R=${R}`, logT: 'info', ops });
+            const m = Math.floor(Math.sqrt(n));
+            let prev = 0;
+            let step = m;
 
-            while (L <= R) {
+            steps.push({ L: prev, R: Math.min(step, n) - 1, M: null, line: { go: 5, java: 4, python: 5 }, log: `Initialize: prev=0, block step=${step}`, logT: 'info', ops });
+
+            while (prev < n && arr[Math.min(step, n) - 1] < trg) {
                 ops++;
-                steps.push({ L, R, M: null, line: { go: 3, java: 5, python: 4 }, log: `Evaluating bounds: L(${L}) <= R(${R}) -> True`, logT: 'eval', ops });
+                let checkIdx = Math.min(step, n) - 1;
+                steps.push({ L: prev, R: checkIdx, M: checkIdx, line: { go: 6, java: 5, python: 6 }, log: `Checking block end arr[${checkIdx}]=${arr[checkIdx]} < ${trg}. Target might be ahead.`, logT: 'eval', ops });
 
-                let M = Math.floor((L + R) / 2);
+                prev = step;
+                step += m;
                 ops++;
-                steps.push({ L, R, M, line: { go: 4, java: 6, python: 5 }, log: `Compute Mid: floor((${L}+${R})/2) = ${M}. Value: arr[${M}]=${arr[M]}`, logT: 'info', ops });
 
-                ops++;
-                steps.push({ L, R, M, line: { go: 6, java: 8, python: 7 }, log: `Evaluating match: arr[M] == target -> ${arr[M]} == ${trg}?`, logT: 'eval', ops });
+                steps.push({ L: prev, R: Math.min(step, n) - 1, M: null, line: { go: 8, java: 7, python: 8 }, log: `Jump interval shifted. New prev=${prev}, step=${step}`, logT: 'warn', ops });
 
-                if (arr[M] === trg) {
-                    steps.push({ L, R, M, line: { go: 7, java: 9, python: 8 }, log: `Match found at index ${M}!`, logT: 'success', ops, found: true });
+                if (prev >= n) {
+                    steps.push({ L: null, R: null, M: null, line: { go: 10, java: 8, python: 10 }, log: `prev ${prev} >= array size ${n}. Out of bounds. Return -1`, logT: 'error', ops, notFound: true });
                     state.steps = steps; return;
-                }
-
-                ops++;
-                steps.push({ L, R, M, line: { go: 10, java: 12, python: 10 }, log: `Evaluating partition: arr[M] < target -> ${arr[M]} < ${trg}?`, logT: 'eval', ops });
-
-                if (arr[M] < trg) {
-                    L = M + 1;
-                    steps.push({ L, R, M, line: { go: 11, java: 13, python: 11 }, log: `Target is greater. Narrowing to right half. L = ${L}`, logT: 'warn', ops });
-                } else {
-                    R = M - 1;
-                    steps.push({ L, R, M, line: { go: 13, java: 15, python: 13 }, log: `Target is smaller. Narrowing to left half. R = ${R}`, logT: 'warn', ops });
                 }
             }
 
-            steps.push({ L, R, M: null, line: { go: 3, java: 5, python: 4 }, log: `Evaluating bounds: L(${L}) <= R(${R}) -> False. Branch exit.`, logT: 'error', ops });
-            steps.push({ L: null, R: null, M: null, line: { go: 16, java: 19, python: 16 }, log: `Target ${trg} not found. Return -1`, logT: 'error', ops, notFound: true });
+            if (prev < n) {
+                ops++;
+                let checkIdx = Math.min(step, n) - 1;
+                steps.push({ L: prev, R: checkIdx, M: checkIdx, line: { go: 6, java: 5, python: 6 }, log: `Checking block end arr[${checkIdx}]=${arr[checkIdx]} >= ${trg}. Target might be in this block.`, logT: 'success', ops });
+            }
+
+            let curr = prev;
+            while (curr < Math.min(step, n) && curr < n) {
+                ops++;
+                steps.push({ L: prev, R: Math.min(step, n) - 1, M: curr, line: { go: 13, java: 10, python: 11 }, log: `Linear search evaluating arr[${curr}]=${arr[curr]} < ${trg}?`, logT: 'eval', ops });
+
+                if (arr[curr] >= trg) {
+                    steps.push({ L: prev, R: Math.min(step, n) - 1, M: curr, line: { go: 13, java: 10, python: 11 }, log: `arr[${curr}] >= ${trg}, halting linear progression.`, logT: 'info', ops });
+                    break;
+                }
+                curr++;
+                ops++;
+                steps.push({ L: prev, R: Math.min(step, n) - 1, M: curr < n ? curr : curr - 1, line: { go: 14, java: 11, python: 12 }, log: `Incrementing index to ${curr}`, logT: 'warn', ops });
+            }
+
+            ops++;
+            steps.push({ L: prev, R: Math.min(step, n) - 1, M: curr < n ? curr : curr - 1, line: { go: 19, java: 14, python: 15 }, log: `Check if arr[${curr}] == ${trg}...`, logT: 'eval', ops });
+
+            if (curr < n && arr[curr] === trg) {
+                steps.push({ L: prev, R: Math.min(step, n) - 1, M: curr, line: { go: 20, java: 14, python: 16 }, log: `Match found at index ${curr}!`, logT: 'success', ops, found: true });
+            } else {
+                steps.push({ L: null, R: null, M: null, line: { go: 22, java: 15, python: 17 }, log: `Target ${trg} not found. Return -1`, logT: 'error', ops, notFound: true });
+            }
             state.steps = steps;
         }
 
@@ -1197,7 +1223,7 @@
                 attachTooltip(box, () => `Index: ${i}<br>Value: <span class="text-blue">${val}</span>`);
             });
 
-            const maxOps = Math.ceil(Math.log2(state.array.length || 1)) * 3; // Approx 3 ops per iter
+            const maxOps = Math.ceil(Math.sqrt(state.array.length || 1)) * 3;
             DOM.statN.textContent = state.array.length;
             DOM.statMax.textContent = maxOps;
 
