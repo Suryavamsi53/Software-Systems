@@ -1,4 +1,4 @@
-# 🌑 Software Systems SDE Coding Interview Patterns
+# Data Structures and Algorithms Visualizer
 
 **Your Daily Revision Hub for Company SDE-1 / SDE-2 Coding Interviews**
 
@@ -394,7 +394,7 @@ This guide fills that gap. 🚀
 
 ---
 
-**Built with 💚 for Company SDE candidates**
+**DSA**
 
 *Last Updated: January 25, 2026*
 *Study Mode: Daily Revision + Deep Dives*
