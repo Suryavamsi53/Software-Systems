@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMP String Search Visualizer</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-blue {
+            color: var(--neon-blue);
+        }
+
+        .text-green {
+            color: var(--neon-green);
+        }
+
+        .text-red {
+            color: var(--neon-red);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i {
+            color: var(--neon-cyan);
+        }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col {
+            overflow-y: hidden;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(46, 160, 67, 0.1);
+            border-color: rgba(46, 160, 67, 0.4);
+            color: var(--neon-green);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: rgba(46, 160, 67, 0.2);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(46, 160, 67, 0.3);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--neon-cyan);
+        }
+
+        /* Visualization Area */
+        .viz-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1rem;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4rem;
+            position: relative;
+            max-width: 100%;
+            z-index: 10;
+        }
+
+        .range-highlight {
+            position: absolute;
+            bottom: 3.5rem;
+            height: 70px;
+            background: linear-gradient(180deg, rgba(88, 166, 255, 0) 0%, rgba(88, 166, 255, 0.1) 50%, rgba(88, 166, 255, 0) 100%);
+            border-left: 2px solid var(--neon-cyan);
+            border-right: 2px solid var(--neon-cyan);
+            border-top: 1px dashed rgba(88, 166, 255, 0.4);
+            border-bottom: 1px dashed rgba(88, 166, 255, 0.4);
+            border-radius: 8px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .array-element-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s;
+        }
+
+        .array-index {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .array-block {
+            width: 48px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .array-block:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-muted);
+        }
+
+        .array-block.active-element {
+            background: rgba(88, 166, 255, 0.05);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: white;
+        }
+
+        .array-block.eliminated {
+            background: #0d1117;
+            border-color: #21262d;
+            color: #484f58;
+            opacity: 0.4;
+            transform: scale(0.9);
+        }
+
+        .array-block.mid {
+            background: rgba(188, 140, 255, 0.15);
+            border-color: var(--neon-purple);
+            color: white;
+            box-shadow: 0 0 20px rgba(188, 140, 255, 0.3);
+            transform: translateY(-8px) scale(1.05);
+            z-index: 10;
+        }
+
+        .array-block.found {
+            background: rgba(46, 160, 67, 0.15);
+            border-color: var(--neon-green);
+            color: white;
+            box-shadow: 0 0 25px rgba(46, 160, 67, 0.4);
+            transform: translateY(-8px) scale(1.1);
+            z-index: 20;
+        }
+
+        /* Animated Pointers */
+        .pointers-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .pointer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+
+        .pointer-arrow {
+            font-size: 1.2rem;
+            line-height: 1;
+            animation: bounce 1.5s infinite;
+        }
+
+        .pointer-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-main);
+            border: 1px solid currentColor;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .pointer-l {
+            color: var(--neon-cyan);
+        }
+
+        .pointer-r {
+            color: var(--neon-red);
+        }
+
+        .pointer-m {
+            color: var(--neon-purple);
+            z-index: 21;
+        }
+
+        .pointer-m .pointer-arrow {
+            animation: bounce-mid 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes bounce-mid {
+            0% {
+                transform: translateY(-2px) scale(1.1);
+            }
+
+            100% {
+                transform: translateY(-6px) scale(1.1);
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: white;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--neon-blue) transparent transparent transparent;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Terminal Style Log */
+        .terminal-container {
+            flex: 1;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 250px;
+            max-height: 350px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 6px;
+            margin-right: 12px;
+        }
+
+        .mac-btns span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mac-btns span:nth-child(1) {
+            background: #ff5f56;
+        }
+
+        .mac-btns span:nth-child(2) {
+            background: #ffbd2e;
+        }
+
+        .mac-btns span:nth-child(3) {
+            background: #27c93f;
+        }
+
+        .terminal-logs {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: #e6edf3;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 0.5rem;
+            line-height: 1.4;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .log-line:last-child {
+            opacity: 1;
+        }
+
+        .log-time {
+            color: #8b949e;
+            user-select: none;
+        }
+
+        .log-type-sys {
+            color: #8b949e;
+        }
+
+        .log-type-info {
+            color: #79c0ff;
+        }
+
+        .log-type-eval {
+            color: #d2a8ff;
+        }
+
+        .log-type-warn {
+            color: #ffa657;
+        }
+
+        .log-type-success {
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .log-type-error {
+            color: #f85149;
+            font-weight: bold;
+        }
+
+        .log-msg {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+            background: var(--text-main);
+            width: 8px;
+            height: 14px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Monaco Code Container */
+        .code-panel-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            min-height: 350px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .code-tab {
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .code-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .code-tab.active {
+            color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        #monaco-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Dashboard Metrcis */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+        }
+
+        .metric-card.m-time::before {
+            background: var(--neon-cyan);
+        }
+
+        .metric-card.m-space::before {
+            background: var(--neon-green);
+        }
+
+        .metric-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            margin: 0.25rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .stat-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.85rem;
+        }
+
+        .stat-flex:last-child {
+            border-bottom: none;
+        }
+
+        .monaco-line-highlight {
+            background-color: rgba(88, 166, 255, 0.2) !important;
+            border-left: 3px solid #58a6ff;
+        }
+
+        .string-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .row-label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            text-align: right;
+            padding-right: 1rem;
+        }
+
+        .char-block {
+            width: 40px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .char-block.match {
+            background: rgba(46, 160, 67, 0.15);
+            border-color: var(--neon-green);
+            color: white;
+            box-shadow: 0 0 15px rgba(46, 160, 67, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .char-block.mismatch {
+            background: rgba(248, 81, 73, 0.15);
+            border-color: var(--neon-red);
+            color: white;
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .char-block.active {
+            background: rgba(88, 166, 255, 0.35) !important;
+            border: 2px solid var(--neon-cyan) !important;
+            color: white;
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.6) !important;
+            transform: translateY(-4px);
+            z-index: 15;
+        }
+
+        .lps-block {
+            width: 40px;
+            height: 36px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            background: #0d1117;
+            border: 1px dashed #30363d;
+            color: var(--text-muted);
+        }
+
+
+        @keyframes pulse-match {
+            0% {
+                box-shadow: 0 0 0 0 rgba(46, 160, 67, 0.7);
+                transform: scale(1);
+            }
+
+            50% {
+                box-shadow: 0 0 20px 10px rgba(46, 160, 67, 0);
+                transform: scale(1.1);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(46, 160, 67, 0);
+                transform: scale(1);
+            }
+        }
+
+        @keyframes shake-mismatch {
+            0% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+
+            50% {
+                transform: translateX(5px) rotate(5deg);
+            }
+
+            75% {
+                transform: translateX(-5px) rotate(-5deg);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        .match {
+            animation: pulse-match 0.4s ease-out;
+            background: rgba(46, 160, 67, 0.3) !important;
+            border-color: var(--neon-green) !important;
+            font-weight: bold;
+            color: white;
+            z-index: 10;
+        }
+
+        .mismatch {
+            animation: shake-mismatch 0.4s ease-in-out;
+            background: rgba(248, 81, 73, 0.3) !important;
+            border-color: var(--neon-red) !important;
+            color: white;
+            z-index: 10;
+        }
+
+        #jump-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 50;
+        }
+
+        .jump-path {
+            stroke: var(--neon-purple);
+            stroke-width: 3;
+            fill: transparent;
+            stroke-dasharray: 8 4;
+            animation: dash 1s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -24;
+            }
+        }
+
+        .viz-container {
+            position: relative;
+        }
+
+        .array-container {
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* Zoom & Pan Controls */
+        .zoom-controls {
+            display: flex;
+            gap: 8px;
+            background: rgba(13, 17, 23, 0.8);
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 4px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 100;
+            backdrop-filter: blur(4px);
+        }
+
+        .zoom-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .zoom-btn:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .zoom-value {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-main);
+            width: 45px;
+            user-select: none;
+        }
+
+        .viz-viewport {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            flex: 1;
+            cursor: grab;
+        }
+
+        .viz-viewport:active {
+            cursor: grabbing;
+        }
+
+        .viz-canvas {
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+            min-width: 100%;
+            min-height: 100%;
+            padding: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="skip-forward"></i> KMP Search </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance
+                Analytics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i>
+                Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL: Controls & Logs -->
+        <div class="column">
+            <section class="panel">
+
+                <div class="panel-header"><i data-lucide="cpu"></i> Pattern Engine</div>
+                <div class="control-group">
+                    <label>Main Text (N):</label>
+                    <input type="text" id="main-text" class="form-input" value="ABABDEABACDABABCABAB">
+                </div>
+                <div class="control-group">
+                    <label>Search Pattern (M):</label>
+                    <input type="text" id="search-pattern" class="form-input" value="ABABCABAB">
+                </div>
+                <div class="grid-2" style="margin-bottom: 0.5rem;">
+                    <button class="btn" id="btn-ex-dna"><i data-lucide="dna"></i> DNA Sequence</button>
+                    <button class="btn" id="btn-ex-rep"><i data-lucide="repeat"></i> Repetitive Prefix</button>
+                </div>
+                <div class="grid-2" style="margin-bottom: 1rem;">
+                    <button class="btn" id="btn-ex-word"><i data-lucide="whole-word"></i> Word Match</button>
+                    <button class="btn" id="btn-ex-worst"><i data-lucide="alert-triangle"></i> Worst Case</button>
+                </div>
+                <button class="btn btn-primary" id="btn-initSearch" style="width: 100%;"><i data-lucide="power"></i>
+                    Initialize Engine</button>
+
+            </section>
+
+            <section class="panel"
+                style="flex: 1; padding: 0; background: transparent; border: none; box-shadow: none; min-height: 0;">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="mac-btns"><span></span><span></span><span></span></div>
+                        <span>bash - search_tracer.sh</span>
+                    </div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span
+                                class="log-type-sys">[SYS]</span><span class="log-msg">Tracing engine ready.</span>
+                        </div>
+                        <div id="cursor" class="cursor-blink"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CENTER PANEL: Visualization -->
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled title="Step Back"><i
+                                data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-success" id="btn-play" disabled style="min-width: 90px;"><i
+                                data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled title="Step Forward"><i
+                                data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset" disabled title="Reset"><i
+                                data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+                <div class="control-group" style="margin: 0.5rem 0 1rem 0;">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>Animation Speed Multiplier</span>
+                        <span id="speed-val" class="text-mono">1.0x</span>
+                    </label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+
+                <div class="viz-viewport" id="viz-viewport">
+                    <div class="zoom-controls">
+                        <button class="zoom-btn" id="btn-zoom-out" title="Zoom Out"><i data-lucide="zoom-out"
+                                style="width:16px;height:16px;"></i></button>
+                        <div class="zoom-value" id="zoom-val">100%</div>
+                        <button class="zoom-btn" id="btn-zoom-in" title="Zoom In"><i data-lucide="zoom-in"
+                                style="width:16px;height:16px;"></i></button>
+                        <button class="zoom-btn" id="btn-zoom-reset" title="Reset View"><i data-lucide="maximize"
+                                style="width:16px;height:16px;"></i></button>
+                    </div>
+                    <div class="viz-canvas" id="viz-canvas">
+                        <div class="viz-container" id="viz-container"
+                            style="justify-content: flex-start; padding-top: 3rem;">
+                            <svg id="jump-svg"></svg>
+                            <div class="string-row">
+                                <div class="row-label">TEXT[i]</div>
+                                <div class="array-container" id="text-container"
+                                    style="padding-bottom:1rem; padding-top: 2rem;"></div>
+                            </div>
+                            <div class="string-row">
+                                <div class="row-label">PATTERN[j]</div>
+                                <div class="array-container" id="pattern-container" style="padding-bottom:1rem;"></div>
+                            </div>
+                            <div class="string-row">
+                                <div class="row-label">LPS Array</div>
+                                <div class="array-container" id="lps-container" style="padding-bottom:1rem;"></div>
+                            </div>
+                            <div class="pointers-container">
+                                <div class="pointer pointer-l" id="ptr-i">
+                                    <i data-lucide="arrow-down" class="pointer-arrow"></i><span class="pointer-label"
+                                        style="margin-top:-30px;">i</span>
+                                </div>
+                                <div class="pointer pointer-m" id="ptr-j">
+                                    <i data-lucide="arrow-up" class="pointer-arrow"></i><span
+                                        class="pointer-label">j</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+                            <span style="display:flex; align-items:center; gap:6px;">
+                                <div
+                                    style="width:12px;height:12px;background:rgba(46,160,67,0.15);border:1px solid var(--neon-green);border-radius:2px;">
+                                </div> Match
+                            </span>
+                            <span style="display:flex; align-items:center; gap:6px;">
+                                <div
+                                    style="width:12px;height:12px;background:rgba(248,81,73,0.15);border:1px solid var(--neon-red);border-radius:2px;">
+                                </div> Mismatch
+                            </span>
+                            <span style="display:flex; align-items:center; gap:6px;">
+                                <div
+                                    style="width:12px;height:12px;background:rgba(88,166,255,0.15);border:1px solid var(--neon-cyan);border-radius:2px;">
+                                </div> Comparing
+                            </span>
+                        </div>
+            </section>
+        </div>
+
+        <!-- RIGHT PANEL: Dashboard & Code -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Time Complexity</div>
+                        <div class="metric-val text-blue">O(N + M)</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Space Complexity</div>
+                        <div class="metric-val text-green">O(1)</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex">
+                        <span>Items (N):</span>
+                        <span id="stat-n" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Theor. Max Comparisons:</span>
+                        <span id="stat-max" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Operations Progress:</span>
+                        <span id="stat-comp" class="text-mono text-cyan">0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ops-progress"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="go">main.go</button>
+                        <button class="code-tab" data-lang="java">Search.java</button>
+                        <button class="code-tab" data-lang="python">search.py</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Floating Global Tooltip -->
+    <div class="tooltip" id="global-tooltip"></div>
+
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Template Code
+        const CODES = {
+            go: `func computeLPS(pat string) []int {
+    m := len(pat)
+    lps := make([]int, m)
+    len := 0
+    i := 1
+    for i < m {
+        if pat[i] == pat[len] {
+            len++
+            lps[i] = len
+            i++
+        } else {
+            if len != 0 {
+                len = lps[len-1]
+            } else {
+                lps[i] = 0
+                i++
+            }
+        }
+    }
+    return lps
+}
+
+func KMPSearch(text string, pat string) int {
+    n := len(text)
+    m := len(pat)
+    lps := computeLPS(pat)
+    i := 0
+    j := 0
+    for i < n {
+        if pat[j] == text[i] {
+            j++
+            i++
+        }
+        if j == m {
+            return i - j
+        } else if i < n && pat[j] != text[i] {
+            if j != 0 {
+                j = lps[j-1]
+            } else {
+                i++
+            }
+        }
+    }
+    return -1
+}`,
+            java: `public int[] computeLPS(String pat) {
+    int m = pat.length();
+    int[] lps = new int[m];
+    int len = 0;
+    int i = 1;
+    while (i < m) {
+        if (pat.charAt(i) == pat.charAt(len)) {
+            len++;
+            lps[i] = len;
+            i++;
+        } else {
+            if (len != 0) {
+                len = lps[len - 1];
+            } else {
+                lps[i] = 0;
+                i++;
+            }
+        }
+    }
+    return lps;
+}
+
+public int KMPSearch(String text, String pat) {
+    int n = text.length();
+    int m = pat.length();
+    int[] lps = computeLPS(pat);
+    int i = 0, j = 0;
+    while (i < n) {
+        if (pat.charAt(j) == text.charAt(i)) {
+            j++;
+            i++;
+        }
+        if (j == m) {
+            return i - j;
+        } else if (i < n && pat.charAt(j) != text.charAt(i)) {
+            if (j != 0) {
+                j = lps[j - 1];
+            } else {
+                i++;
+            }
+        }
+    }
+    return -1;
+}`,
+            python: `def compute_lps(pat):
+    m = len(pat)
+    lps = [0] * m
+    length = 0
+    i = 1
+    while i < m:
+        if pat[i] == pat[length]:
+            length += 1
+            lps[i] = length
+            i += 1
+        else:
+            if length != 0:
+                length = lps[length - 1]
+            else:
+                lps[i] = 0
+                i += 1
+    return lps
+
+def kmp_search(text, pat):
+    n = len(text)
+    m = len(pat)
+    lps = compute_lps(pat)
+    i = 0
+    j = 0
+    while i < n:
+        if pat[j] == text[i]:
+            j += 1
+            i += 1
+        if j == m:
+            return i - j
+        elif i < n and pat[j] != text[i]:
+            if j != 0:
+                j = lps[j - 1]
+            else:
+                i += 1
+    return -1`
+        };
+
+
+        const DOM = {
+            mainText: document.getElementById('main-text'),
+            searchPattern: document.getElementById('search-pattern'),
+            btnExDna: document.getElementById('btn-ex-dna'),
+            btnExRep: document.getElementById('btn-ex-rep'),
+            btnExWord: document.getElementById('btn-ex-word'),
+            btnExWorst: document.getElementById('btn-ex-worst'),
+            btnInit: document.getElementById('btn-initSearch'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            textContainer: document.getElementById('text-container'),
+            patternContainer: document.getElementById('pattern-container'),
+            lpsContainer: document.getElementById('lps-container'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            statN: document.getElementById('stat-n'),
+            statMax: document.getElementById('stat-max'),
+            statComp: document.getElementById('stat-comp'),
+            opsProgress: document.getElementById('ops-progress'),
+            ptrI: document.getElementById('ptr-i'),
+            ptrJ: document.getElementById('ptr-j'),
+            vizContainer: document.querySelector('.viz-container'),
+            jumpSvg: document.getElementById('jump-svg'),
+            viewport: document.getElementById('viz-viewport'),
+            canvas: document.getElementById('viz-canvas'),
+            realVizContainer: document.getElementById('viz-container'),
+            btnZoomIn: document.getElementById('btn-zoom-in'),
+            btnZoomOut: document.getElementById('btn-zoom-out'),
+            btnZoomReset: document.getElementById('btn-zoom-reset'),
+            zoomValText: document.getElementById('zoom-val'),
+            tooltip: document.getElementById('global-tooltip')
+        };
+
+        let state = {
+            text: "",
+            pattern: "",
+            lps: [],
+            steps: [],
+            currentStepIndex: -1,
+            isPlaying: false,
+            playInterval: null,
+            baseDelay: 1200,
+            activeLang: 'go',
+            domText: [],
+            domPat: [],
+            domLps: [],
+            editorDecorations: [],
+            zoom: 1.0,
+            panX: 0,
+            panY: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0
+        };
+
+        // Monaco Init
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES[state.activeLang],
+                language: 'go',
+                theme: 'vs-dark',
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: "'Fira Code', monospace",
+                lineHeight: 22,
+                renderLineHighlight: 'none',
+                scrollbar: { vertical: 'visible', horizontal: 'hidden' },
+                contextmenu: false
+            });
+            initApp();
+        });
+
+        const langMap = { go: 'go', java: 'java', python: 'python' };
+
+        function initApp() {
+            setupListeners();
+            setupZoomPan();
+            parseInit();
+        }
+
+
+
+        function setupZoomPan() {
+            const minZoom = 0.3;
+            const maxZoom = 2.5;
+
+            function updateTransform() {
+                DOM.canvas.style.transform = `translate(${state.panX}px, ${state.panY}px) scale(${state.zoom})`;
+                DOM.zoomValText.textContent = `${Math.round(state.zoom * 100)}%`;
+            }
+
+            DOM.btnZoomIn.addEventListener('click', () => {
+                state.zoom = Math.min(state.zoom + 0.1, maxZoom);
+                updateTransform();
+            });
+
+            DOM.btnZoomOut.addEventListener('click', () => {
+                state.zoom = Math.max(state.zoom - 0.1, minZoom);
+                updateTransform();
+            });
+
+            DOM.btnZoomReset.addEventListener('click', () => {
+                state.zoom = 1.0;
+                state.panX = 0;
+                state.panY = 0;
+                updateTransform();
+            });
+
+            DOM.viewport.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.ctrlKey || e.metaKey) {
+                    // Zoom
+                    const zoomDelta = e.deltaY > 0 ? -0.1 : 0.1;
+
+                    // Get mouse position relative to viewport
+                    const rect = DOM.viewport.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    // Calculate old zoom and new zoom
+                    const oldZoom = state.zoom;
+                    state.zoom = Math.max(minZoom, Math.min(maxZoom, state.zoom + zoomDelta));
+
+                    // Adjust pan to zoom towards mouse cursor
+                    if (oldZoom !== state.zoom) {
+                        const zoomRatio = state.zoom / oldZoom;
+                        state.panX = mouseX - (mouseX - state.panX) * zoomRatio;
+                        state.panY = mouseY - (mouseY - state.panY) * zoomRatio;
+                        updateTransform();
+                    }
+                } else {
+                    // Pan
+                    state.panX -= e.deltaX;
+                    state.panY -= e.deltaY;
+                    updateTransform();
+                }
+            }, { passive: false });
+
+            // Mouse panning
+            DOM.viewport.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.zoom-controls')) return;
+                state.isDragging = true;
+                state.startX = e.clientX - state.panX;
+                state.startY = e.clientY - state.panY;
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!state.isDragging) return;
+                state.panX = e.clientX - state.startX;
+                state.panY = e.clientY - state.startY;
+                updateTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                state.isDragging = false;
+            });
+
+            // Initial reset to fit content roughly if needed, but 1.0 is fine
+            updateTransform();
+        }
+
+        function setupListeners() {
+            DOM.btnExDna.addEventListener('click', () => { DOM.mainText.value = "GCATCGCAGAGAGTATACAGTACG"; DOM.searchPattern.value = "GCAGAGAG"; parseInit(); });
+            DOM.btnExRep.addEventListener('click', () => { DOM.mainText.value = "AABAACAADAABAABA"; DOM.searchPattern.value = "AABA"; parseInit(); });
+            DOM.btnExWord.addEventListener('click', () => { DOM.mainText.value = "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG"; DOM.searchPattern.value = "FOX"; parseInit(); });
+            DOM.btnExWorst.addEventListener('click', () => { DOM.mainText.value = "AAAAAAAAAAAAAAAAAB"; DOM.searchPattern.value = "AAAAAB"; parseInit(); });
+            DOM.btnInit.addEventListener('click', parseInit);
+
+
+            DOM.animSpeed.addEventListener('input', e => {
+                DOM.speedVal.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+                if (state.isPlaying) { pauseAnim(); playAnim(); }
+            });
+
+            DOM.btnPlay.addEventListener('click', () => state.isPlaying ? pauseAnim() : playAnim());
+            DOM.btnNext.addEventListener('click', stepNext);
+            DOM.btnPrev.addEventListener('click', stepPrev);
+            DOM.btnReset.addEventListener('click', resetViz);
+
+            DOM.codeTabs.forEach(tab => {
+                tab.addEventListener('click', e => {
+                    DOM.codeTabs.forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    state.activeLang = e.target.dataset.lang;
+                    window.monacoEditor.setValue(CODES[state.activeLang]);
+                    monaco.editor.setModelLanguage(window.monacoEditor.getModel(), langMap[state.activeLang]);
+                    highlightCode(state.currentStepIndex >= 0 ? state.steps[state.currentStepIndex].line : null);
+                });
+            });
+        }
+
+        function getTimestamp() {
+            const d = new Date();
+            return `[${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}]`;
+        }
+
+        function termLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            let tClass = 'log-type-info'; let tag = '[INF]';
+            if (type === 'sys') { tClass = 'log-type-sys'; tag = '[SYS]'; }
+            else if (type === 'eval') { tClass = 'log-type-eval'; tag = '[EVL]'; }
+            else if (type === 'warn') { tClass = 'log-type-warn'; tag = '[WRN]'; }
+            else if (type === 'success') { tClass = 'log-type-success'; tag = '[OK ]'; }
+            else if (type === 'error') { tClass = 'log-type-error'; tag = '[ERR]'; }
+
+            div.innerHTML = `<span class="log-time">${getTimestamp()}</span><span class="${tClass}">${tag}</span><span class="log-msg">${msg}</span>`;
+            DOM.logsContainer.insertBefore(div, DOM.cursorLog);
+            DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        function parseInit() {
+            state.text = DOM.mainText.value.toUpperCase() || "A";
+            state.pattern = DOM.searchPattern.value.toUpperCase() || "A";
+            buildSteps();
+            resetViz();
+            renderArray();
+            DOM.btnPlay.disabled = false; DOM.btnNext.disabled = false; DOM.btnReset.disabled = false;
+            termLog(`Loaded text length ${state.text.length}, pattern length ${state.pattern.length}.`, 'sys');
+            stepNext();
+        }
+
+        function buildSteps() {
+            const txt = state.text; const pat = state.pattern;
+            let steps = []; let ops = 0;
+            const n = txt.length; const m = pat.length;
+
+            steps.push({ lpsSt: [], i: null, j: null, patOffset: 0, line: { go: 2, java: 2, python: 2 }, log: `Begin building LPS Array for pattern "${pat}"`, logT: 'info', ops });
+
+            let lps = new Array(m).fill(0);
+            let length = 0;
+            let ptr = 1;
+
+            steps.push({ lpsSt: [...lps], lpsPtr: ptr, lpsLen: length, i: null, j: null, patOffset: 0, line: { go: 6, java: 6, python: 6 }, log: `LPS[0] = 0. Start comparing at index 1.`, logT: 'info', ops });
+
+            // LPS Generation Phase
+            while (ptr < m) {
+                ops++;
+                steps.push({ lpsSt: [...lps], lpsPtr: ptr, lpsLen: length, i: null, j: null, patOffset: 0, line: { go: 8, java: 7, python: 7 }, log: `LPS loop: checking pat[${ptr}] == pat[${length}] (${pat[ptr]} == ${pat[length]}?)`, logT: 'eval', ops });
+
+                if (pat[ptr] === pat[length]) {
+                    length++;
+                    lps[ptr] = length;
+                    steps.push({ lpsSt: [...lps], lpsPtr: ptr, lpsLen: Math.max(0, length - 1), i: null, j: null, patOffset: 0, line: { go: 10, java: 10, python: 10 }, log: `Match! lps[${ptr}] = ${length}.`, logT: 'success', ops });
+                    ptr++;
+                } else {
+                    if (length !== 0) {
+                        length = lps[length - 1];
+                        steps.push({ lpsSt: [...lps], lpsPtr: ptr, lpsLen: length, i: null, j: null, patOffset: 0, line: { go: 14, java: 14, python: 13 }, log: `Mismatch. Fallback to length = lps[${length}]`, logT: 'warn', ops });
+                    } else {
+                        lps[ptr] = 0;
+                        steps.push({ lpsSt: [...lps], lpsPtr: ptr, lpsLen: length, i: null, j: null, patOffset: 0, line: { go: 16, java: 16, python: 15 }, log: `Mismatch and length is 0. lps[${ptr}] = 0`, logT: 'warn', ops });
+                        ptr++;
+                    }
+                }
+            }
+
+            state.lps = lps;
+            steps.push({ lpsSt: [...lps], lpsPtr: null, lpsLen: null, i: null, j: null, patOffset: 0, line: { go: 20, java: 20, python: 17 }, log: `LPS Array computation complete.`, logT: 'sys', ops });
+
+            // Search Phase
+            let i = 0; let j = 0;
+            let offset = 0;
+            steps.push({ lpsSt: [...lps], i: 0, j: 0, patOffset: offset, line: { go: 24, java: 23, python: 20 }, log: `Starting KMP Search Phase`, logT: 'info', ops });
+
+            while (i < n) {
+                ops++;
+                steps.push({ lpsSt: [...lps], i: i, j: j, patOffset: offset, check: true, line: { go: 31, java: 30, python: 27 }, log: `Comparing Text[${i}] (${txt[i]}) with Pat[${j}] (${pat[j]})`, logT: 'eval', ops });
+
+                if (pat[j] === txt[i]) {
+                    steps.push({ lpsSt: [...lps], i: i, j: j, patOffset: offset, match: true, line: { go: 33, java: 32, python: 29 }, log: `Match! Incrementing i and j.`, logT: 'success', ops });
+                    j++; i++;
+                }
+
+                if (j === m) {
+                    steps.push({ lpsSt: [...lps], i: i - 1, j: j - 1, patOffset: offset, found: i - j, line: { go: 36, java: 34, python: 31 }, log: `M pattern characters matched! Found occurrence at index ${i - j}.`, logT: 'success', ops });
+                    break;
+                } else if (i < n && pat[j] !== txt[i]) {
+                    steps.push({ lpsSt: [...lps], i: i, j: j, patOffset: offset, mismatch: true, line: { go: 37, java: 36, python: 32 }, log: `Mismatch at Text[${i}] and Pat[${j}]`, logT: 'error', ops });
+                    if (j !== 0) {
+                        let oldJ = j;
+                        j = lps[j - 1];
+                        offset = i - j;
+                        steps.push({ lpsSt: [...lps], i: i, j: j, patOffset: offset, shift: true, shiftFrom: oldJ, shiftTo: j, line: { go: 39, java: 38, python: 34 }, log: `Shift Pattern leveraging LPS table (lps[${oldJ - 1}] = ${j}).`, logT: 'warn', ops });
+                    } else {
+                        i++;
+                        offset = i;
+                        steps.push({ lpsSt: [...lps], i: i, j: j, patOffset: offset, line: { go: 41, java: 40, python: 36 }, log: `j == 0, shifting text pointer i to ${i}`, logT: 'warn', ops });
+                    }
+                }
+            }
+
+            let finalLog = (j === m) ? `Pattern found! Search terminated.` : `End of text reached. Pattern not found.`;
+            let fI = (j === m) ? i - 1 : null;
+            let fJ = (j === m) ? j - 1 : null;
+            steps.push({ lpsSt: [...lps], i: fI, j: fJ, patOffset: offset, found: (j === m) ? i - j : undefined, line: { go: 45, java: 45, python: 37 }, log: finalLog, logT: 'sys', ops });
+            state.steps = steps;
+        }
+
+        // ... Tooltip logic
+        function attachTooltip(el, textProvider) {
+            el.addEventListener('mouseenter', () => {
+                const txt = textProvider();
+                if (!txt) return;
+                DOM.tooltip.innerHTML = txt;
+                const rect = el.getBoundingClientRect();
+                DOM.tooltip.style.left = rect.left + (rect.width / 2) + 'px';
+                DOM.tooltip.style.top = rect.top - 5 + 'px';
+                DOM.tooltip.classList.add('show');
+            });
+            el.addEventListener('mouseleave', () => DOM.tooltip.classList.remove('show'));
+        }
+
+        function createEl(tag, className, textContent) {
+            const el = document.createElement(tag);
+            if (className) el.className = className;
+            if (textContent !== undefined) el.textContent = textContent;
+            return el;
+        }
+
+        function renderArray() {
+            DOM.textContainer.innerHTML = '';
+            DOM.patternContainer.innerHTML = '';
+            DOM.lpsContainer.innerHTML = '';
+            state.domText = [];
+            state.domPat = [];
+            state.domLps = [];
+
+            // Render Text
+            for (let i = 0; i < state.text.length; i++) {
+                const wrap = createEl('div', 'array-element-wrapper'); wrap.style.marginRight = "2px";
+                const box = createEl('div', 'char-block', state.text[i]);
+                const idx = createEl('div', 'array-index', i);
+                wrap.appendChild(box); wrap.appendChild(idx);
+                DOM.textContainer.appendChild(wrap);
+                state.domText.push({ wrap, box, val: state.text[i] });
+                attachTooltip(box, () => `Index: ${i}<br>Char: <span class="text-blue">${state.text[i]}</span>`);
+            }
+
+            // Render Pattern
+            for (let j = 0; j < state.pattern.length; j++) {
+                const wrap = createEl('div', 'array-element-wrapper'); wrap.style.marginRight = "2px";
+                const box = createEl('div', 'char-block', state.pattern[j]);
+                const idx = createEl('div', 'array-index', j);
+                wrap.appendChild(box); wrap.appendChild(idx);
+                DOM.patternContainer.appendChild(wrap);
+                state.domPat.push({ wrap, box, val: state.pattern[j] });
+            }
+
+            // Render LPS
+            for (let j = 0; j < state.pattern.length; j++) {
+                const wrap = createEl('div', 'array-element-wrapper'); wrap.style.marginRight = "2px";
+                const box = createEl('div', 'char-block lps-block', '0');
+                const idx = createEl('div', 'array-index', j);
+                wrap.appendChild(box); wrap.appendChild(idx);
+                DOM.lpsContainer.appendChild(wrap);
+                state.domLps.push({ wrap, box });
+            }
+
+            DOM.statN.textContent = state.text.length;
+            DOM.statMax.textContent = state.text.length + state.pattern.length;
+
+            DOM.ptrI.style.opacity = 0; DOM.ptrJ.style.opacity = 0; DOM.jumpSvg.innerHTML = ''; DOM.lpsContainer.style.transform = 'translateX(0)'; DOM.patternContainer.style.transform = 'translateX(0)';
+            // Position arrows
+            DOM.ptrI.querySelector('.pointer-arrow').className = "pointer-arrow";
+            DOM.ptrJ.querySelector('.pointer-arrow').className = "pointer-arrow";
+        }
+
+        function resetViz() {
+            pauseAnim(); state.currentStepIndex = -1;
+            DOM.btnPrev.disabled = true; DOM.btnNext.disabled = !state.steps.length; DOM.btnPlay.disabled = !state.steps.length;
+            while (DOM.logsContainer.children.length > 2) { DOM.logsContainer.removeChild(DOM.logsContainer.firstChild); }
+            DOM.opsProgress.style.width = '0%'; DOM.statComp.textContent = '0';
+            highlightCode(null);
+            if (state.text.length) renderArray();
+            DOM.patternContainer.style.transform = `translateX(0px)`;
+        }
+
+        function playAnim() {
+            if (state.currentStepIndex >= state.steps.length - 1) { state.currentStepIndex = -1; while (DOM.logsContainer.children.length > 2) DOM.logsContainer.removeChild(DOM.logsContainer.firstChild); }
+            state.isPlaying = true;
+            DOM.btnPlay.innerHTML = '<i data-lucide="pause"></i> Pause'; DOM.btnPlay.classList.replace('btn-success', 'btn-primary'); if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            const r = parseFloat(DOM.animSpeed.value);
+            stepNext();
+            state.playInterval = setInterval(() => {
+                if (state.currentStepIndex >= state.steps.length - 1) return pauseAnim();
+                stepNext();
+            }, state.baseDelay / r);
+        }
+
+        function pauseAnim() {
+            state.isPlaying = false; clearInterval(state.playInterval);
+            DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play'; DOM.btnPlay.classList.replace('btn-primary', 'btn-success'); if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function stepNext() { if (state.currentStepIndex < state.steps.length - 1) { state.currentStepIndex++; applyState(); } else pauseAnim(); }
+        function stepPrev() { if (state.currentStepIndex > 0) { state.currentStepIndex--; replayState(state.currentStepIndex); } else if (state.currentStepIndex === 0) resetViz(); }
+
+        function replayState(idx) {
+            while (DOM.logsContainer.children.length > 2) DOM.logsContainer.removeChild(DOM.logsContainer.firstChild);
+            for (let i = 0; i <= idx; i++) { const s = state.steps[i]; termLog(s.log, s.logT); }
+            applyState(true);
+        }
+
+        function applyState(skipLog = false) {
+            const step = state.steps[state.currentStepIndex];
+            if (!skipLog) termLog(step.log, step.logT);
+
+            DOM.btnPrev.disabled = state.currentStepIndex <= 0;
+            DOM.btnNext.disabled = state.currentStepIndex >= state.steps.length - 1;
+
+            DOM.statComp.textContent = step.ops;
+            const mo = parseInt(DOM.statMax.textContent) || 1;
+            DOM.opsProgress.style.width = Math.min(100, (step.ops / mo) * 100) + '%';
+
+            highlightCode(step.line);
+            updateVisuals(step);
+        }
+
+
+        function updateVisuals(step) {
+            // Reset styles
+            state.domText.forEach(el => { el.box.className = 'char-block'; });
+            state.domPat.forEach(el => { el.box.className = 'char-block'; });
+            state.domLps.forEach(el => el.box.className = 'char-block lps-block');
+            DOM.jumpSvg.innerHTML = ''; // clear arcs
+
+            for (let i = 0; i < step.lpsSt.length; i++) {
+                state.domLps[i].box.textContent = step.lpsSt[i] !== undefined ? step.lpsSt[i] : '0';
+                if (step.lpsSt[i] > 0) state.domLps[i].box.style.color = 'var(--neon-green)';
+                else state.domLps[i].box.style.color = 'var(--text-muted)';
+            }
+
+            if (step.lpsPtr !== undefined && step.lpsPtr !== null) {
+                state.domPat[step.lpsPtr].box.classList.add('active');
+                state.domLps[step.lpsPtr].box.classList.add('active'); // highlight LPS block too
+                state.domLps[step.lpsPtr].box.style.borderColor = 'var(--neon-cyan)';
+                if (step.lpsLen !== null) {
+                    state.domPat[step.lpsLen].box.classList.add('match');
+                }
+            }
+
+            if (step.patOffset !== undefined) {
+                DOM.patternContainer.style.transform = `translateX(${step.patOffset * 42}px)`;
+                DOM.lpsContainer.style.transform = `translateX(${step.patOffset * 42}px)`;
+            }
+
+            if (step.i !== null && step.j !== null && step.i < state.domText.length && step.j < state.domPat.length) {
+                if (step.check) {
+                    state.domText[step.i].box.classList.add('active');
+                    state.domPat[step.j].box.classList.add('active');
+                } else if (step.match) {
+                    state.domText[step.i].box.classList.add('match');
+                    state.domPat[step.j].box.classList.add('match');
+                } else if (step.mismatch) {
+                    state.domText[step.i].box.classList.add('mismatch');
+                    state.domPat[step.j].box.classList.add('mismatch');
+                }
+
+                movePtr(DOM.ptrI, step.i, state.domText, 'top');
+                movePtr(DOM.ptrJ, step.j, state.domPat, 'bottom', step.patOffset);
+            } else {
+                DOM.ptrI.style.opacity = 0;
+                DOM.ptrJ.style.opacity = 0;
+            }
+
+            if (step.found !== undefined) {
+                for (let k = 0; k < state.pattern.length; k++) {
+                    if (step.found + k < state.domText.length) {
+                        state.domText[step.found + k].box.classList.add('match');
+                        state.domPat[k].box.classList.add('match');
+                    }
+                }
+            }
+
+            // Draw Jump Arc
+            if (step.shift && step.shiftFrom !== undefined && step.shiftTo !== undefined) {
+                drawJumpArc(step.shiftFrom, step.shiftTo, step.patOffset);
+            }
+        }
+
+
+        function drawJumpArc(fromJ, toJ, offset) {
+            const wrapFrom = state.domPat[fromJ].wrap;
+            const wrapTo = state.domPat[toJ].wrap;
+
+            const contRect = DOM.realVizContainer.getBoundingClientRect();
+            const fromRect = wrapFrom.getBoundingClientRect();
+            const toRect = wrapTo.getBoundingClientRect();
+
+            // Get exact coordinates relative to unscaled viz container
+            let x1 = ((fromRect.left - contRect.left) / state.zoom) + (fromRect.width / state.zoom / 2);
+            let y1 = ((fromRect.bottom - contRect.top) / state.zoom);
+
+            let x2 = ((toRect.left - contRect.left) / state.zoom) + (toRect.width / state.zoom / 2);
+            let y2 = ((toRect.bottom - contRect.top) / state.zoom);
+
+            // Draw cubic bezier curve downwards
+            let controlY = Math.max(y1, y2) + 60;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M ${x1} ${y1} C ${x1} ${controlY}, ${x2} ${controlY}, ${x2} ${y2}`);
+            path.setAttribute('class', 'jump-path');
+
+            // Add arrow head
+            const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+            arrow.setAttribute('points', `${x2},${y2} ${x2 - 5},${y2 + 10} ${x2 + 5},${y2 + 10}`);
+            arrow.setAttribute('fill', 'var(--neon-purple)');
+
+            DOM.jumpSvg.appendChild(path);
+            DOM.jumpSvg.appendChild(arrow);
+        }
+
+
+
+        function movePtr(el, idx, arrRef, dir, offset = 0) {
+            if (idx === null || idx < 0 || idx >= arrRef.length) { el.style.opacity = 0; return; }
+            const tgt = arrRef[idx].wrap;
+            el.style.opacity = 1;
+
+            const contRect = DOM.realVizContainer.getBoundingClientRect();
+            const tgtRect = tgt.getBoundingClientRect();
+
+            // Calculate exact position based on scaled bounding rects divided by scale modifier
+            const localX = (tgtRect.left - contRect.left) / state.zoom;
+            const targetX = localX + (tgtRect.width / state.zoom / 2) - (el.offsetWidth / 2);
+
+            let localY;
+            if (dir === 'top') {
+                localY = (tgtRect.top - contRect.top) / state.zoom - 40;
+            } else {
+                localY = (tgtRect.bottom - contRect.top) / state.zoom + 5;
+            }
+
+            el.style.top = localY + 'px';
+            el.style.left = targetX + 'px';
+            el.style.transform = `translateX(0)`; // Offset is already handled visually by pattern shift container
+        }
+
+
+        function highlightCode(lineObj) {
+            if (!window.monacoEditor) return;
+            if (!lineObj) {
+                state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, []);
+                return;
+            }
+            const l = lineObj[state.activeLang];
+            if (!l) return;
+            state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, [
+                { range: new monaco.Range(l, 1, l, 1), options: { isWholeLine: true, className: 'monaco-line-highlight' } }
+            ]);
+            window.monacoEditor.revealLineInCenter(l);
+        }
+    </script>
+
+</body>
+</body>
+
+</html>

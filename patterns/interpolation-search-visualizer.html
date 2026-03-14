@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpolation Search Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-blue {
+            color: var(--neon-blue);
+        }
+
+        .text-green {
+            color: var(--neon-green);
+        }
+
+        .text-red {
+            color: var(--neon-red);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i {
+            color: var(--neon-cyan);
+        }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col {
+            overflow-y: hidden;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(46, 160, 67, 0.1);
+            border-color: rgba(46, 160, 67, 0.4);
+            color: var(--neon-green);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: rgba(46, 160, 67, 0.2);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(46, 160, 67, 0.3);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--neon-cyan);
+        }
+
+        /* Visualization Area */
+        .viz-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1rem;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4rem;
+            position: relative;
+            max-width: 100%;
+            z-index: 10;
+        }
+
+        .range-highlight {
+            position: absolute;
+            bottom: 3.5rem;
+            height: 70px;
+            background: linear-gradient(180deg, rgba(88, 166, 255, 0) 0%, rgba(88, 166, 255, 0.1) 50%, rgba(88, 166, 255, 0) 100%);
+            border-left: 2px solid var(--neon-cyan);
+            border-right: 2px solid var(--neon-cyan);
+            border-top: 1px dashed rgba(88, 166, 255, 0.4);
+            border-bottom: 1px dashed rgba(88, 166, 255, 0.4);
+            border-radius: 8px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .array-element-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s;
+        }
+
+        .array-index {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .array-block {
+            width: 48px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .array-block:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-muted);
+        }
+
+        .array-block.active-element {
+            background: rgba(88, 166, 255, 0.05);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: white;
+        }
+
+        .array-block.eliminated {
+            background: #0d1117;
+            border-color: #21262d;
+            color: #484f58;
+            opacity: 0.4;
+            transform: scale(0.9);
+        }
+
+        .array-block.mid {
+            background: rgba(188, 140, 255, 0.15);
+            border-color: var(--neon-purple);
+            color: white;
+            box-shadow: 0 0 20px rgba(188, 140, 255, 0.3);
+            transform: translateY(-8px) scale(1.05);
+            z-index: 10;
+        }
+
+        .array-block.found {
+            background: rgba(46, 160, 67, 0.15);
+            border-color: var(--neon-green);
+            color: white;
+            box-shadow: 0 0 25px rgba(46, 160, 67, 0.4);
+            transform: translateY(-8px) scale(1.1);
+            z-index: 20;
+        }
+
+        /* Animated Pointers */
+        .pointers-container {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .pointer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+
+        .pointer-arrow {
+            font-size: 1.2rem;
+            line-height: 1;
+            animation: bounce 1.5s infinite;
+        }
+
+        .pointer-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-main);
+            border: 1px solid currentColor;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .pointer-l {
+            color: var(--neon-cyan);
+        }
+
+        .pointer-r {
+            color: var(--neon-red);
+        }
+
+        .pointer-m {
+            color: var(--neon-purple);
+            z-index: 21;
+        }
+
+        .pointer-m .pointer-arrow {
+            animation: bounce-mid 1s infinite alternate;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        @keyframes bounce-mid {
+            0% {
+                transform: translateY(-2px) scale(1.1);
+            }
+
+            100% {
+                transform: translateY(-6px) scale(1.1);
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: white;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--neon-blue) transparent transparent transparent;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Terminal Style Log */
+        .terminal-container {
+            flex: 1;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 250px;
+            max-height: 350px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 6px;
+            margin-right: 12px;
+        }
+
+        .mac-btns span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mac-btns span:nth-child(1) {
+            background: #ff5f56;
+        }
+
+        .mac-btns span:nth-child(2) {
+            background: #ffbd2e;
+        }
+
+        .mac-btns span:nth-child(3) {
+            background: #27c93f;
+        }
+
+        .terminal-logs {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: #e6edf3;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 0.5rem;
+            line-height: 1.4;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .log-line:last-child {
+            opacity: 1;
+        }
+
+        .log-time {
+            color: #8b949e;
+            user-select: none;
+        }
+
+        .log-type-sys {
+            color: #8b949e;
+        }
+
+        .log-type-info {
+            color: #79c0ff;
+        }
+
+        .log-type-eval {
+            color: #d2a8ff;
+        }
+
+        .log-type-warn {
+            color: #ffa657;
+        }
+
+        .log-type-success {
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .log-type-error {
+            color: #f85149;
+            font-weight: bold;
+        }
+
+        .log-msg {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+            background: var(--text-main);
+            width: 8px;
+            height: 14px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Monaco Code Container */
+        .code-panel-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            min-height: 350px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .code-tab {
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .code-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .code-tab.active {
+            color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        #monaco-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Dashboard Metrcis */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+        }
+
+        .metric-card.m-time::before {
+            background: var(--neon-cyan);
+        }
+
+        .metric-card.m-space::before {
+            background: var(--neon-green);
+        }
+
+        .metric-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            margin: 0.25rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .stat-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.85rem;
+        }
+
+        .stat-flex:last-child {
+            border-bottom: none;
+        }
+
+        .monaco-line-highlight {
+            background-color: rgba(88, 166, 255, 0.2) !important;
+            border-left: 3px solid #58a6ff;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="skip-forward"></i> Interpolation Search </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance
+                Analytics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i>
+                Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL: Controls & Logs -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="cpu"></i> Parameters Engine</div>
+                <div class="control-group">
+                    <label>Data Set Size: <span id="size-val" class="text-mono">15</span></label>
+                    <input type="range" id="array-size" min="5" max="32" value="15">
+                </div>
+                <div class="control-group">
+                    <label>Target Query Value:</label>
+                    <input type="number" id="target-value" class="form-input" placeholder="e.g. 45">
+                </div>
+                <div class="grid-2" style="margin-bottom: 1rem;">
+                    <button class="btn" id="btn-generateRandom"><i data-lucide="shuffle"></i> Generate Random</button>
+                    <button class="btn" id="btn-generateSequential"><i data-lucide="trending-up"></i> Generate
+                        Linear</button>
+                </div>
+                <div class="control-group">
+                    <label>Custom Vector (CSV):</label>
+                    <input type="text" id="custom-array" class="form-input" placeholder="Data vector...">
+                </div>
+                <button class="btn btn-primary" id="btn-initSearch" style="width: 100%;"><i data-lucide="power"></i>
+                    Initialize Engine</button>
+            </section>
+
+            <section class="panel"
+                style="flex: 1; padding: 0; background: transparent; border: none; box-shadow: none; min-height: 0;">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="mac-btns"><span></span><span></span><span></span></div>
+                        <span>bash - search_tracer.sh</span>
+                    </div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span
+                                class="log-type-sys">[SYS]</span><span class="log-msg">Tracing engine ready.</span>
+                        </div>
+                        <div id="cursor" class="cursor-blink"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CENTER PANEL: Visualization -->
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled title="Step Back"><i
+                                data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-success" id="btn-play" disabled style="min-width: 90px;"><i
+                                data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled title="Step Forward"><i
+                                data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset" disabled title="Reset"><i
+                                data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+                <div class="control-group" style="margin: 0.5rem 0 1rem 0;">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>Animation Speed Multiplier</span>
+                        <span id="speed-val" class="text-mono">1.0x</span>
+                    </label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+                <div class="viz-container">
+                    <div class="range-highlight" id="range-highlight"></div>
+                    <div class="array-container" id="array-container">
+                        <!-- Array blocks generated by JS -->
+                    </div>
+                    <div class="pointers-container">
+                        <div class="pointer pointer-l" id="ptr-l">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">PREV</span>
+                        </div>
+                        <div class="pointer pointer-m" id="ptr-m">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">CHK</span>
+                        </div>
+                        <div class="pointer pointer-r" id="ptr-r">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">STEP</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(88,166,255,0.1);border:1px dashed var(--neon-cyan);border-radius:2px;">
+                        </div> Block Bounds
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:#0d1117;border:1px solid #30363d;border-radius:2px;">
+                        </div> Eliminated
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(188,140,255,0.15);border:1px solid var(--neon-purple);border-radius:2px;">
+                        </div> Check Pointer
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(46,160,67,0.15);border:1px solid var(--neon-green);border-radius:2px;">
+                        </div> Found
+                    </span>
+                </div>
+            </section>
+        </div>
+
+        <!-- RIGHT PANEL: Dashboard & Code -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Time Complexity</div>
+                        <div class="metric-val text-blue">O(log(log n))</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Space Complexity</div>
+                        <div class="metric-val text-green">O(1)</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex">
+                        <span>Items (N):</span>
+                        <span id="stat-n" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Theor. Max Comparisons:</span>
+                        <span id="stat-max" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Operations Progress:</span>
+                        <span id="stat-comp" class="text-mono text-cyan">0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ops-progress"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="go">main.go</button>
+                        <button class="code-tab" data-lang="java">Search.java</button>
+                        <button class="code-tab" data-lang="python">search.py</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Floating Global Tooltip -->
+    <div class="tooltip" id="global-tooltip"></div>
+
+    <script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Template Code
+        const CODES = {
+            go: `func interpolationSearch(arr []int, target int) int {
+    lo := 0
+    hi := len(arr) - 1
+    for lo <= hi && target >= arr[lo] && target <= arr[hi] {
+        if lo == hi {
+            if arr[lo] == target {
+                return lo
+            }
+            return -1
+        }
+        pos := lo + int(float64(hi-lo)/float64(arr[hi]-arr[lo])*float64(target-arr[lo]))
+        if arr[pos] == target {
+            return pos
+        }
+        if arr[pos] < target {
+            lo = pos + 1
+        } else {
+            hi = pos - 1
+        }
+    }
+    return -1
+}`,
+            java: `public int interpolationSearch(int[] arr, int target) {
+    int lo = 0, hi = (arr.length - 1);
+    while (lo <= hi && target >= arr[lo] && target <= arr[hi]) {
+        if (lo == hi) {
+            if (arr[lo] == target) return lo;
+            return -1;
+        }
+        int pos = lo + (((hi - lo) / (arr[hi] - arr[lo])) * (target - arr[lo]));
+        if (arr[pos] == target) return pos;
+        if (arr[pos] < target) lo = pos + 1;
+        else hi = pos - 1;
+    }
+    return -1;
+}`,
+            python: `def interpolation_search(arr, target):
+    lo = 0
+    hi = len(arr) - 1
+    while lo <= hi and target >= arr[lo] and target <= arr[hi]:
+        if lo == hi:
+            if arr[lo] == target:
+                return lo
+            return -1
+        
+        div = arr[hi] - arr[lo]
+        if div == 0:
+            if arr[lo] == target:
+                return lo
+            return -1
+
+        pos = lo + int(((float(hi - lo) / div) * (target - arr[lo])))
+        if arr[pos] == target:
+            return pos
+        if arr[pos] < target:
+            lo = pos + 1
+        else:
+            hi = pos - 1
+    return -1`
+        };
+
+        const DOM = {
+            arraySize: document.getElementById('array-size'),
+            sizeVal: document.getElementById('size-val'),
+            targetValue: document.getElementById('target-value'),
+            customArray: document.getElementById('custom-array'),
+            btnGenRand: document.getElementById('btn-generateRandom'),
+            btnGenSeq: document.getElementById('btn-generateSequential'),
+            btnInit: document.getElementById('btn-initSearch'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            arrayContainer: document.getElementById('array-container'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            statN: document.getElementById('stat-n'),
+            statMax: document.getElementById('stat-max'),
+            statComp: document.getElementById('stat-comp'),
+            opsProgress: document.getElementById('ops-progress'),
+            rangeHighlight: document.getElementById('range-highlight'),
+            ptrL: document.getElementById('ptr-l'),
+            ptrR: document.getElementById('ptr-r'),
+            ptrM: document.getElementById('ptr-m'),
+            tooltip: document.getElementById('global-tooltip')
+        };
+
+        let state = {
+            array: [],
+            target: null,
+            steps: [],
+            currentStepIndex: -1,
+            isPlaying: false,
+            playInterval: null,
+            baseDelay: 1200,
+            activeLang: 'go',
+            domElements: [],
+            editorDecorations: []
+        };
+
+        // Monaco Init
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES[state.activeLang],
+                language: 'go',
+                theme: 'vs-dark',
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: "'Fira Code', monospace",
+                lineHeight: 22,
+                renderLineHighlight: 'none',
+                scrollbar: { vertical: 'visible', horizontal: 'hidden' },
+                contextmenu: false
+            });
+            initApp();
+        });
+
+        const langMap = { go: 'go', java: 'java', python: 'python' };
+
+        function initApp() {
+            setupListeners();
+            generateArray('sequential', parseInt(DOM.arraySize.value));
+        }
+
+        function setupListeners() {
+            DOM.arraySize.addEventListener('input', e => DOM.sizeVal.textContent = e.target.value);
+            DOM.arraySize.addEventListener('change', e => generateArray('random', parseInt(e.target.value)));
+            DOM.btnGenRand.addEventListener('click', () => generateArray('random', parseInt(DOM.arraySize.value)));
+            DOM.btnGenSeq.addEventListener('click', () => generateArray('sequential', parseInt(DOM.arraySize.value)));
+            DOM.btnInit.addEventListener('click', parseInit);
+
+            DOM.animSpeed.addEventListener('input', e => {
+                DOM.speedVal.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+                if (state.isPlaying) { pauseAnim(); playAnim(); }
+            });
+
+            DOM.btnPlay.addEventListener('click', () => state.isPlaying ? pauseAnim() : playAnim());
+            DOM.btnNext.addEventListener('click', stepNext);
+            DOM.btnPrev.addEventListener('click', stepPrev);
+            DOM.btnReset.addEventListener('click', resetViz);
+
+            DOM.codeTabs.forEach(tab => {
+                tab.addEventListener('click', e => {
+                    DOM.codeTabs.forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    state.activeLang = e.target.dataset.lang;
+                    window.monacoEditor.setValue(CODES[state.activeLang]);
+                    monaco.editor.setModelLanguage(window.monacoEditor.getModel(), langMap[state.activeLang]);
+                    highlightCode(state.currentStepIndex >= 0 ? state.steps[state.currentStepIndex].line : null);
+                });
+            });
+        }
+
+        function generateArray(type, size) {
+            let arr = [];
+            if (type === 'random') {
+                for (let i = 0; i < size; i++) arr.push(Math.floor(Math.random() * 200));
+                arr.sort((a, b) => a - b); arr = [...new Set(arr)];
+            } else {
+                let s = Math.floor(Math.random() * 10);
+                for (let i = 0; i < size; i++) { arr.push(s); s += Math.floor(Math.random() * 5) + 1; }
+            }
+            state.array = arr;
+            DOM.customArray.value = arr.join(', ');
+            DOM.targetValue.value = Math.random() > 0.3 ? arr[Math.floor(Math.random() * arr.length)] : Math.floor(Math.random() * 200);
+            resetViz();
+            renderArray();
+        }
+
+        function getTimestamp() {
+            const d = new Date();
+            return `[${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}]`;
+        }
+
+        function termLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            let tClass = 'log-type-info'; let tag = '[INF]';
+            if (type === 'sys') { tClass = 'log-type-sys'; tag = '[SYS]'; }
+            else if (type === 'eval') { tClass = 'log-type-eval'; tag = '[EVL]'; }
+            else if (type === 'warn') { tClass = 'log-type-warn'; tag = '[WRN]'; }
+            else if (type === 'success') { tClass = 'log-type-success'; tag = '[OK ]'; }
+            else if (type === 'error') { tClass = 'log-type-error'; tag = '[ERR]'; }
+
+            div.innerHTML = `<span class="log-time">${getTimestamp()}</span><span class="${tClass}">${tag}</span><span class="log-msg">${msg}</span>`;
+            DOM.logsContainer.insertBefore(div, DOM.cursorLog);
+            DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        function parseInit() {
+            const cVal = DOM.customArray.value.trim();
+            if (cVal) {
+                const parsed = cVal.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+                if (parsed.length > 0) { parsed.sort((a, b) => a - b); state.array = parsed; }
+            }
+            const tgt = parseInt(DOM.targetValue.value);
+            if (isNaN(tgt)) { termLog("Invalid target scalar.", 'error'); return; }
+
+            state.target = tgt;
+            buildSteps();
+            resetViz();
+            renderArray();
+
+            DOM.btnPlay.disabled = false; DOM.btnNext.disabled = false; DOM.btnReset.disabled = false;
+            termLog(`Loaded vector size ${state.array.length}. Target: ${tgt}`, 'sys');
+            stepNext();
+        }
+
+        // Algo compilation
+        function buildSteps() {
+            const arr = state.array; const trg = state.target;
+            let steps = []; let ops = 0;
+            const n = arr.length;
+            if (n === 0) return;
+
+            let lo = 0;
+            let hi = n - 1;
+            
+            steps.push({ L: lo, R: hi, M: null, line: { go: 2, java: 2, python: 2 }, log: `Initialize: lo=0, hi=${hi}`, logT: 'info', ops });
+
+            while (lo <= hi && trg >= arr[lo] && trg <= arr[hi]) {
+                ops++;
+                steps.push({ L: lo, R: hi, M: null, line: { go: 4, java: 3, python: 4 }, log: `Evaluating bounds: arr[${lo}] <= ${trg} <= arr[${hi}]`, logT: 'eval', ops });
+
+                if (lo === hi) {
+                    if (arr[lo] === trg) {
+                        steps.push({ L: lo, R: hi, M: lo, line: { go: 6, java: 5, python: 6 }, log: `Single element left. Match found at ${lo}!`, logT: 'success', ops, found: true });
+                        state.steps = steps; return;
+                    }
+                    steps.push({ L: null, R: null, M: null, line: { go: 9, java: 6, python: 8 }, log: `Target not found at only index.`, logT: 'error', ops, notFound: true });
+                    state.steps = steps; return;
+                }
+
+                // Protect division by zero for duplicates
+                if (arr[hi] === arr[lo]) {
+                    if (arr[lo] === trg) {
+                        steps.push({ L: lo, R: hi, M: lo, line: { go: 6, java: 5, python: 6 }, log: `Elements are identical. Match found at ${lo}!`, logT: 'success', ops, found: true });
+                    } else {
+                        steps.push({ L: null, R: null, M: null, line: { go: 9, java: 6, python: 8 }, log: `Elements identical but != target.`, logT: 'error', ops, notFound: true });
+                    }
+                    state.steps = steps; return;
+                }
+
+                let pos = lo + Math.floor(((hi - lo) / (arr[hi] - arr[lo])) * (trg - arr[lo]));
+                ops++;
+                steps.push({ L: lo, R: hi, M: pos, line: { go: 11, java: 8, python: 15 }, log: `Interpolated pos = ${pos} (Estimated position of ${trg})`, logT: 'info', ops });
+
+                if (pos < 0 || pos >= n) {
+                   steps.push({ L: null, R: null, M: null, line: { go: 9, java: 6, python: 8 }, log: `Interpolation ${pos} out of bounds.`, logT: 'error', ops, notFound: true });
+                   state.steps = steps; return;
+                }
+
+                if (arr[pos] === trg) {
+                    steps.push({ L: lo, R: hi, M: pos, line: { go: 12, java: 9, python: 16 }, log: `Match found at interpolated index ${pos}!`, logT: 'success', ops, found: true });
+                    state.steps = steps; return;
+                }
+
+                if (arr[pos] < trg) {
+                    ops++;
+                    lo = pos + 1;
+                    steps.push({ L: lo, R: hi, M: pos, line: { go: 16, java: 10, python: 19 }, log: `arr[${pos}] < ${trg}. Moving lo up to ${lo}.`, logT: 'warn', ops });
+                } else {
+                    ops++;
+                    hi = pos - 1;
+                    steps.push({ L: lo, R: hi, M: pos, line: { go: 18, java: 11, python: 21 }, log: `arr[${pos}] > ${trg}. Moving hi down to ${hi}.`, logT: 'warn', ops });
+                }
+            }
+
+            steps.push({ L: null, R: null, M: null, line: { go: 22, java: 13, python: 22 }, log: `Target not in range. Return -1`, logT: 'error', ops, notFound: true });
+            state.steps = steps;
+        }
+
+        // Tooltip logic
+        function attachTooltip(el, textProvider) {
+            el.addEventListener('mouseenter', () => {
+                const txt = textProvider();
+                if (!txt) return;
+                DOM.tooltip.innerHTML = txt;
+                const rect = el.getBoundingClientRect();
+                DOM.tooltip.style.left = rect.left + (rect.width / 2) + 'px';
+                DOM.tooltip.style.top = rect.top - 5 + 'px';
+                DOM.tooltip.classList.add('show');
+            });
+            el.addEventListener('mouseleave', () => DOM.tooltip.classList.remove('show'));
+        }
+
+        function renderArray() {
+            DOM.arrayContainer.innerHTML = '';
+            state.domElements = [];
+
+            state.array.forEach((val, i) => {
+                const wrap = document.createElement('div'); wrap.className = 'array-element-wrapper'; wrap.id = `block-wrap-${i}`;
+                const box = document.createElement('div'); box.className = 'array-block active-element'; box.textContent = val;
+                const idx = document.createElement('div'); idx.className = 'array-index'; idx.textContent = i;
+                wrap.appendChild(box); wrap.appendChild(idx);
+                DOM.arrayContainer.appendChild(wrap);
+                state.domElements.push({ wrap, box, val });
+
+                // Tooltip
+                attachTooltip(box, () => `Index: ${i}<br>Value: <span class="text-blue">${val}</span>`);
+            });
+
+            const maxOps = Math.ceil(Math.sqrt(state.array.length || 1)) * 3;
+            DOM.statN.textContent = state.array.length;
+            DOM.statMax.textContent = maxOps;
+
+            DOM.ptrL.style.opacity = 0; DOM.ptrR.style.opacity = 0; DOM.ptrM.style.opacity = 0;
+            DOM.rangeHighlight.style.opacity = 0;
+        }
+
+        function resetViz() {
+            pauseAnim(); state.currentStepIndex = -1;
+            DOM.btnPrev.disabled = true; DOM.btnNext.disabled = !state.steps.length; DOM.btnPlay.disabled = !state.steps.length;
+            while (DOM.logsContainer.children.length > 2) { DOM.logsContainer.removeChild(DOM.logsContainer.firstChild); }
+            DOM.opsProgress.style.width = '0%'; DOM.statComp.textContent = '0';
+            highlightCode(null);
+            if (state.array.length) renderArray();
+        }
+
+        function playAnim() {
+            if (state.currentStepIndex >= state.steps.length - 1) { state.currentStepIndex = -1; while (DOM.logsContainer.children.length > 2) DOM.logsContainer.removeChild(DOM.logsContainer.firstChild); }
+            state.isPlaying = true;
+            DOM.btnPlay.innerHTML = '<i data-lucide="pause"></i> Pause'; DOM.btnPlay.classList.replace('btn-success', 'btn-primary'); if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            const r = parseFloat(DOM.animSpeed.value);
+            stepNext();
+            state.playInterval = setInterval(() => {
+                if (state.currentStepIndex >= state.steps.length - 1) return pauseAnim();
+                stepNext();
+            }, state.baseDelay / r);
+        }
+
+        function pauseAnim() {
+            state.isPlaying = false; clearInterval(state.playInterval);
+            DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play'; DOM.btnPlay.classList.replace('btn-primary', 'btn-success'); if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function stepNext() { if (state.currentStepIndex < state.steps.length - 1) { state.currentStepIndex++; applyState(); } else pauseAnim(); }
+        function stepPrev() { if (state.currentStepIndex > 0) { state.currentStepIndex--; replayState(state.currentStepIndex); } else if (state.currentStepIndex === 0) resetViz(); }
+
+        function replayState(idx) {
+            while (DOM.logsContainer.children.length > 2) DOM.logsContainer.removeChild(DOM.logsContainer.firstChild);
+            for (let i = 0; i <= idx; i++) { const s = state.steps[i]; termLog(s.log, s.logT); }
+            applyState(true);
+        }
+
+        function applyState(skipLog = false) {
+            const step = state.steps[state.currentStepIndex];
+            if (!skipLog) termLog(step.log, step.logT);
+
+            DOM.btnPrev.disabled = state.currentStepIndex <= 0;
+            DOM.btnNext.disabled = state.currentStepIndex >= state.steps.length - 1;
+
+            DOM.statComp.textContent = step.ops;
+            const mo = parseInt(DOM.statMax.textContent) || 1;
+            DOM.opsProgress.style.width = Math.min(100, (step.ops / mo) * 100) + '%';
+
+            highlightCode(step.line);
+            updateVisuals(step);
+        }
+
+        function updateVisuals(step) {
+            if (!state.domElements.length) return;
+
+            // Reset styles
+            state.domElements.forEach(el => el.box.className = 'array-block');
+
+            if (step.L !== null && step.R !== null) {
+                let rL = null, rR = null;
+                state.domElements.forEach((el, i) => {
+                    if (i >= step.L && i <= step.R) { el.box.classList.add('active-element'); if (rL === null) rL = el.wrap; rR = el.wrap; }
+                    else { el.box.classList.add('eliminated'); }
+                });
+
+                // Gradient Range box
+                if (rL && rR) {
+                    DOM.rangeHighlight.style.opacity = 1;
+                    DOM.rangeHighlight.style.left = rL.offsetLeft - 4 + 'px';
+                    DOM.rangeHighlight.style.width = (rR.offsetLeft + rR.offsetWidth - rL.offsetLeft + 8) + 'px';
+                } else { DOM.rangeHighlight.style.opacity = 0; }
+
+                movePtr(DOM.ptrL, step.L); movePtr(DOM.ptrR, step.R);
+            } else { DOM.rangeHighlight.style.opacity = 0; DOM.ptrL.style.opacity = 0; DOM.ptrR.style.opacity = 0; }
+
+            if (step.M !== null) {
+                state.domElements[step.M].box.classList.add('mid');
+                if (step.found) { state.domElements[step.M].box.classList.remove('mid'); state.domElements[step.M].box.classList.add('found'); }
+                movePtr(DOM.ptrM, step.M);
+            } else { DOM.ptrM.style.opacity = 0; }
+
+            if (step.notFound) {
+                state.domElements.forEach(el => el.box.classList.add('eliminated'));
+                DOM.ptrL.style.opacity = 0; DOM.ptrR.style.opacity = 0; DOM.ptrM.style.opacity = 0; DOM.rangeHighlight.style.opacity = 0;
+            }
+        }
+
+        function movePtr(el, idx) {
+            if (idx === null || idx < 0 || idx >= state.domElements.length) { el.style.opacity = 0; return; }
+            const tgt = state.domElements[idx].wrap;
+            el.style.opacity = 1;
+            el.style.transform = `translateX(${tgt.offsetLeft + (tgt.offsetWidth / 2) - (el.offsetWidth / 2)}px)`;
+        }
+
+        function highlightCode(lineObj) {
+            if (!window.monacoEditor) return;
+            if (!lineObj) {
+                state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, []);
+                return;
+            }
+            const l = lineObj[state.activeLang];
+            if (!l) return;
+            state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, [
+                { range: new monaco.Range(l, 1, l, 1), options: { isWholeLine: true, className: 'monaco-line-highlight' } }
+            ]);
+            window.monacoEditor.revealLineInCenter(l);
+        }
+    </script>
+</body>
+
+</html>

@@ -44,6 +44,11 @@ ROOT_SIDEBAR = """      <nav class="sidebar-nav">
           <a href="patterns/sort-search.html" class="nav-item">Sorting & Search</a>
           <a href="patterns/sorting-visualizer.html" class="nav-item indent">↳ Visualizer: Sorting</a>
           <a href="patterns/binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary Search</a>
+          <a href="patterns/jump-search-visualizer.html" class="nav-item indent">↳ Visualizer: Jump Search</a>
+          <a href="patterns/interpolation-search-visualizer.html" class="nav-item indent">↳ Visualizer: Interpolation Search</a>
+          <a href="patterns/exponential-search-visualizer.html" class="nav-item indent">↳ Visualizer: Exponential Search</a>
+          <a href="patterns/ternary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Ternary Search</a>
+          <a href="patterns/kmp-search-visualizer.html" class="nav-item indent">↳ Visualizer: KMP String Search</a>
           <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
           <a href="patterns/knapsack-dp.html" class="nav-item indent">↳ Visualizer: Knapsack</a>
           <a href="patterns/dp-lcs.html" class="nav-item indent">↳ Visualizer: LCS</a>
@@ -69,39 +74,6 @@ ROOT_SIDEBAR = """      <nav class="sidebar-nav">
           <a href="patterns/prefix-sum.html" class="nav-item">Prefix Sum</a>
         </details>
     
-        <!-- System Design -->
-        <details class="nav-section">
-          <summary class="nav-section-title">System Design</summary>
-          <a href="system-design.html" class="nav-item">System Design Basics</a>
-          <a href="system-design-masterclass.html" class="nav-item">Masterclass (Part 1)</a>
-          <a href="system-design-patterns.html" class="nav-item">System Design Patterns</a>
-          <a href="system-design-checklist.html" class="nav-item">System Design Checklist</a>
-          <a href="system-design-case-studies.html" class="nav-item">Case Studies</a>
-          <a href="system-design-quiz.html" class="nav-item">System Design Quiz</a>
-        </details>
-
-        <!-- Guides & Tools -->
-        <details class="nav-section">
-          <summary class="nav-section-title">Guides & Tools</summary>
-          <a href="pattern-recognition-guide.html" class="nav-item">Pattern Recognition</a>
-          <a href="interview-approach.html" class="nav-item">Interview Approach</a>
-          <a href="complexity-guide.html" class="nav-item">Complexity Analysis</a>
-          <a href="dsa-roadmap.html" class="nav-item">DSA Roadmap</a>
-          <a href="mock-interview-checklist.html" class="nav-item">Mock Interview Checklist</a>
-          <a href="cs-fundamentals.html" class="nav-item">CS Fundamentals</a>
-          <a href="golang-guide.html" class="nav-item">Go Language Guide</a>
-          <a href="osi-layers.html" class="nav-item">OSI Model Deep Dive</a>
-          <a href="tcp-ip-model.html" class="nav-item">TCP/IP Model Deep Dive</a>
-          <a href="go-interview-questions.html" class="nav-item">Go Interview Questions</a>
-          <a href="google-interview-questions.html" class="nav-item">Google Interview Questions</a>
-          <a href="amazon-two-pointers-questions.html" class="nav-item">Amazon Two Pointers Questions</a>
-          <a href="go-interview-plan.html" class="nav-item">📅 14-Day Interview Plan</a>
-          <a href="google-roadmap.html" class="nav-item">🗺️ Google Roadmap</a>
-          <a href="cheat-sheet.html" class="nav-item">Pattern Cheat Sheet</a>
-          <a href="dashboard.html" class="nav-item">📊 My Dashboard</a>
-          <a href="visualizer-dashboard.html" class="nav-item">🎨 Visualizer Dashboard</a>
-          <a href="mobile-access.html" class="nav-item">📱 Mobile Access</a>
-        </details>
       </nav>"""
 
 # Generate Pattern Level Sidebar (Adjust links to ../)
@@ -131,12 +103,11 @@ SKIP_FILES = {
     "patterns/sudoku-solver.html",
     "patterns/maze-generator.html",
     "patterns/two-pointers-visualizer.html",
-    "patterns/sliding-window-visualizer.html",
-    "patterns/binary-search-visualizer.html",
-    "patterns/hash-map-visualizer.html",
-    "patterns/bst-visualizer.html",
-    "patterns/bfs-graph.html",
-    "patterns/dp-lcs.html"
+    "patterns/jump-search-visualizer.html",
+    "patterns/interpolation-search-visualizer.html",
+    "patterns/exponential-search-visualizer.html",
+    "patterns/ternary-search-visualizer.html",
+    "patterns/kmp-search-visualizer.html"
 }
 
 def update_file(filepath, is_pattern_level):
