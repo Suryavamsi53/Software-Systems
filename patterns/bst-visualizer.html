@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="visualizer-common.css" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Binary Search Tree Visualizer - Pro</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .panel-header i { color: var(--neon-cyan); }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .app-title {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.5rem; color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim); font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex; flex-direction: column; gap: 1.5rem;
+            height: 100%; overflow-y: auto; padding-right: 0.5rem;
+        }
+        .column.center-col { overflow-y: hidden; }
+
+        .control-group { margin-bottom: 1rem; }
+        .control-group label {
+            display: block; margin-bottom: 0.5rem; font-size: 0.85rem;
+            color: var(--text-muted); font-weight: 500;
+        }
+
+        .form-input, .form-select, .input-field {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+        .input-group { display: flex; gap: 8px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; background: #21262d; border: 1px solid #30363d;
+            color: var(--text-main); padding: 0.6rem 1rem; border-radius: 6px;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-primary { background: rgba(88, 166, 255, 0.1); border-color: rgba(88, 166, 255, 0.4); color: var(--neon-cyan); }
+        .btn-success { background: rgba(46, 160, 67, 0.1); border-color: rgba(46, 160, 67, 0.4); color: var(--neon-green); }
+        .btn-danger, .btn.danger { background: rgba(248, 81, 73, 0.1); border-color: rgba(248, 81, 73, 0.4); color: var(--neon-red); }
+
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item { display: block; padding: 0.5rem 0.75rem; color: var(--text-muted); text-decoration: none; border-radius: 6px; margin-bottom: 2px; transition: all 0.2s; font-size: 0.9rem; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(88, 166, 255, 0.1); color: var(--neon-cyan); border-left: 2px solid var(--neon-cyan); }
+
+        .viz-viewport {
+            flex: 1; position: relative; background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px; overflow: hidden; display: flex; cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
+        }
+        .viz-canvas {
+            transform-origin: 0 0; flex: 1; position: relative; padding: 20px; display: flex; flex-direction: column;
+        }
+        #tree-canvas { flex: 1; min-height: 250px; }
+
+        /* Terminal */
+        .terminal-container { flex: 1; background: #0d1117; border-radius: 8px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; height: 100%; min-height: 200px; }
+        .terminal-header { background: #161b22; padding: 6px 12px; border-bottom: 1px solid #30363d; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display:flex; align-items:center; }
+        .terminal-logs { padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; color: #e6edf3; }
+        .log-line { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        
+        .log-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .log-entry { font-family: var(--font-mono); font-size: 0.85rem; color: #e6edf3; padding-bottom: 2px; }
+
+        /* Monaco */
+        .code-section { flex: 1; display: flex; flex-direction: column; height: 100%; background: transparent; border: none; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 0.6rem 1rem; border-bottom: 1px solid #30363d; font-size: 0.9rem; color: var(--text-main); border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .btn-group { display: flex; gap: 0.5rem; }
+        .lang-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 8px; }
+        .lang-btn.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); }
+        .code-content { flex: 1; position: relative; background: #0d1117; }
+        .monaco-container { position: absolute; width: 100%; height: 100%; }
+        .code-controls { padding: 10px; background: #161b22; border-top: 1px solid #30363d; font-size: 0.85rem; color: var(--text-muted); text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
+        .code-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        .code-line-glyph { background: var(--neon-cyan) !important; }
+
+        /* Tree Styles */
+        .node-circle {
+            fill: #161b22;
+            stroke: #30363d;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .node-circle.active {
+            fill: rgba(88, 166, 255, 0.1);
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.3));
+        }
+        .node-circle.found {
+            fill: rgba(63, 185, 80, 0.1);
+            stroke: var(--neon-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.3));
+        }
+        .node-circle.deleted {
+            fill: rgba(248, 81, 73, 0.1);
+            stroke: var(--neon-red);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(248, 81, 73, 0.3));
+        }
+        .node-text {
+            fill: var(--text-main);
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+        .edge-line {
+            stroke: #30363d;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .edge-line.active {
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+        }
+    </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Binary Search Tree Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Operations</div>
+<a class="nav-item active" href="javascript:void(0)" id="nav-insert" onclick="selectOperation('insert')">Insert</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-delete" onclick="selectOperation('delete')">Delete</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-search" onclick="selectOperation('search')">Search</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-inorder" onclick="selectOperation('inorder')">In-order Traversal</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-preorder" onclick="selectOperation('preorder')">Pre-order Traversal</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-postorder" onclick="selectOperation('postorder')">Post-order Traversal</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-min" onclick="selectOperation('min')">Find Minimum</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-max" onclick="selectOperation('max')">Find Maximum</a>
+</div>
+</section>
+<section class="panel">
+<div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+<div class="control-group">
+<label>Value</label>
+<div class="input-group">
+<input class="input-field" id="value-input" placeholder="Enter value" type="number"/>
+<button class="btn btn-primary" id="execute-btn" onclick="executeOperation()">Execute</button>
+</div>
+</div>
+<div class="control-group">
+<button class="btn danger" id="clear-tree" onclick="clearTree()">Clear Tree</button>
+<button class="btn" id="random-tree" onclick="generateRandomTree()">Random Tree</button>
+</div>
+</section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none; min-height: 200px;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+<div class="log-section" id="log-panel">
+<div class="log-entry">Binary Search Tree visualizer ready...</div>
+</div></div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> <span id="studio-title">Algorithm Visualization Studio</span></div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-prev" title="Step Back"><i data-lucide="chevron-left" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-play" title="Play/Pause" onclick="runOperation()"><i data-lucide="play" style="width:16px;height:16px;color:var(--neon-cyan)"></i> Play</button>
+<button class="tool-btn" id="btn-next" title="Step Forward" onclick="stepOperation()"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-reset" title="Restart" onclick="resetOperation()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i></button>
+</div></div>
+<div style="padding: 15px 20px 0 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.8rem; color:var(--text-muted); text-transform: uppercase;">Animation Speed Multiplier</span>
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-main);" id="speed-display">1.0x</span>
+    </div>
+    <input type="range" id="anim-speed" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%; accent-color:var(--neon-cyan);">
+</div>
+<div class="viz-viewport" style="margin: 15px; border-radius: 8px;"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="tree-canvas" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="var(--text-muted)" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg></div></div></section></div><div class="column">
+<section class="panel" style="margin-bottom: 0;">
+    <div class="panel-header"><i data-lucide="activity"></i> Performance Profiler</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Time Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem;" id="time-complexity">O(log n)</div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Space Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-green); font-weight: bold; font-size: 1.1rem;" id="space-complexity">O(n)</div>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Total Nodes:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-size">0</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Current Depth:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-depth">0</span>
+    </div>
+</section>
+<section class="panel" style="flex: 1; padding: 0;">
+<div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<span>Algorithm Code</span>
+<div class="btn-group">
+<button class="lang-btn active" id="lang-go" onclick="setLang('go')">Go</button>
+<button class="lang-btn" id="lang-java" onclick="setLang('java')">Java</button>
+<button class="lang-btn" id="lang-python" onclick="setLang('python')">Python</button>
+</div>
+</div>
+<div class="code-content">
+<div class="monaco-container" id="monaco-go" style="display: block;"></div>
+<div class="monaco-container" id="monaco-java" style="display: none;"></div>
+<div class="monaco-container" id="monaco-python" style="display: none;"></div>
+</div>
+<div class="code-controls">
+<div class="control-group">
+<span id="operation-info">Insert Operation</span>
+</div>
+</div>
+</div></section></div></div><script>
+        // BST Node structure
+        class TreeNode {
+            constructor(val) {
+                this.val = val;
+                this.left = null;
+                this.right = null;
+                this.x = 0;
+                this.y = 0;
+                this.active = false;
+                this.found = false;
+            }
+        }
+
+        // Global variables
+        let root = null;
+        let currentOperation = 'insert';
+        let currentLang = 'go';
+        let animationSteps = [];
+        let currentStep = 0;
+        let isRunning = false;
+        let editors = {};
+        let currentHighlights = [];
+
+        // Algorithm implementations
+        const algorithms = {
+            insert: {
+                go: `func insert(root *TreeNode, val int) *TreeNode {
+    if root == nil {
+        return &TreeNode{Val: val}
+    }
+
+    if val < root.Val {
+        root.Left = insert(root.Left, val)
+    } else if val > root.Val {
+        root.Right = insert(root.Right, val)
+    }
+
+    return root
+}`,
+                java: `public TreeNode insert(TreeNode root, int val) {
+    if (root == null) {
+        return new TreeNode(val);
+    }
+
+    if (val < root.val) {
+        root.left = insert(root.left, val);
+    } else if (val > root.val) {
+        root.right = insert(root.right, val);
+    }
+
+    return root;
+}`,
+                python: `def insert(root, val):
+    if root is None:
+        return TreeNode(val)
+
+    if val < root.val:
+        root.left = insert(root.left, val)
+    elif val > root.val:
+        root.right = insert(root.right, val)
+
+    return root`
+            },
+            delete: {
+                go: `func deleteNode(root *TreeNode, key int) *TreeNode {
+    if root == nil {
+        return nil
+    }
+
+    if key < root.Val {
+        root.Left = deleteNode(root.Left, key)
+    } else if key > root.Val {
+        root.Right = deleteNode(root.Right, key)
+    } else {
+        if root.Left == nil {
+            return root.Right
+        } else if root.Right == nil {
+            return root.Left
+        }
+
+        temp := minValueNode(root.Right)
+        root.Val = temp.Val
+        root.Right = deleteNode(root.Right, temp.Val)
+    }
+
+    return root
+}`,
+                java: `public TreeNode deleteNode(TreeNode root, int key) {
+    if (root == null) return null;
+
+    if (key < root.val) {
+        root.left = deleteNode(root.left, key);
+    } else if (key > root.val) {
+        root.right = deleteNode(root.right, key);
+    } else {
+        if (root.left == null) return root.right;
+        if (root.right == null) return root.left;
+
+        TreeNode temp = minValueNode(root.right);
+        root.val = temp.val;
+        root.right = deleteNode(root.right, temp.val);
+    }
+
+    return root;
+}`,
+                python: `def delete_node(root, key):
+    if root is None:
+        return None
+
+    if key < root.val:
+        root.left = delete_node(root.left, key)
+    elif key > root.val:
+        root.right = delete_node(root.right, key)
+    else:
+        if root.left is None:
+            return root.right
+        elif root.right is None:
+            return root.left
+
+        temp = min_value_node(root.right)
+        root.val = temp.val
+        root.right = delete_node(root.right, temp.val)
+
+    return root`
+            },
+            search: {
+                go: `func search(root *TreeNode, key int) *TreeNode {
+    if root == nil || root.Val == key {
+        return root
+    }
+
+    if key < root.Val {
+        return search(root.Left, key)
+    }
+
+    return search(root.Right, key)
+}`,
+                java: `public TreeNode search(TreeNode root, int key) {
+    if (root == null || root.val == key) {
+        return root;
+    }
+
+    if (key < root.val) {
+        return search(root.left, key);
+    }
+
+    return search(root.right, key);
+}`,
+                python: `def search(root, key):
+    if root is None or root.val == key:
+        return root
+
+    if key < root.val:
+        return search(root.left, key)
+
+    return search(root.right, key)`
+            },
+            inorder: {
+                go: `func inorderTraversal(root *TreeNode) []int {
+    result := []int{}
+    inorderHelper(root, &result)
+    return result
+}
+
+func inorderHelper(root *TreeNode, result *[]int) {
+    if root != nil {
+        inorderHelper(root.Left, result)
+        *result = append(*result, root.Val)
+        inorderHelper(root.Right, result)
+    }
+}`,
+                java: `public List<Integer> inorderTraversal(TreeNode root) {
+    List<Integer> result = new ArrayList<>();
+    inorderHelper(root, result);
+    return result;
+}
+
+private void inorderHelper(TreeNode root, List<Integer> result) {
+    if (root != null) {
+        inorderHelper(root.left, result);
+        result.add(root.val);
+        inorderHelper(root.right, result);
+    }
+}`,
+                python: `def inorder_traversal(root):
+    result = []
+    inorder_helper(root, result)
+    return result
+
+def inorder_helper(root, result):
+    if root:
+        inorder_helper(root.left, result)
+        result.append(root.val)
+        inorder_helper(root.right, result)`
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            initMonacoEditors();
+            createSampleTree();
+        }
+
+        function initMonacoEditors() {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], function() {
+                // Initialize Go editor
+                editors.go = monaco.editor.create(document.getElementById('monaco-go'), {
+                    value: algorithms.insert.go,
+                    language: 'go',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Java editor
+                editors.java = monaco.editor.create(document.getElementById('monaco-java'), {
+                    value: algorithms.insert.java,
+                    language: 'java',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Python editor
+                editors.python = monaco.editor.create(document.getElementById('monaco-python'), {
+                    value: algorithms.insert.python,
+                    language: 'python',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Set initial language
+                setLang('go');
+            });
+        }
+
+        function setupCanvas() {
+            const canvas = document.getElementById('tree-canvas');
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            // Per-page zoom removed — visualizer-common.js handles wheel zoom and toolbar buttons.
+        }
+
+        // Zoom is handled by `visualizer-common.js` which applies CSS transforms to the canvas.
+
+        const opTitles = {
+            insert: '➕ Insert Node',
+            delete: '❌ Delete Node',
+            search: '🔍 Search Node',
+            inorder: '➡️ In-order Traversal',
+            preorder: '⤵️ Pre-order Traversal',
+            postorder: '⤴️ Post-order Traversal',
+            min: '⏬ Find Minimum',
+            max: '⏫ Find Maximum'
+        };
+
+        function selectOperation(operation) {
+            currentOperation = operation;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + operation).classList.add('active');
+
+            const titleEl = document.getElementById('studio-title');
+            if (titleEl && opTitles[operation]) {
+                titleEl.innerText = opTitles[operation];
+            }
+
+            // Update all editors with new operation code
+            Object.keys(editors).forEach(lang => {
+                if (algorithms[operation] && algorithms[operation][lang]) {
+                    editors[lang].setValue(algorithms[operation][lang]);
+                }
+            });
+
+            updateOperationInfo();
+            resetOperation();
+            clearHighlights();
+
+            // Show/hide input field based on operation
+            const inputGroup = document.querySelector('.input-group');
+            const needsInput = ['insert', 'delete', 'search'].includes(operation);
+            inputGroup.style.display = needsInput ? 'flex' : 'none';
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+
+            // Hide all editors
+            document.getElementById('monaco-go').style.display = 'none';
+            document.getElementById('monaco-java').style.display = 'none';
+            document.getElementById('monaco-python').style.display = 'none';
+
+            // Show selected editor
+            document.getElementById('monaco-' + lang).style.display = 'block';
+
+            // Update button states
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            // Update editor content for current operation
+            if (editors[lang]) {
+                const code = algorithms[currentOperation][lang];
+                editors[lang].setValue(code);
+                clearHighlights();
+            }
+        }
+
+
+
+        function highlightLine(lineNumber) {
+            if (editors[currentLang]) {
+                // Clear previous highlights
+                clearHighlights();
+
+                // Add new highlight
+                const decoration = {
+                    range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'code-line-highlight',
+                        glyphMarginClassName: 'code-line-glyph'
+                    }
+                };
+
+                currentHighlights = editors[currentLang].deltaDecorations([], [decoration]);
+
+                // Scroll to line
+                editors[currentLang].revealLine(lineNumber, monaco.editor.ScrollType.smooth);
+            }
+        }
+
+        function clearHighlights() {
+            if (editors[currentLang] && currentHighlights.length > 0) {
+                editors[currentLang].deltaDecorations(currentHighlights, []);
+                currentHighlights = [];
+            }
+        }
+
+        // Add CSS for Monaco highlights
+        // Handled by main CSS block
+
+        function createSampleTree() {
+            // Create a sample BST
+            const values = [50, 30, 70, 20, 40, 60, 80];
+            values.forEach(val => {
+                root = insertNode(root, val);
+            });
+            renderTree();
+        }
+
+        function insertNode(node, val) {
+            if (node === null) {
+                return new TreeNode(val);
+            }
+
+            if (val < node.val) {
+                node.left = insertNode(node.left, val);
+            } else if (val > node.val) {
+                node.right = insertNode(node.right, val);
+            }
+
+            return node;
+        }
+
+        function deleteNode(node, val) {
+            if (node === null) {
+                return null;
+            }
+
+            if (val < node.val) {
+                node.left = deleteNode(node.left, val);
+            } else if (val > node.val) {
+                node.right = deleteNode(node.right, val);
+            } else {
+                if (node.left === null) {
+                    return node.right;
+                } else if (node.right === null) {
+                    return node.left;
+                }
+
+                const temp = minValueNode(node.right);
+                node.val = temp.val;
+                node.right = deleteNode(node.right, temp.val);
+            }
+
+            return node;
+        }
+
+        function searchNode(node, val) {
+            if (node === null || node.val === val) {
+                return node;
+            }
+
+            if (val < node.val) {
+                return searchNode(node.left, val);
+            }
+
+            return searchNode(node.right, val);
+        }
+
+        function minValueNode(node) {
+            let current = node;
+            while (current.left !== null) {
+                current = current.left;
+            }
+            return current;
+        }
+
+        function inorderTraversal(node, result = []) {
+            if (node) {
+                inorderTraversal(node.left, result);
+                result.push(node.val);
+                inorderTraversal(node.right, result);
+            }
+            return result;
+        }
+
+        function preorderTraversal(node, result = []) {
+            if (node) {
+                result.push(node.val);
+                preorderTraversal(node.left, result);
+                preorderTraversal(node.right, result);
+            }
+            return result;
+        }
+
+        function postorderTraversal(node, result = []) {
+            if (node) {
+                postorderTraversal(node.left, result);
+                postorderTraversal(node.right, result);
+                result.push(node.val);
+            }
+            return result;
+        }
+
+        function findMin(node) {
+            if (node === null) return null;
+            while (node.left !== null) {
+                node = node.left;
+            }
+            return node;
+        }
+
+        function findMax(node) {
+            if (node === null) return null;
+            while (node.right !== null) {
+                node = node.right;
+            }
+            return node;
+        }
+
+        function renderTree() {
+            const canvas = document.getElementById('tree-canvas');
+            canvas.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-muted)" /></marker></defs>';
+
+            // Create a group for drawing tree
+            const treeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            treeGroup.setAttribute('id', 'tree-group');
+            canvas.appendChild(treeGroup);
+
+            if (root) {
+                calculatePositions(root, 400, 50, 200);
+                drawNode(treeGroup, root);
+            }
+        }
+
+        function calculatePositions(node, x, y, offset) {
+            if (node) {
+                node.x = x;
+                node.y = y;
+
+                if (node.left) {
+                    calculatePositions(node.left, x - offset, y + 80, offset / 2);
+                }
+                if (node.right) {
+                    calculatePositions(node.right, x + offset, y + 80, offset / 2);
+                }
+            }
+        }
+
+        function drawNode(parent, node) {
+            if (node.left) {
+                drawEdge(parent, node.x, node.y, node.left.x, node.left.y);
+                drawNode(parent, node.left);
+            }
+            if (node.right) {
+                drawEdge(parent, node.x, node.y, node.right.x, node.right.y);
+                drawNode(parent, node.right);
+            }
+
+            // Draw node circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', node.x);
+            circle.setAttribute('cy', node.y);
+            circle.setAttribute('r', 25);
+            let classes = 'node-circle';
+            if (node.active) classes += ' active';
+            if (node.found) classes += ' found';
+            circle.setAttribute('class', classes);
+            parent.appendChild(circle);
+
+            // Draw node text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', node.x);
+            text.setAttribute('y', node.y + 5);
+            text.setAttribute('class', 'node-text');
+            text.textContent = node.val;
+            parent.appendChild(text);
+        }
+
+        function drawEdge(parent, x1, y1, x2, y2) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1 + 25);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2 - 25);
+            line.setAttribute('class', 'edge-line');
+            parent.appendChild(line);
+        }
+
+        function executeOperation() {
+            let value = null;
+            if (['insert', 'delete', 'search'].includes(currentOperation)) {
+                value = parseInt(document.getElementById('value-input').value);
+                if (isNaN(value)) {
+                    logMessage('Please enter a valid number');
+                    return;
+                }
+            }
+
+            switch (currentOperation) {
+                case 'insert':
+                    root = insertNode(root, value);
+                    logMessage(`Inserted ${value} into BST`);
+                    break;
+                case 'delete':
+                    root = deleteNode(root, value);
+                    logMessage(`Deleted ${value} from BST`);
+                    break;
+                case 'search':
+                    const found = searchNode(root, value);
+                    logMessage(found ? `Found ${value} in BST` : `${value} not found in BST`);
+                    break;
+                case 'inorder':
+                    const inorder = inorderTraversal(root);
+                    logMessage(`In-order traversal: [${inorder.join(', ')}]`);
+                    break;
+                case 'preorder':
+                    const preorder = preorderTraversal(root);
+                    logMessage(`Pre-order traversal: [${preorder.join(', ')}]`);
+                    break;
+                case 'postorder':
+                    const postorder = postorderTraversal(root);
+                    logMessage(`Post-order traversal: [${postorder.join(', ')}]`);
+                    break;
+                case 'min':
+                    const minNode = findMin(root);
+                    logMessage(minNode ? `Minimum value: ${minNode.val}` : 'Tree is empty');
+                    break;
+                case 'max':
+                    const maxNode = findMax(root);
+                    logMessage(maxNode ? `Maximum value: ${maxNode.val}` : 'Tree is empty');
+                    break;
+            }
+
+            renderTree();
+            if (value !== null) {
+                document.getElementById('value-input').value = '';
+            }
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function animateSearch(node, val) {
+            if (!node) return null;
+            node.active = true;
+            renderTree();
+            await sleep(800);
+            node.active = false;
+            
+            if (val === node.val) {
+                node.found = true;
+                renderTree();
+                await sleep(1000);
+                node.found = false;
+                renderTree();
+                return node;
+            } else if (val < node.val) {
+                return await animateSearch(node.left, val);
+            } else {
+                return await animateSearch(node.right, val);
+            }
+        }
+        
+        async function animateInsert(node, val) {
+            if (!node) return new TreeNode(val);
+            node.active = true;
+            renderTree();
+            await sleep(800);
+            node.active = false;
+            
+            if (val < node.val) {
+                node.left = await animateInsert(node.left, val);
+            } else if (val > node.val) {
+                node.right = await animateInsert(node.right, val);
+            }
+            return node;
+        }
+
+        async function runOperation() {
+            if (isRunning) return;
+            const value = parseInt(document.getElementById('value-input').value);
+            if (isNaN(value) && ['insert', 'delete', 'search'].includes(currentOperation)) {
+                logMessage('Please enter a valid number.');
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('btn-run').disabled = true;
+            logMessage(`Running ${currentOperation} operation...`);
+            
+            try {
+                if (currentOperation === 'insert') {
+                    root = await animateInsert(root, value);
+                    logMessage(`Inserted ${value} into BST`);
+                } else if (currentOperation === 'search') {
+                    const found = await animateSearch(root, value);
+                    logMessage(found ? `Found ${value} in BST` : `${value} not found in BST`);
+                } else {
+                    // Fallback to instant execution for other operations for simplicity
+                    executeOperation();
+                }
+            } finally {
+                isRunning = false;
+                document.getElementById('btn-run').disabled = false;
+                document.getElementById('value-input').value = '';
+                renderTree();
+            }
+        }
+
+        function stepOperation() {
+            // Step through operation
+            logMessage(`Stepping through ${currentOperation}...`);
+            clearHighlights();
+
+            if (!animationSteps.length) {
+                animationSteps = getExecutionSteps(currentOperation);
+                currentStep = 0;
+            }
+
+            if (currentStep < animationSteps.length) {
+                highlightLine(animationSteps[currentStep]);
+                currentStep++;
+            } else {
+                clearHighlights();
+                logMessage(`${currentOperation} operation completed.`);
+                resetOperation();
+            }
+        }
+
+        function getExecutionSteps(operation) {
+            // Define execution steps for each operation (line numbers)
+            const steps = {
+                insert: [1, 2, 3, 4, 6, 7, 8, 9, 11],
+                delete: [1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13],
+                search: [1, 2, 3, 5, 7],
+                inorder: [1, 2, 4, 5, 6, 7, 8, 9],
+                preorder: [1, 2, 4, 5, 6, 7, 8],
+                postorder: [1, 2, 4, 5, 6, 7, 8, 9],
+                min: [1, 2, 3, 4],
+                max: [1, 2, 3, 4]
+            };
+            return steps[operation] || [];
+        }
+
+        function resetOperation() {
+            // Reset operation state
+            animationSteps = [];
+            currentStep = 0;
+            clearHighlights();
+            logMessage('Operation reset.');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function clearTree() {
+            root = null;
+            renderTree();
+            logMessage('Tree cleared.');
+        }
+
+        function generateRandomTree() {
+            clearTree();
+            const values = [];
+            for (let i = 0; i < 10; i++) {
+                values.push(Math.floor(Math.random() * 100) + 1);
+            }
+            values.forEach(val => {
+                root = insertNode(root, val);
+            });
+            renderTree();
+            logMessage('Generated random BST with 10 nodes.');
+        }
+
+        function logMessage(message) {
+            const logPanel = document.getElementById('log-panel');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script><script src="visualizer-common.js"></script></body>
+</html>

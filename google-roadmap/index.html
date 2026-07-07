@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Interview Roadmap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="site">
+    <header class="site-header">
+      <div class="brand">
+        <div class="logo">Google Interview Roadmap</div>
+        <div class="tag">Your guide to cracking the interview</div>
+      </div>
+      <nav class="nav">
+        <a href="#planner">Study Plan</a>
+        <a href="#process">Process</a>
+      </nav>
+      <button id="themeToggle" class="btn small">Toggle Theme</button>
+    </header>
+
+    <main class="main-content">
+      <section id="hero" class="hero panel">
+        <div class="hero-left">
+          <h1>Crack the Google Software Engineer Interview</h1>
+          <p class="lead">A structured 1-year roadmap covering algorithms, system design, and coding practice to help you succeed.</p>
+          <div class="hero-actions">
+            <a href="#planner" class="btn">Start Learning</a>
+          </div>
+        </div>
+        <div class="hero-right">
+        </div>
+      </section>
+
+      <section id="process" class="panel">
+        <h2>Interview Process at Google</h2>
+        <div class="steps">
+          <div class="step"><strong>Resume screening</strong><div class="hint">Tip: quantify impact, include keywords and links.</div></div>
+          <div class="step"><strong>Recruiter call</strong><div class="hint">Tip: clarify role, timelines and expectations.</div></div>
+          <div class="step"><strong>Online assessment</strong><div class="hint">Tip: practice timed problems and templates.</div></div>
+          <div class="step"><strong>Technical coding interviews</strong><div class="hint">Tip: talk through approach, write tests, handle edge-cases.</div></div>
+          <div class="step"><strong>System design round</strong><div class="hint">Tip: start high-level, discuss tradeoffs and scaling.</div></div>
+          <div class="step"><strong>Behavioral / Googliness</strong><div class="hint">Tip: prepare STAR stories focused on impact.</div></div>
+          <div class="step"><strong>Hiring committee & team matching</strong><div class="hint">Tip: keep portfolio and communication tidy.</div></div>
+        </div>
+      </section>
+
+      <section id="planner" class="panel">
+        <h2>Daily Study Planner (12 months)</h2>
+        <div id="study-plan"></div>
+        <div class="planner-controls">
+          <button id="exportProgress" class="btn small outline">Export Progress</button>
+          <button id="importProgress" class="btn small ghost">Import Progress</button>
+          <input type="file" id="importFile" style="display:none" />
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="site-footer">
+      <div>© <span id="year"></span> Google Roadmap — Your guide to cracking the interview.</div>
+    </footer>
+  </div>
+
+  <script src="scripts.js"></script>
+</body>
+</html>

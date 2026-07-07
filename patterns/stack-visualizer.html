@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="visualizer-common.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-blue {
+            color: var(--neon-blue);
+        }
+
+        .text-green {
+            color: var(--neon-green);
+        }
+
+        .text-red {
+            color: var(--neon-red);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i {
+            color: var(--neon-cyan);
+        }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col {
+            overflow-y: hidden;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(46, 160, 67, 0.1);
+            border-color: rgba(46, 160, 67, 0.4);
+            color: var(--neon-green);
+        }
+
+        .btn-danger {
+            background: rgba(248, 81, 73, 0.1);
+            border-color: rgba(248, 81, 73, 0.4);
+            color: var(--neon-red);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Visualization Area */
+        .viz-viewport {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .viz-viewport:active {
+            cursor: grabbing;
+        }
+
+        .viz-canvas {
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end; /* Stack stays at bottom */
+            padding-bottom: 50px;
+        }
+
+        .stack-container {
+            display: flex;
+            flex-direction: column-reverse; /* New items at top */
+            gap: 12px;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .stack-element {
+            width: 120px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .stack-element.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 20px rgba(88, 166, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .stack-element.found {
+            border-color: var(--neon-green);
+            background: rgba(46, 160, 67, 0.1);
+            box-shadow: 0 0 25px rgba(46, 160, 67, 0.4);
+        }
+
+        .stack-element.pop-animation {
+            transform: translate(150px, -50px) rotate(20deg);
+            opacity: 0;
+        }
+
+        /* Pointer */
+        .ptr-top {
+            position: absolute;
+            right: -80px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--neon-purple);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            font-size: 0.9rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+        }
+
+        .ptr-top.show {
+            opacity: 1;
+        }
+
+        /* Terminal Style Log */
+        .terminal-container {
+            flex: 1;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 250px;
+            max-height: 350px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 6px;
+            margin-right: 12px;
+        }
+
+        .mac-btns span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mac-btns span:nth-child(1) { background: #ff5f56; }
+        .mac-btns span:nth-child(2) { background: #ffbd2e; }
+        .mac-btns span:nth-child(3) { background: #27c93f; }
+
+        .terminal-logs {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: #e6edf3;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        .log-type-eval { color: #d2a8ff; }
+        .log-type-success { color: #3fb950; font-weight: bold; }
+        .log-type-error { color: #f85149; font-weight: bold; }
+
+        /* Monaco Code Container */
+        .code-panel-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .code-tab {
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .code-tab.active {
+            color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        #monaco-container { flex: 1; }
+
+        /* Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%;
+        }
+
+        .metric-card.m-time::before { background: var(--neon-cyan); }
+        .metric-card.m-space::before { background: var(--neon-green); }
+
+        .metric-val { font-size: 1.2rem; font-weight: 700; font-family: var(--font-mono); margin: 0.25rem 0; }
+        .metric-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .stat-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.8rem;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute; background: rgba(13, 17, 23, 0.95); border: 1px solid var(--neon-blue);
+            padding: 8px 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.8rem;
+            color: white; pointer-events: none; opacity: 0; transition: opacity 0.2s; z-index: 100;
+        }
+
+        .tooltip.show { opacity: 1; }
+
+        .monaco-line-highlight {
+            background-color: rgba(88, 166, 255, 0.2) !important;
+            border-left: 3px solid #58a6ff;
+        }
+
+        .zoom-controls {
+            display: flex; gap: 8px; background: rgba(13, 17, 23, 0.8); border: 1px solid #30363d;
+            border-radius: 6px; padding: 4px; position: absolute; top: 10px; right: 10px; z-index: 100;
+        }
+
+        .zoom-btn {
+            background: transparent; border: none; color: var(--text-muted); width: 24px; height: 24px;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="layers"></i> Stack Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span> </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL: Controls -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="cpu"></i> Configuration</div>
+                <div class="control-group">
+                    <label>Implementation Strategy</label>
+                    <select id="stack-type" class="form-select">
+                        <option value="array">Array-Based (Fixed Size)</option>
+                        <option value="dynamic">Dynamic Array (Slice)</option>
+                        <option value="list">Linked List Based</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Initial Entries (CSV)</label>
+                    <input type="text" id="init-input" class="form-input" placeholder="e.g. 10, 20, 30">
+                </div>
+                <button class="btn btn-primary" id="btn-initialize" style="width: 100%;"><i data-lucide="refresh-cw"></i> Initialize Stack</button>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+                <div class="control-group">
+                    <label>Element Value</label>
+                    <input type="number" id="val-input" class="form-input" placeholder="Value...">
+                </div>
+                <div class="btn-group" style="margin-bottom: 0.5rem;">
+                    <button class="btn btn-success" id="btn-push"><i data-lucide="arrow-down-to-line"></i> Push</button>
+                    <button class="btn btn-danger" id="btn-pop"><i data-lucide="arrow-up-from-line"></i> Pop</button>
+                </div>
+                <button class="btn" id="btn-peek" style="width: 100%;"><i data-lucide="eye"></i> Peek Top</button>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0; background: transparent; border: none; box-shadow: none; min-height: 0;">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="mac-btns"><span></span><span></span><span></span></div>
+                        <span>bash - stack_tracer.sh</span>
+                    </div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">Stack tracing engine ready.</span></div>
+                        <div id="cursor" style="width: 8px; height: 14px; background: var(--text-main); display: inline-block; animation: blink 1s step-end infinite;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CENTER PANEL: Visualization -->
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled><i data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-primary" id="btn-play" disabled><i data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled><i data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset"><i data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+                
+                <div class="control-group" style="margin: 0.5rem 0 1rem 0;">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>Animation Speed Multiplier</span>
+                        <span id="speed-val" class="text-mono">1.0x</span>
+                    </label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+                
+      <div class="algo-toolbar"><div class="control-group"></div></div>
+<div class="viz-viewport" id="viz-viewport">
+                    <!-- zoom controls removed — visualizer-common.js provides zoom UI -->
+                    <div class="viz-canvas" id="viz-canvas">
+                        <div class="stack-container" id="stack-container">
+                            <!-- Stack items -->
+                            <div class="ptr-top" id="ptr-top">
+                                <i data-lucide="arrow-left"></i> TOP
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- RIGHT PANEL: Profiler -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Time Complexity</div>
+                        <div id="time-val" class="metric-val text-blue">O(1)</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Space Complexity</div>
+                        <div id="space-val" class="metric-val text-green">O(n)</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex">
+                        <span>Stack Depth (N):</span>
+                        <span id="stat-n" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Current Capacity:</span>
+                        <span id="stat-cap" class="text-mono">10</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Executed Steps:</span>
+                        <span id="stat-steps" class="text-mono text-blue">0</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="go">main.go</button>
+                        <button class="code-tab" data-lang="java">Stack.java</button>
+                        <button class="code-tab" data-lang="python">stack.py</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="global-tooltip"></div>
+
+    <script>
+        const CODES = {
+            go: `func (s *Stack) Push(val int) {\n    if s.top == s.capacity-1 {\n        return // Overflow\n    }\n    s.data = append(s.data, val)\n    s.top++\n}\n\nfunc (s *Stack) Pop() int {\n    if s.top == -1 {\n        return -1 // Underflow\n    }\n    val := s.data[s.top]\n    s.data = s.data[:s.top]\n    s.top--\n    return val\n}\n\nfunc (s *Stack) Peek() int {\n    if s.top == -1 {\n        return -1\n    }\n    return s.data[s.top]\n}`,
+            java: `public void push(int val) {\n    if (top == capacity - 1) return; // Overflow\n    data[++top] = val;\n}\n\npublic int pop() {\n    if (top == -1) return -1; // Underflow\n    return data[top--];\n}\n\npublic int peek() {\n    if (top == -1) return -1;\n    return data[top];\n}`,
+            python: `def push(self, val):\n    if self.top == self.capacity - 1:\n        return # Overflow\n    self.data.append(val)\n    self.top += 1\n\ndef pop(self):\n    if self.top == -1:\n        return -1 # Underflow\n    val = self.data.pop()\n    self.top -= 1\n    return val\n\ndef peek(self):\n    if self.top == -1:\n        return -1\n    return self.data[self.top]`
+        };
+
+        const LINE_MAP = {
+            push: { go: [1, 7], java: [1, 4], python: [1, 5] },
+            pop: { go: [9, 17], java: [6, 9], python: [7, 12] },
+            peek: { go: [19, 24], java: [11, 14], python: [14, 18] }
+        };
+
+        const DOM = {
+            initialize: document.getElementById('btn-initialize'),
+            initInput: document.getElementById('init-input'),
+            valInput: document.getElementById('val-input'),
+            btnPush: document.getElementById('btn-push'),
+            btnPop: document.getElementById('btn-pop'),
+            btnPeek: document.getElementById('btn-peek'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            stackContainer: document.getElementById('stack-container'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            statN: document.getElementById('stat-n'),
+            statSteps: document.getElementById('stat-steps'),
+            ptrTop: document.getElementById('ptr-top'),
+            canvas: document.getElementById('viz-canvas'),
+            viewport: document.getElementById('viz-viewport'),
+            // zoomValText: provided by visualizer-common.js when needed
+            tooltip: document.getElementById('global-tooltip')
+        };
+
+        let state = {
+            stack: [],
+            steps: [],
+            currentStepIndex: -1,
+            isPlaying: false,
+            playInterval: null,
+            baseDelay: 1000,
+            activeLang: 'go',
+            activeOp: 'push',
+            editorDecorations: [],
+            zoom: 1.0,
+            panX: 0,
+            panY: 0
+        };
+
+        // Monaco Init
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES[state.activeLang],
+                language: 'go',
+                theme: 'vs-dark',
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: "'Fira Code', monospace",
+                lineHeight: 22,
+                renderLineHighlight: 'none'
+            });
+            initApp();
+        });
+
+        function initApp() {
+            setupListeners();
+            lucide.createIcons();
+            termLog("Stack Visualization System Online", 'sys');
+            resetStack([10, 20, 30, 40]);
+        }
+
+        function setupListeners() {
+            DOM.initialize.addEventListener('click', () => {
+                const vals = DOM.initInput.value.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v));
+                resetStack(vals);
+            });
+            DOM.btnPush.addEventListener('click', () => startOperation('push'));
+            DOM.btnPop.addEventListener('click', () => startOperation('pop'));
+            DOM.btnPeek.addEventListener('click', () => startOperation('peek'));
+
+            DOM.animSpeed.addEventListener('input', e => {
+                DOM.speedVal.textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+                if (state.isPlaying) { pauseAnim(); playAnim(); }
+            });
+
+            DOM.btnPlay.addEventListener('click', () => state.isPlaying ? pauseAnim() : playAnim());
+            DOM.btnNext.addEventListener('click', stepNext);
+            DOM.btnPrev.addEventListener('click', stepPrev);
+            DOM.btnReset.addEventListener('click', () => resetStack([10, 20, 30, 40]));
+
+            DOM.codeTabs.forEach(tab => {
+                tab.addEventListener('click', e => {
+                    DOM.codeTabs.forEach(t => t.classList.remove('active'));
+                    e.target.classList.add('active');
+                    state.activeLang = e.target.dataset.lang;
+                    window.monacoEditor.setValue(CODES[state.activeLang]);
+                    monaco.editor.setModelLanguage(window.monacoEditor.getModel(), state.activeLang);
+                    updateCodeHighlight();
+                });
+            });
+        }
+
+        // Zoom/pan handled by visualizer-common.js (centralized)
+
+        function termLog(msg, type = 'info') {
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            let tClass = 'log-type-sys', tag = '[SYS]';
+            if (type === 'eval') { tClass = 'log-type-eval'; tag = '[EVL]'; }
+            else if (type === 'success') { tClass = 'log-type-success'; tag = '[OK ]'; }
+            else if (type === 'error') { tClass = 'log-type-error'; tag = '[ERR]'; }
+            
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${tClass}">${tag}</span><span class="log-msg">${msg}</span>`;
+            DOM.logsContainer.insertBefore(div, DOM.cursorLog);
+            DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        function resetStack(vals = []) {
+            pauseAnim();
+            state.stack = vals;
+            state.steps = [];
+            state.currentStepIndex = -1;
+            renderStack();
+            termLog(`Stack reset with ${vals.length} items`, 'sys');
+            DOM.btnPlay.disabled = true; DOM.btnNext.disabled = true;
+        }
+
+        function startOperation(op) {
+            state.activeOp = op;
+            let val = parseInt(DOM.valInput.value);
+            if(op === 'push' && isNaN(val)) { termLog("Please enter a valid number", 'error'); return; }
+            
+            pauseAnim();
+            buildSteps(op, val);
+            state.currentStepIndex = -1;
+            DOM.btnPlay.disabled = false; DOM.btnNext.disabled = false;
+            stepNext();
+        }
+
+        function buildSteps(op, val) {
+            let steps = [];
+            let currentStack = [...state.stack];
+            
+            if (op === 'push') {
+                steps.push({ stack: [...currentStack], log: `Ready to push ${val}`, line: getLine(op, 0) });
+                steps.push({ stack: [...currentStack], log: `Checking capacity limits...`, line: getLine(op, 1) });
+                currentStack.push(val);
+                steps.push({ stack: [...currentStack], log: `Data appended: data[top+1] = ${val}`, line: getLine(op, 2), pushIdx: currentStack.length-1 });
+                steps.push({ stack: [...currentStack], log: `Top pointer incremented. Push successful.`, line: getLine(op, 3), success: true });
+            } else if (op === 'pop') {
+                steps.push({ stack: [...currentStack], log: `Attempting Pop operation.`, line: getLine(op, 0) });
+                if (currentStack.length === 0) {
+                    steps.push({ stack: [], log: `Stack Underflow! Cannot pop from empty stack.`, line: getLine(op, 1), error: true });
+                } else {
+                    let popped = currentStack[currentStack.length-1];
+                    steps.push({ stack: [...currentStack], log: `Identified top element: ${popped}`, line: getLine(op, 3), activeIdx: currentStack.length-1 });
+                    currentStack.pop();
+                    steps.push({ stack: [...currentStack], log: `Removed top. Value ${popped} returned.`, line: getLine(op, 4), success: true });
+                }
+            } else if (op === 'peek') {
+                steps.push({ stack: [...currentStack], log: `Peeking top element.`, line: getLine(op, 0) });
+                if (currentStack.length === 0) {
+                    steps.push({ stack: [], log: `Stack is empty. Nothing to peek.`, line: getLine(op, 1), error: true });
+                } else {
+                    steps.push({ stack: [...currentStack], log: `Top value is ${currentStack[currentStack.length-1]}`, line: getLine(op, 3), foundIdx: currentStack.length-1, success: true });
+                }
+            }
+            state.steps = steps;
+        }
+
+        function getLine(op, stepOffset) {
+            const startLine = LINE_MAP[op][state.activeLang][0];
+            return startLine + stepOffset;
+        }
+
+        function renderStack(currentStack = state.stack, status = {}) {
+            DOM.stackContainer.innerHTML = '';
+            currentStack.forEach((val, i) => {
+                const el = document.createElement('div');
+                el.className = 'stack-element';
+                if (status.activeIdx === i) el.classList.add('active');
+                if (status.foundIdx === i) el.classList.add('found');
+                if (status.pushIdx === i) el.style.animation = 'bounce 0.5s ease';
+                el.textContent = val;
+                DOM.stackContainer.appendChild(el);
+            });
+
+            // Update Pointer
+            if (currentStack.length > 0) {
+                DOM.ptrTop.classList.add('show');
+                const topEl = DOM.stackContainer.lastChild;
+                DOM.ptrTop.style.bottom = (currentStack.length * 62) - 45 + 'px';
+            } else {
+                DOM.ptrTop.classList.remove('show');
+            }
+
+            DOM.statN.textContent = currentStack.length;
+        }
+
+        function stepNext() {
+            if (state.currentStepIndex < state.steps.length - 1) {
+                state.currentStepIndex++;
+                applyStep();
+            } else pauseAnim();
+        }
+
+        function stepPrev() {
+            if (state.currentStepIndex > 0) {
+                state.currentStepIndex--;
+                applyStep();
+            }
+        }
+
+        function applyStep() {
+            const step = state.steps[state.currentStepIndex];
+            state.stack = step.stack;
+            renderStack(step.stack, step);
+            termLog(step.log, step.error ? 'error' : (step.success ? 'success' : 'info'));
+            highlightLine(step.line);
+            DOM.statSteps.textContent = state.currentStepIndex + 1;
+            DOM.btnPrev.disabled = state.currentStepIndex <= 0;
+            DOM.btnNext.disabled = state.currentStepIndex >= state.steps.length - 1;
+        }
+
+        function highlightLine(line) {
+            if (!window.monacoEditor) return;
+            state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, [
+                { range: new monaco.Range(line, 1, line, 1), options: { isWholeLine: true, className: 'monaco-line-highlight' } }
+            ]);
+            window.monacoEditor.revealLineInCenter(line);
+        }
+
+        function updateCodeHighlight() {
+            if (state.currentStepIndex >= 0) {
+                const step = state.steps[state.currentStepIndex];
+                // Recalculate line based on new language if needed (offsets might change but here we assume structure matches)
+                highlightLine(step.line);
+            }
+        }
+
+        function playAnim() {
+            state.isPlaying = true;
+            DOM.btnPlay.innerHTML = '<i data-lucide="pause"></i> Pause';
+            lucide.createIcons();
+            state.playInterval = setInterval(() => {
+                if (state.currentStepIndex >= state.steps.length - 1) return pauseAnim();
+                stepNext();
+            }, state.baseDelay / parseFloat(DOM.animSpeed.value));
+        }
+
+        function pauseAnim() {
+            state.isPlaying = false;
+            clearInterval(state.playInterval);
+            DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+            lucide.createIcons();
+        }
+    </script>
+    <script src="visualizer-common.js"></script>
+</body>
+</html>

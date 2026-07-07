@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="visualizer-common.css" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Heap Visualizer - Pro</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .panel-header i { color: var(--neon-cyan); }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .app-title {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.5rem; color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim); font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex; flex-direction: column; gap: 1.5rem;
+            height: 100%; overflow-y: auto; padding-right: 0.5rem;
+        }
+        .column.center-col { overflow-y: hidden; }
+
+        .control-group { margin-bottom: 1rem; }
+        .control-group label {
+            display: block; margin-bottom: 0.5rem; font-size: 0.85rem;
+            color: var(--text-muted); font-weight: 500;
+        }
+
+        .form-input, .form-select, .input-field {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+        .input-group { display: flex; gap: 8px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; background: #21262d; border: 1px solid #30363d;
+            color: var(--text-main); padding: 0.6rem 1rem; border-radius: 6px;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-primary { background: rgba(88, 166, 255, 0.1); border-color: rgba(88, 166, 255, 0.4); color: var(--neon-cyan); }
+        .btn-success { background: rgba(46, 160, 67, 0.1); border-color: rgba(46, 160, 67, 0.4); color: var(--neon-green); }
+        .btn-danger, .btn.danger { background: rgba(248, 81, 73, 0.1); border-color: rgba(248, 81, 73, 0.4); color: var(--neon-red); }
+
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item { display: block; padding: 0.5rem 0.75rem; color: var(--text-muted); text-decoration: none; border-radius: 6px; margin-bottom: 2px; transition: all 0.2s; font-size: 0.9rem; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(88, 166, 255, 0.1); color: var(--neon-cyan); border-left: 2px solid var(--neon-cyan); }
+
+        .viz-viewport {
+            flex: 1; position: relative; background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px; overflow: hidden; display: flex; cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
+        }
+        .viz-canvas {
+            transform-origin: 0 0; flex: 1; position: relative; padding: 20px; display: flex; flex-direction: column;
+        }
+        #heap-canvas { flex: 1; min-height: 250px; }
+
+        /* Terminal */
+        .terminal-container { flex: 1; background: #0d1117; border-radius: 8px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; height: 100%; min-height: 200px; }
+        .terminal-header { background: #161b22; padding: 6px 12px; border-bottom: 1px solid #30363d; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display:flex; align-items:center; }
+        .terminal-logs { padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; color: #e6edf3; }
+        .log-line { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        
+        .log-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .log-entry { font-family: var(--font-mono); font-size: 0.85rem; color: #e6edf3; padding-bottom: 2px; }
+
+        /* Monaco */
+        .code-section { flex: 1; display: flex; flex-direction: column; height: 100%; background: transparent; border: none; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 0.6rem 1rem; border-bottom: 1px solid #30363d; font-size: 0.9rem; color: var(--text-main); border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .btn-group { display: flex; gap: 0.5rem; }
+        .lang-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 8px; }
+        .lang-btn.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); }
+        .code-content { flex: 1; position: relative; background: #0d1117; }
+        .monaco-container { position: absolute; width: 100%; height: 100%; }
+        .code-controls { padding: 10px; background: #161b22; border-top: 1px solid #30363d; font-size: 0.85rem; color: var(--text-muted); text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
+        .code-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        .code-line-glyph { background: var(--neon-cyan) !important; }
+
+        /* Heap Styles */
+        .heap-node {
+            fill: #161b22;
+            stroke: #30363d;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .heap-node.active {
+            fill: rgba(88, 166, 255, 0.1);
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.3));
+        }
+        .heap-node.compare {
+            fill: rgba(249, 115, 22, 0.1);
+            stroke: #fb923c;
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.3));
+        }
+        .heap-node.swap {
+            fill: rgba(63, 185, 80, 0.1);
+            stroke: var(--neon-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.3));
+        }
+        .heap-text {
+            fill: var(--text-main);
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+        .heap-edge {
+            stroke: #30363d;
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+        .heap-edge.active {
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+        }
+
+        /* Array View */
+        .array-view {
+            background: #0d1117;
+            border-top: 1px solid #30363d;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: auto;
+        }
+        .array-cell {
+            width: 45px;
+            height: 45px;
+            border: 1px solid #30363d;
+            background: #161b22;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: 600;
+            font-family: var(--font-mono);
+            color: var(--text-main);
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .array-cell.active {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: var(--neon-cyan);
+            transform: scale(1.1);
+        }
+        .array-cell.compare {
+            background: rgba(249, 115, 22, 0.1);
+            border-color: #fb923c;
+        }
+        .array-cell.swap {
+            background: rgba(63, 185, 80, 0.1);
+            border-color: var(--neon-green);
+        }
+        .array-index {
+            position: absolute;
+            bottom: -20px;
+            font-size: 10px;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+    </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Heap Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Operations</div>
+<a class="nav-item active" href="javascript:void(0)" id="nav-insert" onclick="selectOperation('insert')">Insert</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-extract" onclick="selectOperation('extract')">Extract Min</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-heapify" onclick="selectOperation('heapify')">Heapify</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-build" onclick="selectOperation('build')">Build Heap</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-sort" onclick="selectOperation('sort')">Heap Sort</a>
+</div>
+</section>
+<section class="panel">
+<div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+<div class="control-group">
+<label>Value</label>
+<div class="input-group">
+<input class="input-field" id="value-input" placeholder="Enter value" type="number"/>
+<button class="btn btn-primary" id="execute-btn" onclick="executeOperation()">Execute</button>
+</div>
+</div>
+<div class="control-group">
+<button class="btn danger" id="clear-heap" onclick="clearHeap()">Clear Heap</button>
+<button class="btn" id="random-heap" onclick="generateRandomHeap()">Random Heap</button>
+</div>
+</section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none; min-height: 200px;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+<div class="log-section" id="log-panel">
+<div class="log-entry">Heap visualizer ready...</div>
+</div></div>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> <span id="studio-title">Algorithm Visualization Studio</span></div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-prev" title="Step Back"><i data-lucide="chevron-left" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-play" title="Play/Pause" onclick="runOperation()"><i data-lucide="play" style="width:16px;height:16px;color:var(--neon-cyan)"></i> Play</button>
+<button class="tool-btn" id="btn-next" title="Step Forward" onclick="stepOperation()"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-reset" title="Restart" onclick="resetOperation()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i></button>
+</div></div>
+<div style="padding: 15px 20px 0 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.8rem; color:var(--text-muted); text-transform: uppercase;">Animation Speed Multiplier</span>
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-main);" id="speed-display">1.0x</span>
+    </div>
+    <input type="range" id="anim-speed" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%; accent-color:var(--neon-cyan);">
+</div>
+<div class="viz-viewport" style="margin: 15px; border-radius: 8px;"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="heap-canvas" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="var(--text-secondary)" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg><div class="array-view" id="array-view">
+<!-- Array cells will be dynamically added here -->
+</div></div></div></section></div><div class="column">
+<section class="panel" style="margin-bottom: 0;">
+    <div class="panel-header"><i data-lucide="activity"></i> Performance Profiler</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Time Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem;" id="time-complexity">O(log n)</div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Space Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-green); font-weight: bold; font-size: 1.1rem;" id="space-complexity">O(1)</div>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Current Heap Size:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-size">0</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Comparisons/Swaps:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-ops">0 / 0</span>
+    </div>
+</section>
+<section class="panel" style="flex: 1; padding: 0;">
+<div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<span>Algorithm Code</span>
+<div class="btn-group">
+<button class="lang-btn active" id="lang-go" onclick="setLang('go')">Go</button>
+<button class="lang-btn" id="lang-java" onclick="setLang('java')">Java</button>
+<button class="lang-btn" id="lang-python" onclick="setLang('python')">Python</button>
+</div>
+</div>
+<div class="code-content">
+<div class="monaco-container" id="monaco-go" style="display: block;"></div>
+<div class="monaco-container" id="monaco-java" style="display: none;"></div>
+<div class="monaco-container" id="monaco-python" style="display: none;"></div>
+</div>
+<div class="code-controls">
+<div class="control-group">
+<span id="operation-info">Insert Operation</span>
+</div>
+</div>
+</div></section></div></div><script>
+        // Global variables
+        let heap = [];
+        let heapActiveIndex = -1;
+        let heapCompareIndex1 = -1;
+        let heapCompareIndex2 = -1;
+        let heapSwapIndex1 = -1;
+        let heapSwapIndex2 = -1;
+        let currentOperation = 'insert';
+        let currentLang = 'go';
+        let animationSteps = [];
+        let currentStep = 0;
+        let isRunning = false;
+        let editors = {};
+        let currentHighlights = [];
+        
+        function clearHeapState() {
+            heapActiveIndex = -1;
+            heapCompareIndex1 = -1;
+            heapCompareIndex2 = -1;
+            heapSwapIndex1 = -1;
+            heapSwapIndex2 = -1;
+        }
+
+        // Algorithm implementations
+        const algorithms = {
+            insert: {
+                go: `func insert(heap *[]int, val int) {
+    *heap = append(*heap, val)
+    i := len(*heap) - 1
+
+    for i > 0 {
+        parent := (i - 1) / 2
+        if (*heap)[parent] <= (*heap)[i] {
+            break
+        }
+        (*heap)[parent], (*heap)[i] = (*heap)[i], (*heap)[parent]
+        i = parent
+    }
+}`,
+                java: `public void insert(List<Integer> heap, int val) {
+    heap.add(val);
+    int i = heap.size() - 1;
+
+    while (i > 0) {
+        int parent = (i - 1) / 2;
+        if (heap.get(parent) <= heap.get(i)) {
+            break;
+        }
+        // Swap
+        int temp = heap.get(parent);
+        heap.set(parent, heap.get(i));
+        heap.set(i, temp);
+        i = parent;
+    }
+}`,
+                python: `def insert(heap, val):
+    heap.append(val)
+    i = len(heap) - 1
+
+    while i > 0:
+        parent = (i - 1) // 2
+        if heap[parent] <= heap[i]:
+            break
+        heap[parent], heap[i] = heap[i], heap[parent]
+        i = parent`
+            },
+            extract: {
+                go: `func extractMin(heap *[]int) int {
+    if len(*heap) == 0 {
+        return -1
+    }
+
+    min := (*heap)[0]
+    last := len(*heap) - 1
+    (*heap)[0] = (*heap)[last]
+    *heap = (*heap)[:last]
+
+    heapify(heap, 0)
+    return min
+}
+
+func heapify(heap *[]int, i int) {
+    smallest := i
+    left := 2*i + 1
+    right := 2*i + 2
+
+    if left < len(*heap) && (*heap)[left] < (*heap)[smallest] {
+        smallest = left
+    }
+    if right < len(*heap) && (*heap)[right] < (*heap)[smallest] {
+        smallest = right
+    }
+
+    if smallest != i {
+        (*heap)[i], (*heap)[smallest] = (*heap)[smallest], (*heap)[i]
+        heapify(heap, smallest)
+    }
+}`,
+                java: `public int extractMin(List<Integer> heap) {
+    if (heap.isEmpty()) return -1;
+
+    int min = heap.get(0);
+    int last = heap.size() - 1;
+    heap.set(0, heap.get(last));
+    heap.remove(last);
+
+    heapify(heap, 0);
+    return min;
+}
+
+private void heapify(List<Integer> heap, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < heap.size() && heap.get(left) < heap.get(smallest)) {
+        smallest = left;
+    }
+    if (right < heap.size() && heap.get(right) < heap.get(smallest)) {
+        smallest = right;
+    }
+
+    if (smallest != i) {
+        int temp = heap.get(i);
+        heap.set(i, heap.get(smallest));
+        heap.set(smallest, temp);
+        heapify(heap, smallest);
+    }
+}`,
+                python: `def extract_min(heap):
+    if not heap:
+        return -1
+
+    min_val = heap[0]
+    last = len(heap) - 1
+    heap[0] = heap[last]
+    heap.pop()
+
+    heapify(heap, 0)
+    return min_val
+
+def heapify(heap, i):
+    smallest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < len(heap) and heap[left] < heap[smallest]:
+        smallest = left
+    if right < len(heap) and heap[right] < heap[smallest]:
+        smallest = right
+
+    if smallest != i:
+        heap[i], heap[smallest] = heap[smallest], heap[i]
+        heapify(heap, smallest)`
+            },
+            heapify: {
+                go: `func heapify(heap *[]int, i int) {
+    smallest := i
+    left := 2*i + 1
+    right := 2*i + 2
+
+    if left < len(*heap) && (*heap)[left] < (*heap)[smallest] {
+        smallest = left
+    }
+    if right < len(*heap) && (*heap)[right] < (*heap)[smallest] {
+        smallest = right
+    }
+
+    if smallest != i {
+        (*heap)[i], (*heap)[smallest] = (*heap)[smallest], (*heap)[i]
+        heapify(heap, smallest)
+    }
+}`,
+                java: `private void heapify(List<Integer> heap, int i) {
+    int smallest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+
+    if (left < heap.size() && heap.get(left) < heap.get(smallest)) {
+        smallest = left;
+    }
+    if (right < heap.size() && heap.get(right) < heap.get(smallest)) {
+        smallest = right;
+    }
+
+    if (smallest != i) {
+        int temp = heap.get(i);
+        heap.set(i, heap.get(smallest));
+        heap.set(smallest, temp);
+        heapify(heap, smallest);
+    }
+}`,
+                python: `def heapify(heap, i):
+    smallest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+
+    if left < len(heap) and heap[left] < heap[smallest]:
+        smallest = left
+    if right < len(heap) and heap[right] < heap[smallest]:
+        smallest = right
+
+    if smallest != i:
+        heap[i], heap[smallest] = heap[smallest], heap[i]
+        heapify(heap, smallest)`
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            initMonacoEditors();
+            createSampleHeap();
+        }
+
+        function initMonacoEditors() {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], function() {
+                // Initialize Go editor
+                editors.go = monaco.editor.create(document.getElementById('monaco-go'), {
+                    value: algorithms.insert.go,
+                    language: 'go',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Java editor
+                editors.java = monaco.editor.create(document.getElementById('monaco-java'), {
+                    value: algorithms.insert.java,
+                    language: 'java',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Python editor
+                editors.python = monaco.editor.create(document.getElementById('monaco-python'), {
+                    value: algorithms.insert.python,
+                    language: 'python',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Set initial language
+                setLang('go');
+            });
+        }
+
+        function setupCanvas() {
+            const canvas = document.getElementById('heap-canvas');
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            // Event listeners
+        }
+
+        const opTitles = {
+            insert: '➕ Insert Node',
+            extract: '⬆️ Extract Min',
+            heapify: '🔄 Heapify',
+            build: '🏗️ Build Heap',
+            sort: '📊 Heap Sort'
+        };
+
+        function selectOperation(operation) {
+            currentOperation = operation;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + operation).classList.add('active');
+
+            const titleEl = document.getElementById('studio-title');
+            if (titleEl && opTitles[operation]) {
+                titleEl.innerText = opTitles[operation];
+            }
+
+            // Update all editors with new operation code
+            Object.keys(editors).forEach(lang => {
+                if (algorithms[operation] && algorithms[operation][lang]) {
+                    editors[lang].setValue(algorithms[operation][lang]);
+                }
+            });
+
+            updateOperationInfo();
+            resetOperation();
+            clearHighlights();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+
+            // Hide all editors
+            document.getElementById('monaco-go').style.display = 'none';
+            document.getElementById('monaco-java').style.display = 'none';
+            document.getElementById('monaco-python').style.display = 'none';
+
+            // Show selected editor
+            document.getElementById('monaco-' + lang).style.display = 'block';
+
+            // Update button states
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+
+            // Update editor content for current operation
+            if (editors[lang]) {
+                const code = algorithms[currentOperation][lang];
+                editors[lang].setValue(code);
+                clearHighlights();
+            }
+        }
+
+
+
+        function updateOperationInfo() {
+            const info = document.getElementById('operation-info');
+            const operationNames = {
+                insert: 'Insert Operation',
+                extract: 'Extract Min Operation',
+                heapify: 'Heapify Operation',
+                build: 'Build Heap Operation',
+                sort: 'Heap Sort Operation'
+            };
+            info.textContent = operationNames[currentOperation] || 'Operation';
+        }
+
+        function highlightLine(lineNumber) {
+            if (editors[currentLang]) {
+                // Clear previous highlights
+                clearHighlights();
+
+                // Add new highlight
+                const decoration = {
+                    range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'code-line-highlight',
+                        glyphMarginClassName: 'code-line-glyph'
+                    }
+                };
+
+                currentHighlights = editors[currentLang].deltaDecorations([], [decoration]);
+
+                // Scroll to line
+                editors[currentLang].revealLine(lineNumber, monaco.editor.ScrollType.smooth);
+            }
+        }
+
+        function clearHighlights() {
+            if (editors[currentLang] && currentHighlights.length > 0) {
+                editors[currentLang].deltaDecorations(currentHighlights, []);
+                currentHighlights = [];
+            }
+        }
+
+        // Monaco highlights CSS moved to main <style> block
+
+        function createSampleHeap() {
+            // Create a sample min-heap
+            const values = [3, 7, 5, 12, 9, 8, 15];
+            heap = [];
+            values.forEach(val => {
+                insertHeap(val);
+            });
+            renderHeap();
+        }
+
+        function insertHeap(val) {
+            heap.push(val);
+            let i = heap.length - 1;
+
+            while (i > 0) {
+                const parent = Math.floor((i - 1) / 2);
+                if (heap[parent] <= heap[i]) {
+                    break;
+                }
+                [heap[parent], heap[i]] = [heap[i], heap[parent]];
+                i = parent;
+            }
+        }
+
+        function renderHeap() {
+            const canvas = document.getElementById('heap-canvas');
+            canvas.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-muted)" /></marker></defs>';
+
+            if (heap.length > 0) {
+                const positions = calculateHeapPositions(heap.length);
+                heap.forEach((val, index) => {
+                    drawHeapNode(canvas, val, index, positions[index]);
+                });
+            }
+
+            renderArrayView();
+        }
+
+        function calculateHeapPositions(n) {
+            const positions = [];
+            const levels = Math.ceil(Math.log2(n + 1));
+            const canvas = document.getElementById('heap-canvas');
+            const width = canvas.clientWidth || 800;
+            const height = (canvas.clientHeight || 400) - 100; // Leave space for array view
+
+            for (let i = 0; i < n; i++) {
+                const level = Math.floor(Math.log2(i + 1));
+                const nodesInLevel = Math.pow(2, level);
+                const positionInLevel = i - (Math.pow(2, level) - 1);
+                const x = (positionInLevel + 0.5) * (width / nodesInLevel);
+                const y = (level + 1) * (height / (levels + 1));
+                positions.push({ x, y });
+            }
+
+            return positions;
+        }
+
+        function drawHeapNode(canvas, val, index, pos) {
+            // Draw edges first
+            const leftChild = 2 * index + 1;
+            const rightChild = 2 * index + 2;
+
+            if (leftChild < heap.length) {
+                const leftPos = calculateHeapPositions(heap.length)[leftChild];
+                drawHeapEdge(canvas, pos.x, pos.y, leftPos.x, leftPos.y);
+            }
+            if (rightChild < heap.length) {
+                const rightPos = calculateHeapPositions(heap.length)[rightChild];
+                drawHeapEdge(canvas, pos.x, pos.y, rightPos.x, rightPos.y);
+            }
+
+            // Draw node
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', pos.x);
+            circle.setAttribute('cy', pos.y);
+            circle.setAttribute('r', 25);
+            let classes = 'heap-node';
+            if (index === heapActiveIndex) classes += ' active';
+            if (index === heapCompareIndex1 || index === heapCompareIndex2) classes += ' compare';
+            if (index === heapSwapIndex1 || index === heapSwapIndex2) classes += ' swap';
+            circle.setAttribute('class', classes);
+            canvas.appendChild(circle);
+
+            // Draw text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', pos.x);
+            text.setAttribute('y', pos.y + 5);
+            text.setAttribute('class', 'heap-text');
+            text.textContent = val;
+            canvas.appendChild(text);
+        }
+
+        function drawHeapEdge(canvas, x1, y1, x2, y2) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1 + 25);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2 - 25);
+            line.setAttribute('class', 'heap-edge');
+            canvas.appendChild(line);
+        }
+
+        function renderArrayView() {
+            const arrayView = document.getElementById('array-view');
+            arrayView.innerHTML = '';
+
+            heap.forEach((val, index) => {
+                const cell = document.createElement('div');
+                let classes = 'array-cell';
+                if (index === heapActiveIndex) classes += ' active';
+                if (index === heapCompareIndex1 || index === heapCompareIndex2) classes += ' compare';
+                if (index === heapSwapIndex1 || index === heapSwapIndex2) classes += ' swap';
+                cell.className = classes;
+                cell.textContent = val;
+
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'array-index';
+                indexLabel.textContent = index;
+                cell.appendChild(indexLabel);
+
+                arrayView.appendChild(cell);
+            });
+        }
+
+        function executeOperation() {
+            const value = parseInt(document.getElementById('value-input').value);
+            if (isNaN(value) && currentOperation === 'insert') {
+                logMessage('Please enter a valid number');
+                return;
+            }
+
+            switch (currentOperation) {
+                case 'insert':
+                    insertHeap(value);
+                    logMessage(`Inserted ${value} into heap`);
+                    break;
+                case 'extract':
+                    const min = extractMin();
+                    if (min !== -1) {
+                        logMessage(`Extracted min: ${min}`);
+                    } else {
+                        logMessage('Heap is empty');
+                    }
+                    break;
+                case 'heapify':
+                    // Heapify the entire heap
+                    for (let i = Math.floor(heap.length / 2) - 1; i >= 0; i--) {
+                        heapify(i);
+                    }
+                    logMessage('Heapified the array');
+                    break;
+            }
+
+            renderHeap();
+            document.getElementById('value-input').value = '';
+        }
+
+        function extractMin() {
+            if (heap.length === 0) return -1;
+
+            const min = heap[0];
+            const last = heap.length - 1;
+            heap[0] = heap[last];
+            heap.pop();
+
+            heapify(0);
+            return min;
+        }
+
+        function heapify(i) {
+            let smallest = i;
+            const left = 2 * i + 1;
+            const right = 2 * i + 2;
+
+            if (left < heap.length && heap[left] < heap[smallest]) {
+                smallest = left;
+            }
+            if (right < heap.length && heap[right] < heap[smallest]) {
+                smallest = right;
+            }
+
+            if (smallest !== i) {
+                [heap[i], heap[smallest]] = [heap[smallest], heap[i]];
+                heapify(smallest);
+            }
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function animateInsertHeap(val) {
+            heap.push(val);
+            let i = heap.length - 1;
+            heapActiveIndex = i;
+            renderHeap();
+            await sleep(800);
+
+            while (i > 0) {
+                const parent = Math.floor((i - 1) / 2);
+                heapCompareIndex1 = parent;
+                heapCompareIndex2 = i;
+                renderHeap();
+                await sleep(800);
+
+                if (heap[parent] <= heap[i]) {
+                    break;
+                }
+                
+                heapCompareIndex1 = -1;
+                heapCompareIndex2 = -1;
+                heapSwapIndex1 = parent;
+                heapSwapIndex2 = i;
+                renderHeap();
+                await sleep(400);
+
+                [heap[parent], heap[i]] = [heap[i], heap[parent]];
+                heapSwapIndex1 = -1;
+                heapSwapIndex2 = -1;
+                heapActiveIndex = parent;
+                i = parent;
+                renderHeap();
+                await sleep(800);
+            }
+            clearHeapState();
+            renderHeap();
+        }
+
+        async function runOperation() {
+            if (isRunning) return;
+            const value = parseInt(document.getElementById('value-input').value);
+            if (isNaN(value) && ['insert'].includes(currentOperation)) {
+                logMessage('Please enter a valid number.');
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('btn-run').disabled = true;
+            logMessage(`Running ${currentOperation} operation...`);
+            
+            try {
+                if (currentOperation === 'insert') {
+                    await animateInsertHeap(value);
+                    logMessage(`Inserted ${value} into Heap`);
+                } else {
+                    // Fallback to instant for other operations
+                    executeOperation();
+                }
+            } finally {
+                isRunning = false;
+                document.getElementById('btn-run').disabled = false;
+                document.getElementById('value-input').value = '';
+                clearHeapState();
+                renderHeap();
+            }
+        }
+
+        function stepOperation() {
+            // Step through operation
+            logMessage(`Stepping through ${currentOperation}...`);
+            clearHighlights();
+
+            if (!animationSteps.length) {
+                animationSteps = getExecutionSteps(currentOperation);
+                currentStep = 0;
+            }
+
+            if (currentStep < animationSteps.length) {
+                highlightLine(animationSteps[currentStep]);
+                currentStep++;
+            } else {
+                clearHighlights();
+                logMessage(`${currentOperation} operation completed.`);
+                resetOperation();
+            }
+        }
+
+        function getExecutionSteps(operation) {
+            // Define execution steps for each operation (line numbers)
+            const steps = {
+                insert: [1, 2, 3, 5, 6, 7, 8, 9, 10],
+                extract: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                heapify: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                build: [1, 2, 3, 4, 5],
+                sort: [1, 2, 3, 4, 5, 6, 7, 8]
+            };
+            return steps[operation] || [];
+        }
+
+        function resetOperation() {
+            // Reset operation state
+            logMessage('Operation reset.');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function clearHeap() {
+            heap = [];
+            renderHeap();
+            logMessage('Heap cleared.');
+        }
+
+        function generateRandomHeap() {
+            clearHeap();
+            const values = [];
+            for (let i = 0; i < 8; i++) {
+                values.push(Math.floor(Math.random() * 50) + 1);
+            }
+            values.forEach(val => {
+                insertHeap(val);
+            });
+            renderHeap();
+            logMessage('Generated random min-heap with 8 nodes.');
+        }
+
+        function logMessage(message) {
+            const logPanel = document.getElementById('log-panel');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script><script src="visualizer-common.js"></script></body>
+</html>

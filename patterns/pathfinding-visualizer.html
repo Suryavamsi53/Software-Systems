@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pathfinding Visualizer</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <link rel="stylesheet" href="visualizer.css">
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Software Systems</h1>
+                <p>Pathfinding Visualizer</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Algorithms</div>
+                <a href="javascript:void(0)" class="nav-item active" id="nav-bfs" onclick="selectAlgorithm('bfs')">Breadth-First Search</a>
+                <a href="javascript:void(0)" class="nav-item" id="nav-dfs" onclick="selectAlgorithm('dfs')">Depth-First Search</a>
+                <a href="javascript:void(0)" class="nav-item" id="nav-dijkstra" onclick="selectAlgorithm('dijkstra')">Dijkstra</a>
+                <a href="javascript:void(0)" class="nav-item" id="nav-astar" onclick="selectAlgorithm('astar')">A* Search</a>
+            </div>
+
+            <!-- Pathfinding Controls -->
+            <div class="pathfinding-controls">
+                <div class="control-group">
+                    <label>Grid Size</label>
+                    <div class="input-group">
+                        <input type="number" id="grid-rows" class="input-field" value="20" min="5" max="30">
+                        <span style="color: var(--text-muted);">×</span>
+                        <input type="number" id="grid-cols" class="input-field" value="30" min="5" max="40">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Speed (ms)</label>
+                    <input type="range" id="animation-speed" min="10" max="500" value="100" class="input-field">
+                </div>
+                <div class="btn-group">
+                    <button id="generate-maze" class="btn" onclick="generateMaze()">Generate Maze</button>
+                    <button id="clear-grid" class="btn" onclick="clearGrid()">Clear Grid</button>
+                </div>
+                <div class="btn-group">
+                    <button id="start-visualization" class="btn btn-primary" onclick="startVisualization()">Start Search</button>
+                    <button id="stop-visualization" class="btn danger" onclick="stopVisualization()">Stop</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text">Ready. Click cells to add walls, drag to set start/end points.</div>
+                    <div class="control-group">
+                        <!-- zoom buttons provided by visualizer-common.js -->
+                        <button id="btn-run" class="btn btn-primary" onclick="runAlgorithm()">▶ Run</button>
+                        <button id="btn-step" class="btn" onclick="stepAlgorithm()" disabled>Step</button>
+                        <button id="btn-reset" class="btn" onclick="resetVisualization()">Reset</button>
+                    </div>
+                </div>
+
+                <div class="split-view">
+                    <!-- Visualization -->
+                    <div class="canvas-section">
+                        <div id="pathfinding-canvas">
+                            <div id="maze-grid" class="maze-grid"></div>
+                        </div>
+                        <div class="log-section" id="log-panel">
+                            <div class="log-entry">Pathfinding visualizer ready...</div>
+                        </div>
+                    </div>
+
+                    <!-- Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <span>Algorithm Code</span>
+                            <div class="btn-group">
+                                <button id="lang-go" class="lang-btn active" onclick="setLang('go')">Go</button>
+                                <button id="lang-java" class="lang-btn" onclick="setLang('java')">Java</button>
+                                <button id="lang-python" class="lang-btn" onclick="setLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div class="code-content" id="code-content">
+                            <div class="code-line"><span class="kwd">func</span> <span class="func">bfs</span>(grid [][]<span class="typ">int</span>, start, end []<span class="typ">int</span>) [][]<span class="typ">int</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;rows, cols := <span class="kwd">len</span>(grid), <span class="kwd">len</span>(grid[<span class="num">0</span>])</div>
+                            <div class="code-line">&nbsp;&nbsp;visited := <span class="kwd">make</span>([][]<span class="typ">bool</span>, rows)</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="kwd">range</span> visited {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;visited[i] = <span class="kwd">make</span>([]<span class="typ">bool</span>, cols)</div>
+                            <div class="code-line">&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;queue := [][]<span class="typ">int</span>{start}</div>
+                            <div class="code-line">&nbsp;&nbsp;visited[start[<span class="num">0</span>]][start[<span class="num">1</span>]] = <span class="kwd">true</span></div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">for</span> <span class="kwd">len</span>(queue) &gt; <span class="num">0</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;current := queue[<span class="num">0</span>]</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;queue = queue[<span class="num">1</span>:]</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> current[<span class="num">0</span>] == end[<span class="num">0</span>] && current[<span class="num">1</span>] == end[<span class="num">1</span>] {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">break</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">// Check all 4 directions</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;directions := [][]<span class="typ">int</span>{{-<span class="num">1</span>,<span class="num">0</span>}, {<span class="num">1</span>,<span class="num">0</span>}, {<span class="num">0</span>,-<span class="num">1</span>}, {<span class="num">0</span>,<span class="num">1</span>}}</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, dir := <span class="kwd">range</span> directions {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;nr, nc := current[<span class="num">0</span>]+dir[<span class="num">0</span>], current[<span class="num">1</span>]+dir[<span class="num">1</span>]</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> nr &gt;= <span class="num">0</span> && nr &lt; rows && nc &gt;= <span class="num">0</span> && nc &lt; cols &&</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!visited[nr][nc] && grid[nr][nc] != <span class="num">1</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;queue = <span class="kwd">append</span>(queue, []<span class="typ">int</span>{nr, nc})</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;visited[nr][nc] = <span class="kwd">true</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">return</span> visited</div>
+                            <div class="code-line">}</div>
+                        </div>
+                        <div class="code-controls">
+                            <div class="control-group">
+                                <span id="operation-info">BFS Algorithm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let grid = [];
+        let rows = 20;
+        let cols = 30;
+        let start = [9, 5];
+        let end = [9, 24];
+        let currentAlgorithm = 'bfs';
+        let currentLang = 'go';
+        let isRunning = false;
+        let animationSpeed = 100;
+        let visited = [];
+        let path = [];
+        // zoom state moved to visualizer-common.js
+
+        // Algorithm implementations
+        const algorithms = {
+            bfs: {
+                go: `func bfs(grid [][]int, start, end []int) [][]int {
+    rows, cols := len(grid), len(grid[0])
+    visited := make([][]bool, rows)
+    for i := range visited {
+        visited[i] = make([]bool, cols)
+    }
+
+    queue := [][]int{start}
+    visited[start[0]][start[1]] = true
+
+    for len(queue) > 0 {
+        current := queue[0]
+        queue = queue[1:]
+
+        if current[0] == end[0] && current[1] == end[1] {
+            break
+        }
+
+        // Check all 4 directions
+        directions := [][]int{{-1,0}, {1,0}, {0,-1}, {0,1}}
+        for _, dir := range directions {
+            nr, nc := current[0]+dir[0], current[1]+dir[1]
+            if nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+                !visited[nr][nc] && grid[nr][nc] != 1 {
+                queue = append(queue, []int{nr, nc})
+                visited[nr][nc] = true
+            }
+        }
+    }
+
+    return visited
+}`,
+                java: `public int[][] bfs(int[][] grid, int[] start, int[] end) {
+    int rows = grid.length, cols = grid[0].length;
+    boolean[][] visited = new boolean[rows][cols];
+    Queue<int[]> queue = new LinkedList<>();
+    queue.add(start);
+    visited[start[0]][start[1]] = true;
+
+    int[][] directions = {{-1,0}, {1,0}, {0,-1}, {0,1}};
+
+    while (!queue.isEmpty()) {
+        int[] current = queue.poll();
+
+        if (current[0] == end[0] && current[1] == end[1]) {
+            break;
+        }
+
+        for (int[] dir : directions) {
+            int nr = current[0] + dir[0];
+            int nc = current[1] + dir[1];
+
+            if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+                !visited[nr][nc] && grid[nr][nc] != 1) {
+                queue.add(new int[]{nr, nc});
+                visited[nr][nc] = true;
+            }
+        }
+    }
+
+    return visited;
+}`,
+                python: `def bfs(grid, start, end):
+    rows, cols = len(grid), len(grid[0])
+    visited = [[False for _ in range(cols)] for _ in range(rows)]
+    queue = [start]
+    visited[start[0]][start[1]] = True
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    while queue:
+        current = queue.pop(0)
+
+        if current[0] == end[0] and current[1] == end[1]:
+            break
+
+        for dr, dc in directions:
+            nr, nc = current[0] + dr, current[1] + dc
+
+            if (0 <= nr < rows and 0 <= nc < cols and
+                not visited[nr][nc] and grid[nr][nc] != 1):
+                queue.append([nr, nc])
+                visited[nr][nc] = True
+
+    return visited`
+            },
+            dfs: {
+                go: `func dfs(grid [][]int, start, end []int, visited [][]bool) bool {
+    rows, cols := len(grid), len(grid[0])
+    sr, sc := start[0], start[1]
+    er, ec := end[0], end[1]
+
+    if sr == er && sc == ec {
+        return true
+    }
+
+    visited[sr][sc] = true
+
+    directions := [][]int{{-1,0}, {1,0}, {0,-1}, {0,1}}
+    for _, dir := range directions {
+        nr, nc := sr+dir[0], sc+dir[1]
+        if nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+            !visited[nr][nc] && grid[nr][nc] != 1 {
+            if dfs(grid, []int{nr, nc}, end, visited) {
+                return true
+            }
+        }
+    }
+
+    return false
+}`,
+                java: `public boolean dfs(int[][] grid, int[] current, int[] end, boolean[][] visited) {
+    int rows = grid.length, cols = grid[0].length;
+    int cr = current[0], cc = current[1];
+    int er = end[0], ec = end[1];
+
+    if (cr == er && cc == ec) {
+        return true;
+    }
+
+    visited[cr][cc] = true;
+
+    int[][] directions = {{-1,0}, {1,0}, {0,-1}, {0,1}};
+    for (int[] dir : directions) {
+        int nr = cr + dir[0];
+        int nc = cc + dir[1];
+
+        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+            !visited[nr][nc] && grid[nr][nc] != 1) {
+            if (dfs(grid, new int[]{nr, nc}, end, visited)) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}`,
+                python: `def dfs(grid, current, end, visited):
+    cr, cc = current
+    er, ec = end
+
+    if cr == er and cc == ec:
+        return True
+
+    visited[cr][cc] = True
+
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+    for dr, dc in directions:
+        nr, nc = cr + dr, cc + dc
+
+        if (0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and
+            not visited[nr][nc] and grid[nr][nc] != 1):
+            if dfs(grid, [nr, nc], end, visited):
+                return True
+
+    return False`
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            renderCode('bfs', 'go');
+            initializeGrid();
+            // setupZoom moved to visualizer-common.js
+        }
+
+        function setupCanvas() {
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            document.getElementById('grid-rows').addEventListener('change', updateGridSize);
+            document.getElementById('grid-cols').addEventListener('change', updateGridSize);
+            document.getElementById('animation-speed').addEventListener('input', (e) => {
+                animationSpeed = parseInt(e.target.value);
+            });
+        }
+
+        
+
+        function selectAlgorithm(algorithm) {
+            currentAlgorithm = algorithm;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + algorithm).classList.add('active');
+            renderCode(algorithm, currentLang);
+            updateOperationInfo();
+            resetVisualization();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            renderCode(currentAlgorithm, lang);
+        }
+
+        function renderCode(algorithm, lang) {
+            const code = algorithms[algorithm][lang];
+            const lines = code.split('\n');
+            const codeContent = document.getElementById('code-content');
+            codeContent.innerHTML = '';
+
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.innerHTML = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                codeContent.appendChild(div);
+            });
+        }
+
+        // Code tracking helpers
+        function clearCodeHighlights() {
+            document.querySelectorAll('.line, .code-line').forEach(el => {
+                el.classList.remove('code-highlight', 'code-highlight-enqueue', 'code-highlight-found');
+            });
+        }
+
+        function highlightCodeLine(lineNumber, type) {
+            clearCodeHighlights();
+            // Build id depending on language
+            let id = '';
+            if (currentLang === 'go') id = `${currentAlgorithm}-${lineNumber}`;
+            else id = `${currentAlgorithm}-${currentLang}-${lineNumber}`;
+
+            const el = document.getElementById(id);
+            if (el) {
+                if (type === 'enqueue') el.classList.add('code-highlight-enqueue');
+                else if (type === 'found') el.classList.add('code-highlight-found');
+                else el.classList.add('code-highlight');
+                // ensure visible (scroll into view in code panel area)
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
+        function updateOperationInfo() {
+            const info = document.getElementById('operation-info');
+            const algorithmNames = {
+                bfs: 'Breadth-First Search',
+                dfs: 'Depth-First Search',
+                dijkstra: 'Dijkstra Algorithm',
+                astar: 'A* Search Algorithm'
+            };
+            info.textContent = algorithmNames[currentAlgorithm] || 'Algorithm';
+        }
+
+        function initializeGrid() {
+            grid = [];
+            for (let i = 0; i < rows; i++) {
+                grid[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    grid[i][j] = 0; // 0 = empty, 1 = wall
+                }
+            }
+            renderGrid();
+        }
+
+        function updateGridSize() {
+            rows = parseInt(document.getElementById('grid-rows').value);
+            cols = parseInt(document.getElementById('grid-cols').value);
+            initializeGrid();
+        }
+
+        function renderGrid() {
+            const mazeGrid = document.getElementById('maze-grid');
+            mazeGrid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+            mazeGrid.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            mazeGrid.innerHTML = '';
+
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+
+                    if (i === start[0] && j === start[1]) {
+                        cell.classList.add('start');
+                        cell.textContent = 'S';
+                    } else if (i === end[0] && j === end[1]) {
+                        cell.classList.add('end');
+                        cell.textContent = 'E';
+                    } else if (grid[i][j] === 1) {
+                        cell.classList.add('wall');
+                    }
+
+                    cell.addEventListener('click', () => toggleCell(i, j));
+                    cell.addEventListener('mousedown', (e) => startDrag(e, i, j));
+                    cell.addEventListener('mouseenter', (e) => dragCell(e, i, j));
+
+                    mazeGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function toggleCell(i, j) {
+            if ((i === start[0] && j === start[1]) || (i === end[0] && j === end[1])) return;
+
+            grid[i][j] = grid[i][j] === 0 ? 1 : 0;
+            renderGrid();
+        }
+
+        let isDragging = false;
+        let dragType = null;
+
+        function startDrag(e, i, j) {
+            if (i === start[0] && j === start[1]) {
+                dragType = 'start';
+            } else if (i === end[0] && j === end[1]) {
+                dragType = 'end';
+            } else {
+                dragType = 'wall';
+                toggleCell(i, j);
+            }
+            isDragging = true;
+        }
+
+        function dragCell(e, i, j) {
+            if (!isDragging) return;
+
+            if (dragType === 'start' && (i !== end[0] || j !== end[1])) {
+                start = [i, j];
+                renderGrid();
+            } else if (dragType === 'end' && (i !== start[0] || j !== start[1])) {
+                end = [i, j];
+                renderGrid();
+            } else if (dragType === 'wall') {
+                if ((i !== start[0] || j !== start[1]) && (i !== end[0] || j !== end[1])) {
+                    grid[i][j] = 1;
+                    renderGrid();
+                }
+            }
+        }
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            dragType = null;
+        });
+
+        function generateMaze() {
+            // Simple maze generation
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (Math.random() < 0.3 && (i !== start[0] || j !== start[1]) && (i !== end[0] || j !== end[1])) {
+                        grid[i][j] = 1;
+                    } else {
+                        grid[i][j] = 0;
+                    }
+                }
+            }
+            renderGrid();
+            logMessage('Generated random maze');
+        }
+
+        function clearGrid() {
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if ((i !== start[0] || j !== start[1]) && (i !== end[0] || j !== end[1])) {
+                        grid[i][j] = 0;
+                    }
+                }
+            }
+            renderGrid();
+            logMessage('Grid cleared');
+        }
+
+        async function startVisualization() {
+            if (isRunning) return;
+            isRunning = true;
+
+            clearVisited();
+            visited = [];
+            path = [];
+
+            logMessage(`Starting ${currentAlgorithm.toUpperCase()} visualization...`);
+
+            try {
+                    if (currentAlgorithm === 'bfs') {
+                        await visualizeBFS();
+                    } else if (currentAlgorithm === 'dfs') {
+                        await visualizeDFS();
+                    } else if (currentAlgorithm === 'dijkstra') {
+                        await visualizeDijkstra();
+                    } else if (currentAlgorithm === 'astar') {
+                        await visualizeAstar();
+                    }
+            } catch (error) {
+                logMessage('Visualization stopped');
+            }
+
+            isRunning = false;
+        }
+
+        function stopVisualization() {
+            isRunning = false;
+            logMessage('Visualization stopped');
+        }
+
+        async function visualizeBFS() {
+            const queue = [start];
+            visited = Array(rows).fill().map(() => Array(cols).fill(false));
+            visited[start[0]][start[1]] = true;
+
+            const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+            while (queue.length > 0 && isRunning) {
+                const current = queue.shift();
+                const [cr, cc] = current;
+
+                if (cr === end[0] && cc === end[1]) {
+                        logMessage('Path found!');
+                        highlightCodeLine(6, 'found');
+                    break;
+                }
+
+                // Visualize current cell
+                if (!(cr === start[0] && cc === start[1])) {
+                        highlightCodeLine(5, 'visit');
+                        const cell = document.querySelector(`.cell[data-row="${cr}"][data-col="${cc}"]`);
+                        cell.classList.add('current');
+                        await sleep(animationSpeed);
+                        cell.classList.remove('current');
+                        cell.classList.add('visited');
+                }
+
+                for (const [dr, dc] of directions) {
+                    const nr = cr + dr;
+                    const nc = cc + dc;
+
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+                        !visited[nr][nc] && grid[nr][nc] !== 1) {
+                        queue.push([nr, nc]);
+                        visited[nr][nc] = true;
+                        // highlight enqueue line
+                        highlightCodeLine(10, 'enqueue');
+                    }
+                }
+            }
+            // clear code highlights after run
+            setTimeout(clearCodeHighlights, 400);
+        }
+
+        async function visualizeDFS() {
+            visited = Array(rows).fill().map(() => Array(cols).fill(false));
+            await dfsHelper(start[0], start[1]);
+        }
+
+        async function dfsHelper(cr, cc) {
+            if (!isRunning) return false;
+
+            if (cr === end[0] && cc === end[1]) {
+                highlightCodeLine(2, 'found');
+                return true;
+            }
+
+            // Dijkstra (grid with uniform weights) — visualized with simple array-based PQ
+            async function visualizeDijkstra() {
+                const dist = Array(rows).fill().map(() => Array(cols).fill(Infinity));
+                dist[start[0]][start[1]] = 0;
+                const visitedLocal = Array(rows).fill().map(() => Array(cols).fill(false));
+
+                // simple priority queue using linear scan (sufficient for demo)
+                const pq = [[start[0], start[1]]];
+
+                while (pq.length > 0 && isRunning) {
+                    // extract min
+                    let minIdx = 0;
+                    for (let i = 1; i < pq.length; i++) {
+                        const [r, c] = pq[i];
+                        const [mr, mc] = pq[minIdx];
+                        if (dist[r][c] < dist[mr][mc]) minIdx = i;
+                    }
+                    const [cr, cc] = pq.splice(minIdx, 1)[0];
+
+                    if (visitedLocal[cr][cc]) continue;
+                    visitedLocal[cr][cc] = true;
+
+                    // found
+                    if (cr === end[0] && cc === end[1]) {
+                        logMessage('Path found!');
+                        highlightCodeLine(7, 'found');
+                        break;
+                    }
+
+                    // visualize current
+                    if (!(cr === start[0] && cc === start[1])) {
+                        highlightCodeLine(6, 'visit');
+                        const cell = document.querySelector(`.cell[data-row="${cr}"][data-col="${cc}"]`);
+                        cell.classList.add('current');
+                        await sleep(animationSpeed);
+                        cell.classList.remove('current');
+                        cell.classList.add('visited');
+                    }
+
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    for (const [dr, dc] of directions) {
+                        const nr = cr + dr;
+                        const nc = cc + dc;
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] !== 1) {
+                            const nd = dist[cr][cc] + 1;
+                            if (nd < dist[nr][nc]) {
+                                dist[nr][nc] = nd;
+                                pq.push([nr, nc]);
+                                // highlight enqueue/push
+                                highlightCodeLine(12, 'enqueue');
+                            }
+                        }
+                    }
+                }
+                setTimeout(clearCodeHighlights, 400);
+            }
+
+            // A* (Manhattan heuristic)
+            async function visualizeAstar() {
+                const gScore = Array(rows).fill().map(() => Array(cols).fill(Infinity));
+                const fScore = Array(rows).fill().map(() => Array(cols).fill(Infinity));
+                gScore[start[0]][start[1]] = 0;
+                fScore[start[0]][start[1]] = Math.abs(start[0]-end[0]) + Math.abs(start[1]-end[1]);
+
+                const open = [[start[0], start[1]]];
+                const closed = Array(rows).fill().map(() => Array(cols).fill(false));
+
+                while (open.length > 0 && isRunning) {
+                    // pop node with lowest f
+                    let bestIdx = 0;
+                    for (let i = 1; i < open.length; i++) {
+                        const [r, c] = open[i];
+                        const [br, bc] = open[bestIdx];
+                        if (fScore[r][c] < fScore[br][bc]) bestIdx = i;
+                    }
+                    const [cr, cc] = open.splice(bestIdx, 1)[0];
+                    if (closed[cr][cc]) continue;
+                    closed[cr][cc] = true;
+
+                    if (cr === end[0] && cc === end[1]) {
+                        logMessage('Path found!');
+                        highlightCodeLine(6, 'found');
+                        break;
+                    }
+
+                    // visualize current
+                    if (!(cr === start[0] && cc === start[1])) {
+                        highlightCodeLine(5, 'visit');
+                        const cell = document.querySelector(`.cell[data-row="${cr}"][data-col="${cc}"]`);
+                        cell.classList.add('current');
+                        await sleep(animationSpeed);
+                        cell.classList.remove('current');
+                        cell.classList.add('visited');
+                    }
+
+                    const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+                    for (const [dr, dc] of directions) {
+                        const nr = cr + dr;
+                        const nc = cc + dc;
+                        if (nr >= 0 && nr < rows && nc >= 0 && nc < cols && grid[nr][nc] !== 1) {
+                            const tentativeG = gScore[cr][cc] + 1;
+                            if (tentativeG < gScore[nr][nc]) {
+                                gScore[nr][nc] = tentativeG;
+                                const f = tentativeG + Math.abs(nr - end[0]) + Math.abs(nc - end[1]);
+                                fScore[nr][nc] = f;
+                                open.push([nr, nc]);
+                                // highlight better/push
+                                highlightCodeLine(12, 'enqueue');
+                            }
+                        }
+                    }
+                }
+                setTimeout(clearCodeHighlights, 400);
+            }
+
+            visited[cr][cc] = true;
+
+            // Visualize current cell and highlight code
+            highlightCodeLine(3, 'visit');
+            if (!(cr === start[0] && cc === start[1])) {
+                const cell = document.querySelector(`.cell[data-row="${cr}"][data-col="${cc}"]`);
+                cell.classList.add('current');
+                await sleep(animationSpeed);
+                cell.classList.remove('current');
+                cell.classList.add('visited');
+            }
+
+            const directions = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+
+            for (const [dr, dc] of directions) {
+                const nr = cr + dr;
+                const nc = cc + dc;
+
+                if (nr >= 0 && nr < rows && nc >= 0 && nc < cols &&
+                    !visited[nr][nc] && grid[nr][nc] !== 1) {
+                    highlightCodeLine(7, 'enqueue');
+                    if (await dfsHelper(nr, nc)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        function clearVisited() {
+            document.querySelectorAll('.cell.visited, .cell.path, .cell.current').forEach(cell => {
+                cell.classList.remove('visited', 'path', 'current');
+            });
+        }
+
+        function runAlgorithm() {
+            startVisualization();
+        }
+
+        function stepAlgorithm() {
+            // Step through algorithm
+            logMessage(`Stepping through ${currentAlgorithm}...`);
+        }
+
+        function resetVisualization() {
+            clearVisited();
+            visited = [];
+            path = [];
+            isRunning = false;
+            logMessage('Visualization reset');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function logMessage(message) {
+            const logPanel = document.getElementById('log-panel');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+    <script src="visualizer-common.js"></script>
+</body>
+</html>

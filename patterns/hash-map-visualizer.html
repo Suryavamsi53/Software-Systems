@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="visualizer-common.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HashMap Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i { color: var(--neon-cyan); }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col { overflow-y: hidden; }
+
+        .control-group { margin-bottom: 1rem; }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { background: rgba(88, 166, 255, 0.1); border-color: rgba(88, 166, 255, 0.4); color: var(--neon-cyan); }
+        .btn-success { background: rgba(46, 160, 67, 0.1); border-color: rgba(46, 160, 67, 0.4); color: var(--neon-green); }
+        .btn-danger { background: rgba(248, 81, 73, 0.1); border-color: rgba(248, 81, 73, 0.4); color: var(--neon-red); }
+
+        .viz-viewport {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .viz-canvas {
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            position: relative;
+            padding: 50px;
+        }
+
+        .bucket-row {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .bucket-cell {
+            width: 80px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0d1117;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .bucket-cell.active { border-color: var(--neon-cyan); color: var(--neon-cyan); box-shadow: 0 0 10px rgba(88,166,255,0.2); }
+
+        .chain-container { display: flex; gap: 12px; align-items: center; }
+
+        .node-element {
+            width: 110px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            transition: all 0.3s;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .node-element.active { border-color: var(--neon-cyan); transform: scale(1.05); }
+        .node-element.found { border-color: var(--neon-green); box-shadow: 0 0 15px rgba(63,185,80,0.3); }
+
+        .node-key { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px; }
+        .node-val { font-size: 0.9rem; color: white; font-weight: 600; }
+
+        .ptr-hash {
+            position: absolute;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            color: var(--neon-purple);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.4s;
+            opacity: 0;
+            z-index: 20;
+        }
+        .ptr-hash.show { opacity: 1; }
+
+        /* Terminal */
+        .terminal-container { flex: 1; background: #0d1117; border-radius: 8px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; height: 100%; }
+        .terminal-header { background: #161b22; padding: 6px 12px; border-bottom: 1px solid #30363d; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display:flex; align-items:center; }
+        .terminal-logs { padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; color: #e6edf3; }
+        .log-line { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        .log-type-eval { color: #d2a8ff; }
+        .log-type-success { color: #3fb950; font-weight: bold; }
+        .log-type-error { color: #f85149; font-weight: bold; }
+
+        /* Monaco */
+        .code-panel-wrapper { display: flex; flex-direction: column; flex: 1; height: 100%; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; overflow: hidden; }
+        .code-tabs { display: flex; background: #161b22; border-bottom: 1px solid #30363d; }
+        .code-tab { padding: 0.6rem 1rem; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; }
+        .code-tab.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); background: rgba(88, 166, 255, 0.05); }
+        #monaco-container { flex: 1; }
+
+        /* Metrics */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+        .metric-card { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .metric-card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+        .metric-card.m-time::before { background: var(--neon-cyan); }
+        .metric-card.m-space::before { background: var(--neon-green); }
+        .metric-val { font-size: 1.2rem; font-weight: 700; font-family: var(--font-mono); margin: 0.25rem 0; }
+        .metric-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .stat-flex { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #30363d; font-size: 0.8rem; }
+        .monaco-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        
+        .zoom-controls { display: flex; gap: 8px; background: rgba(13, 17, 23, 0.8); border: 1px solid #30363d; border-radius: 6px; padding: 4px; position: absolute; top: 10px; right: 10px; z-index: 100; }
+        .zoom-btn { background: transparent; border: none; color: var(--text-muted); width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="layout-grid"></i> HashMap Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span> </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Collision Metrics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="cpu"></i> Configuration</div>
+                <div class="control-group">
+                    <label>Collision Resolution</label>
+                    <select id="map-type" class="form-select">
+                        <option value="chaining">Separate Chaining</option>
+                        <option value="probing">Linear Probing</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Initial Entries (Key:Val CSV)</label>
+                    <input type="text" id="init-input" class="form-input" placeholder="e.g. A:10, B:20, C:30">
+                </div>
+                <button class="btn btn-primary" id="btn-initialize" style="width: 100%;"><i data-lucide="refresh-cw"></i> Initialize Map</button>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+                <div class="control-group">
+                    <label>Data Entry (Key:Val or Key)</label>
+                    <input type="text" id="val-input" class="form-input" placeholder="e.g. D:40 or A">
+                </div>
+                <div class="btn-group" style="margin-bottom: 0.5rem;">
+                    <button class="btn btn-success" id="btn-put"><i data-lucide="arrow-down-to-line"></i> Put</button>
+                    <button class="btn" id="btn-get"><i data-lucide="search"></i> Get</button>
+                </div>
+                <button class="btn btn-danger" id="btn-remove" style="width: 100%;"><i data-lucide="trash-2"></i> Remove</button>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0; background: transparent; border: none;">
+                <div class="terminal-container">
+                    <div class="terminal-header"><div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;"><span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span><span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span><span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span></div><span>bash - hash_tracer.sh</span></div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">HashMap profiling engine active.</span></div>
+                        <div id="cursor" style="width: 8px; height: 14px; background: var(--text-main); display: inline-block; animation: blink 1s step-end infinite;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled><i data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-primary" id="btn-play" disabled><i data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled><i data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset"><i data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+                
+                <div class="control-group" style="margin: 0.5rem 0;">
+                    <label style="display: flex; justify-content: space-between;"><span>Anim Speed</span><span id="speed-val" class="text-mono">1.0x</span></label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+                
+      <div class="algo-toolbar"><div class="control-group"></div></div>
+<div class="viz-viewport" id="viz-viewport">
+                    <!-- zoom controls removed — visualizer-common.js provides zoom UI -->
+                    <div class="viz-canvas" id="viz-canvas">
+                        <div class="ptr-hash" id="ptr-hash">HASH <i data-lucide="arrow-right"></i></div>
+                        <div id="buckets-area" style="width: 100%;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Avg Complexity</div>
+                        <div class="metric-val text-blue">O(1)</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Max Load Factor</div>
+                        <div class="metric-val text-green" id="stat-load">0.0</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex"><span>Total Entries (N):</span><span id="stat-n" class="text-mono">0</span></div>
+                    <div class="stat-flex"><span>Bucket Count (M):</span><span class="text-mono">8</span></div>
+                    <div class="stat-flex"><span>Collision Chains:</span><span id="stat-collisions" class="text-mono text-red">0</span></div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="go">main.go</button>
+                        <button class="code-tab" data-lang="java">HashMap.java</button>
+                        <button class="code-tab" data-lang="python">hashmap.py</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const CODES = {
+            go: `func (m *HashMap) Put(key string, val int) {\n    idx := hash(key) % m.capacity\n    curr := m.buckets[idx]\n    for curr != nil {\n        if curr.key == key {\n            curr.val = val // Update\n            return\n        }\n        curr = curr.next\n    }\n    newNode := &Node{key, val, m.buckets[idx]}\n    m.buckets[idx] = newNode\n    m.size++\n}\n\nfunc (m *HashMap) Get(key string) int {\n    idx := hash(key) % m.capacity\n    curr := m.buckets[idx]\n    for curr != nil {\n        if curr.key == key { return curr.val }\n        curr = curr.next\n    }\n    return -1\n}`,
+            java: `public void put(String key, int val) {\n    int idx = hash(key) % capacity;\n    Node curr = buckets[idx];\n    while (curr != null) {\n        if (curr.key.equals(key)) {\n            curr.val = val; return;\n        }\n        curr = curr.next;\n    }\n    buckets[idx] = new Node(key, val, buckets[idx]);\n    size++;\n}\n\npublic Integer get(String key) {\n    int idx = hash(key) % capacity;\n    Node curr = buckets[idx];\n    while (curr != null) {\n        if (curr.key.equals(key)) return curr.val;\n        curr = curr.next;\n    }\n    return null;\n}`,
+            python: `def put(self, key, val):\n    idx = hash(key) % self.capacity\n    curr = self.buckets[idx]\n    while curr:\n        if curr.key == key:\n            curr.val = val; return\n        curr = curr.next\n    self.buckets[idx] = Node(key, val, self.buckets[idx])\n    self.size += 1\n\ndef get(self, key):\n    idx = hash(key) % self.capacity\n    curr = self.buckets[idx]\n    while curr:\n        if curr.key == key: return curr.val\n        curr = curr.next\n    return None`
+        };
+
+        const LINE_MAP = {
+            put: { go: [1, 14], java: [1, 11], python: [1, 8] },
+            get: { go: [16, 23], java: [13, 20], python: [10, 16] },
+            remove: { go: [16, 23], java: [13, 20], python: [10, 16] } // simplified for demo
+        };
+
+        const DOM = {
+            initialize: document.getElementById('btn-initialize'),
+            initInput: document.getElementById('init-input'),
+            valInput: document.getElementById('val-input'),
+            btnPut: document.getElementById('btn-put'),
+            btnGet: document.getElementById('btn-get'),
+            btnRemove: document.getElementById('btn-remove'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            bucketArea: document.getElementById('buckets-area'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            statN: document.getElementById('stat-n'),
+            statLoad: document.getElementById('stat-load'),
+            statColl: document.getElementById('stat-collisions'),
+            ptrHash: document.getElementById('ptr-hash'),
+            canvas: document.getElementById('viz-canvas'),
+            viewport: document.getElementById('viz-viewport'),
+            // zoomValText: provided by visualizer-common.js when needed
+        };
+
+        const M = 8;
+        let state = {
+            buckets: Array.from({length: M}, () => []),
+            steps: [], currentStepIndex: -1, isPlaying: false,
+            playInterval: null, baseDelay: 1000, activeLang: 'go', activeOp: 'put',
+            editorDecorations: [], zoom: 1.0, panX: 0, panY: 0
+        };
+
+        function hashStr(s) { let h = 0; for(let i=0; i<s.length; i++) { h = (h<<5)-h+s.charCodeAt(i); h |= 0; } return Math.abs(h); }
+
+        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES[state.activeLang], language: 'go', theme: 'vs-dark',
+                readOnly: true, minimap: { enabled: false }, fontSize: 13, fontFamily: "'Fira Code', monospace"
+            });
+            initApp();
+        });
+
+        function initApp() {
+            setupListeners(); lucide.createIcons();
+            resetMap(["A:10", "B:20", "C:30"]);
+        }
+
+        function setupListeners() {
+            DOM.initialize.onclick = () => resetMap(DOM.initInput.value.split(',').map(s => s.trim()).filter(s => s));
+            DOM.btnPut.onclick = () => startOp('put');
+            DOM.btnGet.onclick = () => startOp('get');
+            DOM.btnRemove.onclick = () => startOp('remove');
+            DOM.btnPlay.onclick = () => state.isPlaying ? pauseAnim() : playAnim();
+            DOM.btnNext.onclick = stepNext; DOM.btnPrev.onclick = stepPrev;
+            DOM.btnReset.onclick = () => resetMap(["A:10", "B:20", "C:30"]);
+            DOM.animSpeed.oninput = e => { DOM.speedVal.textContent = parseFloat(e.target.value).toFixed(1) + 'x'; if(state.isPlaying) { pauseAnim(); playAnim(); } };
+            DOM.codeTabs.forEach(tab => tab.onclick = e => {
+                DOM.codeTabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active');
+                state.activeLang = e.target.dataset.lang; window.monacoEditor.setValue(CODES[state.activeLang]);
+                monaco.editor.setModelLanguage(window.monacoEditor.getModel(), state.activeLang);
+                updateHighlight();
+            });
+        }
+
+        // Zoom/pan handled by visualizer-common.js (centralized)
+
+        function termLog(msg, type = 'info') {
+            const div = document.createElement('div'); div.className = 'log-line';
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            let tClass = 'log-type-info', tag = '[INF]';
+            if (type === 'sys') { tClass = 'log-type-sys'; tag = '[SYS]'; }
+            else if (type === 'eval') { tClass = 'log-type-eval'; tag = '[EVL]'; }
+            else if (type === 'success') { tClass = 'log-type-success'; tag = '[OK ]'; }
+            else if (type === 'error') { tClass = 'log-type-error'; tag = '[ERR]'; }
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${tClass}">${tag}</span><span class="log-msg">${msg}</span>`;
+            DOM.logsContainer.insertBefore(div, DOM.cursorLog); DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        function resetMap(pairs = []) {
+            pauseAnim(); state.buckets = Array.from({length: M}, () => []);
+            pairs.forEach(p => {
+                const [k, v] = p.split(':'); if(k && v) state.buckets[hashStr(k)%M].push({key:k, val:v});
+            });
+            state.steps = []; state.currentStepIndex = -1; renderMap();
+            termLog(`HashMap initialized with ${pairs.length} entries`, 'sys');
+            DOM.btnPlay.disabled = true; DOM.btnNext.disabled = true;
+        }
+
+        function startOp(op) {
+            state.activeOp = op; let input = DOM.valInput.value.trim();
+            if(!input) return termLog("Input required", 'error');
+            let key, val; if(input.includes(':')) { [key, val] = input.split(':'); } else key = input;
+            pauseAnim(); buildSteps(op, key, val); state.currentStepIndex = -1;
+            DOM.btnPlay.disabled = false; DOM.btnNext.disabled = false; stepNext();
+        }
+
+        function buildSteps(op, key, val) {
+            let steps = [], buckets = JSON.parse(JSON.stringify(state.buckets)), idx = hashStr(key)%M;
+            const getL = (off) => LINE_MAP[state.activeOp][state.activeLang][0] + off;
+            
+            if (op === 'put') {
+                steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Hashing key '${key}' -> index ${idx}`, line: getL(1), activeBucket: idx });
+                let chain = buckets[idx], found = false;
+                for(let i=0; i<chain.length; i++) {
+                    const node = chain[i]; node.active = true;
+                    steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Checking key '${node.key}'...`, line: getL(4), activeBucket: idx });
+                    if(node.key === key) {
+                        node.val = val; node.found = true; found = true;
+                        steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Match! Updated value to ${val}`, line: getL(5), activeBucket: idx, success: true });
+                        break;
+                    }
+                    node.active = false;
+                }
+                if(!found) {
+                    buckets[idx].push({key, val, active: true});
+                    steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Added new node to bucket ${idx}`, line: getL(10), activeBucket: idx, success: true });
+                }
+            } else if (op === 'get') {
+                steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Searching for key '${key}' at index ${idx}`, line: getL(1), activeBucket: idx });
+                let chain = buckets[idx], found = false;
+                for(let i=0; i<chain.length; i++) {
+                    const node = chain[i]; node.active = true;
+                    steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Checking key '${node.key}'...`, line: getL(3), activeBucket: idx });
+                    if(node.key === key) {
+                        node.found = true; found = true;
+                        steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Found! Value: ${node.val}`, line: getL(4), activeBucket: idx, success: true });
+                        break;
+                    }
+                    node.active = false;
+                }
+                if(!found) steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Key not found.`, line: getL(7), activeBucket: idx, error: true });
+            } else if (op === 'remove') {
+                steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Targeting key '${key}' at index ${idx}`, line: getL(1), activeBucket: idx });
+                let chain = buckets[idx], foundIdx = chain.findIndex(n => n.key === key);
+                if(foundIdx !== -1) {
+                    chain[foundIdx].active = true;
+                    steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Found key '${key}'. Detaching node.`, line: getL(4), activeBucket: idx, success: true });
+                    chain.splice(foundIdx, 1);
+                    steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Node removed.`, line: getL(5), activeBucket: idx });
+                } else steps.push({ buckets: JSON.parse(JSON.stringify(buckets)), log: `Key not present.`, line: getL(1), activeBucket: idx, error: true });
+            }
+            state.steps = steps;
+        }
+
+        function renderMap(buckets = state.buckets, status = {}) {
+            DOM.bucketArea.innerHTML = ''; let total = 0, colls = 0;
+            buckets.forEach((chain, i) => {
+                const row = document.createElement('div'); row.className = 'bucket-row';
+                const cell = document.createElement('div'); cell.className = 'bucket-cell' + (status.activeBucket === i ? ' active' : '');
+                cell.textContent = `B[${i}]`; row.appendChild(cell);
+                const container = document.createElement('div'); container.className = 'chain-container';
+                chain.forEach(node => {
+                    const el = document.createElement('div'); el.className = 'node-element' + (node.active ? ' active' : '') + (node.found ? ' found' : '');
+                    el.innerHTML = `<div class="node-key">${node.key}</div><div class="node-val">${node.val}</div>`;
+                    container.appendChild(el); total++;
+                });
+                if(chain.length > 1) colls += (chain.length-1);
+                row.appendChild(container); DOM.bucketArea.appendChild(row);
+            });
+            DOM.statN.textContent = total; DOM.statLoad.textContent = (total/M).toFixed(1); DOM.statColl.textContent = colls;
+            if(status.activeBucket !== undefined) {
+                DOM.ptrHash.classList.add('show');
+                DOM.ptrHash.style.top = (status.activeBucket * 80) + 15 + 'px';
+            } else DOM.ptrHash.classList.remove('show');
+        }
+
+        function stepNext() { if(state.currentStepIndex < state.steps.length-1) { state.currentStepIndex++; applyStep(); } else pauseAnim(); }
+        function stepPrev() { if(state.currentStepIndex > 0) { state.currentStepIndex--; applyStep(); } }
+
+        function applyStep() {
+            const s = state.steps[state.currentStepIndex]; state.buckets = s.buckets;
+            renderMap(s.buckets, s); termLog(s.log, s.error?'error':(s.success?'success':'info'));
+            highlight(s.line); DOM.statSteps.textContent = state.currentStepIndex + 1;
+            DOM.btnPrev.disabled = state.currentStepIndex <= 0; DOM.btnNext.disabled = state.currentStepIndex >= state.steps.length-1;
+        }
+
+        function highlight(l) {
+            state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, [{ range: new monaco.Range(l,1,l,1), options: { isWholeLine:true, className:'monaco-line-highlight' }}]);
+            window.monacoEditor.revealLineInCenter(l);
+        }
+
+        function updateHighlight() { if(state.currentStepIndex>=0) highlight(state.steps[state.currentStepIndex].line); }
+
+        function playAnim() {
+            state.isPlaying = true; DOM.btnPlay.innerHTML='<i data-lucide="pause"></i> Pause'; lucide.createIcons();
+            state.playInterval = setInterval(() => { if(state.currentStepIndex >= state.steps.length-1) return pauseAnim(); stepNext(); }, state.baseDelay / parseFloat(DOM.animSpeed.value));
+        }
+
+        function pauseAnim() { state.isPlaying = false; clearInterval(state.playInterval); DOM.btnPlay.innerHTML='<i data-lucide="play"></i> Play'; lucide.createIcons(); }
+    </script>
+    <script src="visualizer-common.js"></script>
+</body>
+</html>

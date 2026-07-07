@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="visualizer-common.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sorting Algorithms Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --neon-orange: #fb923c;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+
+        .text-mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-blue {
+            color: var(--neon-blue);
+        }
+
+        .text-green {
+            color: var(--neon-green);
+        }
+
+        .text-red {
+            color: var(--neon-red);
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i {
+            color: var(--neon-cyan);
+        }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col {
+            overflow-y: hidden;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: var(--font-main);
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #30363d;
+            border-color: #8b949e;
+            transform: translateY(-1px);
+        }
+
+        .btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: var(--neon-cyan);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: rgba(88, 166, 255, 0.2);
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+        }
+
+        .btn-success {
+            background: rgba(46, 160, 67, 0.1);
+            border-color: rgba(46, 160, 67, 0.4);
+            color: var(--neon-green);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: rgba(46, 160, 67, 0.2);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 15px rgba(46, 160, 67, 0.3);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            accent-color: var(--neon-cyan);
+        }
+
+        /* Visualization Area */
+        .viz-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 1rem;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 4rem;
+            position: relative;
+            max-width: 100%;
+            z-index: 10;
+        }
+
+        .array-element-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+            transition: transform 0.3s;
+        }
+
+        .array-index {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .array-block {
+            width: 48px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .array-block:hover {
+            transform: translateY(-4px);
+            border-color: var(--text-muted);
+        }
+
+        .array-block.active {
+            background: rgba(88, 166, 255, 0.05);
+            border-color: rgba(88, 166, 255, 0.4);
+            color: white;
+        }
+
+        .array-block.compare {
+            background: rgba(251, 146, 60, 0.15);
+            border-color: var(--neon-orange);
+            color: white;
+            box-shadow: 0 0 20px rgba(251, 146, 60, 0.3);
+            transform: translateY(-8px) scale(1.05);
+            z-index: 10;
+        }
+
+        .array-block.sorted {
+            background: rgba(46, 160, 67, 0.15);
+            border-color: var(--neon-green);
+            color: white;
+            box-shadow: 0 0 25px rgba(46, 160, 67, 0.4);
+            transform: translateY(-8px) scale(1.1);
+            z-index: 20;
+        }
+
+        .array-block.pivot {
+            background: rgba(188, 140, 255, 0.15);
+            border-color: var(--neon-purple);
+            color: white;
+            box-shadow: 0 0 20px rgba(188, 140, 255, 0.3);
+            transform: translateY(-8px) scale(1.05);
+            z-index: 10;
+        }
+
+        /* Animated Pointers */
+        .pointers-container {
+            position: absolute;
+            bottom: 1.5rem;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .pointer {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+
+        .pointer-arrow {
+            font-size: 1.2rem;
+            line-height: 1;
+            animation: bounce 1.5s infinite;
+        }
+
+        .pointer-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: var(--bg-main);
+            border: 1px solid currentColor;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .pointer-l {
+            color: var(--neon-cyan);
+        }
+
+        .pointer-r {
+            color: var(--neon-red);
+        }
+
+        .pointer-i {
+            color: var(--neon-purple);
+        }
+
+        .pointer-j {
+            color: var(--neon-orange);
+        }
+
+        @keyframes bounce {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-4px);
+            }
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(13, 17, 23, 0.95);
+            border: 1px solid var(--neon-blue);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            color: white;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -100%);
+            margin-top: -10px;
+        }
+
+        .tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--neon-blue) transparent transparent transparent;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Terminal Style Log */
+        .terminal-container {
+            flex: 1;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            min-height: 250px;
+            max-height: 350px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: #161b22;
+            padding: 6px 12px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #30363d;
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .mac-btns {
+            display: flex;
+            gap: 6px;
+            margin-right: 12px;
+        }
+
+        .mac-btns span {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .mac-btns span:nth-child(1) {
+            background: #ff5f56;
+        }
+
+        .mac-btns span:nth-child(2) {
+            background: #ffbd2e;
+        }
+
+        .mac-btns span:nth-child(3) {
+            background: #27c93f;
+        }
+
+        .terminal-logs {
+            padding: 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            color: #e6edf3;
+        }
+
+        .log-line {
+            display: flex;
+            gap: 0.5rem;
+            line-height: 1.4;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .log-line:last-child {
+            opacity: 1;
+        }
+
+        .log-time {
+            color: #8b949e;
+            user-select: none;
+        }
+
+        .log-type-sys {
+            color: #8b949e;
+        }
+
+        .log-type-info {
+            color: #79c0ff;
+        }
+
+        .log-type-eval {
+            color: #d2a8ff;
+        }
+
+        .log-type-warn {
+            color: #ffa657;
+        }
+
+        .log-type-success {
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .log-type-error {
+            color: #f85149;
+            font-weight: bold;
+        }
+
+        .log-msg {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .cursor-blink {
+            animation: blink 1s step-end infinite;
+            background: var(--text-main);
+            width: 8px;
+            height: 14px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Monaco Code Container */
+        .code-panel-wrapper {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            height: 100%;
+            min-height: 350px;
+            overflow: hidden;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            background: #0d1117;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+        }
+
+        .code-tab {
+            padding: 0.6rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .code-tab:hover {
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .code-tab.active {
+            color: var(--neon-cyan);
+            border-bottom-color: var(--neon-cyan);
+            background: rgba(88, 166, 255, 0.05);
+        }
+
+        #monaco-container {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Dashboard Metrics */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-card {
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 100%;
+        }
+
+        .metric-card.m-time::before {
+            background: var(--neon-cyan);
+        }
+
+        .metric-card.m-space::before {
+            background: var(--neon-green);
+        }
+
+        .metric-val {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            margin: 0.25rem 0;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #21262d;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .stat-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #30363d;
+            font-size: 0.85rem;
+        }
+
+        .stat-flex:last-child {
+            border-bottom: none;
+        }
+
+        .monaco-line-highlight {
+            background-color: rgba(88, 166, 255, 0.2) !important;
+            border-left: 3px solid #58a6ff;
+        }
+
+        /* Algorithm selector */
+        .algo-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .algo-btn {
+            padding: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .algo-btn:hover {
+            background: #30363d;
+            border-color: #8b949e;
+        }
+
+        .algo-btn.active {
+            background: rgba(88, 166, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+        }
+    </style>
+</head>
+
+<body>
+      <div class="algo-toolbar"><div class="control-group"></div></div>
+
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="sort-desc"></i> Sorting Algorithms</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance
+                Analytics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i>
+                Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- LEFT PANEL: Controls & Logs -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="cpu"></i> Algorithm Engine</div>
+
+                <div class="control-group">
+                    <label>Algorithm Selection</label>
+                    <div class="algo-selector">
+                        <button class="algo-btn active" data-algo="bubble">Bubble Sort</button>
+                        <button class="algo-btn" data-algo="selection">Selection Sort</button>
+                        <button class="algo-btn" data-algo="insertion">Insertion Sort</button>
+                        <button class="algo-btn" data-algo="merge">Merge Sort</button>
+                        <button class="algo-btn" data-algo="quick">Quick Sort</button>
+                        <button class="algo-btn" data-algo="heap">Heap Sort</button>
+                        <button class="algo-btn" data-algo="counting">Counting Sort</button>
+                        <button class="algo-btn" data-algo="radix">Radix Sort</button>
+                        <button class="algo-btn" data-algo="bucket">Bucket Sort</button>
+                        <button class="algo-btn" data-algo="shell">Shell Sort</button>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>Array Size: <span id="size-val" class="text-mono">15</span></label>
+                    <input type="range" id="array-size" min="5" max="32" value="15">
+                </div>
+
+                <div class="grid-2" style="margin-bottom: 1rem;">
+                    <button class="btn" id="btn-generateRandom"><i data-lucide="shuffle"></i> Random</button>
+                    <button class="btn" id="btn-generateSorted"><i data-lucide="trending-up"></i> Nearly Sorted</button>
+                </div>
+
+                <div class="control-group">
+                    <label>Custom Array (CSV):</label>
+                    <input type="text" id="custom-array" class="form-input" placeholder="1,5,3,8,2,9,4">
+                </div>
+
+                <button class="btn btn-primary" id="btn-initSort" style="width: 100%;"><i data-lucide="power"></i>
+                    Initialize Sort</button>
+            </section>
+
+            <section class="panel"
+                style="flex: 1; padding: 0; background: transparent; border: none; box-shadow: none; min-height: 0;">
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="mac-btns"><span></span><span></span><span></span></div>
+                        <span>bash - sort_tracer.sh</span>
+                    </div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span
+                                class="log-type-sys">[SYS]</span><span class="log-msg">Sorting engine ready.</span>
+                        </div>
+                        <div id="cursor" class="cursor-blink"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- CENTER PANEL: Visualization -->
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled title="Step Back"><i
+                                data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-success" id="btn-play" disabled style="min-width: 90px;"><i
+                                data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled title="Step Forward"><i
+                                data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset" disabled title="Reset"><i
+                                data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+
+                <div class="control-group" style="margin: 0.5rem 0 1rem 0;">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>Animation Speed Multiplier</span>
+                        <span id="speed-val" class="text-mono">1.0x</span>
+                    </label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+                <div class="viz-container">
+                    <div class="array-container" id="array-container">
+                        <!-- Array blocks generated by JS -->
+                    </div>
+                    <div class="pointers-container">
+                        <div class="pointer pointer-l" id="ptr-i">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">i</span>
+                        </div>
+                        <div class="pointer pointer-r" id="ptr-j">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">j</span>
+                        </div>
+                        <div class="pointer pointer-i" id="ptr-min">
+                            <i data-lucide="arrow-up" class="pointer-arrow"></i><span class="pointer-label">min</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:#161b22;border:1px solid #30363d;border-radius:2px;">
+                        </div> Unsorted
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(251,146,60,0.15);border:1px solid var(--neon-orange);border-radius:2px;">
+                        </div> Comparing
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(188,140,255,0.15);border:1px solid var(--neon-purple);border-radius:2px;">
+                        </div> Pivot/Min
+                    </span>
+                    <span style="display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="width:12px;height:12px;background:rgba(46,160,67,0.15);border:1px solid var(--neon-green);border-radius:2px;">
+                        </div> Sorted
+                    </span>
+                </div>
+            </section>
+        </div>
+
+        <!-- RIGHT PANEL: Dashboard & Code -->
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Time Complexity</div>
+                        <div class="metric-val text-blue" id="time-complexity">O(n²)</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Space Complexity</div>
+                        <div class="metric-val text-green" id="space-complexity">O(1)</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex">
+                        <span>Array Size (N):</span>
+                        <span id="stat-n" class="text-mono">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Comparisons:</span>
+                        <span id="stat-comp" class="text-mono text-cyan">0</span>
+                    </div>
+                    <div class="stat-flex">
+                        <span>Swaps:</span>
+                        <span id="stat-swap" class="text-mono text-orange">0</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="ops-progress"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="python">sort.py</button>
+                        <button class="code-tab" data-lang="java">Sort.java</button>
+                        <button class="code-tab" data-lang="cpp">sort.cpp</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Floating Global Tooltip -->
+    <div class="tooltip" id="global-tooltip"></div>
+
+    <script>
+    <script src="visualizer-common.js"></script>
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+
+        // Monaco Editor Initialization
+        let monacoEditor = null;
+        let currentLanguage = 'python';
+        let editorDecorations = [];
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: '',
+                language: 'python',
+                theme: 'vs-dark',
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                fontFamily: "'Fira Code', monospace",
+                lineHeight: 22,
+                renderLineHighlight: 'none',
+                scrollbar: { vertical: 'visible', horizontal: 'hidden' },
+                contextmenu: false
+            });
+
+            // Initialize with bubble sort
+            setAlgorithm('bubble');
+        });
+
+        // Template Code for different algorithms
+        const ALGORITHMS = {
+            bubble: {
+                name: "Bubble Sort",
+                timeComplexity: "O(n²)",
+                spaceComplexity: "O(1)",
+                python: `def bubble_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        for j in range(0, n-i-1):
+            if arr[j] > arr[j+1]:
+                arr[j], arr[j+1] = arr[j+1], arr[j]
+    return arr`,
+                java: `public void bubbleSort(int[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+        }
+    }
+}`,
+                cpp: `void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(arr[j], arr[j+1]);
+            }
+        }
+    }
+}`
+            },
+            selection: {
+                name: "Selection Sort",
+                timeComplexity: "O(n²)",
+                spaceComplexity: "O(1)",
+                python: `def selection_sort(arr):
+    n = len(arr)
+    for i in range(n):
+        min_idx = i
+        for j in range(i+1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]
+    return arr`,
+                java: `public void selectionSort(int[] arr) {
+    int n = arr.length;
+    for (int i = 0; i < n-1; i++) {
+        int minIdx = i;
+        for (int j = i+1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        int temp = arr[minIdx];
+        arr[minIdx] = arr[i];
+        arr[i] = temp;
+    }
+}`,
+                cpp: `void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 0; i < n-1; i++) {
+        int minIdx = i;
+        for (int j = i+1; j < n; j++) {
+            if (arr[j] < arr[minIdx]) {
+                minIdx = j;
+            }
+        }
+        swap(arr[i], arr[minIdx]);
+    }
+}`
+            },
+            insertion: {
+                name: "Insertion Sort",
+                timeComplexity: "O(n²)",
+                spaceComplexity: "O(1)",
+                python: `def insertion_sort(arr):
+    n = len(arr)
+    for i in range(1, n):
+        key = arr[i]
+        j = i - 1
+        while j >= 0 and arr[j] > key:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    return arr`,
+                java: `public void insertionSort(int[] arr) {
+    int n = arr.length;
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}`,
+                cpp: `void insertionSort(vector<int>& arr) {
+    int n = arr.size();
+    for (int i = 1; i < n; i++) {
+        int key = arr[i];
+        int j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+            arr[j + 1] = arr[j];
+            j--;
+        }
+        arr[j + 1] = key;
+    }
+}`
+            },
+            merge: {
+                name: "Merge Sort",
+                timeComplexity: "O(n log n)",
+                spaceComplexity: "O(n)",
+                python: `def merge_sort(arr):
+    if len(arr) <= 1:
+        return arr
+    
+    mid = len(arr) // 2
+    left = merge_sort(arr[:mid])
+    right = merge_sort(arr[mid:])
+    
+    return merge(left, right)
+
+def merge(left, right):
+    result = []
+    i = j = 0
+    
+    while i < len(left) and j < len(right):
+        if left[i] <= right[j]:
+            result.append(left[i])
+            i += 1
+        else:
+            result.append(right[j])
+            j += 1
+    
+    result.extend(left[i:])
+    result.extend(right[j:])
+    return result`,
+                java: `public void mergeSort(int[] arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+private void merge(int[] arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    
+    int[] L = new int[n1];
+    int[] R = new int[n2];
+    
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int i = 0; i < n2; i++) R[i] = arr[mid + 1 + i];
+    
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i]; i++;
+        } else {
+            arr[k] = R[j]; j++;
+        }
+        k++;
+    }
+    
+    while (i < n1) { arr[k] = L[i]; i++; k++; }
+    while (j < n2) { arr[k] = R[j]; j++; k++; }
+}`,
+                cpp: `void merge(vector<int>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    
+    vector<int> L(n1), R(n2);
+    for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+    for (int i = 0; i < n2; i++) R[i] = arr[mid + 1 + i];
+    
+    int i = 0, j = 0, k = left;
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i]; i++;
+        } else {
+            arr[k] = R[j]; j++;
+        }
+        k++;
+    }
+    
+    while (i < n1) { arr[k] = L[i]; i++; k++; }
+    while (j < n2) { arr[k] = R[j]; j++; k++; }
+}
+
+void mergeSort(vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}`
+            },
+            quick: {
+                name: "Quick Sort",
+                timeComplexity: "O(n²)",
+                spaceComplexity: "O(log n)",
+                python: `def quick_sort(arr, low=0, high=None):
+    if high is None:
+        high = len(arr) - 1
+    
+    if low < high:
+        pi = partition(arr, low, high)
+        quick_sort(arr, low, pi - 1)
+        quick_sort(arr, pi + 1, high)
+    return arr
+
+def partition(arr, low, high):
+    pivot = arr[high]
+    i = low - 1
+    
+    for j in range(low, high):
+        if arr[j] <= pivot:
+            i += 1
+            arr[i], arr[j] = arr[j], arr[i]
+    
+    arr[i + 1], arr[high] = arr[high], arr[i + 1]
+    return i + 1`,
+                java: `public void quickSort(int[] arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+private int partition(int[] arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            int temp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = temp;
+        }
+    }
+    
+    int temp = arr[i + 1];
+    arr[i + 1] = arr[high];
+    arr[high] = temp;
+    return i + 1;
+}`,
+                cpp: `int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];
+    int i = low - 1;
+    
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}`
+            },
+            heap: {
+                name: "Heap Sort",
+                timeComplexity: "O(n log n)",
+                spaceComplexity: "O(1)",
+                python: `def heap_sort(arr):
+    n = len(arr)
+    
+    # Build max heap
+    for i in range(n//2 - 1, -1, -1):
+        heapify(arr, n, i)
+    
+    # Extract elements one by one
+    for i in range(n-1, 0, -1):
+        arr[i], arr[0] = arr[0], arr[i]  # swap
+        heapify(arr, i, 0)
+    
+    return arr
+
+def heapify(arr, n, i):
+    largest = i
+    left = 2 * i + 1
+    right = 2 * i + 2
+    
+    if left < n and arr[left] > arr[largest]:
+        largest = left
+    
+    if right < n and arr[right] > arr[largest]:
+        largest = right
+    
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest)`,
+                java: `public void heapSort(int[] arr) {
+    int n = arr.length;
+    
+    // Build heap (rearrange array)
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+    
+    // One by one extract an element from heap
+    for (int i = n - 1; i > 0; i--) {
+        int temp = arr[0];
+        arr[0] = arr[i];
+        arr[i] = temp;
+        heapify(arr, i, 0);
+    }
+}
+
+private void heapify(int[] arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    if (left < n && arr[left] > arr[largest]) {
+        largest = left;
+    }
+    
+    if (right < n && arr[right] > arr[largest]) {
+        largest = right;
+    }
+    
+    if (largest != i) {
+        int swap = arr[i];
+        arr[i] = arr[largest];
+        arr[largest] = swap;
+        heapify(arr, n, largest);
+    }
+}`,
+                cpp: `void heapify(vector<int>& arr, int n, int i) {
+    int largest = i;
+    int left = 2 * i + 1;
+    int right = 2 * i + 2;
+    
+    if (left < n && arr[left] > arr[largest]) {
+        largest = left;
+    }
+    
+    if (right < n && arr[right] > arr[largest]) {
+        largest = right;
+    }
+    
+    if (largest != i) {
+        swap(arr[i], arr[largest]);
+        heapify(arr, n, largest);
+    }
+}
+
+void heapSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    // Build heap
+    for (int i = n / 2 - 1; i >= 0; i--) {
+        heapify(arr, n, i);
+    }
+    
+    // Extract elements
+    for (int i = n - 1; i > 0; i--) {
+        swap(arr[0], arr[i]);
+        heapify(arr, i, 0);
+    }
+}`
+            },
+            counting: {
+                name: "Counting Sort",
+                timeComplexity: "O(n + k)",
+                spaceComplexity: "O(n + k)",
+                python: `def counting_sort(arr):
+    if not arr:
+        return arr
+    
+    max_val = max(arr)
+    min_val = min(arr)
+    range_of_elements = max_val - min_val + 1
+    
+    # Initialize count array
+    count = [0] * range_of_elements
+    output = [0] * len(arr)
+    
+    # Count occurrences
+    for num in arr:
+        count[num - min_val] += 1
+    
+    # Cumulative count
+    for i in range(1, len(count)):
+        count[i] += count[i - 1]
+    
+    # Build output array
+    for num in reversed(arr):
+        output[count[num - min_val] - 1] = num
+        count[num - min_val] -= 1
+    
+    return output`,
+                java: `public void countingSort(int[] arr) {
+    if (arr.length == 0) return;
+    
+    int max = Arrays.stream(arr).max().getAsInt();
+    int min = Arrays.stream(arr).min().getAsInt();
+    int range = max - min + 1;
+    
+    int[] count = new int[range];
+    int[] output = new int[arr.length];
+    
+    // Count occurrences
+    for (int num : arr) {
+        count[num - min]++;
+    }
+    
+    // Cumulative count
+    for (int i = 1; i < count.length; i++) {
+        count[i] += count[i - 1];
+    }
+    
+    // Build output array
+    for (int i = arr.length - 1; i >= 0; i--) {
+        output[count[arr[i] - min] - 1] = arr[i];
+        count[arr[i] - min]--;
+    }
+    
+    // Copy back to original array
+    System.arraycopy(output, 0, arr, 0, arr.length);
+}`,
+                cpp: `void countingSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    
+    int max_val = *max_element(arr.begin(), arr.end());
+    int min_val = *min_element(arr.begin(), arr.end());
+    int range = max_val - min_val + 1;
+    
+    vector<int> count(range, 0);
+    vector<int> output(arr.size());
+    
+    // Count occurrences
+    for (int num : arr) {
+        count[num - min_val]++;
+    }
+    
+    // Cumulative count
+    for (int i = 1; i < range; i++) {
+        count[i] += count[i - 1];
+    }
+    
+    // Build output array
+    for (int i = arr.size() - 1; i >= 0; i--) {
+        output[count[arr[i] - min_val] - 1] = arr[i];
+        count[arr[i] - min_val]--;
+    }
+    
+    arr = output;
+}`
+            },
+            radix: {
+                name: "Radix Sort",
+                timeComplexity: "O(n * d)",
+                spaceComplexity: "O(n + k)",
+                python: `def radix_sort(arr):
+    if not arr:
+        return arr
+    
+    max_num = max(arr)
+    exp = 1
+    
+    while max_num // exp > 0:
+        counting_sort_by_digit(arr, exp)
+        exp *= 10
+    
+    return arr
+
+def counting_sort_by_digit(arr, exp):
+    n = len(arr)
+    output = [0] * n
+    count = [0] * 10
+    
+    # Count occurrences of digits
+    for num in arr:
+        digit = (num // exp) % 10
+        count[digit] += 1
+    
+    # Cumulative count
+    for i in range(1, 10):
+        count[i] += count[i - 1]
+    
+    # Build output array
+    for i in range(n - 1, -1, -1):
+        digit = (arr[i] // exp) % 10
+        output[count[digit] - 1] = arr[i]
+        count[digit] -= 1
+    
+    # Copy back
+    for i in range(n):
+        arr[i] = output[i]`,
+                java: `public void radixSort(int[] arr) {
+    if (arr.length == 0) return;
+    
+    int max = Arrays.stream(arr).max().getAsInt();
+    
+    for (int exp = 1; max / exp > 0; exp *= 10) {
+        countingSortByDigit(arr, exp);
+    }
+}
+
+private void countingSortByDigit(int[] arr, int exp) {
+    int n = arr.length;
+    int[] output = new int[n];
+    int[] count = new int[10];
+    
+    // Count occurrences
+    for (int num : arr) {
+        int digit = (num / exp) % 10;
+        count[digit]++;
+    }
+    
+    // Cumulative count
+    for (int i = 1; i < 10; i++) {
+        count[i] += count[i - 1];
+    }
+    
+    // Build output
+    for (int i = n - 1; i >= 0; i--) {
+        int digit = (arr[i] / exp) % 10;
+        output[count[digit] - 1] = arr[i];
+        count[digit]--;
+    }
+    
+    // Copy back
+    System.arraycopy(output, 0, arr, 0, n);
+}`,
+                cpp: `void countingSortByDigit(vector<int>& arr, int exp) {
+    int n = arr.size();
+    vector<int> output(n);
+    vector<int> count(10, 0);
+    
+    // Count digits
+    for (int num : arr) {
+        int digit = (num / exp) % 10;
+        count[digit]++;
+    }
+    
+    // Cumulative
+    for (int i = 1; i < 10; i++) {
+        count[i] += count[i - 1];
+    }
+    
+    // Build output
+    for (int i = n - 1; i >= 0; i--) {
+        int digit = (arr[i] / exp) % 10;
+        output[count[digit] - 1] = arr[i];
+        count[digit]--;
+    }
+    
+    arr = output;
+}
+
+void radixSort(vector<int>& arr) {
+    if (arr.empty()) return;
+    
+    int max_val = *max_element(arr.begin(), arr.end());
+    
+    for (int exp = 1; max_val / exp > 0; exp *= 10) {
+        countingSortByDigit(arr, exp);
+    }
+}`
+            },
+            bucket: {
+                name: "Bucket Sort",
+                timeComplexity: "O(n²)",
+                spaceComplexity: "O(n + k)",
+                python: `def bucket_sort(arr):
+    if not arr:
+        return arr
+    
+    n = len(arr)
+    max_val = max(arr)
+    min_val = min(arr)
+    
+    # Create buckets
+    bucket_count = n // 2 + 1
+    buckets = [[] for _ in range(bucket_count)]
+    
+    # Distribute elements into buckets
+    for num in arr:
+        if max_val == min_val:
+            bucket_idx = 0
+        else:
+            bucket_idx = int((num - min_val) / (max_val - min_val + 1) * bucket_count)
+            bucket_idx = min(bucket_idx, bucket_count - 1)
+        buckets[bucket_idx].append(num)
+    
+    # Sort individual buckets and concatenate
+    result = []
+    for bucket in buckets:
+        if bucket:
+            bucket.sort()
+            result.extend(bucket)
+    
+    return result`,
+                java: `public void bucketSort(float[] arr) {
+    if (arr.length <= 1) return;
+    
+    int n = arr.length;
+    ArrayList<Float>[] buckets = new ArrayList[n];
+    
+    for (int i = 0; i < n; i++) {
+        buckets[i] = new ArrayList<>();
+    }
+    
+    // Distribute elements
+    for (float num : arr) {
+        int bucketIndex = (int) (num * n);
+        if (bucketIndex >= n) bucketIndex = n - 1;
+        buckets[bucketIndex].add(num);
+    }
+    
+    // Sort and merge
+    int index = 0;
+    for (ArrayList<Float> bucket : buckets) {
+        if (bucket != null) {
+            Collections.sort(bucket);
+            for (float num : bucket) {
+                arr[index++] = num;
+            }
+        }
+    }
+}`,
+                cpp: `void bucketSort(vector<float>& arr) {
+    if (arr.empty()) return;
+    
+    int n = arr.size();
+    vector<vector<float>> buckets(n);
+    
+    // Distribute
+    for (float num : arr) {
+        int bucketIdx = (int)(num * n);
+        if (bucketIdx >= n) bucketIdx = n - 1;
+        buckets[bucketIdx].push_back(num);
+    }
+    
+    // Sort and merge
+    int index = 0;
+    for (auto& bucket : buckets) {
+        sort(bucket.begin(), bucket.end());
+        for (float num : bucket) {
+            arr[index++] = num;
+        }
+    }
+}`
+            },
+            shell: {
+                name: "Shell Sort",
+                timeComplexity: "O(n log² n)",
+                spaceComplexity: "O(1)",
+                python: `def shell_sort(arr):
+    n = len(arr)
+    gap = n // 2
+    
+    while gap > 0:
+        for i in range(gap, n):
+            temp = arr[i]
+            j = i
+            
+            while j >= gap and arr[j - gap] > temp:
+                arr[j] = arr[j - gap]
+                j -= gap
+            
+            arr[j] = temp
+        
+        gap //= 2
+    
+    return arr`,
+                java: `public void shellSort(int[] arr) {
+    int n = arr.length;
+    
+    for (int gap = n/2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j = i;
+            
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            
+            arr[j] = temp;
+        }
+    }
+}`,
+                cpp: `void shellSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    for (int gap = n/2; gap > 0; gap /= 2) {
+        for (int i = gap; i < n; i++) {
+            int temp = arr[i];
+            int j = i;
+            
+            while (j >= gap && arr[j - gap] > temp) {
+                arr[j] = arr[j - gap];
+                j -= gap;
+            }
+            
+            arr[j] = temp;
+        }
+    }
+}`
+            }
+        };
+
+        // DOM elements
+        const DOM = {
+            arraySize: document.getElementById('array-size'),
+            sizeVal: document.getElementById('size-val'),
+            customArray: document.getElementById('custom-array'),
+            btnGenRand: document.getElementById('btn-generateRandom'),
+            btnGenSorted: document.getElementById('btn-generateSorted'),
+            btnInit: document.getElementById('btn-initSort'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            arrayContainer: document.getElementById('array-container'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            algoBtns: document.querySelectorAll('.algo-btn'),
+            statN: document.getElementById('stat-n'),
+            statComp: document.getElementById('stat-comp'),
+            statSwap: document.getElementById('stat-swap'),
+            opsProgress: document.getElementById('ops-progress'),
+            timeComplexity: document.getElementById('time-complexity'),
+            spaceComplexity: document.getElementById('space-complexity'),
+            ptrI: document.getElementById('ptr-i'),
+            ptrJ: document.getElementById('ptr-j'),
+            ptrMin: document.getElementById('ptr-min')
+        };
+
+        // Global state
+        let currentArray = [];
+        let animationSteps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationSpeed = 1;
+        let currentAlgorithm = 'bubble';
+        let editor = null;
+
+        // Code highlighting during execution
+        function highlightCode(lineNumber) {
+            if (!editor) return;
+
+            // Clear previous highlights
+            editorDecorations = editor.deltaDecorations(editorDecorations, []);
+
+            if (lineNumber) {
+                // Add new highlight
+                const decoration = {
+                    range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'monaco-line-highlight',
+                        glyphMarginClassName: 'monaco-line-glyph'
+                    }
+                };
+                editorDecorations = editor.deltaDecorations([], [decoration]);
+                editor.revealLineInCenter(lineNumber);
+            }
+        }
+
+        // Initialize Monaco Editor
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: ALGORITHMS[currentAlgorithm].python,
+                language: 'python',
+                theme: 'vs-dark',
+                fontSize: 14,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                automaticLayout: true,
+                readOnly: true
+            });
+        });
+
+        // Event listeners
+        DOM.arraySize.addEventListener('input', updateSizeValue);
+        DOM.animSpeed.addEventListener('input', updateSpeedValue);
+        DOM.btnGenRand.addEventListener('click', generateRandomArray);
+        DOM.btnGenSorted.addEventListener('click', generateNearlySortedArray);
+        DOM.btnInit.addEventListener('click', initializeSort);
+        DOM.btnPlay.addEventListener('click', togglePlay);
+        DOM.btnNext.addEventListener('click', nextStep);
+        DOM.btnPrev.addEventListener('click', prevStep);
+        DOM.btnReset.addEventListener('click', resetVisualization);
+
+        // Algorithm selection
+        DOM.algoBtns.forEach(btn => {
+            btn.addEventListener('click', () => selectAlgorithm(btn.dataset.algo));
+        });
+
+        // Code tabs
+        DOM.codeTabs.forEach(tab => {
+            tab.addEventListener('click', () => switchCodeTab(tab.dataset.lang));
+        });
+
+        // Initialize
+        generateRandomArray();
+        updateUI();
+
+        function updateSizeValue() {
+            DOM.sizeVal.textContent = DOM.arraySize.value;
+        }
+
+        function updateSpeedValue() {
+            animationSpeed = parseFloat(DOM.animSpeed.value);
+            DOM.speedVal.textContent = animationSpeed.toFixed(1) + 'x';
+        }
+
+        function selectAlgorithm(algo) {
+            currentAlgorithm = algo;
+            DOM.algoBtns.forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`[data-algo="${algo}"]`).classList.add('active');
+            
+            // Update complexities
+            DOM.timeComplexity.textContent = ALGORITHMS[algo].timeComplexity;
+            DOM.spaceComplexity.textContent = ALGORITHMS[algo].spaceComplexity;
+            
+            // Update code
+            if (editor) {
+                switchCodeTab('python'); // Default to Python
+            }
+            
+            updateUI();
+        }
+
+        function switchCodeTab(lang) {
+            DOM.codeTabs.forEach(tab => tab.classList.remove('active'));
+            document.querySelector(`[data-lang="${lang}"]`).classList.add('active');
+            
+            if (editor) {
+                const code = ALGORITHMS[currentAlgorithm][lang];
+                const language = lang === 'cpp' ? 'cpp' : lang;
+                editor.setValue(code);
+                monaco.editor.setModelLanguage(editor.getModel(), language);
+            }
+        }
+
+        function generateRandomArray() {
+            const size = parseInt(DOM.arraySize.value);
+            currentArray = [];
+            for (let i = 0; i < size; i++) {
+                currentArray.push(Math.floor(Math.random() * 100) + 1);
+            }
+            resetVisualization();
+        }
+
+        function generateNearlySortedArray() {
+            const size = parseInt(DOM.arraySize.value);
+            currentArray = [];
+            for (let i = 0; i < size; i++) {
+                currentArray.push(i + 1 + Math.floor(Math.random() * 10) - 5);
+            }
+            currentArray = currentArray.map(x => Math.max(1, Math.min(100, x)));
+            resetVisualization();
+        }
+
+        function initializeSort() {
+            const customInput = DOM.customArray.value.trim();
+            if (customInput) {
+                try {
+                    currentArray = customInput.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+                    if (currentArray.length === 0) {
+                        generateRandomArray();
+                        return;
+                    }
+                } catch (e) {
+                    generateRandomArray();
+                    return;
+                }
+            }
+            
+            // Generate animation steps based on algorithm
+            animationSteps = generateSortSteps(currentArray.slice(), currentAlgorithm);
+            currentStep = 0;
+            updateUI();
+            renderArray();
+            logMessage('info', `Initialized ${ALGORITHMS[currentAlgorithm].name} with ${currentArray.length} elements`);
+        }
+
+        function generateSortSteps(arr, algorithm) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            
+            switch (algorithm) {
+                case 'bubble':
+                    return generateBubbleSortSteps(arr);
+                case 'selection':
+                    return generateSelectionSortSteps(arr);
+                case 'insertion':
+                    return generateInsertionSortSteps(arr);
+                case 'merge':
+                    return generateMergeSortSteps(arr);
+                case 'quick':
+                    return generateQuickSortSteps(arr);
+                case 'heap':
+                    return generateHeapSortSteps(arr);
+                case 'counting':
+                    return generateCountingSortSteps(arr);
+                case 'radix':
+                    return generateRadixSortSteps(arr);
+                case 'bucket':
+                    return generateBucketSortSteps(arr);
+                case 'shell':
+                    return generateShellSortSteps(arr);
+                default:
+                    return steps;
+            }
+        }
+
+        function generateBubbleSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 0; i < arr.length; i++) {
+                for (let j = 0; j < arr.length - i - 1; j++) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i: j, j: j + 1 },
+                        comparing: [j, j + 1]
+                    });
+                    
+                    if (arr[j] > arr[j + 1]) {
+                        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+                        swaps++;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i: j, j: j + 1 },
+                            swapped: [j, j + 1]
+                        });
+                    }
+                }
+                // Mark last element as sorted
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    sorted: [arr.length - i - 1]
+                });
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateSelectionSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 0; i < arr.length - 1; i++) {
+                let minIdx = i;
+                
+                for (let j = i + 1; j < arr.length; j++) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, min: minIdx, j },
+                        comparing: [minIdx, j]
+                    });
+                    
+                    if (arr[j] < arr[minIdx]) {
+                        minIdx = j;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i, min: minIdx, j },
+                            minFound: minIdx
+                        });
+                    }
+                }
+                
+                if (minIdx !== i) {
+                    [arr[i], arr[minIdx]] = [arr[minIdx], arr[i]];
+                    swaps++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, min: minIdx },
+                        swapped: [i, minIdx],
+                        sorted: Array.from({length: i}, (_, idx) => idx)
+                    });
+                } else {
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i },
+                        sorted: Array.from({length: i + 1}, (_, idx) => idx)
+                    });
+                }
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateInsertionSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            for (let i = 1; i < arr.length; i++) {
+                let key = arr[i];
+                let j = i - 1;
+                
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: { i, j: j },
+                    key: i
+                });
+                
+                while (j >= 0) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, j },
+                        comparing: [j, j + 1],
+                        key: i
+                    });
+                    
+                    if (arr[j] > key) {
+                        arr[j + 1] = arr[j];
+                        swaps++;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i, j: j - 1 },
+                            shifted: [j, j + 1],
+                            key: i
+                        });
+                        j--;
+                    } else {
+                        break;
+                    }
+                }
+                
+                arr[j + 1] = key;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: { i },
+                    inserted: j + 1,
+                    sorted: Array.from({length: i + 1}, (_, idx) => idx)
+                });
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateMergeSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            function mergeSortHelper(arr, left, right) {
+                if (left < right) {
+                    const mid = Math.floor((left + right) / 2);
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        range: [left, right]
+                    });
+                    
+                    mergeSortHelper(arr, left, mid);
+                    mergeSortHelper(arr, mid + 1, right);
+                    
+                    // Merge step
+                    const n1 = mid - left + 1;
+                    const n2 = right - mid;
+                    const L = arr.slice(left, left + n1);
+                    const R = arr.slice(mid + 1, mid + 1 + n2);
+                    
+                    let i = 0, j = 0, k = left;
+                    
+                    while (i < n1 && j < n2) {
+                        comparisons++;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i: k },
+                            comparing: [left + i, mid + 1 + j],
+                            merging: [left, right]
+                        });
+                        
+                        if (L[i] <= R[j]) {
+                            arr[k] = L[i];
+                            i++;
+                        } else {
+                            arr[k] = R[j];
+                            j++;
+                        }
+                        k++;
+                        swaps++;
+                        
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i: k - 1 },
+                            merged: [k - 1],
+                            merging: [left, right]
+                        });
+                    }
+                    
+                    while (i < n1) {
+                        arr[k] = L[i];
+                        i++;
+                        k++;
+                        swaps++;
+                    }
+                    
+                    while (j < n2) {
+                        arr[k] = R[j];
+                        j++;
+                        k++;
+                        swaps++;
+                    }
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        merged: Array.from({length: right - left + 1}, (_, idx) => left + idx)
+                    });
+                }
+            }
+            
+            mergeSortHelper(arr, 0, arr.length - 1);
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateQuickSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            function quickSortHelper(arr, low, high) {
+                if (low < high) {
+                    const pi = partition(arr, low, high);
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { pivot: pi },
+                        partitioned: [low, high]
+                    });
+                    
+                    quickSortHelper(arr, low, pi - 1);
+                    quickSortHelper(arr, pi + 1, high);
+                }
+            }
+            
+            function partition(arr, low, high) {
+                const pivot = arr[high];
+                let i = low - 1;
+                
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: { pivot: high, i: low - 1, j: low },
+                    partitioning: [low, high]
+                });
+                
+                for (let j = low; j < high; j++) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { pivot: high, i, j },
+                        comparing: [j, high],
+                        partitioning: [low, high]
+                    });
+                    
+                    if (arr[j] <= pivot) {
+                        i++;
+                        [arr[i], arr[j]] = [arr[j], arr[i]];
+                        swaps++;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { pivot: high, i, j },
+                            swapped: [i, j],
+                            partitioning: [low, high]
+                        });
+                    }
+                }
+                
+                [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+                swaps++;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: { pivot: i + 1 },
+                    swapped: [i + 1, high],
+                    partitioned: [low, high]
+                });
+                
+                return i + 1;
+            }
+            
+            quickSortHelper(arr, 0, arr.length - 1);
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateHeapSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            function heapify(arr, n, i) {
+                let largest = i;
+                const left = 2 * i + 1;
+                const right = 2 * i + 2;
+                
+                if (left < n) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, largest },
+                        comparing: [largest, left],
+                        heapifying: [i]
+                    });
+                    
+                    if (arr[left] > arr[largest]) {
+                        largest = left;
+                    }
+                }
+                
+                if (right < n) {
+                    comparisons++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, largest },
+                        comparing: [largest, right],
+                        heapifying: [i]
+                    });
+                    
+                    if (arr[right] > arr[largest]) {
+                        largest = right;
+                    }
+                }
+                
+                if (largest !== i) {
+                    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+                    swaps++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i: largest },
+                        swapped: [i, largest],
+                        heapifying: [largest]
+                    });
+                    
+                    heapify(arr, n, largest);
+                }
+            }
+            
+            // Build heap
+            for (let i = Math.floor(arr.length / 2) - 1; i >= 0; i--) {
+                heapify(arr, arr.length, i);
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                heapBuilt: true
+            });
+            
+            // Extract elements
+            for (let i = arr.length - 1; i > 0; i--) {
+                [arr[0], arr[i]] = [arr[i], arr[0]];
+                swaps++;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    swapped: [0, i],
+                    extracting: i
+                });
+                
+                heapify(arr, i, 0);
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateCountingSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            if (arr.length === 0) return steps;
+            
+            const max_val = Math.max(...arr);
+            const min_val = Math.min(...arr);
+            const range = max_val - min_val + 1;
+            
+            const count = new Array(range).fill(0);
+            const output = new Array(arr.length);
+            
+            // Count occurrences
+            for (let num of arr) {
+                count[num - min_val]++;
+                swaps++;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    counting: num - min_val
+                });
+            }
+            
+            // Cumulative count
+            for (let i = 1; i < range; i++) {
+                count[i] += count[i - 1];
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    cumulative: i
+                });
+            }
+            
+            // Build output
+            for (let i = arr.length - 1; i >= 0; i--) {
+                const digit = arr[i] - min_val;
+                output[count[digit] - 1] = arr[i];
+                count[digit]--;
+                swaps++;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    placing: i
+                });
+            }
+            
+            // Copy back
+            for (let i = 0; i < arr.length; i++) {
+                arr[i] = output[i];
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateRadixSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            if (arr.length === 0) return steps;
+            
+            const max_num = Math.max(...arr);
+            
+            for (let exp = 1; Math.floor(max_num / exp) > 0; exp *= 10) {
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    digit: Math.floor(Math.log10(exp))
+                });
+                
+                countingSortByDigit(arr, exp);
+            }
+            
+            function countingSortByDigit(arr, exp) {
+                const n = arr.length;
+                const output = new Array(n);
+                const count = new Array(10).fill(0);
+                
+                // Count digits
+                for (let num of arr) {
+                    const digit = Math.floor((num / exp) % 10);
+                    count[digit]++;
+                    swaps++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        countingDigit: digit
+                    });
+                }
+                
+                // Cumulative
+                for (let i = 1; i < 10; i++) {
+                    count[i] += count[i - 1];
+                }
+                
+                // Build output
+                for (let i = n - 1; i >= 0; i--) {
+                    const digit = Math.floor((arr[i] / exp) % 10);
+                    output[count[digit] - 1] = arr[i];
+                    count[digit]--;
+                    swaps++;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        placingDigit: i
+                    });
+                }
+                
+                // Copy back
+                for (let i = 0; i < n; i++) {
+                    arr[i] = output[i];
+                }
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateBucketSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            if (arr.length === 0) return steps;
+            
+            const n = arr.length;
+            const max_val = Math.max(...arr);
+            const min_val = Math.min(...arr);
+            
+            const bucketCount = Math.floor(n / 2) + 1;
+            const buckets = Array.from({length: bucketCount}, () => []);
+            
+            // Distribute
+            for (let num of arr) {
+                let bucketIdx;
+                if (max_val === min_val) {
+                    bucketIdx = 0;
+                } else {
+                    bucketIdx = Math.floor(((num - min_val) / (max_val - min_val + 1)) * bucketCount);
+                    bucketIdx = Math.min(bucketIdx, bucketCount - 1);
+                }
+                buckets[bucketIdx].push(num);
+                swaps++;
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    distributing: num,
+                    bucket: bucketIdx
+                });
+            }
+            
+            // Sort buckets and merge
+            let index = 0;
+            for (let bucket of buckets) {
+                if (bucket.length > 0) {
+                    bucket.sort((a, b) => {
+                        comparisons++;
+                        return a - b;
+                    });
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        bucketSorted: bucket.slice()
+                    });
+                    
+                    for (let num of bucket) {
+                        arr[index] = num;
+                        index++;
+                        swaps++;
+                    }
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: {},
+                        merged: index - bucket.length
+                    });
+                }
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function generateShellSortSteps(arr) {
+            const steps = [{ array: arr.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            let comparisons = 0;
+            let swaps = 0;
+            
+            let gap = Math.floor(arr.length / 2);
+            
+            while (gap > 0) {
+                steps.push({
+                    array: arr.slice(),
+                    comparisons,
+                    swaps,
+                    pointers: {},
+                    gap
+                });
+                
+                for (let i = gap; i < arr.length; i++) {
+                    const temp = arr[i];
+                    let j = i;
+                    
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i, j },
+                        key: i,
+                        gap
+                    });
+                    
+                    while (j >= gap) {
+                        comparisons++;
+                        steps.push({
+                            array: arr.slice(),
+                            comparisons,
+                            swaps,
+                            pointers: { i, j: j - gap },
+                            comparing: [j - gap, j],
+                            key: i,
+                            gap
+                        });
+                        
+                        if (arr[j - gap] > temp) {
+                            arr[j] = arr[j - gap];
+                            swaps++;
+                            steps.push({
+                                array: arr.slice(),
+                                comparisons,
+                                swaps,
+                                pointers: { i, j: j - gap },
+                                shifted: [j - gap, j],
+                                key: i,
+                                gap
+                            });
+                            j -= gap;
+                        } else {
+                            break;
+                        }
+                    }
+                    
+                    arr[j] = temp;
+                    steps.push({
+                        array: arr.slice(),
+                        comparisons,
+                        swaps,
+                        pointers: { i },
+                        inserted: j,
+                        gap
+                    });
+                }
+                
+                gap = Math.floor(gap / 2);
+            }
+            
+            steps.push({
+                array: arr.slice(),
+                comparisons,
+                swaps,
+                pointers: {},
+                sorted: Array.from({length: arr.length}, (_, i) => i)
+            });
+            
+            return steps;
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                DOM.btnPlay.innerHTML = '<i data-lucide="pause"></i> Pause';
+                playAnimation();
+            } else {
+                DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+            }
+        }
+
+        function playAnimation() {
+            if (!isPlaying || currentStep >= animationSteps.length - 1) {
+                isPlaying = false;
+                DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+                return;
+            }
+            
+            nextStep();
+            setTimeout(playAnimation, 1000 / animationSpeed);
+        }
+
+        function nextStep() {
+            if (currentStep < animationSteps.length - 1) {
+                currentStep++;
+                renderStep();
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+                updateUI();
+            }
+        }
+
+        function resetVisualization() {
+            currentStep = 0;
+            isPlaying = false;
+            DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+            animationSteps = [{ array: currentArray.slice(), comparisons: 0, swaps: 0, pointers: {} }];
+            highlightCode(null); // Clear highlights
+            updateUI();
+            renderArray();
+        }
+
+        function renderStep() {
+            const step = animationSteps[currentStep];
+            renderArray(step);
+            highlightCurrentLine(step);
+        }
+
+        function highlightCurrentLine(step) {
+            // Simple line highlighting based on algorithm and step type
+            let lineNumber = null;
+
+            switch (currentAlgorithm) {
+                case 'bubble':
+                    if (step.comparing) lineNumber = 4; // for j in range(0, n-i-1):
+                    else if (step.swapped) lineNumber = 5; // arr[j], arr[j+1] = arr[j+1], arr[j]
+                    break;
+                case 'selection':
+                    if (step.comparing) lineNumber = 5; // for j in range(i+1, n):
+                    else if (step.swapped) lineNumber = 8; // arr[i], arr[min_idx] = arr[min_idx], arr[i]
+                    break;
+                case 'insertion':
+                    if (step.comparing) lineNumber = 6; // while j >= 0 and arr[j] > key:
+                    else if (step.inserted !== undefined) lineNumber = 9; // arr[j + 1] = key
+                    break;
+                // Add more algorithms as needed
+            }
+
+            highlightCode(lineNumber);
+        }
+
+        function renderArray(step = null) {
+            const data = step || animationSteps[currentStep] || { array: currentArray, pointers: {}, comparing: [], swapped: [], sorted: [] };
+            
+            DOM.arrayContainer.innerHTML = '';
+            
+            data.array.forEach((value, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'array-element-wrapper';
+                
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'array-index';
+                indexLabel.textContent = index;
+                
+                const block = document.createElement('div');
+                block.className = 'array-block';
+                block.textContent = value;
+                
+                // Apply states
+                if (data.sorted && data.sorted.includes(index)) {
+                    block.classList.add('sorted');
+                } else if (data.swapped && data.swapped.includes(index)) {
+                    block.classList.add('compare');
+                } else if (data.comparing && data.comparing.includes(index)) {
+                    block.classList.add('compare');
+                } else if (data.key === index) {
+                    block.classList.add('pivot');
+                } else if (data.minFound === index) {
+                    block.classList.add('pivot');
+                }
+                
+                wrapper.appendChild(indexLabel);
+                wrapper.appendChild(block);
+                DOM.arrayContainer.appendChild(wrapper);
+            });
+            
+            // Update pointers
+            updatePointers(data.pointers);
+        }
+
+        function updatePointers(pointers) {
+            // Hide all pointers first
+            DOM.ptrI.style.opacity = '0';
+            DOM.ptrJ.style.opacity = '0';
+            DOM.ptrMin.style.opacity = '0';
+            
+            // Position and show active pointers
+            if (pointers.i !== undefined) {
+                const element = DOM.arrayContainer.children[pointers.i];
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const containerRect = DOM.arrayContainer.getBoundingClientRect();
+                    DOM.ptrI.style.left = (rect.left - containerRect.left + rect.width / 2) + 'px';
+                    DOM.ptrI.style.opacity = '1';
+                }
+            }
+            
+            if (pointers.j !== undefined) {
+                const element = DOM.arrayContainer.children[pointers.j];
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const containerRect = DOM.arrayContainer.getBoundingClientRect();
+                    DOM.ptrJ.style.left = (rect.left - containerRect.left + rect.width / 2) + 'px';
+                    DOM.ptrJ.style.opacity = '1';
+                }
+            }
+            
+            if (pointers.min !== undefined) {
+                const element = DOM.arrayContainer.children[pointers.min];
+                if (element) {
+                    const rect = element.getBoundingClientRect();
+                    const containerRect = DOM.arrayContainer.getBoundingClientRect();
+                    DOM.ptrMin.style.left = (rect.left - containerRect.left + rect.width / 2) + 'px';
+                    DOM.ptrMin.style.opacity = '1';
+                }
+            }
+        }
+
+        function updateUI() {
+            const step = animationSteps[currentStep] || { comparisons: 0, swaps: 0 };
+            
+            DOM.statN.textContent = currentArray.length;
+            DOM.statComp.textContent = step.comparisons || 0;
+            DOM.statSwap.textContent = step.swaps || 0;
+            
+            const progress = animationSteps.length > 1 ? (currentStep / (animationSteps.length - 1)) * 100 : 0;
+            DOM.opsProgress.style.width = progress + '%';
+            
+            DOM.btnPrev.disabled = currentStep === 0;
+            DOM.btnNext.disabled = currentStep >= animationSteps.length - 1;
+            DOM.btnReset.disabled = animationSteps.length <= 1;
+            DOM.btnPlay.disabled = animationSteps.length <= 1;
+            
+            if (currentStep >= animationSteps.length - 1 && animationSteps.length > 1) {
+                DOM.btnPlay.innerHTML = '<i data-lucide="rotate-ccw"></i> Reset';
+                DOM.btnPlay.onclick = resetVisualization;
+            } else {
+                DOM.btnPlay.innerHTML = '<i data-lucide="play"></i> Play';
+                DOM.btnPlay.onclick = togglePlay;
+            }
+        }
+
+        function logMessage(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-line';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'log-time';
+            timeSpan.textContent = `[${timestamp}]`;
+            
+            const typeSpan = document.createElement('span');
+            typeSpan.className = `log-type-${type}`;
+            typeSpan.textContent = `[${type.toUpperCase()}]`;
+            
+            const msgSpan = document.createElement('span');
+            msgSpan.className = 'log-msg';
+            msgSpan.textContent = message;
+            
+            logEntry.appendChild(timeSpan);
+            logEntry.appendChild(typeSpan);
+            logEntry.appendChild(msgSpan);
+            
+            DOM.logsContainer.insertBefore(logEntry, DOM.cursorLog);
+            
+            // Auto-scroll to bottom
+            DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        // Initialize with random array
+        generateRandomArray();
+    </script>
+
+</body>
+</html>

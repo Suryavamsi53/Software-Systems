@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <link rel="stylesheet" href="visualizer-common.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Queue Visualizer - Pro</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .panel-header i { color: var(--neon-cyan); }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.5rem;
+            color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim);
+            font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            height: 100%;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .column.center-col { overflow-y: hidden; }
+
+        .control-group { margin-bottom: 1rem; }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary { background: rgba(88, 166, 255, 0.1); border-color: rgba(88, 166, 255, 0.4); color: var(--neon-cyan); }
+        .btn-success { background: rgba(46, 160, 67, 0.1); border-color: rgba(46, 160, 67, 0.4); color: var(--neon-green); }
+        .btn-danger { background: rgba(248, 81, 73, 0.1); border-color: rgba(248, 81, 73, 0.4); color: var(--neon-red); }
+
+        .viz-viewport {
+            flex: 1;
+            position: relative;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .viz-canvas {
+            transform-origin: 0 0;
+            min-width: 100%;
+            min-height: 100%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px;
+        }
+
+        .queue-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .queue-element {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #161b22;
+            border: 2px solid #30363d;
+            border-radius: 12px;
+            font-family: var(--font-mono);
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .queue-element.active { border-color: var(--neon-cyan); box-shadow: 0 0 20px rgba(88, 166, 255, 0.4); transform: scale(1.1); }
+        .queue-element.found { border-color: var(--neon-green); background: rgba(46, 160, 67, 0.1); }
+
+        .ptr-head, .ptr-tail {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--neon-purple);
+            font-family: var(--font-mono);
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            z-index: 20;
+        }
+
+        .ptr-head.show, .ptr-tail.show { opacity: 1; }
+
+        .ptr-head { top: -45px; }
+        .ptr-tail { bottom: -45px; color: var(--neon-red); flex-direction: column-reverse; }
+
+        /* Terminal */
+        .terminal-container {
+            flex: 1; background: #0d1117; border-radius: 8px; border: 1px solid #30363d;
+            display: flex; flex-direction: column; overflow: hidden; height: 100%;
+        }
+
+        .terminal-header { background: #161b22; padding: 6px 12px; display: flex; align-items: center; border-bottom: 1px solid #30363d; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); }
+        .terminal-logs { padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; color: #e6edf3; }
+        .log-line { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        .log-type-eval { color: #d2a8ff; }
+        .log-type-success { color: #3fb950; font-weight: bold; }
+        .log-type-error { color: #f85149; font-weight: bold; }
+
+        /* Monaco */
+        .code-panel-wrapper { display: flex; flex-direction: column; flex: 1; height: 100%; border-radius: 8px; border: 1px solid #30363d; background: #0d1117; overflow: hidden; }
+        .code-tabs { display: flex; background: #161b22; border-bottom: 1px solid #30363d; }
+        .code-tab { padding: 0.6rem 1rem; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; }
+        .code-tab.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); background: rgba(88, 166, 255, 0.05); }
+        #monaco-container { flex: 1; }
+
+        /* Metrics */
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+        .metric-card { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .metric-card::before { content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%; }
+        .metric-card.m-time::before { background: var(--neon-cyan); }
+        .metric-card.m-space::before { background: var(--neon-green); }
+        .metric-val { font-size: 1.2rem; font-weight: 700; font-family: var(--font-mono); margin: 0.25rem 0; }
+        .metric-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; }
+
+        .stat-flex { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #30363d; font-size: 0.8rem; }
+
+        .monaco-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        
+        .zoom-controls { display: flex; gap: 8px; background: rgba(13, 17, 23, 0.8); border: 1px solid #30363d; border-radius: 6px; padding: 4px; position: absolute; top: 10px; right: 10px; z-index: 100; }
+        .zoom-btn { background: transparent; border: none; color: var(--text-muted); width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <div class="app-title"><i data-lucide="split"></i> Queue Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span> </div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;">
+            <span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span>
+            <span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="cpu"></i> Configuration</div>
+                <div class="control-group">
+                    <label>Implementation Strategy</label>
+                    <select id="queue-type" class="form-select">
+                        <option value="array">Array-Based (Fixed)</option>
+                        <option value="list">Linked List Based</option>
+                        <option value="circular">Circular Buffer</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Initial Entries (CSV)</label>
+                    <input type="text" id="init-input" class="form-input" placeholder="e.g. 10, 20, 30">
+                </div>
+                <button class="btn btn-primary" id="btn-initialize" style="width: 100%;"><i data-lucide="refresh-cw"></i> Initialize Queue</button>
+            </section>
+
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+                <div class="control-group">
+                    <label>Element Value</label>
+                    <input type="number" id="val-input" class="form-input" placeholder="Value...">
+                </div>
+                <div class="btn-group" style="margin-bottom: 0.5rem;">
+                    <button class="btn btn-success" id="btn-enqueue"><i data-lucide="arrow-right-to-line"></i> Enqueue</button>
+                    <button class="btn btn-danger" id="btn-dequeue"><i data-lucide="arrow-right-from-line"></i> Dequeue</button>
+                </div>
+                <button class="btn" id="btn-peekFront" style="width: 100%;"><i data-lucide="eye"></i> Peek Front</button>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0; background: transparent; border: none;">
+                <div class="terminal-container">
+                    <div class="terminal-header"><div class="mac-btns"><span></span><span></span><span></span></div><span>bash - queue_tracer.sh</span></div>
+                    <div class="terminal-logs" id="logs-container">
+                        <div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">Queue tracing engine ready.</span></div>
+                        <div id="cursor" style="width: 8px; height: 14px; background: var(--text-main); display: inline-block; animation: blink 1s step-end infinite;"></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="column center-col">
+            <section class="panel" style="flex: 1; display:flex; flex-direction:column;">
+                <div class="panel-header" style="justify-content: space-between;">
+                    <div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div>
+                    <div style="display:flex; gap: 8px;">
+                        <button class="btn" id="btn-prev" disabled><i data-lucide="chevron-left"></i></button>
+                        <button class="btn btn-primary" id="btn-play" disabled><i data-lucide="play"></i> Play</button>
+                        <button class="btn" id="btn-next" disabled><i data-lucide="chevron-right"></i></button>
+                        <button class="btn" id="btn-reset"><i data-lucide="rotate-ccw"></i></button>
+                    </div>
+                </div>
+                
+                <div class="control-group" style="margin: 0.5rem 0;">
+                    <label style="display: flex; justify-content: space-between;"><span>Animation Speed</span><span id="speed-val" class="text-mono">1.0x</span></label>
+                    <input type="range" id="anim-speed" min="0.2" max="3" step="0.2" value="1" style="width: 100%;">
+                </div>
+
+                
+      <div class="algo-toolbar"><div class="control-group"></div></div>
+<div class="viz-viewport" id="viz-viewport">
+                    <!-- zoom controls removed — visualizer-common.js provides zoom UI -->
+                    <div class="viz-canvas" id="viz-canvas">
+                        <div class="queue-container" id="queue-container">
+                            <div class="ptr-head" id="ptr-head"><span style="margin-bottom: 2px;">FRONT</span><i data-lucide="arrow-down"></i></div>
+                            <div class="ptr-tail" id="ptr-tail"><span style="margin-top: 2px;">REAR</span><i data-lucide="arrow-up"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="column">
+            <section class="panel">
+                <div class="panel-header"><i data-lucide="gauge"></i> Performance Profiler</div>
+                <div class="metrics-grid">
+                    <div class="metric-card m-time">
+                        <div class="metric-label">Time Complexity</div>
+                        <div class="metric-val text-blue">O(1)</div>
+                    </div>
+                    <div class="metric-card m-space">
+                        <div class="metric-label">Space Complexity</div>
+                        <div class="metric-val text-green">O(n)</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-flex"><span>Queue Size (N):</span><span id="stat-n" class="text-mono">0</span></div>
+                    <div class="stat-flex"><span>Executed Steps:</span><span id="stat-steps" class="text-mono text-blue">0</span></div>
+                </div>
+            </section>
+
+            <section class="panel" style="flex: 1; padding: 0;">
+                <div class="code-panel-wrapper">
+                    <div class="code-tabs">
+                        <button class="code-tab active" data-lang="go">main.go</button>
+                        <button class="code-tab" data-lang="java">Queue.java</button>
+                        <button class="code-tab" data-lang="python">queue.py</button>
+                    </div>
+                    <div id="monaco-container"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const CODES = {
+            go: `func (q *Queue) Enqueue(val int) {\n    if q.size == q.capacity {\n        return // Overflow\n    }\n    q.data[q.tail] = val\n    q.tail = (q.tail + 1) % q.capacity\n    q.size++\n}\n\nfunc (q *Queue) Dequeue() int {\n    if q.size == 0 {\n        return -1 // Underflow\n    }\n    val := q.data[q.head]\n    q.head = (q.head + 1) % q.capacity\n    q.size--\n    return val\n}\n\nfunc (q *Queue) Peek() int {\n    if q.size == 0 {\n        return -1\n    }\n    return q.data[q.head]\n}`,
+            java: `public void enqueue(int val) {\n    if (size == capacity) return; // Overflow\n    data[tail] = val;\n    tail = (tail + 1) % capacity;\n    size++;\n}\n\npublic int dequeue() {\n    if (size == 0) return -1; // Underflow\n    int val = data[head];\n    head = (head + 1) % capacity;\n    size--;\n    return val;\n}\n\npublic int peek() {\n    if (size == 0) return -1;\n    return data[head];\n}`,
+            python: `def enqueue(self, val):\n    if self.size == self.capacity:\n        return # Overflow\n    self.data[self.tail] = val\n    self.tail = (self.tail + 1) % self.capacity\n    self.size += 1\n\ndef dequeue(self):\n    if self.size == 0:\n        return -1 # Underflow\n    val = self.data[self.head]\n    self.head = (self.head + 1) % self.capacity\n    self.size -= 1\n    return val\n\ndef peek(self):\n    if self.size == 0:\n        return -1\n    return self.data[self.head]`
+        };
+
+        const LINE_MAP = {
+            enqueue: { go: [1, 7], java: [1, 5], python: [1, 5] },
+            dequeue: { go: [10, 18], java: [7, 12], python: [7, 12] },
+            peek: { go: [20, 25], java: [14, 17], python: [14, 17] }
+        };
+
+        const DOM = {
+            initialize: document.getElementById('btn-initialize'),
+            initInput: document.getElementById('init-input'),
+            valInput: document.getElementById('val-input'),
+            btnEnqueue: document.getElementById('btn-enqueue'),
+            btnDequeue: document.getElementById('btn-dequeue'),
+            btnPeek: document.getElementById('btn-peekFront'),
+            btnPlay: document.getElementById('btn-play'),
+            btnNext: document.getElementById('btn-next'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnReset: document.getElementById('btn-reset'),
+            animSpeed: document.getElementById('anim-speed'),
+            speedVal: document.getElementById('speed-val'),
+            queueContainer: document.getElementById('queue-container'),
+            logsContainer: document.getElementById('logs-container'),
+            cursorLog: document.getElementById('cursor'),
+            codeTabs: document.querySelectorAll('.code-tab'),
+            statN: document.getElementById('stat-n'),
+            statSteps: document.getElementById('stat-steps'),
+            ptrHead: document.getElementById('ptr-head'),
+            ptrTail: document.getElementById('ptr-tail'),
+            canvas: document.getElementById('viz-canvas'),
+            viewport: document.getElementById('viz-viewport'),
+            // zoomValText: provided by visualizer-common.js when needed
+        };
+
+        let state = {
+            queue: [], steps: [], currentStepIndex: -1, isPlaying: false,
+            playInterval: null, baseDelay: 1000, activeLang: 'go', activeOp: 'enqueue',
+            editorDecorations: [], zoom: 1.0, panX: 0, panY: 0
+        };
+
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+        require(['vs/editor/editor.main'], function () {
+            window.monacoEditor = monaco.editor.create(document.getElementById('monaco-container'), {
+                value: CODES[state.activeLang], language: 'go', theme: 'vs-dark',
+                readOnly: true, minimap: { enabled: false }, fontSize: 13, fontFamily: "'Fira Code', monospace"
+            });
+            initApp();
+        });
+
+        function initApp() {
+            setupListeners();
+            lucide.createIcons();
+            resetQueue([10, 20, 30, 40]);
+        }
+
+        function setupListeners() {
+            DOM.initialize.onclick = () => resetQueue(DOM.initInput.value.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v)));
+            DOM.btnEnqueue.onclick = () => startOp('enqueue');
+            DOM.btnDequeue.onclick = () => startOp('dequeue');
+            DOM.btnPeek.onclick = () => startOp('peek');
+            DOM.btnPlay.onclick = () => state.isPlaying ? pauseAnim() : playAnim();
+            DOM.btnNext.onclick = stepNext;
+            DOM.btnPrev.onclick = stepPrev;
+            DOM.btnReset.onclick = () => resetQueue([10, 20, 30, 40]);
+            DOM.animSpeed.oninput = e => { DOM.speedVal.textContent = parseFloat(e.target.value).toFixed(1) + 'x'; if(state.isPlaying) { pauseAnim(); playAnim(); } };
+            DOM.codeTabs.forEach(tab => tab.onclick = e => {
+                DOM.codeTabs.forEach(t => t.classList.remove('active')); e.target.classList.add('active');
+                state.activeLang = e.target.dataset.lang;
+                window.monacoEditor.setValue(CODES[state.activeLang]);
+                monaco.editor.setModelLanguage(window.monacoEditor.getModel(), state.activeLang);
+                updateHighlight();
+            });
+        }
+
+        // Zoom/pan handled by visualizer-common.js (centralized)
+
+        function termLog(msg, type = 'info') {
+            const div = document.createElement('div'); div.className = 'log-line';
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+            let tClass = 'log-type-info', tag = '[INF]';
+            if (type === 'sys') { tClass = 'log-type-sys'; tag = '[SYS]'; }
+            else if (type === 'eval') { tClass = 'log-type-eval'; tag = '[EVL]'; }
+            else if (type === 'success') { tClass = 'log-type-success'; tag = '[OK ]'; }
+            else if (type === 'error') { tClass = 'log-type-error'; tag = '[ERR]'; }
+            div.innerHTML = `<span class="log-time">[${time}]</span><span class="${tClass}">${tag}</span><span class="log-msg">${msg}</span>`;
+            DOM.logsContainer.insertBefore(div, DOM.cursorLog); DOM.logsContainer.scrollTop = DOM.logsContainer.scrollHeight;
+        }
+
+        function resetQueue(vals = []) {
+            pauseAnim(); state.queue = vals; state.steps = []; state.currentStepIndex = -1; renderQueue();
+            termLog(`Queue reset with ${vals.length} items`, 'sys');
+            DOM.btnPlay.disabled = true; DOM.btnNext.disabled = true;
+        }
+
+        function startOp(op) {
+            state.activeOp = op; let val = parseInt(DOM.valInput.value);
+            if(op === 'enqueue' && isNaN(val)) { termLog("Enter a valid number", 'error'); return; }
+            pauseAnim(); buildSteps(op, val); state.currentStepIndex = -1;
+            DOM.btnPlay.disabled = false; DOM.btnNext.disabled = false; stepNext();
+        }
+
+        function buildSteps(op, val) {
+            let steps = [], q = [...state.queue];
+            const getL = (off) => LINE_MAP[op][state.activeLang][0] + off;
+            if (op === 'enqueue') {
+                steps.push({ q: [...q], log: `Ready to enqueue ${val}`, line: getL(0) });
+                steps.push({ q: [...q], log: `Checking capacity...`, line: getL(1) });
+                q.push(val);
+                steps.push({ q: [...q], log: `Appended ${val} to Rear`, line: getL(4), activeIdx: q.length-1 });
+                steps.push({ q: [...q], log: `Enqueue successful.`, line: getL(6), success: true });
+            } else if (op === 'dequeue') {
+                steps.push({ q: [...q], log: `Dequeue initiated.`, line: getL(0) });
+                if(!q.length) return state.steps = [{ q: [], log: `Queue Underflow!`, line: getL(2), error: true }];
+                let popped = q[0];
+                steps.push({ q: [...q], log: `Target front element: ${popped}`, line: getL(4), activeIdx: 0 });
+                q.shift();
+                steps.push({ q: [...q], log: `Retired front element. Value ${popped} returned.`, line: getL(7), success: true });
+            } else if (op === 'peek') {
+                steps.push({ q: [...q], log: `Peeking front...`, line: getL(0) });
+                if(!q.length) return state.steps = [{ q: [], log: `Queue is empty.`, line: getL(2), error: true }];
+                steps.push({ q: [...q], log: `Front value is ${q[0]}`, line: getL(4), foundIdx: 0, success: true });
+            }
+            state.steps = steps;
+        }
+
+        function renderQueue(q = state.queue, status = {}) {
+            DOM.queueContainer.innerHTML = '';
+            q.forEach((val, i) => {
+                const el = document.createElement('div'); el.className = 'queue-element';
+                if(status.activeIdx === i) el.classList.add('active');
+                if(status.foundIdx === i) el.classList.add('found');
+                el.textContent = val; DOM.queueContainer.appendChild(el);
+            });
+            if(q.length) {
+                DOM.ptrHead.classList.add('show'); DOM.ptrTail.classList.add('show');
+                const first = DOM.queueContainer.firstChild, last = DOM.queueContainer.lastChild;
+                DOM.ptrHead.style.left = first.offsetLeft + 15 + 'px';
+                DOM.ptrTail.style.left = last.offsetLeft + 15 + 'px';
+            } else { DOM.ptrHead.classList.remove('show'); DOM.ptrTail.classList.remove('show'); }
+            DOM.statN.textContent = q.length;
+        }
+
+        function stepNext() { if(state.currentStepIndex < state.steps.length-1) { state.currentStepIndex++; applyStep(); } else pauseAnim(); }
+        function stepPrev() { if(state.currentStepIndex > 0) { state.currentStepIndex--; applyStep(); } }
+
+        function applyStep() {
+            const s = state.steps[state.currentStepIndex]; state.queue = s.q;
+            renderQueue(s.q, s); termLog(s.log, s.error?'error':(s.success?'success':'info'));
+            highlight(s.line); DOM.statSteps.textContent = state.currentStepIndex + 1;
+            DOM.btnPrev.disabled = state.currentStepIndex <= 0; DOM.btnNext.disabled = state.currentStepIndex >= state.steps.length-1;
+        }
+
+        function highlight(l) {
+            state.editorDecorations = window.monacoEditor.deltaDecorations(state.editorDecorations, [{ range: new monaco.Range(l,1,l,1), options: { isWholeLine:true, className:'monaco-line-highlight' }}]);
+            window.monacoEditor.revealLineInCenter(l);
+        }
+
+        function updateHighlight() { if(state.currentStepIndex>=0) highlight(state.steps[state.currentStepIndex].line); }
+
+        function playAnim() {
+            state.isPlaying = true; DOM.btnPlay.innerHTML='<i data-lucide="pause"></i> Pause'; lucide.createIcons();
+            state.playInterval = setInterval(() => { if(state.currentStepIndex >= state.steps.length-1) return pauseAnim(); stepNext(); }, state.baseDelay / parseFloat(DOM.animSpeed.value));
+        }
+
+        function pauseAnim() { state.isPlaying = false; clearInterval(state.playInterval); DOM.btnPlay.innerHTML='<i data-lucide="play"></i> Play'; lucide.createIcons(); }
+    </script>
+    <script src="visualizer-common.js"></script>
+</body>
+</html>

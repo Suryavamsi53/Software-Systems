@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head><link href="visualizer-common.css?v=2" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Graph Algorithms Visualizer - Pro</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<style>
+        /* Graph Specific Styles - relying on visualizer-common.css for layout */
+        .control-group { margin-bottom: 15px; }
+        .control-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 500; }
+        
+        .btn-group { display: flex; gap: 5px; flex-wrap: wrap; }
+        .tool-btn {
+            padding: 8px 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .tool-btn:hover { background: rgba(51, 65, 85, 0.7); color: #fff; }
+        .tool-btn.active { background: var(--neon-cyan); color: #000; border-color: var(--neon-cyan); }
+        
+        /* Toggle Switches */
+        .toggle-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,255,255,0.1); transition: .3s; border-radius: 20px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--neon-cyan); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .lang-btn {
+            padding: 6px 12px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+        .lang-btn:hover { background: rgba(51, 65, 85, 0.7); }
+        .lang-btn.active { background: var(--neon-purple); color: white; border-color: var(--neon-purple); }
+
+        .edge-weight { fill: var(--text-main); font-size: 12px; text-anchor: middle; dominant-baseline: middle; }
+        #arrowhead polygon { fill: rgba(255,255,255,0.3); }
+
+        .matrix-cell { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); font-family: 'Fira Code', monospace; font-size: 0.8rem; }
+        .matrix-cell.header { background: rgba(255,255,255,0.05); font-weight: bold; color: var(--neon-cyan); }
+        .matrix-cell.active { background: rgba(34, 211, 238, 0.1); color: var(--neon-cyan); border-color: rgba(34, 211, 238, 0.3); }
+        
+        .mac-btns span { display: inline-block; }
+    </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Graph Algorithms Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Algorithms</div>
+<a class="nav-item active" href="javascript:void(0)" id="nav-bfs" onclick="selectAlgo('bfs')">BFS</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-dfs" onclick="selectAlgo('dfs')">DFS</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-dijkstra" onclick="selectAlgo('dijkstra')">Dijkstra</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-topological" onclick="selectAlgo('topological')">Topological Sort</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-components" onclick="selectAlgo('components')">Connected Components</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-cycle" onclick="selectAlgo('cycle')">Cycle Detection</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-bipartite" onclick="selectAlgo('bipartite')">Bipartite Check</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-kruskal" onclick="selectAlgo('kruskal')">Kruskal's MST</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-prims" onclick="selectAlgo('prims')">Prim's MST</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-tarjan" onclick="selectAlgo('tarjan')">Tarjan's SCC</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-bellman" onclick="selectAlgo('bellman')">Bellman-Ford</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-floyd" onclick="selectAlgo('floyd')">Floyd-Warshall</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-astar" onclick="selectAlgo('astar')">A* Search</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-bidirectional" onclick="selectAlgo('bidirectional')">Bidirectional Search</a>
+</div>
+</section>
+<section class="panel">
+<div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+<div class="nav-section" style="margin-top: 5px;">
+<div class="nav-section-title">Graph Settings</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding: 4px 8px;">
+    <span style="font-size:0.9rem; color:var(--text-secondary);">Directed</span>
+    <label class="switch">
+        <input type="checkbox" id="is-directed">
+        <span class="slider round"></span>
+    </label>
+</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding: 4px 8px;">
+    <span style="font-size:0.9rem; color:var(--text-secondary);">Weighted</span>
+    <label class="switch">
+        <input type="checkbox" id="is-weighted">
+        <span class="slider round"></span>
+    </label>
+</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding: 4px 8px;">
+    <span style="font-size:0.9rem; color:var(--text-secondary);">Grid Mode</span>
+    <label class="switch">
+        <input type="checkbox" id="is-grid-mode">
+        <span class="slider round"></span>
+    </div>
+<div style="margin-bottom: 12px; padding: 4px 8px;">
+    <div style="font-size:0.9rem; color:var(--text-secondary); margin-bottom: 6px;">Graph Topology</div>
+    <select id="topology-select" class="control-input" style="width: 100%; background: rgba(0,0,0,0.3); color: var(--text-main); border: 1px solid rgba(255,255,255,0.1); padding: 6px; border-radius: 4px; font-family: var(--font-sans);" onchange="if(window.controller) window.controller.loadExample(this.value)">
+        <option value="tree">Tree (Binary)</option>
+        <option value="dense">Dense Graph</option>
+        <option value="dag">Directed Acyclic (DAG)</option>
+        <option value="cycle">Cyclic Graph</option>
+        <option value="bipartite">Bipartite Graph</option>
+        <option value="disconnected">Disconnected Components</option>
+        <option value="grid">Grid Network</option>
+    </select>
+</div>
+<div style="margin-top: 15px; padding: 4px 8px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.9rem; color:var(--text-secondary);">Speed</span>
+    </div>
+    <input type="range" id="speed-range" min="1" max="10" value="4" style="width:100%; accent-color:var(--accent-color);">
+</div>
+<div style="display:flex; flex-direction:column; gap:10px; margin-top:20px; padding: 4px 8px;">
+    <button id="clear-graph" class="btn btn-primary" style="background:#ef4444; border-color:#ef4444; width:100%;">Clear Graph</button>
+    <button id="generate-maze" class="btn btn-primary" style="background:var(--accent-color); border-color:var(--accent-color); width:100%; display:none;">Generate Maze</button>
+</div>
+</div>
+</section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none; min-height: 200px;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+<div class="log-section" id="log-panel">
+<div class="log-entry">Graph visualization ready...</div>
+</div></div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> <span id="studio-title">Algorithm Visualization Studio</span></div><div class="control-group">
+<label>Mode</label>
+<div style="display: flex; align-items: center;">
+<div class="btn-group">
+<button class="tool-btn active" id="mode-move" title="Move Nodes"><i data-lucide="hand" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="mode-node" title="Add Node"><i data-lucide="plus-circle" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="mode-edge" title="Add Edge"><i data-lucide="link" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="mode-delete" title="Delete"><i data-lucide="trash-2" style="width:16px;height:16px"></i></button>
+</div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-prev" title="Step Back"><i data-lucide="chevron-left" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-play" title="Play/Pause"><i data-lucide="play" style="width:16px;height:16px;color:var(--neon-cyan)"></i> Play</button>
+<button class="tool-btn" id="btn-next" title="Step Forward"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-reset" title="Restart"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i></button>
+</div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-zoom-in" title="Zoom In" onclick="if(window.controller) window.controller.zoom(1)"><i data-lucide="zoom-in" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-zoom-out" title="Zoom Out" onclick="if(window.controller) window.controller.zoom(-1)"><i data-lucide="zoom-out" style="width:16px;height:16px"></i></button>
+</div>
+</div>
+</div></div>
+<div style="padding: 15px 20px 0 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.8rem; color:var(--text-muted); text-transform: uppercase;">Animation Speed Multiplier</span>
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-main);" id="speed-display">1.0x</span>
+    </div>
+    <input type="range" id="anim-speed" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%; accent-color:var(--neon-cyan);">
+</div>
+<div class="viz-viewport" style="margin: 15px; border-radius: 8px;"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="graph-canvas" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="var(--text-secondary)" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg></div></div></section></div><div class="column">
+<section class="panel" style="margin-bottom: 0;">
+    <div class="panel-header"><i data-lucide="activity"></i> Performance Profiler</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Time Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem;" id="time-complexity">O(V + E)</div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Space Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-green); font-weight: bold; font-size: 1.1rem;" id="space-complexity">O(V)</div>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Nodes Visited:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-visited">0</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Search Depth / MST Cost:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-depth">0</span>
+    </div>
+</section>
+<section class="panel" style="flex: 1; padding: 0;">
+<div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<span>Algorithm Code</span>
+<div class="btn-group">
+<button class="lang-btn active" id="lang-go" onclick="setLang('go')">Go</button>
+<button class="lang-btn" id="lang-java" onclick="setLang('java')">Java</button>
+<button class="lang-btn" id="lang-python" onclick="setLang('python')">Python</button>
+</div>
+</div>
+<div class="code-content" id="code-content" style="padding:0; overflow:hidden; display:flex; flex-direction:column; height: 100%;">
+    <div id="monaco-go" class="monaco-editor-container" style="width:100%; height:100%;"></div>
+    <div id="monaco-java" class="monaco-editor-container" style="width:100%; height:100%; display:none;"></div>
+    <div id="monaco-python" class="monaco-editor-container" style="width:100%; height:100%; display:none;"></div>
+</div>
+<div class="code-controls">
+<button class="btn btn-primary" id="btn-run" onclick="runAlgorithm()">▶ Run</button>
+<button class="btn" disabled="" id="btn-step" onclick="stepAlgorithm()">Step</button>
+<button class="btn" id="btn-reset" onclick="resetAlgorithm()">Reset</butto</div></section></div></div><script src="graph-visualizer.js"></script><script>
+        let editors = {};
+        let currentAlgorithm = 'bfs';
+        let currentLang = 'go';
+        let currentDecorations = [];
+
+        // Algorithm implementations
+        const algorithms = {
+            bfs: {
+                go: `func bfs(graph [][]int, start int) []int {
+    visited := make([]bool, len(graph))
+    queue := []int{start}
+    visited[start] = true
+    result := []int{}
+
+    for len(queue) > 0 {
+        node := queue[0]; queue = queue[1:]
+        result = append(result, node)
+
+        for _, neighbor := range graph[node] {
+            if !visited[neighbor] {
+                visited[neighbor] = true
+                queue = append(queue, neighbor)
+            }
+        }
+    }
+
+    return result
+}`,
+                java: `public List<Integer> bfs(List<List<Integer>> graph, int start) {
+    boolean[] visited = new boolean[graph.size()];
+    Queue<Integer> queue = new LinkedList<>();
+    queue.add(start);
+    visited[start] = true;
+    List<Integer> result = new ArrayList<>();
+
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        result.add(node);
+
+        for (int neighbor : graph.get(node)) {
+            if (!visited[neighbor]) {
+                visited[neighbor] = true;
+                queue.add(neighbor);
+            }
+        }
+    }
+
+    return result;
+}`,
+                python: `def bfs(graph, start):
+    visited = [False] * len(graph)
+    queue = deque([start])
+    visited[start] = True
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        for neighbor in graph[node]:
+            if not visited[neighbor]:
+                visited[neighbor] = True
+                queue.append(neighbor)
+
+    return result`
+            },
+            dfs: {
+                go: `func dfs(graph [][]int, start int) []int {
+    visited := make([]bool, len(graph))
+    result := []int{}
+    dfsHelper(graph, start, visited, &result)
+    return result
+}
+
+func dfsHelper(graph [][]int, node int, visited []bool, result *[]int) {
+    visited[node] = true
+    *result = append(*result, node)
+
+    for _, neighbor := range graph[node] {
+        if !visited[neighbor] {
+            dfsHelper(graph, neighbor, visited, result)
+        }
+    }
+}`,
+                java: `public List<Integer> dfs(List<List<Integer>> graph, int start) {
+    boolean[] visited = new boolean[graph.size()];
+    List<Integer> result = new ArrayList<>();
+    dfsHelper(graph, start, visited, result);
+    return result;
+}
+
+private void dfsHelper(List<List<Integer>> graph, int node,
+                       boolean[] visited, List<Integer> result) {
+    visited[node] = true;
+    result.add(node);
+
+    for (int neighbor : graph.get(node)) {
+        if (!visited[neighbor]) {
+            dfsHelper(graph, neighbor, visited, result);
+        }
+    }
+}`,
+                python: `def dfs(graph, start):
+    visited = [False] * len(graph)
+    result = []
+    dfs_helper(graph, start, visited, result)
+    return result
+
+def dfs_helper(graph, node, visited, result):
+    visited[node] = True
+    result.append(node)
+
+    for neighbor in graph[node]:
+        if not visited[neighbor]:
+            dfs_helper(graph, neighbor, visited, result)`
+            },
+            dijkstra: {
+                go: `func dijkstra(graph [][]int, start int) []int {
+    n := len(graph)
+    dist := make([]int, n)
+    visited := make([]bool, n)
+
+    for i := range dist {
+        dist[i] = math.MaxInt32
+    }
+    dist[start] = 0
+
+    for i := 0; i < n-1; i++ {
+        u := minDistance(dist, visited)
+        visited[u] = true
+
+        for v := 0; v < n; v++ {
+            if !visited[v] && graph[u][v] != 0 &&
+               dist[u] != math.MaxInt32 &&
+               dist[u]+graph[u][v] < dist[v] {
+                dist[v] = dist[u] + graph[u][v]
+            }
+        }
+    }
+
+    return dist
+}`,
+                java: `public int[] dijkstra(int[][] graph, int start) {
+    int n = graph.length;
+    int[] dist = new int[n];
+    boolean[] visited = new boolean[n];
+
+    Arrays.fill(dist, Integer.MAX_VALUE);
+    dist[start] = 0;
+
+    for (int i = 0; i < n-1; i++) {
+        int u = minDistance(dist, visited);
+        visited[u] = true;
+
+        for (int v = 0; v < n; v++) {
+            if (!visited[v] && graph[u][v] != 0 &&
+                dist[u] != Integer.MAX_VALUE &&
+                dist[u] + graph[u][v] < dist[v]) {
+                dist[v] = dist[u] + graph[u][v];
+            }
+        }
+    }
+
+    return dist;
+}`,
+                python: `def dijkstra(graph, start):
+    n = len(graph)
+    dist = [float('inf')] * n
+    visited = [False] * n
+    dist[start] = 0
+
+    for _ in range(n-1):
+        u = min_distance(dist, visited)
+        visited[u] = True
+
+        for v in range(n):
+            if (not visited[v] and graph[u][v] != 0 and
+                dist[u] != float('inf') and
+                dist[u] + graph[u][v] < dist[v]):
+                dist[v] = dist[u] + graph[u][v]
+
+    return dist`
+            },
+            topological: {
+                go: `func topologicalSort(graph [][]int) []int {
+    inDegree := make([]int, len(graph))
+    for u := range graph {
+        for _, v := range graph[u] {
+            inDegree[v]++
+        }
+    }
+    var q []int
+    for i, d := range inDegree {
+        if d == 0 { q = append(q, i) }
+    }
+    var order []int
+    for len(q) > 0 {
+        u := q[0]; q = q[1:]
+        order = append(order, u)
+        for _, v := range graph[u] {
+            inDegree[v]--
+            if inDegree[v] == 0 { q = append(q, v) }
+        }
+    }
+    return order
+}`,
+                java: `public List<Integer> topologicalSort(List<List<Integer>> graph) {
+    int n = graph.size();
+    int[] inDegree = new int[n];
+    for (int u = 0; u < n; u++) {
+        for (int v : graph.get(u)) inDegree[v]++;
+    }
+    Queue<Integer> q = new LinkedList<>();
+    for (int i = 0; i < n; i++) {
+        if (inDegree[i] == 0) q.add(i);
+    }
+    List<Integer> order = new ArrayList<>();
+    while (!q.isEmpty()) {
+        int u = q.poll();
+        order.add(u);
+        for (int v : graph.get(u)) {
+            inDegree[v]--;
+            if (inDegree[v] == 0) q.add(v);
+        }
+    }
+    return order;
+}`,
+                python: `def topological_sort(graph):
+    in_degree = [0] * len(graph)
+    for u in range(len(graph)):
+        for v in graph[u]:
+            in_degree[v] += 1
+    q = deque([i for i in range(len(graph)) if in_degree[i] == 0])
+    order = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in graph[u]:
+            in_degree[v] -= 1
+            if in_degree[v] == 0:
+                q.append(v)
+    return order`
+            },
+            components: {
+                go: `func connectedComponents(graph [][]int) [][]int {
+    visited := make([]bool, len(graph))
+    var comps [][]int
+    for i := 0; i < len(graph); i++ {
+        if !visited[i] {
+            var comp []int
+            dfs(graph, i, visited, &comp)
+            comps = append(comps, comp)
+        }
+    }
+    return comps
+}`,
+                java: `public List<List<Integer>> connectedComponents(List<List<Integer>> graph) {
+    boolean[] visited = new boolean[graph.size()];
+    List<List<Integer>> comps = new ArrayList<>();
+    for (int i = 0; i < graph.size(); i++) {
+        if (!visited[i]) {
+            List<Integer> comp = new ArrayList<>();
+            dfs(graph, i, visited, comp);
+            comps.add(comp);
+        }
+    }
+    return comps;
+}`,
+                python: `def connected_components(graph):
+    visited = [False] * len(graph)
+    comps = []
+    for i in range(len(graph)):
+        if not visited[i]:
+            comp = []
+            dfs(graph, i, visited, comp)
+            comps.append(comp)
+    return comps`
+            },
+            cycle: {
+                go: `func hasCycle(graph [][]int) bool {
+    visited := make([]bool, len(graph))
+    recStack := make([]bool, len(graph))
+    for i := 0; i < len(graph); i++ {
+        if dfsCycle(graph, i, visited, recStack) {
+            return true
+        }
+    }
+    return false
+}`,
+                java: `public boolean hasCycle(List<List<Integer>> graph) {
+    boolean[] visited = new boolean[graph.size()];
+    boolean[] recStack = new boolean[graph.size()];
+    for (int i = 0; i < graph.size(); i++) {
+        if (dfsCycle(graph, i, visited, recStack)) return true;
+    }
+    return false;
+}`,
+                python: `def has_cycle(graph):
+    visited = [False] * len(graph)
+    rec_stack = [False] * len(graph)
+    for i in range(len(graph)):
+        if dfs_cycle(graph, i, visited, rec_stack):
+            return True
+    return False`
+            },
+            bipartite: {
+                go: `func isBipartite(graph [][]int) bool {
+    colors := make([]int, len(graph))
+    for i := range colors { colors[i] = -1 }
+    for i := 0; i < len(graph); i++ {
+        if colors[i] == -1 && !bfsColor(graph, i, colors) {
+            return false
+        }
+    }
+    return true
+}`,
+                java: `public boolean isBipartite(List<List<Integer>> graph) {
+    int[] colors = new int[graph.size()];
+    Arrays.fill(colors, -1);
+    for (int i = 0; i < graph.size(); i++) {
+        if (colors[i] == -1 && !bfsColor(graph, i, colors)) return false;
+    }
+    return true;
+}`,
+                python: `def is_bipartite(graph):
+    colors = [-1] * len(graph)
+    for i in range(len(graph)):
+        if colors[i] == -1 and not bfs_color(graph, i, colors):
+            return False
+    return True`
+            },
+            kruskal: {
+                go: `func kruskal(edges []Edge, n int) int {
+    sort.Slice(edges, func(i, j int) bool {
+        return edges[i].weight < edges[j].weight
+    })
+    uf := NewUnionFind(n)
+    mstCost := 0
+    for _, e := range edges {
+        if uf.union(e.u, e.v) {
+            mstCost += e.weight
+        }
+    }
+    return mstCost
+}`,
+                java: `public int kruskal(List<Edge> edges, int n) {
+    Collections.sort(edges, (a, b) -> a.weight - b.weight);
+    UnionFind uf = new UnionFind(n);
+    int mstCost = 0;
+    for (Edge e : edges) {
+        if (uf.union(e.u, e.v)) {
+            mstCost += e.weight;
+        }
+    }
+    return mstCost;
+}`,
+                python: `def kruskal(edges, n):
+    edges.sort(key=lambda x: x.weight)
+    uf = UnionFind(n)
+    mst_cost = 0
+    for e in edges:
+        if uf.union(e.u, e.v):
+            mst_cost += e.weight
+    return mst_cost`
+            },
+            prims: {
+                go: `func prims(graph [][]Edge, start int) int {
+    visited := make([]bool, len(graph))
+    pq := &PriorityQueue{}
+    heap.Init(pq)
+    heap.Push(pq, &Item{value: start, priority: 0})
+    mstCost := 0
+    for pq.Len() > 0 {
+        item := heap.Pop(pq).(*Item)
+        u := item.value
+        if visited[u] { continue }
+        visited[u] = true
+        mstCost += item.priority
+        for _, edge := range graph[u] {
+            if !visited[edge.to] {
+                heap.Push(pq, &Item{value: edge.to, priority: edge.weight})
+            }
+        }
+    }
+    return mstCost
+}`,
+                java: `public int prims(List<List<Edge>> graph, int start) {
+    boolean[] visited = new boolean[graph.size()];
+    PriorityQueue<Edge> pq = new PriorityQueue<>((a, b) -> a.weight - b.weight);
+    pq.add(new Edge(start, 0));
+    int mstCost = 0;
+    while (!pq.isEmpty()) {
+        Edge curr = pq.poll();
+        int u = curr.to;
+        if (visited[u]) continue;
+        visited[u] = true;
+        mstCost += curr.weight;
+        for (Edge edge : graph.get(u)) {
+            if (!visited[edge.to]) pq.add(edge);
+        }
+    }
+    return mstCost;
+}`,
+                python: `def prims(graph, start):
+    visited = [False] * len(graph)
+    pq = [(0, start)]
+    mst_cost = 0
+    while pq:
+        weight, u = heapq.heappop(pq)
+        if visited[u]:
+            continue
+        visited[u] = True
+        mst_cost += weight
+        for v, w in graph[u]:
+            if not visited[v]:
+                heapq.heappush(pq, (w, v))
+    return mst_cost`
+            },
+            tarjan: {
+                go: `func tarjan(graph [][]int) [][]int {
+    n := len(graph)
+    ids := make([]int, n)
+    low := make([]int, n)
+    onStack := make([]bool, n)
+    stack := []int{}
+    id := 0
+    var scc [][]int
+    var dfs func(int)
+    dfs = func(at int) {
+        stack = append(stack, at)
+        onStack[at] = true
+        ids[at] = id; low[at] = id; id++
+        for _, to := range graph[at] {
+            if ids[to] == 0 { dfs(to) }
+            if onStack[to] { low[at] = min(low[at], low[to]) }
+        }
+        if ids[at] == low[at] {
+            var component []int
+            for {
+                node := stack[len(stack)-1]; stack = stack[:len(stack)-1]
+                onStack[node] = false
+                component = append(component, node)
+                if node == at { break }
+            }
+            scc = append(scc, component)
+        }
+    }
+    return scc
+}`,
+                java: `public List<List<Integer>> tarjan(List<List<Integer>> graph) {
+    int n = graph.size();
+    int[] ids = new int[n];
+    int[] low = new int[n];
+    boolean[] onStack = new boolean[n];
+    Stack<Integer> stack = new Stack<>();
+    List<List<Integer>> sccs = new ArrayList<>();
+    int[] id = {0};
+    for (int i = 0; i < n; i++) {
+        if (ids[i] == 0) dfs(i, graph, ids, low, onStack, stack, sccs, id);
+    }
+    return sccs;
+}`,
+                python: `def tarjan(graph):
+    n = len(graph)
+    ids = [-1] * n
+    low = [-1] * n
+    on_stack = [False] * n
+    stack = []
+    id_counter = [0]
+    sccs = []
+    def dfs(at):
+        stack.append(at)
+        on_stack[at] = True
+        ids[at] = low[at] = id_counter[0]
+        id_counter[0] += 1
+        for to in graph[at]:
+            if ids[to] == -1: dfs(to)
+            if on_stack[to]: low[at] = min(low[at], low[to])
+        if ids[at] == low[at]:
+            comp = []
+            while True:
+                node = stack.pop()
+                on_stack[node] = False
+                comp.append(node)
+                if node == at: break
+            sccs.append(comp)
+    return sccs`
+            },
+            bellman: {
+                go: `func bellmanFord(edges []Edge, n int, start int) []int {
+    dist := make([]int, n)
+    for i := range dist { dist[i] = math.MaxInt32 }
+    dist[start] = 0
+    for i := 0; i < n-1; i++ {
+        for _, e := range edges {
+            if dist[e.u] != math.MaxInt32 && dist[e.u]+e.w < dist[e.v] {
+                dist[e.v] = dist[e.u] + e.w
+            }
+        }
+    }
+    return dist
+}`,
+                java: `public int[] bellmanFord(List<Edge> edges, int n, int start) {
+    int[] dist = new int[n];
+    Arrays.fill(dist, Integer.MAX_VALUE);
+    dist[start] = 0;
+    for (int i = 0; i < n - 1; i++) {
+        for (Edge e : edges) {
+            if (dist[e.u] != Integer.MAX_VALUE && dist[e.u] + e.w < dist[e.v]) {
+                dist[e.v] = dist[e.u] + e.w;
+            }
+        }
+    }
+    return dist;
+}`,
+                python: `def bellman_ford(edges, n, start):
+    dist = [float('inf')] * n
+    dist[start] = 0
+    for _ in range(n - 1):
+        for u, v, w in edges:
+            if dist[u] != float('inf') and dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+    return dist`
+            },
+            floyd: {
+                go: `func floydWarshall(matrix [][]int) [][]int {
+    n := len(matrix)
+    for k := 0; k < n; k++ {
+        for i := 0; i < n; i++ {
+            for j := 0; j < n; j++ {
+                if matrix[i][k]+matrix[k][j] < matrix[i][j] {
+                    matrix[i][j] = matrix[i][k] + matrix[k][j]
+                }
+            }
+        }
+    }
+    return matrix
+}`,
+                java: `public void floydWarshall(int[][] matrix) {
+    int n = matrix.length;
+    for (int k = 0; k < n; k++) {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][k] + matrix[k][j] < matrix[i][j]) {
+                    matrix[i][j] = matrix[i][k] + matrix[k][j];
+                }
+            }
+        }
+    }
+}`,
+                python: `def floyd_warshall(matrix):
+    n = len(matrix)
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if matrix[i][k] + matrix[k][j] < matrix[i][j]:
+                    matrix[i][j] = matrix[i][k] + matrix[k][j]
+    return matrix`
+            },
+            astar: {
+                go: `func astar(graph [][]Edge, start, end int) []int {
+    pq := &PriorityQueue{}
+    heap.Init(pq)
+    heap.Push(pq, &Item{value: start, priority: heuristic(start, end)})
+    gScore := make(map[int]int); gScore[start] = 0
+    for pq.Len() > 0 {
+        curr := heap.Pop(pq).(*Item).value
+        if curr == end { return reconstructPath() }
+        for _, edge := range graph[curr] {
+            tentativeG := gScore[curr] + edge.weight
+            if tentativeG < gScore[edge.to] {
+                gScore[edge.to] = tentativeG
+                fScore := tentativeG + heuristic(edge.to, end)
+                heap.Push(pq, &Item{value: edge.to, priority: fScore})
+            }
+        }
+    }
+    return nil
+}`,
+                java: `public List<Integer> astar(List<List<Edge>> graph, int start, int end) {
+    PriorityQueue<Node> pq = new PriorityQueue<>((a, b) -> a.f - b.f);
+    pq.add(new Node(start, 0, heuristic(start, end)));
+    Map<Integer, Integer> gScore = new HashMap<>();
+    gScore.put(start, 0);
+    while (!pq.isEmpty()) {
+        int curr = pq.poll().id;
+        if (curr == end) return reconstructPath();
+        for (Edge edge : graph.get(curr)) {
+            int tentativeG = gScore.get(curr) + edge.weight;
+            if (tentativeG < gScore.getOrDefault(edge.to, Integer.MAX_VALUE)) {
+                gScore.put(edge.to, tentativeG);
+                pq.add(new Node(edge.to, tentativeG, tentativeG + heuristic(edge.to, end)));
+            }
+        }
+    }
+    return null;
+}`,
+                python: `def astar(graph, start, end):
+    pq = [(heuristic(start, end), start)]
+    g_score = {start: 0}
+    while pq:
+        _, curr = heapq.heappop(pq)
+        if curr == end:
+            return reconstruct_path()
+        for v, w in graph[curr]:
+            tentative_g = g_score[curr] + w
+            if tentative_g < g_score.get(v, float('inf')):
+                g_score[v] = tentative_g
+                f_score = tentative_g + heuristic(v, end)
+                heapq.heappush(pq, (f_score, v))
+    return None`
+            },
+            bidirectional: {
+                go: `func bidirectional(graph [][]int, start, end int) bool {
+    q1, q2 := []int{start}, []int{end}
+    visited1, visited2 := make(map[int]bool), make(map[int]bool)
+    visited1[start] = true; visited2[end] = true
+    for len(q1) > 0 && len(q2) > 0 {
+        if bfsStep(graph, &q1, visited1, visited2) { return true }
+        if bfsStep(graph, &q2, visited2, visited1) { return true }
+    }
+    return false
+}`,
+                java: `public boolean bidirectional(List<List<Integer>> graph, int start, int end) {
+    Queue<Integer> q1 = new LinkedList<>(), q2 = new LinkedList<>();
+    Set<Integer> visited1 = new HashSet<>(), visited2 = new HashSet<>();
+    q1.add(start); q2.add(end);
+    visited1.add(start); visited2.add(end);
+    while (!q1.isEmpty() && !q2.isEmpty()) {
+        if (bfsStep(graph, q1, visited1, visited2)) return true;
+        if (bfsStep(graph, q2, visited2, visited1)) return true;
+    }
+    return false;
+}`,
+                python: `def bidirectional(graph, start, end):
+    q1, q2 = deque([start]), deque([end])
+    visited1, visited2 = {start}, {end}
+    while q1 and q2:
+        if bfs_step(graph, q1, visited1, visited2): return True
+        if bfs_step(graph, q2, visited2, visited1): return True
+    return False`
+            }
+        };
+
+        function initMonacoEditors() {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], function() {
+                const commonOptions = {
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                };
+
+                editors.go = monaco.editor.create(document.getElementById('monaco-go'), {
+                    value: algorithms[currentAlgorithm].go,
+                    language: 'go',
+                    ...commonOptions
+                });
+
+                editors.java = monaco.editor.create(document.getElementById('monaco-java'), {
+                    value: algorithms[currentAlgorithm].java,
+                    language: 'java',
+                    ...commonOptions
+                });
+
+                editors.python = monaco.editor.create(document.getElementById('monaco-python'), {
+                    value: algorithms[currentAlgorithm].python,
+                    language: 'python',
+                    ...commonOptions
+                });
+
+                setLang('go');
+            });
+        }
+
+        window.setLang = function(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            const btn = document.getElementById('lang-' + lang);
+            if (btn) btn.classList.add('active');
+            
+            document.getElementById('monaco-go').style.display = lang === 'go' ? 'block' : 'none';
+            document.getElementById('monaco-java').style.display = lang === 'java' ? 'block' : 'none';
+            document.getElementById('monaco-python').style.display = lang === 'python' ? 'block' : 'none';
+            
+            if (editors[lang]) {
+                editors[lang].layout();
+            }
+            if (window.controller) {
+                window.controller.currentLang = lang;
+            }
+            clearHighlights();
+        };
+
+        const algoTitles = {
+            bfs: '🌊 Breadth-First Search',
+            dfs: '🌲 Depth-First Search',
+            dijkstra: '⚡ Dijkstra\'s Shortest Path',
+            topological: '📚 Topological Sort',
+            components: '🧩 Connected Components',
+            cycle: '🔄 Cycle Detection',
+            bipartite: '🎭 Bipartite Check',
+            kruskal: '🌳 Kruskal\'s MST',
+            prims: '🌱 Prim\'s MST',
+            tarjan: '🕸️ Tarjan\'s SCC',
+            bellman: '🛤️ Bellman-Ford',
+            floyd: '🗺️ Floyd-Warshall',
+            astar: '⭐ A* Search',
+            bidirectional: '🔍 Bidirectional Search'
+        };
+
+        window.selectAlgo = function(algo) {
+            currentAlgorithm = algo;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const item = document.getElementById('nav-' + algo);
+            if (item) item.classList.add('active');
+            
+            const titleEl = document.getElementById('studio-title');
+            if (titleEl && algoTitles[algo]) {
+                titleEl.innerText = algoTitles[algo];
+            }
+            
+            Object.keys(editors).forEach(lang => {
+                if (algorithms[algo] && algorithms[algo][lang] && editors[lang]) {
+                    editors[lang].setValue(algorithms[algo][lang]);
+                }
+            });
+
+            if (window.controller) {
+                window.currentAlgorithm = algo;
+                window.controller.resetAlgo();
+                
+                // Load appropriate default graph structure
+                if (['bfs', 'dfs'].includes(algo)) window.controller.loadExample('tree');
+                else if (['dijkstra', 'bellman', 'floyd', 'kruskal', 'prims', 'astar', 'bidirectional'].includes(algo)) window.controller.loadExample('dense');
+                else if (algo === 'components') window.controller.loadExample('disconnected');
+                else if (algo === 'cycle') window.controller.loadExample('cycle');
+                else if (algo === 'topological') window.controller.loadExample('dag');
+                else if (algo === 'bipartite') window.controller.loadExample('bipartite');
+            }
+            clearHighlights();
+        };
+
+        window.highlightLine = function(lineNum) {
+            const editor = editors[currentLang];
+            if (!editor || !lineNum) return;
+            const line = parseInt(lineNum);
+            
+            clearHighlights();
+            
+            currentDecorations = editor.deltaDecorations([], [
+                {
+                    range: new monaco.Range(line, 1, line, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'code-line-highlight',
+                        glyphMarginClassName: 'code-line-glyph'
+                    }
+                }
+            ]);
+            
+            editor.revealLineInCenter(line);
+        };
+
+        window.clearHighlights = function() {
+            const editor = editors[currentLang];
+            if (currentDecorations.length > 0 && editor) {
+                editor.deltaDecorations(currentDecorations, []);
+                currentDecorations = [];
+            }
+        };
+
+        window.runAlgorithm = function() {
+            if (window.controller) window.controller.startAlgo();
+        };
+        window.stepAlgorithm = function() {
+            if (window.controller) window.controller.stepAlgo();
+        };
+        window.resetAlgorithm = function() {
+            if (window.controller) window.controller.resetAlgo();
+        };
+
+        const originalOnLoad = window.onload;
+        window.onload = function(e) {
+            if (originalOnLoad) originalOnLoad(e);
+            initMonacoEditors();
+            
+            // Set initial state for controller
+            if (window.controller) {
+                window.controller.currentLang = currentLang;
+                window.currentAlgorithm = currentAlgorithm;
+            }
+        };
+    </script><script src="visualizer-common.js"></script></body>
+</html>

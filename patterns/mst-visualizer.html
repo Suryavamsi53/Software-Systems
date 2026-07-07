@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="visualizer-common.css" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MST Visualizer - Pro</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<style>
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-tertiary: #3a3a3a;
+            --bg-hover: #404040;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --accent-color: #3b82f6;
+            --neon-blue: #3b82f6;
+            --neon-green: #22c55e;
+            --neon-red: #ef4444;
+            --neon-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .sidebar-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* MST Controls */
+        .mst-controls {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn.btn-primary {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn.btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn.danger {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content.no-padding {
+            padding: 0;
+        }
+
+        .viz-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .algo-toolbar {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Split View */
+        .split-view {
+            flex: 1;
+            display: flex;
+        }
+
+        /* Canvas Section */
+        .canvas-section {
+            flex: 1;
+            background: var(--bg-primary);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #mst-canvas {
+            flex: 1;
+            background: var(--bg-primary);
+        }
+
+        /* Graph Styles */
+        .node-circle {
+            fill: var(--bg-tertiary);
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .node-circle.active {
+            fill: rgba(59, 130, 246, 0.2);
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+        }
+
+        .node-circle.in-mst {
+            fill: rgba(34, 197, 94, 0.2);
+            stroke: var(--neon-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+        }
+
+        .node-text {
+            fill: var(--text-primary);
+            font-weight: bold;
+            font-family: 'Inter', monospace;
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        .edge-line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .edge-line.active {
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+        }
+
+        .edge-line.in-mst {
+            stroke: var(--neon-green);
+            stroke-width: 4;
+        }
+
+        .edge-weight {
+            fill: var(--text-secondary);
+            font-size: 12px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        /* Code Section */
+        .code-section {
+            width: 400px;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-header span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .code-content {
+            flex: 1;
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        .code-line {
+            white-space: pre;
+            margin-bottom: 2px;
+        }
+
+        .code-line.highlight {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 10px;
+            margin-left: -10px;
+        }
+
+        .kwd { color: #f472b6; font-weight: bold; }
+        .typ { color: #60a5fa; }
+        .num { color: #facc15; }
+        .com { color: #6a9955; font-style: italic; }
+        .func { color: #34d399; }
+
+        .code-controls {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Log Panel */
+        .log-section {
+            height: 200px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            margin-bottom: 4px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 2px;
+        }
+
+        .log-entry.highlight {
+            color: var(--accent-color);
+        }
+
+        /* Status */
+        #status-text {
+            font-family: monospace;
+            color: var(--accent-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .code-section {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .sidebar {
+                width: 250px;
+            }
+            .code-section {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> MST Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Algorithms</div>
+<a class="nav-item active" href="javascript:void(0)" id="nav-kruskal" onclick="selectAlgorithm('kruskal')">Kruskal's Algorithm</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-prim" onclick="selectAlgorithm('prim')">Prim's Algorithm</a>
+</div>
+<div class="control-group">
+<label>Number of Nodes</label>
+<input class="input-field" id="num-nodes" max="10" min="3" type="number" value="6"/>
+</div>
+<div class="control-group">
+<label>Speed (ms)</label>
+<input class="input-field" id="animation-speed" max="1000" min="100" type="range" value="500"/>
+</div>
+<div class="btn-group">
+<button class="btn" id="generate-graph" onclick="generateRandomGraph()">Generate Graph</button>
+<button class="btn" id="clear-graph" onclick="clearGraph()">Clear Graph</button>
+</div>
+<div class="btn-group">
+<button class="btn btn-primary" id="start-visualization" onclick="startVisualization()">Start MST</button>
+<button class="btn danger" id="stop-visualization" onclick="stopVisualization()">Stop</button>
+</div>
+</section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+<div class="log-section" id="log-panel">
+<div class="log-entry">MST visualizer ready...</div>
+</div></div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div><div class="control-group">
+<button class="btn btn-primary" id="btn-run" onclick="runAlgorithm()">▶ Run</button>
+<button class="btn" disabled="" id="btn-step" onclick="stepAlgorithm()">Step</button>
+<button class="btn" id="btn-reset" onclick="resetVisualization()">Reset</button>
+</div></div><div class="viz-viewport"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="mst-canvas" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="var(--text-secondary)" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg></div></div></section></div><div class="column"><section class="panel" style="flex: 1; padding: 0;"><div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<span>Algorithm Code</span>
+<div class="btn-group">
+<button class="lang-btn active" id="lang-go" onclick="setLang('go')">Go</button>
+<button class="lang-btn" id="lang-java" onclick="setLang('java')">Java</button>
+<button class="lang-btn" id="lang-python" onclick="setLang('python')">Python</button>
+</div>
+</div>
+<div class="code-content" id="code-content">
+<div class="code-line"><span class="kwd">type</span> <span class="typ">Edge</span> <span class="kwd">struct</span> {</div>
+<div class="code-line">  u, v, weight <span class="typ">int</span></div>
+<div class="code-line">}</div>
+<div class="code-line"></div>
+<div class="code-line"><span class="kwd">func</span> <span class="func">kruskal</span>(edges []<span class="typ">Edge</span>, n <span class="typ">int</span>) []<span class="typ">Edge</span> {</div>
+<div class="code-line">  <span class="com">// Sort edges by weight</span></div>
+<div class="code-line">  <span class="kwd">sort</span>.<span class="typ">Slice</span>(edges, <span class="kwd">func</span>(i, j <span class="typ">int</span>) <span class="typ">bool</span> {</div>
+<div class="code-line">    <span class="kwd">return</span> edges[i].weight &lt; edges[j].weight</div>
+<div class="code-line">  })</div>
+<div class="code-line">  </div>
+<div class="code-line">  parent := <span class="kwd">make</span>([]<span class="typ">int</span>, n)</div>
+<div class="code-line">  <span class="kwd">for</span> i := <span class="kwd">range</span> parent {</div>
+<div class="code-line">    parent[i] = i</div>
+<div class="code-line">  }</div>
+<div class="code-line">  </div>
+<div class="code-line">  mst := []<span class="typ">Edge</span>{}</div>
+<div class="code-line">  </div>
+<div class="code-line">  <span class="kwd">for</span> _, edge := <span class="kwd">range</span> edges {</div>
+<div class="code-line">    pu := <span class="func">find</span>(parent, edge.u)</div>
+<div class="code-line">    pv := <span class="func">find</span>(parent, edge.v)</div>
+<div class="code-line">    </div>
+<div class="code-line">    <span class="kwd">if</span> pu != pv {</div>
+<div class="code-line">      union(parent, pu, pv)</div>
+<div class="code-line">      mst = <span class="kwd">append</span>(mst, edge)</div>
+<div class="code-line">    }</div>
+<div class="code-line">  }</div>
+<div class="code-line">  </div>
+<div class="code-line">  <span class="kwd">return</span> mst</div>
+<div class="code-line">}</div>
+</div>
+<div class="code-controls">
+<div class="control-group">
+<span id="operation-info">Kruskal's Algorithm</span>
+</div>
+</div>
+</div></section></div></div><script>
+        // Global variables
+        let nodes = [];
+        let edges = [];
+        let mstEdges = [];
+        let currentAlgorithm = 'kruskal';
+        let currentLang = 'go';
+        let animationSpeed = 500;
+        let isRunning = false;
+
+        // Algorithm implementations
+        const algorithms = {
+            kruskal: {
+                go: `type Edge struct {
+    u, v, weight int
+}
+
+func kruskal(edges []Edge, n int) []Edge {
+    // Sort edges by weight
+    sort.Slice(edges, func(i, j int) bool {
+        return edges[i].weight < edges[j].weight
+    })
+
+    parent := make([]int, n)
+    for i := range parent {
+        parent[i] = i
+    }
+
+    mst := []Edge{}
+
+    for _, edge := range edges {
+        pu := find(parent, edge.u)
+        pv := find(parent, edge.v)
+
+        if pu != pv {
+            union(parent, pu, pv)
+            mst = append(mst, edge)
+        }
+    }
+
+    return mst
+}
+
+func find(parent []int, i int) int {
+    if parent[i] != i {
+        parent[i] = find(parent, parent[i])
+    }
+    return parent[i]
+}
+
+func union(parent []int, x, y int) {
+    px := find(parent, x)
+    py := find(parent, y)
+    parent[px] = py
+}`,
+                java: `class Edge implements Comparable<Edge> {
+    int u, v, weight;
+
+    public int compareTo(Edge other) {
+        return this.weight - other.weight;
+    }
+}
+
+public List<Edge> kruskal(List<Edge> edges, int n) {
+    Collections.sort(edges);
+
+    int[] parent = new int[n];
+    for (int i = 0; i < n; i++) {
+        parent[i] = i;
+    }
+
+    List<Edge> mst = new ArrayList<>();
+
+    for (Edge edge : edges) {
+        int pu = find(parent, edge.u);
+        int pv = find(parent, edge.v);
+
+        if (pu != pv) {
+            union(parent, pu, pv);
+            mst.add(edge);
+        }
+    }
+
+    return mst;
+}
+
+private int find(int[] parent, int i) {
+    if (parent[i] != i) {
+        parent[i] = find(parent, parent[i]);
+    }
+    return parent[i];
+}
+
+private void union(int[] parent, int x, int y) {
+    int px = find(parent, x);
+    int py = find(parent, y);
+    parent[px] = py;
+}`,
+                python: `class Edge:
+    def __init__(self, u, v, weight):
+        self.u = u
+        self.v = v
+        self.weight = weight
+
+def kruskal(edges, n):
+    # Sort edges by weight
+    edges.sort(key=lambda x: x.weight)
+
+    parent = list(range(n))
+    mst = []
+
+    def find(i):
+        if parent[i] != i:
+            parent[i] = find(parent[i])
+        return parent[i]
+
+    def union(x, y):
+        px, py = find(x), find(y)
+        parent[px] = py
+
+    for edge in edges:
+        pu, pv = find(edge.u), find(edge.v)
+
+        if pu != pv:
+            union(pu, pv)
+            mst.append(edge)
+
+    return mst`
+            },
+            prim: {
+                go: `func prim(graph [][]int, n int) []Edge {
+    mst := []Edge{}
+    visited := make([]bool, n)
+    minEdge := make([]int, n)
+
+    for i := range minEdge {
+        minEdge[i] = math.MaxInt32
+    }
+    minEdge[0] = 0
+
+    for i := 0; i < n-1; i++ {
+        // Find minimum edge
+        minWeight := math.MaxInt32
+        u := -1
+
+        for v := 0; v < n; v++ {
+            if !visited[v] && minEdge[v] < minWeight {
+                minWeight = minEdge[v]
+                u = v
+            }
+        }
+
+        visited[u] = true
+
+        // Update adjacent vertices
+        for v := 0; v < n; v++ {
+            if graph[u][v] != 0 && !visited[v] && graph[u][v] < minEdge[v] {
+                minEdge[v] = graph[u][v]
+                // In actual implementation, we'd track parent here
+            }
+        }
+    }
+
+    return mst
+}`,
+                java: `public List<Edge> prim(int[][] graph, int n) {
+    List<Edge> mst = new ArrayList<>();
+    boolean[] visited = new boolean[n];
+    int[] minEdge = new int[n];
+    Arrays.fill(minEdge, Integer.MAX_VALUE);
+    minEdge[0] = 0;
+
+    for (int i = 0; i < n-1; i++) {
+        // Find minimum edge
+        int minWeight = Integer.MAX_VALUE;
+        int u = -1;
+
+        for (int v = 0; v < n; v++) {
+            if (!visited[v] && minEdge[v] < minWeight) {
+                minWeight = minEdge[v];
+                u = v;
+            }
+        }
+
+        visited[u] = true;
+
+        // Update adjacent vertices
+        for (int v = 0; v < n; v++) {
+            if (graph[u][v] != 0 && !visited[v] && graph[u][v] < minEdge[v]) {
+                minEdge[v] = graph[u][v];
+                // Track parent for edge reconstruction
+            }
+        }
+    }
+
+    return mst;
+}`,
+                python: `def prim(graph, n):
+    mst = []
+    visited = [False] * n
+    min_edge = [float('inf')] * n
+    min_edge[0] = 0
+
+    for _ in range(n - 1):
+        # Find minimum edge
+        min_weight = float('inf')
+        u = -1
+
+        for v in range(n):
+            if not visited[v] and min_edge[v] < min_weight:
+                min_weight = min_edge[v]
+                u = v
+
+        visited[u] = True
+
+        # Update adjacent vertices
+        for v in range(n):
+            if (graph[u][v] != 0 and not visited[v] and
+                graph[u][v] < min_edge[v]):
+                min_edge[v] = graph[u][v]
+                # Track parent for edge reconstruction
+
+    return mst`
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            renderCode('kruskal', 'go');
+            generateRandomGraph();
+        }
+
+        function setupCanvas() {
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            document.getElementById('num-nodes').addEventListener('change', () => {
+                generateRandomGraph();
+            });
+            document.getElementById('animation-speed').addEventListener('input', (e) => {
+                animationSpeed = parseInt(e.target.value);
+            });
+        }
+
+        function selectAlgorithm(algorithm) {
+            currentAlgorithm = algorithm;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + algorithm).classList.add('active');
+            renderCode(algorithm, currentLang);
+            updateOperationInfo();
+            resetVisualization();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            renderCode(currentAlgorithm, lang);
+        }
+
+        function renderCode(algorithm, lang) {
+            const code = algorithms[algorithm][lang];
+            const lines = code.split('\n');
+            const codeContent = document.getElementById('code-content');
+            codeContent.innerHTML = '';
+
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.innerHTML = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                codeContent.appendChild(div);
+            });
+        }
+
+        function updateOperationInfo() {
+            const info = document.getElementById('operation-info');
+            const algorithmNames = {
+                kruskal: "Kruskal's Algorithm",
+                prim: "Prim's Algorithm"
+            };
+            info.textContent = algorithmNames[currentAlgorithm] || 'Algorithm';
+        }
+
+        function generateRandomGraph() {
+            const numNodes = parseInt(document.getElementById('num-nodes').value);
+            nodes = [];
+            edges = [];
+
+            // Generate nodes in circle
+            const centerX = 400;
+            const centerY = 300;
+            const radius = 150;
+
+            for (let i = 0; i < numNodes; i++) {
+                const angle = (i * 2 * Math.PI) / numNodes;
+                const x = centerX + radius * Math.cos(angle);
+                const y = centerY + radius * Math.sin(angle);
+                nodes.push({ id: i, x, y, label: String.fromCharCode(65 + i) });
+            }
+
+            // Generate random edges
+            for (let i = 0; i < numNodes; i++) {
+                for (let j = i + 1; j < numNodes; j++) {
+                    if (Math.random() < 0.6) { // 60% chance of edge
+                        const weight = Math.floor(Math.random() * 20) + 1;
+                        edges.push({
+                            u: i,
+                            v: j,
+                            weight: weight,
+                            x1: nodes[i].x,
+                            y1: nodes[i].y,
+                            x2: nodes[j].x,
+                            y2: nodes[j].y
+                        });
+                    }
+                }
+            }
+
+            renderGraph();
+            logMessage(`Generated graph with ${numNodes} nodes and ${edges.length} edges`);
+        }
+
+        function renderGraph() {
+            const canvas = document.getElementById('mst-canvas');
+            canvas.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" /></marker></defs>';
+
+            // Draw edges
+            edges.forEach((edge, index) => {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', edge.x1);
+                line.setAttribute('y1', edge.y1);
+                line.setAttribute('x2', edge.x2);
+                line.setAttribute('y2', edge.y2);
+                line.setAttribute('class', 'edge-line');
+                line.setAttribute('data-edge-index', index);
+                canvas.appendChild(line);
+
+                // Edge weight label
+                const midX = (edge.x1 + edge.x2) / 2;
+                const midY = (edge.y1 + edge.y2) / 2;
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', midX);
+                text.setAttribute('y', midY - 5);
+                text.setAttribute('class', 'edge-weight');
+                text.textContent = edge.weight;
+                canvas.appendChild(text);
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x);
+                circle.setAttribute('cy', node.y);
+                circle.setAttribute('r', 20);
+                circle.setAttribute('class', 'node-circle');
+                canvas.appendChild(circle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x);
+                text.setAttribute('y', node.y + 5);
+                text.setAttribute('class', 'node-text');
+                text.textContent = node.label;
+                canvas.appendChild(text);
+            });
+        }
+
+        function clearGraph() {
+            nodes = [];
+            edges = [];
+            mstEdges = [];
+            renderGraph();
+            logMessage('Graph cleared');
+        }
+
+        async function startVisualization() {
+            if (isRunning || edges.length === 0) return;
+            isRunning = true;
+
+            clearMST();
+            logMessage(`Starting ${currentAlgorithm.toUpperCase()} algorithm...`);
+
+            try {
+                if (currentAlgorithm === 'kruskal') {
+                    await visualizeKruskal();
+                } else if (currentAlgorithm === 'prim') {
+                    await visualizePrim();
+                }
+            } catch (error) {
+                logMessage('Visualization stopped');
+            }
+
+            isRunning = false;
+        }
+
+        function stopVisualization() {
+            isRunning = false;
+            logMessage('Visualization stopped');
+        }
+
+        async function visualizeKruskal() {
+            // Sort edges by weight
+            const sortedEdges = [...edges].sort((a, b) => a.weight - b.weight);
+            const parent = Array(nodes.length).fill().map((_, i) => i);
+            mstEdges = [];
+
+            function find(i) {
+                if (parent[i] !== i) {
+                    parent[i] = find(parent[i]);
+                }
+                return parent[i];
+            }
+
+            function union(x, y) {
+                const px = find(x);
+                const py = find(y);
+                parent[px] = py;
+            }
+
+            for (const edge of sortedEdges) {
+                if (!isRunning) break;
+
+                // Highlight current edge
+                const edgeElement = document.querySelector(`[data-edge-index="${edges.indexOf(edge)}"]`);
+                edgeElement.classList.add('active');
+                await sleep(animationSpeed);
+
+                const pu = find(edge.u);
+                const pv = find(edge.v);
+
+                if (pu !== pv) {
+                    union(pu, pv);
+                    mstEdges.push(edge);
+
+                    // Mark edge as part of MST
+                    edgeElement.classList.remove('active');
+                    edgeElement.classList.add('in-mst');
+
+                    // Mark nodes as in MST
+                    const nodeU = document.querySelector(`circle[cx="${edge.x1}"][cy="${edge.y1}"]`);
+                    const nodeV = document.querySelector(`circle[cx="${edge.x2}"][cy="${edge.y2}"]`);
+                    nodeU.classList.add('in-mst');
+                    nodeV.classList.add('in-mst');
+
+                    logMessage(`Added edge ${nodes[edge.u].label}-${nodes[edge.v].label} (weight: ${edge.weight}) to MST`);
+                } else {
+                    edgeElement.classList.remove('active');
+                }
+
+                await sleep(animationSpeed / 2);
+            }
+
+            if (mstEdges.length === nodes.length - 1) {
+                logMessage(`MST complete! Total weight: ${mstEdges.reduce((sum, e) => sum + e.weight, 0)}`);
+            }
+        }
+
+        async function visualizePrim() {
+            const numNodes = nodes.length;
+            const visited = new Array(numNodes).fill(false);
+            const minEdge = new Array(numNodes).fill(Infinity);
+            minEdge[0] = 0;
+            mstEdges = [];
+
+            for (let i = 0; i < numNodes - 1; i++) {
+                if (!isRunning) break;
+
+                // Find minimum edge
+                let minWeight = Infinity;
+                let u = -1;
+
+                for (let v = 0; v < numNodes; v++) {
+                    if (!visited[v] && minEdge[v] < minWeight) {
+                        minWeight = minEdge[v];
+                        u = v;
+                    }
+                }
+
+                visited[u] = true;
+
+                // Mark node as in MST
+                const nodeElement = document.querySelector(`circle[cx="${nodes[u].x}"][cy="${nodes[u].y}"]`);
+                nodeElement.classList.add('in-mst');
+
+                // Update adjacent vertices
+                for (let v = 0; v < numNodes; v++) {
+                    // Find edge between u and v
+                    const edge = edges.find(e => (e.u === u && e.v === v) || (e.u === v && e.v === u));
+                    if (edge && !visited[v] && edge.weight < minEdge[v]) {
+                        minEdge[v] = edge.weight;
+
+                        // Highlight potential edge
+                        const edgeElement = document.querySelector(`[data-edge-index="${edges.indexOf(edge)}"]`);
+                        edgeElement.classList.add('active');
+                        await sleep(animationSpeed / 2);
+                        edgeElement.classList.remove('active');
+                    }
+                }
+
+                await sleep(animationSpeed);
+            }
+
+            logMessage('Prim\'s algorithm visualization complete');
+        }
+
+        function clearMST() {
+            document.querySelectorAll('.edge-line.in-mst, .node-circle.in-mst').forEach(el => {
+                el.classList.remove('in-mst');
+            });
+            mstEdges = [];
+        }
+
+        function runAlgorithm() {
+            startVisualization();
+        }
+
+        function stepAlgorithm() {
+            // Step through algorithm
+            logMessage(`Stepping through ${currentAlgorithm}...`);
+        }
+
+        function resetVisualization() {
+            clearMST();
+            isRunning = false;
+            logMessage('Visualization reset');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function logMessage(message) {
+            const logPanel = document.getElementById('log-panel');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script><script src="visualizer-common.js"></script></body>
+</html>
+      display: block;
+      padding: 0 5px;
+    }
+    .line.active {
+      background-color: rgba(59, 130, 246, 0.2);
+    }
+    .board-view {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+      background: var(--bg-tertiary);
+      border-radius: 8px;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    /* Graph Styles */
+    svg {
+        background-color: #1e1e1e;
+        border-radius: 8px;
+        border: 1px solid #333;
+        width: 100%;
+        height: 400px;
+    }
+    .node { fill: #3b82f6; stroke: #fff; stroke-width: 2px; }
+    .node.visited { fill: #10b981; }
+    .node-text { fill: white; font-weight: bold; font-family: sans-serif; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .edge { stroke: #555; stroke-width: 2px; }
+    .edge.considering { stroke: #facc15; stroke-width: 4px; }
+    .edge.mst { stroke: #10b981; stroke-width: 4px; }
+    .edge.skipped { stroke: #ef4444; stroke-width: 1px; stroke-dasharray: 5,5; opacity: 0.5; }
+    .edge-weight { fill: #aaa; font-size: 12px; font-family: sans-serif; text-anchor: middle; background-color: #1e1e1e; }
+    .weight-bg { fill: #1e1e1e; }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .status-text { text-align: center; color: var(--accent-color); margin-bottom: 10px; font-weight: bold; min-height: 1.5em; }
+    
+    /* Syntax Highlighting */
+    .kwd { color: #f472b6; }
+    .type { color: #60a5fa; }
+    .str { color: #ce9178; }
+    .com { color: #6a9955; }
+    .num { color: #b5cea8; }
+    
+    @media (max-width: 900px) {
+      .visualizer-section { flex-direction: column; }
+    }
+  
+
+<body>
+<div class="container">
+<aside class="sidebar">
+<div class="sidebar-header">
+<h1>🌑 NeoAlgo</h1>
+<p>Coding Interview Prep</p>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Back to Home</div>
+<a class="nav-item" href="../index.html">← Dashboard</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Interactive Visualizers</div>
+<a class="nav-item" href="graphs.html">← Graphs Pattern</a>
+<a class="nav-item active" href="mst-visualizer.html">Minimum Spanning Tree</a>
+</div>
+</aside>
+<main class="main-content">
+<div class="content-header">
+<h1>🌲 Minimum Spanning Tree</h1>
+<p>Visualize Prim's and Kruskal's algorithms for finding the MST.</p>
+</div>
+<div class="section">
+<div class="visualizer-section">
+<!-- Board Visualization (Left) -->
+<div class="board-view">
+<div class="controls">
+<button class="tab-btn" onclick="generateGraph()" style="border: 1px solid var(--border-color); border-radius: 4px;">🎲 New Graph</button>
+<select class="tab-btn" id="algo-select" style="border: 1px solid var(--border-color); border-radius: 4px; background: #1e1e1e;">
+<option value="prims">Prim's Algorithm</option>
+<option value="kruskal">Kruskal's Algorithm</option>
+</select>
+<button class="tab-btn active" onclick="startAlgo()" style="border: 1px solid var(--border-color); border-radius: 4px;">▶ Run</button>
+<button class="tab-btn" onclick="resetGraph()" style="border: 1px solid var(--border-color); border-radius: 4px;">↺ Reset</button>
+</div>
+<div class="status-text" id="status">Ready to start...</div>
+<svg id="graph-svg"></svg>
+</div>
+<!-- Code Tracking Section (Right) -->
+<div class="code-display">
+<div class="lang-tabs">
+<button class="tab-btn active" onclick="switchTab('go')">Go</button>
+<button class="tab-btn" onclick="switchTab('java')">Java</button>
+<button class="tab-btn" onclick="switchTab('python')">Python</button>
+</div>
+<!-- Prim's Code -->
+<div class="code-content" id="code-prims" style="display: block;">
+<span class="line" id="prims-1"><span class="kwd">func</span> prims(n <span class="type">int</span>) <span class="type">int</span> {</span>
+<span class="line" id="prims-2">    visited := <span class="kwd">make</span>([]<span class="type">bool</span>, n)</span>
+<span class="line" id="prims-3">    pq := &amp;MinHeap{{<span class="num">0</span>, <span class="num">0</span>}} <span class="com">// {weight, node}</span></span>
+<span class="line" id="prims-4">    cost := <span class="num">0</span></span>
+<span class="line" id="prims-5"> <span class="kwd">for</span> pq.Len() &gt; <span class="num">0</span> {</span>
+<span class="line" id="prims-6">        u := heap.Pop(pq)</span>
+<span class="line" id="prims-7"> <span class="kwd">if</span> visited[u.id] { <span class="kwd">continue</span> }</span>
+<span class="line" id="prims-8">        visited[u.id] = <span class="kwd">true</span>; cost += u.w</span>
+<span class="line" id="prims-9"> <span class="kwd">for</span> v, w := <span class="kwd">range</span> graph[u.id] {</span>
+<span class="line" id="prims-10"> <span class="kwd">if</span> !visited[v] {</span>
+<span class="line" id="prims-11">                heap.Push(pq, {w, v})</span>
+<span class="line" id="prims-12">            }</span>
+<span class="line" id="prims-13">        }</span>
+<span class="line" id="prims-14">    }</span>
+<span class="line" id="prims-15"> <span class="kwd">return</span> cost</span>
+<span class="line" id="prims-16">}</span>
+</div>
+<!-- Kruskal's Code -->
+<div class="code-content" id="code-kruskal" style="display: none;">
+<span class="line" id="kruskal-1"><span class="kwd">func</span> kruskal(n <span class="type">int</span>, edges [][]<span class="type">int</span>) <span class="type">int</span> {</span>
+<span class="line" id="kruskal-2">    sort.Slice(edges, <span class="kwd">func</span>(i, j <span class="type">int</span>) <span class="type">bool</span> {</span>
+<span class="line" id="kruskal-3"> <span class="kwd">return</span> edges[i][<span class="num">2</span>] &lt; edges[j][<span class="num">2</span>]</span>
+<span class="line" id="kruskal-4">    })</span>
+<span class="line" id="kruskal-5">    uf := NewUnionFind(n)</span>
+<span class="line" id="kruskal-6">    cost := <span class="num">0</span></span>
+<span class="line" id="kruskal-7"> <span class="kwd">for</span> _, e := <span class="kwd">range</span> edges {</span>
+<span class="line" id="kruskal-8">        u, v, w := e[<span class="num">0</span>], e[<span class="num">1</span>], e[<span class="num">2</span>]</span>
+<span class="line" id="kruskal-9"> <span class="kwd">if</span> uf.Union(u, v) {</span>
+<span class="line" id="kruskal-10">            cost += w</span>
+<span class="line" id="kruskal-11">        }</span>
+<span class="line" id="kruskal-12">    }</span>
+<span class="line" id="kruskal-13"> <span class="kwd">return</span> cost</span>
+<span class="line" id="kruskal-14">}</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<script>
+    const svg = document.getElementById('graph-svg');
+    const numNodes = 8;
+    let nodes = [];
+    let edges = [];
+    let isRunning = false;
+    let shouldStop = false;
+    let speed = 800;
+    let currentLang = 'go';
+
+    const lineMap = {
+        prims: {
+            go: { start: 3, loop: 5, pop: 6, checkVisited: 7, visit: 8, loopNeighbors: 9, checkNeighbor: 10, push: 11 }
+        },
+        kruskal: {
+            go: { sort: 2, init: 5, loop: 7, union: 9, add: 10 }
+        }
+    };
+
+    function highlightLine(algo, stepName) {
+        if (!lineMap[algo] || !lineMap[algo]['go']) return;
+        const lineNum = lineMap[algo]['go'][stepName];
+        if (!lineNum) return;
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        const el = document.getElementById(`${algo}-${lineNum}`);
+        if (el) el.classList.add('active');
+    }
+
+    function generateGraph() {
+        if (isRunning) return;
+        resetGraph();
+        nodes = [];
+        edges = [];
+        svg.innerHTML = '';
+
+        // Circular Layout
+        const cx = 300, cy = 200, r = 150;
+        for(let i=0; i<numNodes; i++) {
+            const angle = (i / numNodes) * 2 * Math.PI;
+            nodes.push({
+                id: i,
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+            });
+        }
+
+        // Create Edges (Ensure connected + random)
+        for(let i=0; i<numNodes; i++) {
+            addEdge(i, (i+1)%numNodes); // Ring
+            if (Math.random() > 0.5) addEdge(i, (i+2)%numNodes); // Random chords
+        }
+        
+        drawGraph();
+    }
+
+    function addEdge(u, v) {
+        // Avoid duplicates
+        if (edges.some(e => (e.u === u && e.v === v) || (e.u === v && e.v === u))) return;
+        const w = Math.floor(Math.random() * 20) + 1;
+        edges.push({ u, v, w, id: `e-${u}-${v}` });
+    }
+
+    function drawGraph() {
+        svg.innerHTML = '';
+        
+        // Draw Edges
+        edges.forEach(e => {
+            const n1 = nodes[e.u];
+            const n2 = nodes[e.v];
+            
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", n1.x); line.setAttribute("y1", n1.y);
+            line.setAttribute("x2", n2.x); line.setAttribute("y2", n2.y);
+            line.setAttribute("class", "edge");
+            line.setAttribute("id", e.id);
+            svg.appendChild(line);
+
+            // Weight Label
+            const midX = (n1.x + n2.x) / 2;
+            const midY = (n1.y + n2.y) / 2;
+            
+            const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+            rect.setAttribute("x", midX - 10); rect.setAttribute("y", midY - 10);
+            rect.setAttribute("width", 20); rect.setAttribute("height", 20);
+            rect.setAttribute("class", "weight-bg");
+            svg.appendChild(rect);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", midX); text.setAttribute("y", midY);
+            text.setAttribute("class", "edge-weight");
+            text.textContent = e.w;
+            svg.appendChild(text);
+        });
+
+        // Draw Nodes
+        nodes.forEach(n => {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", n.x); circle.setAttribute("cy", n.y);
+            circle.setAttribute("r", 20);
+            circle.setAttribute("class", "node");
+            circle.setAttribute("id", `n-${n.id}`);
+            svg.appendChild(circle);
+
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", n.x); text.setAttribute("y", n.y);
+            text.setAttribute("class", "node-text");
+            text.textContent = n.id;
+            svg.appendChild(text);
+        });
+    }
+
+    async function startAlgo() {
+        if (isRunning) return;
+        isRunning = true;
+        shouldStop = false;
+        resetGraph();
+        
+        const algo = document.getElementById('algo-select').value;
+        document.querySelectorAll('.code-content').forEach(el => el.style.display = 'none');
+        document.getElementById(`code-${algo}`).style.display = 'block';
+
+        if (algo === 'prims') await runPrims();
+        else await runKruskal();
+        
+        isRunning = false;
+    }
+
+    async function runPrims() {
+        const visited = new Set();
+        const pq = [{ w: 0, u: 0, from: -1 }]; // Simple PQ
+        let cost = 0;
+
+        document.getElementById('status').textContent = "Starting Prim's from Node 0...";
+        highlightLine('prims', 'start');
+
+        while (pq.length > 0) {
+            if (shouldStop) return;
+            highlightLine('prims', 'loop');
+            
+            // Sort to simulate Min-Heap
+            pq.sort((a, b) => a.w - b.w);
+            const { w, u, from } = pq.shift();
+            highlightLine('prims', 'pop');
+
+            highlightLine('prims', 'checkVisited');
+            if (visited.has(u)) continue;
+            visited.add(u);
+            cost += w;
+            highlightLine('prims', 'visit');
+
+            // Visuals
+            document.getElementById(`n-${u}`).classList.add('visited');
+            if (from !== -1) {
+                const edgeId = `e-${Math.min(u, from)}-${Math.max(u, from)}`;
+                const edgeEl = document.getElementById(edgeId);
+                if (edgeEl) edgeEl.classList.add('mst');
+            }
+            document.getElementById('status').textContent = `Visited Node ${u}. Total Cost: ${cost}`;
+            await new Promise(r => setTimeout(r, speed));
+
+            highlightLine('prims', 'loopNeighbors');
+            // Add neighbors
+            for (let e of edges) {
+                if (e.u === u && !visited.has(e.v)) {
+                    highlightLine('prims', 'checkNeighbor');
+                    pq.push({ w: e.w, u: e.v, from: u });
+                    document.getElementById(e.id).classList.add('considering');
+                    highlightLine('prims', 'push');
+                    await new Promise(r => setTimeout(r, speed/4));
+                } else if (e.v === u && !visited.has(e.u)) {
+                    highlightLine('prims', 'checkNeighbor');
+                    pq.push({ w: e.w, u: e.u, from: u });
+                    document.getElementById(e.id).classList.add('considering');
+                    highlightLine('prims', 'push');
+                    await new Promise(r => setTimeout(r, speed/4));
+                }
+            }
+        }
+        document.getElementById('status').textContent = `MST Complete! Total Cost: ${cost}`;
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+    }
+
+    async function runKruskal() {
+        const sortedEdges = [...edges].sort((a, b) => a.w - b.w);
+        highlightLine('kruskal', 'sort');
+        await new Promise(r => setTimeout(r, speed));
+
+        const parent = Array.from({length: numNodes}, (_, i) => i);
+        highlightLine('kruskal', 'init');
+        let cost = 0;
+        let edgesCount = 0;
+
+        function find(i) {
+            if (parent[i] === i) return i;
+            return parent[i] = find(parent[i]);
+        }
+
+        function union(i, j) {
+            const rootI = find(i);
+            const rootJ = find(j);
+            if (rootI !== rootJ) {
+                parent[rootI] = rootJ;
+                return true;
+            }
+            return false;
+        }
+
+        document.getElementById('status').textContent = "Sorted edges by weight. Starting Kruskal's...";
+
+        for (let e of sortedEdges) {
+            if (shouldStop) return;
+            if (edgesCount === numNodes - 1) break;
+
+            highlightLine('kruskal', 'loop');
+            const edgeEl = document.getElementById(e.id);
+            edgeEl.classList.add('considering');
+            await new Promise(r => setTimeout(r, speed));
+
+            highlightLine('kruskal', 'union');
+            if (union(e.u, e.v)) {
+                highlightLine('kruskal', 'add');
+                edgeEl.classList.remove('considering');
+                edgeEl.classList.add('mst');
+                document.getElementById(`n-${e.u}`).classList.add('visited');
+                document.getElementById(`n-${e.v}`).classList.add('visited');
+                cost += e.w;
+                edgesCount++;
+                document.getElementById('status').textContent = `Added edge (${e.u}-${e.v}). Cost: ${cost}`;
+            } else {
+                edgeEl.classList.remove('considering');
+                edgeEl.classList.add('skipped');
+                document.getElementById('status').textContent = `Skipped edge (${e.u}-${e.v}) - Cycle detected`;
+            }
+            await new Promise(r => setTimeout(r, speed));
+        }
+        document.getElementById('status').textContent = `MST Complete! Total Cost: ${cost}`;
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+    }
+
+    function resetGraph() {
+        shouldStop = true;
+        isRunning = false;
+        document.querySelectorAll('.node').forEach(n => n.classList.remove('visited'));
+        document.querySelectorAll('.edge').forEach(e => e.classList.remove('mst', 'considering', 'skipped'));
+        document.querySelectorAll('.line').forEach(l => l.classList.remove('active'));
+        document.getElementById('status').textContent = "Ready";
+    }
+
+    function switchTab(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.tab-btn').forEach(el => {
+            if (['go', 'java', 'python'].includes(el.textContent.toLowerCase())) {
+                el.classList.remove('active');
+            }
+        });
+        const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.textContent.toLowerCase() === lang);
+        if (btn) btn.classList.add('active');
+    }
+
+    generateGraph();
+  </script>
+</body>

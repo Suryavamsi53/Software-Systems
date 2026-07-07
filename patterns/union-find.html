@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="visualizer-common.css?v=2" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Union-Find  - SDE Prep Visualizer - Pro</title>
+<link href="../styles.css" rel="stylesheet"/>
+<link href="graph-visualizer.css" rel="stylesheet"/>
+<style>
+    /* Specific styles for Union-Find */
+    .node-circle {
+      transition: all 0.5s ease;
+      cursor: pointer;
+      fill: var(--bg-tertiary);
+      stroke: var(--text-secondary);
+      stroke-width: 2px;
+    }
+    .node-circle:hover { stroke: var(--accent-color); stroke-width: 3px; }
+    .node-circle.active { fill: #facc15; stroke: #eab308; }
+    .node-circle.root { stroke: #22c55e; stroke-width: 3px; }
+    
+    .node-text { 
+        font-weight: bold; 
+        pointer-events: none; 
+        fill: var(--text-primary); 
+        text-anchor: middle; 
+        dominant-baseline: middle; 
+        font-family: monospace;
+    }
+    
+    .edge-line {
+      stroke: #94a3b8;
+      stroke-width: 2px;
+      marker-end: url(#arrow);
+      transition: all 0.5s ease;
+    }
+    .edge-line.active { stroke: #facc15; stroke-width: 3px; marker-end: url(#arrow-active); }
+    
+    .rank-text {
+      font-size: 10px;
+      fill: #94a3b8;
+      text-anchor: middle;
+    }
+
+    .control-input {
+        width: 60px;
+        padding: 8px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        border-radius: 4px;
+        margin-right: 5px;
+        text-align: center;
+    }
+
+    /* Code Panel Styles */
+    .split-view {
+        display: flex;
+        gap: 20px;
+        height: 100%;
+        min-height: 400px;
+    }
+    .canvas-section {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg-secondary);
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+    .code-section {
+        flex: 1;
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 300px;
+    }
+    .code-header {
+        padding: 10px 15px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: rgba(255,255,255,0.05);
+    }
+    .algo-code {
+        padding: 15px;
+        overflow-y: auto;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+        flex: 1;
+    }
+    .code-line { padding: 2px 5px; border-radius: 4px; }
+    .code-line.active {
+        background-color: rgba(250, 204, 21, 0.2);
+        border-left: 3px solid #facc15;
+        color: #facc15;
+    }
+    .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+    .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+  </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Union-Find  - SDE Prep Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Controls</div>
+<div class="control-group">
+<label>Union(x, y)</label>
+<div style="display: flex; align-items: center;">
+<input class="control-input" id="union-x" max="9" min="0" placeholder="0" type="number"/>
+<input class="control-input" id="union-y" max="9" min="0" placeholder="1" type="number"/>
+<button class="action-btn" onclick="performUnion()">Union</button>
+</div>
+</div>
+<div class="control-group">
+<label>Find(x)</label>
+<div style="display: flex; align-items: center;">
+<input class="control-input" id="find-x" max="9" min="0" placeholder="0" type="number"/>
+<button class="action-btn" onclick="performFind()">Find</button>
+</div>
+</div>
+<div class="control-group">
+<button class="action-btn warning" onclick="resetDSU()" style="width: 100%;">Reset Environment</button>
+</div>
+<div class="nav-section-title" style="margin-top: 20px;">Algorithm Settings</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <span style="font-size:0.9rem; color:var(--text-secondary);">Path Compression</span>
+    <label class="switch">
+        <input type="checkbox" id="setting-path-compression" checked onchange="updateComplexity()">
+        <span class="slider round"></span>
+    </label>
+</div>
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+    <span style="font-size:0.9rem; color:var(--text-secondary);">Union by Rank</span>
+    <label class="switch">
+        <input type="checkbox" id="setting-union-rank" checked onchange="updateComplexity()">
+        <span class="slider round"></span>
+    </label>
+</div>
+<div style="margin-bottom:12px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.9rem; color:var(--text-secondary);">Elements (N)</span>
+        <span id="elements-count-display" style="font-family:var(--font-mono); color:var(--neon-cyan);">10</span>
+    </div>
+    <input type="range" id="setting-elements" min="4" max="24" value="10" style="width:100%; accent-color:var(--neon-cyan);" oninput="document.getElementById('elements-count-display').textContent=this.value" onchange="init()">
+</div>
+<div class="control-group" style="margin-top: 15px;">
+    <button class="action-btn" onclick="randomOperation()" style="background: var(--neon-purple); border-color: var(--neon-purple); color: black; width: 100%;">Random Union</button>
+</div>
+</div></section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+</div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> <span id="studio-title">Algorithm Visualization Studio</span></div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-prev" title="Step Back"><i data-lucide="chevron-left" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-play" title="Play/Pause" onclick="runOperation()"><i data-lucide="play" style="width:16px;height:16px;color:var(--neon-cyan)"></i> Play</button>
+<button class="tool-btn" id="btn-next" title="Step Forward" onclick="stepOperation()"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-reset" title="Restart" onclick="resetOperation()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i></button>
+</div></div>
+<div style="padding: 15px 20px 0 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.8rem; color:var(--text-muted); text-transform: uppercase;">Animation Speed Multiplier</span>
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-main);" id="speed-display">1.0x</span>
+    </div>
+    <input type="range" id="anim-speed" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%; accent-color:var(--neon-cyan);">
+</div>
+<div class="viz-viewport" style="margin: 15px; border-radius: 8px;"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="dsu-svg" width="100%">
+<defs>
+<marker id="arrow" markerheight="10" markerunits="strokeWidth" markerwidth="10" orient="auto" refx="22" refy="3">
+<path d="M0,0 L0,6 L9,3 z" fill="#94a3b8"></path>
+</marker>
+<marker id="arrow-active" markerheight="10" markerunits="strokeWidth" markerwidth="10" orient="auto" refx="22" refy="3">
+<path d="M0,0 L0,6 L9,3 z" fill="#facc15"></path>
+</marker>
+</defs>
+</svg></div></div></section></div><div class="column">
+<section class="panel" style="margin-bottom: 0;">
+    <div class="panel-header"><i data-lucide="activity"></i> Performance Profiler</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Time Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem;" id="time-complexity">O(α(n))</div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Space Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-green); font-weight: bold; font-size: 1.1rem;" id="space-complexity">O(n)</div>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Total Elements:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-size">10</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Disjoint Sets:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-sets">10</span>
+    </div>
+</section>
+<section class="panel" style="flex: 1; padding: 0;">
+<div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<button class="action-btn" onclick="copyCode()" style="padding: 4px 10px; font-size: 0.8rem;">📋 Copy</button>
+<div class="btn-group">
+<button class="tab-btn active" onclick="switchLang('go')">Go</button>
+<button class="tab-btn" onclick="switchLang('java')">Java</button>
+<button class="tab-btn" onclick="switchLang('python')">Python</button>
+</div>
+</div>
+<div class="algo-code" id="code-display"></div>
+</div></section></div></div><script>
+    let N = 10;
+    let parent = [];
+    let rank = [];
+    let nodes = [];
+    let currentLang = 'go';
+    let isAnimating = false;
+    let activeSets = 0;
+
+    const svg = document.getElementById('dsu-svg');
+
+    function logMessage(msg, type='info') {
+        const container = document.getElementById('logs-container');
+        if(!container) return;
+        const div = document.createElement('div');
+        div.className = 'log-line';
+        const now = new Date();
+        const time = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+        const typeSpan = `<span class="log-type-sys" style="color: ${type==='warn'?'#eab308':(type==='error'?'#ef4444':'#3fb950')}">[${type.toUpperCase()}]</span>`;
+        div.innerHTML = `<span class="log-time">${time}</span>${typeSpan}<span class="log-msg">${msg}</span>`;
+        container.appendChild(div);
+        container.scrollTop = container.scrollHeight;
+    }
+
+    const CODES = {
+        go: `type UnionFind struct {
+    parent, rank []int
+}
+
+func (uf *UnionFind) Find(x int) int {
+    if uf.parent[x] != x {
+        uf.parent[x] = uf.Find(uf.parent[x]) // Path compression
+    }
+    return uf.parent[x]
+}
+
+func (uf *UnionFind) Union(x, y int) bool {
+    rootX, rootY := uf.Find(x), uf.Find(y)
+    if rootX == rootY { return false }
+    
+    if uf.rank[rootX] > uf.rank[rootY] {
+        uf.parent[rootY] = rootX
+    } else if uf.rank[rootX] < uf.rank[rootY] {
+        uf.parent[rootX] = rootY
+    } else {
+        uf.parent[rootY] = rootX
+        uf.rank[rootX]++
+    }
+    return true
+}`,
+        java: `class UnionFind {
+    int[] parent, rank;
+    
+    public int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]); // Path compression
+        }
+        return parent[x];
+    }
+    
+    public boolean union(int x, int y) {
+        int rootX = find(x), rootY = find(y);
+        if (rootX == rootY) return false;
+        
+        if (rank[rootX] > rank[rootY]) parent[rootY] = rootX;
+        else if (rank[rootX] < rank[rootY]) parent[rootX] = rootY;
+        else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+        return true;
+    }
+}`,
+        python: `class UnionFind:
+    def find(self, x):
+        if self.parent[x] != x:
+            self.parent[x] = self.find(self.parent[x]) # Path compression
+        return self.parent[x]
+
+    def union(self, x, y):
+        rootX, rootY = self.find(x), self.find(y)
+        if rootX == rootY: return False
+        
+        if self.rank[rootX] > self.rank[rootY]:
+            self.parent[rootY] = rootX
+        elif self.rank[rootX] < self.rank[rootY]:
+            self.parent[rootX] = rootY
+        else:
+            self.parent[rootY] = rootX
+            self.rank[rootX] += 1
+        return True`
+    };
+
+    function init() {
+        initDSU();
+        renderCode('go');
+        updateComplexity();
+    }
+
+    function updateComplexity() {
+        const usePC = document.getElementById('setting-path-compression').checked;
+        const useUR = document.getElementById('setting-union-rank').checked;
+        let complexity = 'O(N)';
+        
+        if (usePC && useUR) complexity = 'O(α(N))';
+        else if (usePC || useUR) complexity = 'O(log N)';
+        
+        document.getElementById('time-complexity').textContent = complexity;
+    }
+
+    function initDSU() {
+        N = parseInt(document.getElementById('setting-elements').value);
+        document.getElementById('stat-size').textContent = N;
+        resetDSU();
+    }
+
+    function updateSetsCount() {
+        activeSets = 0;
+        for(let i=0; i<N; i++) {
+            if(parent[i] === i) activeSets++;
+        }
+        document.getElementById('stat-sets').textContent = activeSets;
+    }
+
+    async function randomOperation() {
+        if(isAnimating) return;
+        let x = Math.floor(Math.random() * N);
+        let y = Math.floor(Math.random() * N);
+        document.getElementById('union-x').value = x;
+        document.getElementById('union-y').value = y;
+        await performUnion();
+    }
+
+    function resetDSU() {
+        parent = Array.from({length: N}, (_, i) => i);
+        rank = Array(N).fill(0);
+        
+        // Initial positions (Circle)
+        nodes = [];
+        const cx = 400, cy = 200, r = 150;
+        for(let i=0; i<N; i++) {
+            const angle = (i / N) * 2 * Math.PI - Math.PI/2;
+            nodes.push({
+                id: i,
+                x: cx + r * Math.cos(angle),
+                y: cy + r * Math.sin(angle)
+            });
+        }
+        draw();
+        updateSetsCount();
+        logMessage(`Environment reset with ${N} disjoint elements.`, 'sys');
+    }
+
+    function draw() {
+        svg.innerHTML = `
+            <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#94a3b8" />
+                </marker>
+                <marker id="arrow-active" markerWidth="10" markerHeight="10" refX="22" refY="3" orient="auto" markerUnits="strokeWidth">
+                    <path d="M0,0 L0,6 L9,3 z" fill="#facc15" />
+                </marker>
+            </defs>
+        `;
+
+        // Draw Edges (Parent pointers)
+        for(let i=0; i<N; i++) {
+            if(parent[i] !== i) {
+                const p = parent[i];
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", nodes[i].x);
+                line.setAttribute("y1", nodes[i].y);
+                line.setAttribute("x2", nodes[p].x);
+                line.setAttribute("y2", nodes[p].y);
+                line.setAttribute("class", "edge-line");
+                line.setAttribute("id", `edge-${i}`);
+                svg.appendChild(line);
+            }
+        }
+
+        // Draw Nodes
+        nodes.forEach(n => {
+            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", n.x);
+            circle.setAttribute("cy", n.y);
+            circle.setAttribute("r", 20);
+            circle.setAttribute("class", `node-circle ${parent[n.id] === n.id ? 'root' : ''}`);
+            circle.setAttribute("id", `node-${n.id}`);
+            
+            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            text.setAttribute("x", n.x);
+            text.setAttribute("y", n.y);
+            text.setAttribute("class", "node-text");
+            text.textContent = n.id;
+
+            // Rank label
+            const rankLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            rankLabel.setAttribute("x", n.x);
+            rankLabel.setAttribute("y", n.y + 35);
+            rankLabel.setAttribute("class", "rank-text");
+            rankLabel.textContent = `Rank: ${rank[n.id]}`;
+
+            g.appendChild(circle);
+            g.appendChild(text);
+            g.appendChild(rankLabel);
+            svg.appendChild(g);
+        });
+    }
+
+    async function performFind() {
+        if(isAnimating) return;
+        const x = parseInt(document.getElementById('find-x').value);
+        if(isNaN(x) || x < 0 || x >= N) {
+            logMessage(`Invalid Find input. Must be between 0 and ${N-1}.`, 'error');
+            return;
+        }
+
+        isAnimating = true;
+        logMessage(`Finding root of element ${x}...`);
+        
+        let curr = x;
+        let path = [];
+        
+        while(curr !== parent[curr]) {
+            path.push(curr);
+            document.getElementById(`node-${curr}`).classList.add('active');
+            await sleep(500);
+            curr = parent[curr];
+        }
+        
+        document.getElementById(`node-${curr}`).classList.add('active');
+        logMessage(`Root of ${x} found as ${curr}.`);
+        await sleep(500);
+
+        // Path Compression
+        const usePC = document.getElementById('setting-path-compression').checked;
+        if (usePC && path.length > 0) {
+            logMessage(`Applying Path Compression. Attaching nodes directly to root ${curr}.`, 'sys');
+            for(let node of path) {
+                parent[node] = curr;
+            }
+            draw();
+            await sleep(500);
+        }
+        
+        document.querySelectorAll('.node-circle').forEach(el => el.classList.remove('active'));
+        isAnimating = false;
+        return curr;
+    }
+
+    async function performUnion() {
+        if(isAnimating) return;
+        const x = parseInt(document.getElementById('union-x').value);
+        const y = parseInt(document.getElementById('union-y').value);
+        if(isNaN(x) || isNaN(y) || x < 0 || x >= N || y < 0 || y >= N) {
+            logMessage(`Invalid Union input. Both must be between 0 and ${N-1}.`, 'error');
+            return;
+        }
+
+        isAnimating = true;
+        logMessage(`Initiating Union(${x}, ${y}). Locating roots...`);
+
+        // Find roots (without animation for simplicity in union step)
+        let rootX = x; while(rootX !== parent[rootX]) rootX = parent[rootX];
+        let rootY = y; while(rootY !== parent[rootY]) rootY = parent[rootY];
+
+        document.getElementById(`node-${rootX}`).classList.add('active');
+        document.getElementById(`node-${rootY}`).classList.add('active');
+        await sleep(800);
+
+        if(rootX === rootY) {
+            logMessage(`Elements ${x} and ${y} are already deeply connected under root ${rootX}.`, 'warn');
+        } else {
+            const useUR = document.getElementById('setting-union-rank').checked;
+            if(!useUR) {
+                parent[rootY] = rootX;
+                logMessage(`Union By Rank Disabled. Randomly appending root ${rootY} under ${rootX}.`, 'warn');
+            } else {
+                if(rank[rootX] > rank[rootY]) {
+                    parent[rootY] = rootX;
+                    logMessage(`Rank(${rootX}) > Rank(${rootY}). Attached root ${rootY} under ${rootX}.`, 'sys');
+                } else if(rank[rootX] < rank[rootY]) {
+                    parent[rootX] = rootY;
+                    logMessage(`Rank(${rootX}) < Rank(${rootY}). Attached root ${rootX} under ${rootY}.`, 'sys');
+                } else {
+                    parent[rootY] = rootX;
+                    rank[rootX]++;
+                    logMessage(`Ranks equal. Appended ${rootY} under ${rootX} and incremented Rank(${rootX}).`, 'sys');
+                }
+            }
+            draw();
+            updateSetsCount();
+        }
+
+        await sleep(1000);
+        document.querySelectorAll('.node-circle').forEach(el => el.classList.remove('active'));
+        isAnimating = false;
+    }
+
+    function renderCode(lang) {
+        currentLang = lang;
+        const code = CODES[lang];
+        const display = document.getElementById('code-display');
+        display.innerHTML = '';
+        
+        code.split('\n').forEach((line, i) => {
+            const div = document.createElement('div');
+            div.className = 'code-line';
+            div.id = `line-${i+1}`;
+            let html = line
+                .replace(/\b(func|var|return|if|else|for|type|struct|public|void|def|class)\b/g, '<span class="kwd">$1</span>')
+                .replace(/\/\/.*/g, '<span class="com">$&</span>');
+            div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+            display.appendChild(div);
+        });
+    }
+
+    function copyCode() {
+        navigator.clipboard.writeText(CODES[currentLang]);
+    }
+
+    function switchLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        renderCode(lang);
+    }
+
+    function getSpeed() {
+        const slider = document.getElementById('anim-speed');
+        return slider ? parseFloat(slider.value) : 1.0;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms / getSpeed())); }
+
+    init();
+  </script><script src="visualizer-common.js"></script></body>
+</html>

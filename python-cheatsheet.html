@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Python Cheatsheet - Software Systems Coding Reference</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cheatsheet-section {
+            margin-bottom: 40px;
+        }
+
+        .cheatsheet-section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .cheatsheet-section h2 .emoji {
+            margin-right: 12px;
+            font-size: 1.8rem;
+        }
+
+        .cheatsheet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .cheatsheet-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .cheatsheet-card h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .code-example {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin: 12px 0;
+            font-family: 'Courier New', 'Monaco', 'Inconsolata', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .syntax-keyword { color: #c678dd; font-weight: bold; }
+        .syntax-string { color: #98c379; }
+        .syntax-number { color: #d19a66; }
+        .syntax-comment { color: #5c6370; font-style: italic; }
+        .syntax-function { color: #61afef; }
+        .syntax-variable { color: #e06c75; }
+
+        .highlight-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 12px 0;
+        }
+
+        .highlight-box .highlight-title {
+            color: var(--accent-color);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>Software Systems</h1>
+                <p>Interview Prep</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-item">🏠 Home Dashboard</a>
+                <a href="python-cheatsheet.html" class="nav-item active">🐍 Python Cheatsheet</a>
+
+                <!-- Linear Data Structures -->
+                <details class="nav-section">
+                  <summary class="nav-section-title">Linear Data Structures</summary>
+                  <a href="linked-lists.html" class="nav-item">Linked Lists</a>
+                  <a href="linked-list-reversal.html" class="nav-item indent">↳ Visualizer: Reversal</a>
+                  <a href="linked-list-visualizer.html" class="nav-item indent">↳ Visualizer: Operations</a>
+                  <a href="stack.html" class="nav-item">Stacks</a>
+                  <a href="stack-visualizer.html" class="nav-item indent">↳ Visualizer: Stack</a>
+                  <a href="queues.html" class="nav-item">Queues</a>
+                  <a href="queue-visualizer.html" class="nav-item indent">↳ Visualizer: Queue</a>
+                </details>
+
+                <!-- Non-Linear Data Structures -->
+                <details class="nav-section">
+                  <summary class="nav-section-title">Non-Linear Data Structures</summary>
+                  <a href="hash-maps.html" class="nav-item">Hash Maps</a>
+                  <a href="hash-map-visualizer.html" class="nav-item indent">↳ Visualizer: Hash Map</a>
+                  <a href="trees.html" class="nav-item">Trees</a>
+                  <a href="bst-visualizer.html" class="nav-item indent">↳ Visualizer: BST</a>
+                  <a href="graphs.html" class="nav-item">Graphs</a>
+                  <a href="graph-visualizer.html" class="nav-item indent">↳ Visualizer: Graph Algo</a>
+                  <a href="bfs-graph.html" class="nav-item indent">↳ Visualizer: BFS</a>
+                  <a href="pathfinding-visualizer.html" class="nav-item indent">↳ Visualizer: Pathfinding</a>
+                  <a href="topological-sort-visualizer.html" class="nav-item indent">↳ Visualizer: Topo Sort</a>
+                  <a href="mst-visualizer.html" class="nav-item indent">↳ Visualizer: MST</a>
+                  <a href="union-find.html" class="nav-item indent">↳ Visualizer: Union-Find</a>
+                  <a href="heap.html" class="nav-item">Heaps</a>
+                  <a href="heap-visualizer.html" class="nav-item indent">↳ Visualizer: Heap</a>
+                  <a href="tries.html" class="nav-item">Tries</a>
+                  <a href="trie-visualizer.html" class="nav-item indent">↳ Visualizer: Trie</a>
+                  <a href="segment-tree.html" class="nav-item">Segment Trees</a>
+                </details>
+
+                <!-- Algorithms -->
+                <details class="nav-section">
+                  <summary class="nav-section-title">Algorithms</summary>
+                  <a href="sort-search.html" class="nav-item">Sorting & Search</a>
+                  <a href="sorting-visualizer.html" class="nav-item indent">↳ Visualizer: Sorting</a>
+                  <a href="binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary Search</a>
+                  <a href="jump-search-visualizer.html" class="nav-item indent">↳ Visualizer: Jump Search</a>
+                  <a href="interpolation-search-visualizer.html" class="nav-item indent">↳ Visualizer: Interpolation Search</a>
+                  <a href="exponential-search-visualizer.html" class="nav-item indent">↳ Visualizer: Exponential Search</a>
+                  <a href="ternary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Ternary Search</a>
+                  <a href="kmp-search-visualizer.html" class="nav-item indent">↳ Visualizer: KMP String Search</a>
+                  <a href="dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+                  <a href="knapsack-dp.html" class="nav-item indent">↳ Visualizer: Knapsack</a>
+                  <a href="dp-lcs.html" class="nav-item indent">↳ Visualizer: LCS</a>
+                  <a href="backtracking.html" class="nav-item">Backtracking</a>
+                  <a href="n-queens.html" class="nav-item indent">↳ Visualizer: N-Queens</a>
+                  <a href="sudoku-solver.html" class="nav-item indent">↳ Visualizer: Sudoku</a>
+                  <a href="maze-generator.html" class="nav-item indent">↳ Visualizer: Maze</a>
+                  <a href="greedy.html" class="nav-item">Greedy</a>
+                  <a href="bit-manipulation.html" class="nav-item">Bit Manipulation</a>
+                  <a href="math-geometry.html" class="nav-item">Math & Geometry</a>
+                </details>
+
+                <!-- Patterns -->
+                <details class="nav-section">
+                  <summary class="nav-section-title">Patterns</summary>
+                  <a href="two-pointers.html" class="nav-item">Two Pointers</a>
+                  <a href="two-pointers-visualizer.html" class="nav-item indent">↳ Visualizer: Two Pointers</a>
+                  <a href="sliding-window.html" class="nav-item">Sliding Window</a>
+                  <a href="sliding-window-visualizer.html" class="nav-item indent">↳ Visualizer: Sliding Window</a>
+                  <a href="fast-slow-pointers.html" class="nav-item">Fast & Slow Pointers</a>
+                  <a href="binary-search.html" class="nav-item">Binary Search</a>
+                  <a href="intervals.html" class="nav-item">Intervals</a>
+                  <a href="prefix-sum.html" class="nav-item">Prefix Sum</a>
+                </details>
+
+              </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-header">
+                <h1>🐍 Python Cheatsheet</h1>
+                <p>Complete reference guide for Python syntax, data structures, and algorithms.</p>
+            </div>
+
+            <!-- Basic Syntax -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">📝</span>Basic Syntax & Variables</h2>
+
+                <div class="callout key-intuition">
+                    <div class="callout-title">🔹 Variables & Data Types</div>
+                    <div class="callout-content">
+                        <div class="code-example">
+<span class="syntax-comment"># Variable assignment</span>
+<span class="syntax-variable">name</span> = <span class="syntax-string">"Alice"</span>
+<span class="syntax-variable">age</span> = <span class="syntax-number">25</span>
+<span class="syntax-variable">height</span> = <span class="syntax-number">5.9</span>
+<span class="syntax-variable">is_student</span> = <span class="syntax-keyword">True</span>
+
+<span class="syntax-comment"># Type conversion</span>
+<span class="syntax-variable">int_val</span> = <span class="syntax-function">int</span>(<span class="syntax-string">"42"</span>)
+<span class="syntax-variable">str_val</span> = <span class="syntax-function">str</span>(<span class="syntax-number">42</span>)
+<span class="syntax-variable">float_val</span> = <span class="syntax-function">float</span>(<span class="syntax-string">"3.14"</span>)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>Control Flow</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># If-elif-else</span>
+<span class="syntax-keyword">if</span> x > <span class="syntax-number">0</span>:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Positive"</span>)
+<span class="syntax-keyword">elif</span> x == <span class="syntax-number">0</span>:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Zero"</span>)
+<span class="syntax-keyword">else</span>:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Negative"</span>)
+
+<span class="syntax-comment"># For loop</span>
+<span class="syntax-keyword">for</span> i <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">5</span>):
+    <span class="syntax-function">print</span>(i)
+
+<span class="syntax-comment"># While loop</span>
+<span class="syntax-keyword">while</span> x > <span class="syntax-number">0</span>:
+    x -= <span class="syntax-number">1</span>
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Functions</h3>
+                        <div class="code-example">
+<span class="syntax-keyword">def</span> <span class="syntax-function">greet</span>(name, age=<span class="syntax-number">18</span>):
+    <span class="syntax-keyword">return</span> <span class="syntax-string">f"Hello {name}, age {age}"</span>
+
+<span class="syntax-comment"># Lambda function</span>
+<span class="syntax-variable">square</span> = <span class="syntax-keyword">lambda</span> x: x**<span class="syntax-number">2</span>
+
+<span class="syntax-comment"># Call function</span>
+<span class="syntax-function">greet</span>(<span class="syntax-string">"Alice"</span>)
+<span class="syntax-function">greet</span>(<span class="syntax-string">"Bob"</span>, <span class="syntax-number">25</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Structures -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">🗂️</span>Data Structures</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>Lists</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Create list</span>
+<span class="syntax-variable">nums</span> = [<span class="syntax-number">1</span>, <span class="syntax-number">2</span>, <span class="syntax-number">3</span>, <span class="syntax-number">4</span>, <span class="syntax-number">5</span>]
+
+<span class="syntax-comment"># Access elements</span>
+<span class="syntax-function">print</span>(nums[<span class="syntax-number">0</span>])  <span class="syntax-comment"># 1</span>
+<span class="syntax-function">print</span>(nums[-<span class="syntax-number">1</span>]) <span class="syntax-comment"># 5</span>
+
+<span class="syntax-comment"># List methods</span>
+nums.<span class="syntax-function">append</span>(<span class="syntax-number">6</span>)
+nums.<span class="syntax-function">insert</span>(<span class="syntax-number">0</span>, <span class="syntax-number">0</span>)
+nums.<span class="syntax-function">pop</span>()  <span class="syntax-comment"># Remove last</span>
+nums.<span class="syntax-function">remove</span>(<span class="syntax-number">3</span>)  <span class="syntax-comment"># Remove value</span>
+
+<span class="syntax-comment"># Slicing</span>
+<span class="syntax-function">print</span>(nums[<span class="syntax-number">1</span>:<span class="syntax-number">4</span>])  <span class="syntax-comment"># [1, 2, 4]</span>
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Dictionaries</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Create dict</span>
+<span class="syntax-variable">person</span> = {
+    <span class="syntax-string">"name"</span>: <span class="syntax-string">"Alice"</span>,
+    <span class="syntax-string">"age"</span>: <span class="syntax-number">25</span>,
+    <span class="syntax-string">"city"</span>: <span class="syntax-string">"NYC"</span>
+}
+
+<span class="syntax-comment"># Access values</span>
+<span class="syntax-function">print</span>(person[<span class="syntax-string">"name"</span>])  <span class="syntax-comment"># Alice</span>
+<span class="syntax-function">print</span>(person.<span class="syntax-function">get</span>(<span class="syntax-string">"age"</span>))  <span class="syntax-comment"># 25</span>
+
+<span class="syntax-comment"># Dict methods</span>
+person[<span class="syntax-string">"job"</span>] = <span class="syntax-string">"Engineer"</span>
+<span class="syntax-function">print</span>(person.<span class="syntax-function">keys</span>())   <span class="syntax-comment"># dict_keys</span>
+<span class="syntax-function">print</span>(person.<span class="syntax-function">values</span>()) <span class="syntax-comment"># dict_values</span>
+<span class="syntax-function">print</span>(person.<span class="syntax-function">items</span>())  <span class="syntax-comment"># dict_items</span>
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Sets & Tuples</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Set (unordered, unique)</span>
+<span class="syntax-variable">unique_nums</span> = {<span class="syntax-number">1</span>, <span class="syntax-number">2</span>, <span class="syntax-number">2</span>, <span class="syntax-number">3</span>}
+<span class="syntax-function">print</span>(unique_nums)  <span class="syntax-comment"># {1, 2, 3}</span>
+
+<span class="syntax-comment"># Set operations</span>
+<span class="syntax-variable">set1</span> = {<span class="syntax-number">1</span>, <span class="syntax-number">2</span>, <span class="syntax-number">3</span>}
+<span class="syntax-variable">set2</span> = {<span class="syntax-number">3</span>, <span class="syntax-number">4</span>, <span class="syntax-number">5</span>}
+<span class="syntax-function">print</span>(set1 | set2)  <span class="syntax-comment"># Union</span>
+<span class="syntax-function">print</span>(set1 & set2)  <span class="syntax-comment"># Intersection</span>
+
+<span class="syntax-comment"># Tuple (immutable)</span>
+<span class="syntax-variable">point</span> = (<span class="syntax-number">10</span>, <span class="syntax-number">20</span>)
+<span class="syntax-function">print</span>(point[<span class="syntax-number">0</span>])  <span class="syntax-comment"># 10</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- String Operations -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">🔤</span>String Operations</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>String Methods</h3>
+                        <div class="code-example">
+<span class="syntax-variable">text</span> = <span class="syntax-string">"Hello World"</span>
+
+<span class="syntax-comment"># Case operations</span>
+<span class="syntax-function">print</span>(text.<span class="syntax-function">upper</span>())      <span class="syntax-comment"># HELLO WORLD</span>
+<span class="syntax-function">print</span>(text.<span class="syntax-function">lower</span>())      <span class="syntax-comment"># hello world</span>
+<span class="syntax-function">print</span>(text.<span class="syntax-function">title</span>())      <span class="syntax-comment"># Hello World</span>
+
+<span class="syntax-comment"># Search & replace</span>
+<span class="syntax-function">print</span>(text.<span class="syntax-function">find</span>(<span class="syntax-string">"World"</span>))    <span class="syntax-comment"># 6</span>
+<span class="syntax-function">print</span>(text.<span class="syntax-function">replace</span>(<span class="syntax-string">"World"</span>, <span class="syntax-string">"Python"</span>))
+
+<span class="syntax-comment"># Split & join</span>
+<span class="syntax-variable">words</span> = text.<span class="syntax-function">split</span>()           <span class="syntax-comment"># ['Hello', 'World']</span>
+<span class="syntax-variable">joined</span> = <span class="syntax-string">" "</span>.<span class="syntax-function">join</span>(words)     <span class="syntax-comment"># "Hello World"</span>
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>String Formatting</h3>
+                        <div class="code-example">
+<span class="syntax-variable">name</span> = <span class="syntax-string">"Alice"</span>
+<span class="syntax-variable">age</span> = <span class="syntax-number">25</span>
+
+<span class="syntax-comment"># f-strings (Python 3.6+)</span>
+<span class="syntax-function">print</span>(<span class="syntax-string">f"Hello {name}, you are {age} years old"</span>)
+
+<span class="syntax-comment"># format() method</span>
+<span class="syntax-function">print</span>(<span class="syntax-string">"Hello {}, you are {} years old"</span>.<span class="syntax-function">format</span>(name, age))
+
+<span class="syntax-comment"># % formatting</span>
+<span class="syntax-function">print</span>(<span class="syntax-string">"Hello %s, you are %d years old"</span> % (name, age))
+
+<span class="syntax-comment"># String concatenation</span>
+<span class="syntax-function">print</span>(name + <span class="syntax-string">" is "</span> + <span class="syntax-function">str</span>(age) + <span class="syntax-string">" years old"</span>)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Comprehensions -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">⚡</span>List Comprehensions & Generators</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>List Comprehensions</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Basic comprehension</span>
+<span class="syntax-variable">squares</span> = [x**<span class="syntax-number">2</span> <span class="syntax-keyword">for</span> x <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">10</span>)]
+
+<span class="syntax-comment"># With condition</span>
+<span class="syntax-variable">even_squares</span> = [x**<span class="syntax-number">2</span> <span class="syntax-keyword">for</span> x <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">10</span>) <span class="syntax-keyword">if</span> x % <span class="syntax-number">2</span> == <span class="syntax-number">0</span>]
+
+<span class="syntax-comment"># Nested comprehension</span>
+<span class="syntax-variable">matrix</span> = [[i*j <span class="syntax-keyword">for</span> j <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">3</span>)] <span class="syntax-keyword">for</span> i <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">3</span>)]
+
+<span class="syntax-comment"># Dictionary comprehension</span>
+<span class="syntax-variable">squares_dict</span> = {x: x**<span class="syntax-number">2</span> <span class="syntax-keyword">for</span> x <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">5</span>)}
+
+<span class="syntax-comment"># Set comprehension</span>
+<span class="syntax-variable">squares_set</span> = {x**<span class="syntax-number">2</span> <span class="syntax-keyword">for</span> x <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">5</span>)}
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Generators</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Generator function</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">count_up_to</span>(n):
+    i = <span class="syntax-number">0</span>
+    <span class="syntax-keyword">while</span> i < n:
+        <span class="syntax-keyword">yield</span> i
+        i += <span class="syntax-number">1</span>
+
+<span class="syntax-comment"># Generator expression</span>
+<span class="syntax-variable">squares_gen</span> = (x**<span class="syntax-number">2</span> <span class="syntax-keyword">for</span> x <span class="syntax-keyword">in</span> <span class="syntax-function">range</span>(<span class="syntax-number">10</span>))
+
+<span class="syntax-comment"># Using generators</span>
+<span class="syntax-keyword">for</span> num <span class="syntax-keyword">in</span> <span class="syntax-function">count_up_to</span>(<span class="syntax-number">5</span>):
+    <span class="syntax-function">print</span>(num)
+
+<span class="syntax-comment"># Convert to list</span>
+<span class="syntax-variable">nums_list</span> = <span class="syntax-function">list</span>(<span class="syntax-function">count_up_to</span>(<span class="syntax-number">5</span>))
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File I/O -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">📁</span>File Input/Output</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>Reading Files</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Read entire file</span>
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'file.txt'</span>, <span class="syntax-string">'r'</span>) <span class="syntax-keyword">as</span> f:
+    content = f.<span class="syntax-function">read</span>()
+
+<span class="syntax-comment"># Read lines</span>
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'file.txt'</span>, <span class="syntax-string">'r'</span>) <span class="syntax-keyword">as</span> f:
+    lines = f.<span class="syntax-function">readlines</span>()
+
+<span class="syntax-comment"># Read line by line</span>
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'file.txt'</span>, <span class="syntax-string">'r'</span>) <span class="syntax-keyword">as</span> f:
+    <span class="syntax-keyword">for</span> line <span class="syntax-keyword">in</span> f:
+        <span class="syntax-function">print</span>(line.<span class="syntax-function">strip</span>())
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Writing Files</h3>
+                        <div class="code-example">
+<span class="syntax-comment"># Write to file</span>
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'output.txt'</span>, <span class="syntax-string">'w'</span>) <span class="syntax-keyword">as</span> f:
+    f.<span class="syntax-function">write</span>(<span class="syntax-string">"Hello World\n"</span>)
+
+<span class="syntax-comment"># Append to file</span>
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'output.txt'</span>, <span class="syntax-string">'a'</span>) <span class="syntax-keyword">as</span> f:
+    f.<span class="syntax-function">write</span>(<span class="syntax-string">"More content\n"</span>)
+
+<span class="syntax-comment"># Write multiple lines</span>
+<span class="syntax-variable">lines</span> = [<span class="syntax-string">"Line 1"</span>, <span class="syntax-string">"Line 2"</span>, <span class="syntax-string">"Line 3"</span>]
+<span class="syntax-keyword">with</span> <span class="syntax-function">open</span>(<span class="syntax-string">'output.txt'</span>, <span class="syntax-string">'w'</span>) <span class="syntax-keyword">as</span> f:
+    f.<span class="syntax-function">writelines</span>(line + <span class="syntax-string">'\n'</span> <span class="syntax-keyword">for</span> line <span class="syntax-keyword">in</span> lines)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Common Algorithms -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">🧮</span>Common Algorithms</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>Sorting</h3>
+                        <div class="code-example">
+<span class="syntax-variable">nums</span> = [<span class="syntax-number">3</span>, <span class="syntax-number">1</span>, <span class="syntax-number">4</span>, <span class="syntax-number">1</span>, <span class="syntax-number">5</span>]
+
+<span class="syntax-comment"># Sort in place</span>
+nums.<span class="syntax-function">sort</span>()  <span class="syntax-comment"># [1, 1, 3, 4, 5]</span>
+
+<span class="syntax-comment"># Sort descending</span>
+nums.<span class="syntax-function">sort</span>(reverse=<span class="syntax-keyword">True</span>)
+
+<span class="syntax-comment"># Sort with key</span>
+<span class="syntax-variable">words</span> = [<span class="syntax-string">"apple"</span>, <span class="syntax-string">"Banana"</span>, <span class="syntax-string">"cherry"</span>]
+words.<span class="syntax-function">sort</span>(key=<span class="syntax-function">str</span>.<span class="syntax-function">lower</span>)
+
+<span class="syntax-comment"># Sorted (returns new list)</span>
+<span class="syntax-variable">sorted_nums</span> = <span class="syntax-function">sorted</span>(nums)
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Searching</h3>
+                        <div class="code-example">
+<span class="syntax-variable">nums</span> = [<span class="syntax-number">1</span>, <span class="syntax-number">2</span>, <span class="syntax-number">3</span>, <span class="syntax-number">4</span>, <span class="syntax-number">5</span>]
+
+<span class="syntax-comment"># Find index</span>
+<span class="syntax-function">print</span>(nums.<span class="syntax-function">index</span>(<span class="syntax-number">3</span>))  <span class="syntax-comment"># 2</span>
+
+<span class="syntax-comment"># Check existence</span>
+<span class="syntax-function">print</span>(<span class="syntax-number">3</span> <span class="syntax-keyword">in</span> nums)  <span class="syntax-comment"># True</span>
+
+<span class="syntax-comment"># Binary search (manual)</span>
+<span class="syntax-keyword">def</span> <span class="syntax-function">binary_search</span>(arr, target):
+    left, right = <span class="syntax-number">0</span>, <span class="syntax-function">len</span>(arr) - <span class="syntax-number">1</span>
+    <span class="syntax-keyword">while</span> left <= right:
+        mid = (left + right) // <span class="syntax-number">2</span>
+        <span class="keyword">if</span> arr[mid] == target:
+            <span class="syntax-keyword">return</span> mid
+        <span class="syntax-keyword">elif</span> arr[mid] < target:
+            left = mid + <span class="syntax-number">1</span>
+        <span class="syntax-keyword">else</span>:
+            right = mid - <span class="syntax-number">1</span>
+    <span class="syntax-keyword">return</span> -<span class="syntax-number">1</span>
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Math Operations</h3>
+                        <div class="code-example">
+<span class="syntax-keyword">import</span> math
+
+<span class="syntax-comment"># Basic math</span>
+<span class="syntax-function">print</span>(<span class="syntax-function">abs</span>(-<span class="syntax-number">5</span>))     <span class="syntax-comment"># 5</span>
+<span class="syntax-function">print</span>(<span class="syntax-function">max</span>(<span class="syntax-number">1</span>, <span class="syntax-number">3</span>, <span class="syntax-number">2</span>))  <span class="syntax-comment"># 3</span>
+<span class="syntax-function">print</span>(<span class="syntax-function">min</span>(<span class="syntax-number">1</span>, <span class="syntax-number">3</span>, <span class="syntax-number">2</span>))  <span class="syntax-comment"># 1</span>
+<span class="syntax-function">print</span>(<span class="syntax-function">sum</span>([<span class="syntax-number">1</span>, <span class="syntax-number">2</span>, <span class="syntax-number">3</span>])) <span class="syntax-comment"># 6</span>
+
+<span class="syntax-comment"># Math module</span>
+<span class="syntax-function">print</span>(math.<span class="syntax-function">sqrt</span>(<span class="syntax-number">16</span>))    <span class="syntax-comment"># 4.0</span>
+<span class="syntax-function">print</span>(math.<span class="syntax-function">pow</span>(<span class="syntax-number">2</span>, <span class="syntax-number">3</span>))   <span class="syntax-comment"># 8.0</span>
+<span class="syntax-function">print</span>(math.<span class="syntax-function">ceil</span>(<span class="syntax-number">3.2</span>))   <span class="syntax-comment"># 4</span>
+<span class="syntax-function">print</span>(math.<span class="syntax-function">floor</span>(<span class="syntax-number">3.8</span>))  <span class="syntax-comment"># 3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exception Handling -->
+            <div class="cheatsheet-section">
+                <h2><span class="emoji">🚨</span>Exception Handling</h2>
+
+                <div class="cheatsheet-grid">
+                    <div class="cheatsheet-card">
+                        <h3>Try-Except Blocks</h3>
+                        <div class="code-example">
+<span class="syntax-keyword">try</span>:
+    <span class="syntax-comment"># Code that might raise exception</span>
+    result = <span class="syntax-number">10</span> / <span class="syntax-number">0</span>
+<span class="syntax-keyword">except</span> ZeroDivisionError:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Cannot divide by zero"</span>)
+<span class="syntax-keyword">except</span> ValueError:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Invalid value"</span>)
+<span class="syntax-keyword">else</span>:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"No exception occurred"</span>)
+<span class="syntax-keyword">finally</span>:
+    <span class="syntax-function">print</span>(<span class="syntax-string">"Always executed"</span>)
+
+<span class="syntax-comment"># Catch all exceptions</span>
+<span class="syntax-keyword">try</span>:
+    risky_code()
+<span class="syntax-keyword">except</span> Exception <span class="syntax-keyword">as</span> e:
+    <span class="syntax-function">print</span>(<span class="syntax-string">f"Error: {e}"</span>)
+                        </div>
+                    </div>
+
+                    <div class="cheatsheet-card">
+                        <h3>Custom Exceptions</h3>
+                        <div class="code-example">
+<span class="syntax-keyword">class</span> <span class="syntax-function">CustomError</span>(Exception):
+    <span class="syntax-keyword">def</span> <span class="syntax-function">__init__</span>(self, message):
+        self.message = message
+        <span class="keyword">super</span>().<span class="syntax-function">__init__</span>(self.message)
+
+<span class="syntax-keyword">def</span> <span class="syntax-function">validate_age</span>(age):
+    <span class="syntax-keyword">if</span> age < <span class="syntax-number">0</span>:
+        <span class="syntax-keyword">raise</span> CustomError(<span class="syntax-string">"Age cannot be negative"</span>)
+    <span class="syntax-keyword">if</span> age > <span class="syntax-number">150</span>:
+        <span class="syntax-keyword">raise</span> ValueError(<span class="syntax-string">"Age too high"</span>)
+
+<span class="syntax-keyword">try</span>:
+    <span class="syntax-function">validate_age</span>(-<span class="syntax-number">5</span>)
+<span class="syntax-keyword">except</span> CustomError <span class="syntax-keyword">as</span> e:
+    <span class="syntax-function">print</span>(e.message)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</body>
+</html>

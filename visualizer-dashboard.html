@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Visualizer Dashboard - SDE Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="styles.css" rel="stylesheet"/>
+<style>
+        :root {
+            --card-bg: var(--bg-tertiary, #171717);
+            --card-border: var(--border-color);
+            --card-hover-border: var(--accent-color);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Hero header */
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(147, 51, 234, 0.15) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .dashboard-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Filter tabs */
+        .filter-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .filter-btn.active {
+            background: var(--accent-color, #3b82f6);
+            color: #fff;
+            border-color: var(--accent-color, #3b82f6);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        /* Grid layout */
+        .visualizer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        /* Modern Card */
+        .vis-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+        }
+
+        .vis-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .vis-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--card-hover-border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .vis-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon-wrapper {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .vis-card:hover .card-icon-wrapper {
+            transform: scale(1.1) rotate(5deg);
+            transition: transform 0.3s ease;
+        }
+
+        /* Colors by category */
+        .vis-card[data-category="data-structures"] .card-icon-wrapper {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .vis-card[data-category="graphs"] .card-icon-wrapper {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .vis-card[data-category="sorting"] .card-icon-wrapper {
+            background: rgba(245, 158, 11, 0.1);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .vis-card[data-category="dp"] .card-icon-wrapper {
+            background: rgba(236, 72, 153, 0.1);
+            color: #f472b6;
+            border-color: rgba(236, 72, 153, 0.2);
+        }
+
+        .vis-card[data-category="patterns"] .card-icon-wrapper {
+            background: rgba(139, 92, 246, 0.1);
+            color: #a78bfa;
+            border-color: rgba(139, 92, 246, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0 0 10px 0;
+        }
+
+        .card-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 0 0 20px 0;
+            flex-grow: 1;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 15px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .complexity-tag {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            background: var(--bg-secondary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            border: 1px solid var(--card-border);
+        }
+
+        .play-btn {
+            color: var(--accent-color, #3b82f6);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.2s;
+        }
+
+        .vis-card:hover .play-btn {
+            color: #60a5fa;
+        }
+
+        .play-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+            transition: transform 0.2s;
+        }
+
+        .vis-card:hover .play-btn svg {
+            transform: translateX(3px);
+        }
+    </style>
+</head>
+<body>
+<div class="sidebar-overlay"></div>
+<button aria-label="Open Menu" class="hamburger-btn">
+<span></span>
+<span></span>
+<span></span>
+</button>
+<div class="container">
+<aside class="sidebar">
+<div class="sidebar-header">
+<h1>🌑 NeoAlgo</h1>
+<p>Coding Interview Prep</p>
+</div>
+<div class="search-container">
+<input autocomplete="off" id="pattern-search" placeholder="Search patterns..." type="text"/>
+</div>
+<div class="sidebar-controls">
+<button class="sidebar-control-btn" id="expand-all-btn">Expand All</button>
+<button class="sidebar-control-btn" id="collapse-all-btn">Collapse All</button>
+</div>
+<nav class="sidebar-nav">
+<a class="nav-item" href="index.html">🏠 Home Dashboard</a>
+<!-- Go Language & Resources -->
+
+<!-- Linear Data Structures -->
+<details class="nav-section">
+<summary class="nav-section-title">Linear Data Structures</summary>
+<a class="nav-item" href="patterns/linked-list-reversal.html">Reversal</a>
+<a class="nav-item" href="patterns/linked-list-visualizer.html">Operations</a>
+<a class="nav-item" href="patterns/stack-visualizer.html">Stack</a>
+<a class="nav-item" href="patterns/queue-visualizer.html">Queue</a>
+</details>
+<!-- Non-Linear Data Structures -->
+<details class="nav-section">
+<summary class="nav-section-title">Non-Linear Data Structures</summary>
+<a class="nav-item" href="patterns/hash-map-visualizer.html">Hash Map</a>
+<a class="nav-item" href="patterns/bst-visualizer.html">BST</a>
+<a class="nav-item" href="patterns/graph-visualizer.html">Graph Algo</a>
+<a class="nav-item" href="patterns/bfs-graph.html">BFS</a>
+<a class="nav-item" href="patterns/pathfinding-visualizer.html">Pathfinding</a>
+<a class="nav-item" href="patterns/topological-sort-visualizer.html">Topo Sort</a>
+<a class="nav-item" href="patterns/mst-visualizer.html">MST</a>
+<a class="nav-item" href="patterns/union-find.html">Union-Find</a>
+<a class="nav-item" href="patterns/heap-visualizer.html">Heap</a>
+<a class="nav-item" href="patterns/trie-visualizer.html">Trie</a>
+</details>
+<!-- Algorithms -->
+<details class="nav-section">
+<summary class="nav-section-title">Algorithms</summary>
+<a class="nav-item" href="patterns/sorting-visualizer.html">Sorting</a>
+<a class="nav-item" href="patterns/binary-search-visualizer.html">Binary Search</a>
+<a class="nav-item" href="patterns/jump-search-visualizer.html">Jump Search</a>
+<a class="nav-item" href="patterns/interpolation-search-visualizer.html">Interpolation Search</a>
+<a class="nav-item" href="patterns/exponential-search-visualizer.html">Exponential Search</a>
+<a class="nav-item" href="patterns/ternary-search-visualizer.html">Ternary Search</a>
+<a class="nav-item" href="patterns/kmp-search-visualizer.html">KMP String Search</a>
+<a class="nav-item" href="patterns/knapsack-dp.html">Knapsack</a>
+<a class="nav-item" href="patterns/dp-lcs.html">LCS</a>
+<a class="nav-item" href="patterns/n-queens.html">N-Queens</a>
+<a class="nav-item" href="patterns/sudoku-solver.html">Sudoku</a>
+<a class="nav-item" href="patterns/maze-generator.html">Maze</a>
+</details>
+<!-- Patterns -->
+<details class="nav-section">
+<summary class="nav-section-title">Patterns</summary>
+<a class="nav-item" href="patterns/two-pointers-visualizer.html">Two Pointers</a>
+<a class="nav-item" href="patterns/sliding-window-visualizer.html">Sliding Window</a>
+</details>
+</nav>
+</aside>
+<main class="main-content">
+<div class="dashboard-header">
+<h1>Interactive Algorithms</h1>
+<p>Master data structures and algorithms through rich, dynamic animations. Visualize how code execution
+                    works step-by-step.</p>
+</div>
+<div class="filter-container" id="vis-filters">
+<button class="filter-btn active" data-filter="all">All Visualizers</button>
+<button class="filter-btn" data-filter="data-structures">Data Structures</button>
+<button class="filter-btn" data-filter="graphs">Graphs &amp; Trees</button>
+<button class="filter-btn" data-filter="sorting">Sorting &amp; Searching</button>
+<button class="filter-btn" data-filter="dp">Backtracking &amp; DP</button>
+<button class="filter-btn" data-filter="patterns">Coding Patterns</button>
+</div>
+<div class="visualizer-grid" id="vis-grid">
+<!-- Data Structures -->
+<a class="vis-card" data-category="data-structures" href="patterns/linked-list-visualizer.html">
+<div class="card-icon-wrapper">🔗</div>
+<h3 class="card-title">Linked List Operations</h3>
+<p class="card-desc">Visualize insertion, deletion, and traversal in a singly linked list.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="data-structures" href="patterns/linked-list-reversal.html">
+<div class="card-icon-wrapper">🔄</div>
+<h3 class="card-title">Linked List Reversal</h3>
+<p class="card-desc">Step-by-step pointers manipulation to reverse a linked list.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="data-structures" href="patterns/stack-visualizer.html">
+<div class="card-icon-wrapper">📚</div>
+<h3 class="card-title">Stack Operations</h3>
+<p class="card-desc">Push, pop, and peek using LIFO (Last-In-First-Out) principles.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(1)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="data-structures" href="patterns/queue-visualizer.html">
+<div class="card-icon-wrapper">🧑‍🤝‍🧑</div>
+<h3 class="card-title">Queue Operations</h3>
+<p class="card-desc">Enqueue and dequeue using FIFO (First-In-First-Out) principles.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(1)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="data-structures" href="patterns/hash-map-visualizer.html">
+<div class="card-icon-wrapper">🗄️</div>
+<h3 class="card-title">Hash Map Collision</h3>
+<p class="card-desc">Understand hashing, bucketing, and collision resolution techniques.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(1) avg</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="data-structures" href="patterns/heap-visualizer.html">
+<div class="card-icon-wrapper">⛰️</div>
+<h3 class="card-title">Min/Max Heap</h3>
+<p class="card-desc">Visualize insertion, deletion, and heapify in priority queues.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(log n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<!-- Graphs & Trees -->
+<a class="vis-card" data-category="graphs" href="patterns/bst-visualizer.html">
+<div class="card-icon-wrapper">🌳</div>
+<h3 class="card-title">Binary Search Tree</h3>
+<p class="card-desc">Insert, search, and delete nodes while maintaining BST properties.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(h)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/trie-visualizer.html">
+<div class="card-icon-wrapper">🌲</div>
+<h3 class="card-title">Prefix Trie</h3>
+<p class="card-desc">Efficient string storage and retrieval for auto-completion systems.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(m)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/graph-visualizer.html">
+<div class="card-icon-wrapper">🕸️</div>
+<h3 class="card-title">Graph Playground</h3>
+<p class="card-desc">Interactive building of graphs with nodes and edges connections.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(V+E)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/bfs-graph.html">
+<div class="card-icon-wrapper">🌊</div>
+<h3 class="card-title">Breadth-First Search</h3>
+<p class="card-desc">Explore graphs layer-by-layer to find shortest paths.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(V+E)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/pathfinding-visualizer.html">
+<div class="card-icon-wrapper">🧭</div>
+<h3 class="card-title">Pathfinding Algorithms</h3>
+<p class="card-desc">Visualize Dijkstra and A* finding optimal routes on a grid.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(E log V)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/topological-sort-visualizer.html">
+<div class="card-icon-wrapper">📋</div>
+<h3 class="card-title">Topological Sort</h3>
+<p class="card-desc">Resolve dependencies and task scheduling in a Directed Acyclic Graph.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(V+E)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/mst-visualizer.html">
+<div class="card-icon-wrapper">🌐</div>
+<h3 class="card-title">Minimum Spanning Tree</h3>
+<p class="card-desc">Connect all nodes with minimum total edge weight (Kruskal/Prim).</p>
+<div class="card-footer">
+<span class="complexity-tag">O(E log V)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="graphs" href="patterns/union-find.html">
+<div class="card-icon-wrapper">🤝</div>
+<h3 class="card-title">Union-Find (Disjoint Set)</h3>
+<p class="card-desc">Efficiently group elements and detect cycles in undirected graphs.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(α(n))</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<!-- Sorting & Searching -->
+<a class="vis-card" data-category="sorting" href="patterns/sorting-visualizer.html">
+<div class="card-icon-wrapper">📊</div>
+<h3 class="card-title">Sorting Sandbox</h3>
+<p class="card-desc">Compare Bubble, Quick, Merge, and Insertion sort algorithms.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(n log n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="sorting" href="patterns/binary-search-visualizer.html">
+<div class="card-icon-wrapper">🔍</div>
+<h3 class="card-title">Binary Search</h3>
+<p class="card-desc">Divide and conquer to search for elements in a sorted array.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(log n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<!-- Jump Search -->
+<div class="vis-card" data-category="sorting">
+<div class="card-icon-wrapper">🚀</div>
+<div class="card-content">
+<h3 class="card-title">Jump Search</h3>
+<p class="card-desc">Visualize block-jumping logic (√n intervals) followed by linear scanning
+                            for optimal mid-sized searches.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(√n)</span>
+<a class="play-btn" href="patterns/jump-search-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- Interpolation Search -->
+<div class="vis-card" data-category="sorting">
+<div class="card-icon-wrapper">📉</div>
+<div class="card-content">
+<h3 class="card-title">Interpolation Search</h3>
+<p class="card-desc">An extension of Binary Search that estimates the position of the target
+                            using linear interpolation.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(log(log n))</span>
+<a class="play-btn" href="patterns/interpolation-search-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- Exponential Search -->
+<div class="vis-card" data-category="sorting">
+<div class="card-icon-wrapper">📈</div>
+<div class="card-content">
+<h3 class="card-title">Exponential Search</h3>
+<p class="card-desc">Finds a range where the target exists by repeatedly doubling the bound,
+                            then applies binary search.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(log n)</span>
+<a class="play-btn" href="patterns/exponential-search-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- Ternary Search -->
+<div class="vis-card" data-category="sorting">
+<div class="card-icon-wrapper">🔄</div>
+<div class="card-content">
+<h3 class="card-title">Ternary Search</h3>
+<p class="card-desc">Similar to Binary Search, but divides the search space into three parts.
+                            Excellent for uni-modal functions.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(log3 n)</span>
+<a class="play-btn" href="patterns/ternary-search-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- KMP String Search -->
+<div class="vis-card" data-category="patterns">
+<div class="card-icon-wrapper">🧬</div>
+<div class="card-content">
+<h3 class="card-title">KMP String Search</h3>
+<p class="card-desc">Advanced substring matching mapping pattern repetitions via the Longest
+                            Prefix Suffix (LPS) array.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(N + M)</span>
+<a class="play-btn" href="patterns/kmp-search-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- LinkedList -->
+<div class="vis-card" data-category="datastructures">
+<div class="card-icon-wrapper" style="background: rgba(188, 140, 255, 0.1); color: var(--neon-purple); border-color: rgba(188, 140, 255, 0.3);">
+                        ⛓️</div>
+<div class="card-content">
+<h3 class="card-title">LinkedList</h3>
+<p class="card-desc">Comprehensive visualizer for Singly, Doubly, and Circular linked lists with
+                            animated operations.</p>
+<div class="card-footer">
+<span class="complexity-tag" style="background: rgba(188, 140, 255, 0.1); color: var(--neon-purple);">O(N)</span>
+<a class="play-btn" href="patterns/linked-list-visualizer.html">
+                                Visualize
+                                <svg viewbox="0 0 24 24">
+<path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</a>
+</div>
+</div>
+</div>
+<!-- Backtracking & DP -->
+<a class="vis-card" data-category="dp" href="patterns/n-queens.html">
+<div class="card-icon-wrapper">👑</div>
+<h3 class="card-title">N-Queens Solver</h3>
+<p class="card-desc">Backtracking visualized to place N queens safely on an NxN board.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(N!)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="dp" href="patterns/sudoku-solver.html">
+<div class="card-icon-wrapper">🔢</div>
+<h3 class="card-title">Sudoku Solver</h3>
+<p class="card-desc">Watch backtracking systematically attempt and undo number placements.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(9^(n*m))</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="dp" href="patterns/maze-generator.html">
+<div class="card-icon-wrapper">🏰</div>
+<h3 class="card-title">Maze Generation</h3>
+<p class="card-desc">Recursive backtracking carving out a perfect maze step-by-step.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(V+E)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="dp" href="patterns/knapsack-dp.html">
+<div class="card-icon-wrapper">🧳</div>
+<h3 class="card-title">0/1 Knapsack DP</h3>
+<p class="card-desc">Dynamic programming grid filling process for capacity optimization.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(N*W)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="dp" href="patterns/dp-lcs.html">
+<div class="card-icon-wrapper">🧬</div>
+<h3 class="card-title">Longest Common Subsequence</h3>
+<p class="card-desc">2D DP table visualization matching characters across two strings.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(m*n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<!-- Coding Patterns -->
+<a class="vis-card" data-category="patterns" href="patterns/two-pointers-visualizer.html">
+<div class="card-icon-wrapper">👈👉</div>
+<h3 class="card-title">Two Pointers Method</h3>
+<p class="card-desc">Converging pointers to solve problems like Two Sum II or Palindrome.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+<a class="vis-card" data-category="patterns" href="patterns/sliding-window-visualizer.html">
+<div class="card-icon-wrapper">🖼️</div>
+<h3 class="card-title">Sliding Window Pattern</h3>
+<p class="card-desc">Dynamic window expansion and contraction for subarray optimization.</p>
+<div class="card-footer">
+<span class="complexity-tag">O(n)</span>
+<span class="play-btn">Launch <svg viewbox="0 0 24 24">
+<path d="M5 3l14 9-14 9v-18z"></path>
+</svg></span>
+</div>
+</a>
+</div>
+</main>
+</div>
+<script src="script.js"></script>
+<script>
+        // Filtering logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const cards = document.querySelectorAll('.vis-card');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+
+                    const filterValue = btn.getAttribute('data-filter');
+
+                    // Filter cards with simple animation
+                    cards.forEach(card => {
+                        if (filterValue === 'all' || card.getAttribute('data-category') === filterValue) {
+                            card.style.display = 'flex';
+                            // Trigger reflow for animation
+                            void card.offsetWidth;
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        } else {
+                            card.style.opacity = '0';
+                            card.style.transform = 'translateY(20px)';
+                            setTimeout(() => {
+                                if (filterValue !== 'all' && card.getAttribute('data-category') !== filterValue) {
+                                    card.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

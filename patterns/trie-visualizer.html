@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head><link href="visualizer-common.css?v=2" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Trie Visualizer - Pro</title>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+
+<style>
+
+        :root {
+            --bg-main: #06090f;
+            --bg-panel: rgba(13, 17, 23, 0.75);
+            --bg-header: rgba(13, 17, 23, 0.95);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --neon-blue: #00f3ff;
+            --neon-blue-dim: rgba(0, 243, 255, 0.15);
+            --neon-green: #3fb950;
+            --neon-green-dim: rgba(63, 185, 80, 0.15);
+            --neon-red: #f85149;
+            --neon-red-dim: rgba(248, 81, 73, 0.15);
+            --neon-purple: #bc8cff;
+            --neon-cyan: #58a6ff;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg-main) radial-gradient(circle at 50% 0%, rgba(0, 243, 255, 0.03) 0%, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #484f58; }
+
+        .panel {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 1.1rem;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .panel-header i { color: var(--neon-cyan); }
+
+        .app-header {
+            padding: 1rem 2rem;
+            background: var(--bg-header);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .app-title {
+            display: flex; align-items: center; gap: 0.75rem;
+            font-size: 1.5rem; color: white;
+            text-shadow: 0 0 15px var(--neon-blue-dim); font-weight: 700;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: 320px 1fr 380px;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            flex: 1;
+            height: calc(100vh - 73px);
+            overflow: hidden;
+        }
+
+        .column {
+            display: flex; flex-direction: column; gap: 1.5rem;
+            height: 100%; overflow-y: auto; padding-right: 0.5rem;
+        }
+        .column.center-col { overflow-y: hidden; }
+
+        .control-group { margin-bottom: 1rem; }
+        .control-group label {
+            display: block; margin-bottom: 0.5rem; font-size: 0.85rem;
+            color: var(--text-muted); font-weight: 500;
+        }
+
+        .form-input, .form-select, .input-field {
+            width: 100%;
+            background: #010409;
+            border: 1px solid #30363d;
+            color: var(--text-main);
+            padding: 0.6rem 0.8rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+        }
+        .input-group { display: flex; gap: 8px; }
+
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 0.5rem; background: #21262d; border: 1px solid #30363d;
+            color: var(--text-main); padding: 0.6rem 1rem; border-radius: 6px;
+            font-weight: 500; cursor: pointer; transition: all 0.2s; font-size: 0.9rem;
+        }
+        .btn:hover { background: #30363d; }
+        .btn-primary { background: rgba(88, 166, 255, 0.1); border-color: rgba(88, 166, 255, 0.4); color: var(--neon-cyan); }
+        .btn-success { background: rgba(46, 160, 67, 0.1); border-color: rgba(46, 160, 67, 0.4); color: var(--neon-green); }
+        .btn-danger, .btn.danger { background: rgba(248, 81, 73, 0.1); border-color: rgba(248, 81, 73, 0.4); color: var(--neon-red); }
+
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section-title { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-item { display: block; padding: 0.5rem 0.75rem; color: var(--text-muted); text-decoration: none; border-radius: 6px; margin-bottom: 2px; transition: all 0.2s; font-size: 0.9rem; }
+        .nav-item:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-main); }
+        .nav-item.active { background: rgba(88, 166, 255, 0.1); color: var(--neon-cyan); border-left: 2px solid var(--neon-cyan); }
+
+        .viz-viewport {
+            flex: 1; position: relative; background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px; overflow: hidden; display: flex; cursor: grab;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex-direction: column;
+        }
+        .viz-canvas {
+            transform-origin: 0 0; flex: 1; position: relative; padding: 20px; display: flex; flex-direction: column;
+        }
+        #tree-canvas { flex: 1; min-height: 250px; }
+
+        /* Terminal */
+        .terminal-container { flex: 1; background: #0d1117; border-radius: 8px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; height: 100%; min-height: 200px; }
+        .terminal-header { background: #161b22; padding: 6px 12px; border-bottom: 1px solid #30363d; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted); display:flex; align-items:center; }
+        .terminal-logs { padding: 1rem; font-family: var(--font-mono); font-size: 0.85rem; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 0.4rem; color: #e6edf3; }
+        .log-line { display: flex; gap: 0.5rem; line-height: 1.4; }
+        .log-time { color: #8b949e; }
+        .log-type-sys { color: #8b949e; }
+        
+        .log-section { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+        .log-entry { font-family: var(--font-mono); font-size: 0.85rem; color: #e6edf3; padding-bottom: 2px; }
+
+        /* Monaco */
+        .code-section { flex: 1; display: flex; flex-direction: column; height: 100%; background: transparent; border: none; }
+        .code-header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 0.6rem 1rem; border-bottom: 1px solid #30363d; font-size: 0.9rem; color: var(--text-main); border-top-left-radius: 8px; border-top-right-radius: 8px; }
+        .btn-group { display: flex; gap: 0.5rem; }
+        .lang-btn { background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--text-muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.85rem; padding: 4px 8px; }
+        .lang-btn.active { color: var(--neon-cyan); border-bottom-color: var(--neon-cyan); }
+        .code-content { flex: 1; position: relative; background: #0d1117; }
+        .monaco-container { position: absolute; width: 100%; height: 100%; }
+        .code-controls { padding: 10px; background: #161b22; border-top: 1px solid #30363d; font-size: 0.85rem; color: var(--text-muted); text-align: center; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; }
+
+        .code-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        .code-line-glyph { background: var(--neon-cyan) !important; }
+
+        /* Tree Styles */
+        
+
+        /* Trie Specific Styles */
+        .node-circle {
+            fill: var(--bg-panel);
+            stroke: var(--neon-cyan);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .node-circle.active {
+            fill: rgba(88, 166, 255, 0.2);
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.6));
+        }
+
+        .node-circle.found {
+            fill: rgba(63, 185, 80, 0.2);
+            stroke: var(--neon-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(63, 185, 80, 0.6));
+        }
+
+        .node-circle.end-node {
+            stroke: var(--neon-green);
+            stroke-width: 3;
+        }
+
+        .node-text {
+            fill: var(--text-main);
+            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        .edge-line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .edge-line.active {
+            stroke: var(--neon-cyan);
+            stroke-width: 3;
+        }
+
+        .edge-label {
+            fill: var(--text-main);
+            font-size: 12px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+        
+        .code-line-highlight { background-color: rgba(88, 166, 255, 0.2) !important; border-left: 3px solid #58a6ff; }
+        .code-line-glyph { background: var(--neon-cyan) !important; }
+
+</style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Trie Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Operations</div>
+<a class="nav-item active" href="javascript:void(0)" id="nav-insert" onclick="selectOperation('insert')">Insert Word</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-search" onclick="selectOperation('search')">Search Word</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-startswith" onclick="selectOperation('startswith')">Starts With</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-delete" onclick="selectOperation('delete')">Delete Word</a>
+<a class="nav-item" href="javascript:void(0)" id="nav-clear" onclick="selectOperation('clear')">Clear Trie</a>
+</div>
+</section>
+<section class="panel">
+<div class="panel-header"><i data-lucide="play-circle"></i> Operations</div>
+<div class="control-group">
+<label>Word</label>
+<div class="input-group">
+<input class="input-field" id="word-input" placeholder="Enter word" type="text"/>
+<button class="btn btn-primary" id="execute-btn" onclick="executeOperation()">Execute</button>
+</div>
+</div>
+<div class="control-group">
+<button class="btn" id="sample-words" onclick="insertSampleWords()">Sample Words</button>
+<button class="btn danger" id="clear-trie" onclick="clearTrie()">Clear All</button>
+</div>
+</section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none; min-height: 200px;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+<div class="log-section" id="log-panel">
+<div class="log-entry">Trie visualizer ready...</div>
+</div></div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> <span id="studio-title">Algorithm Visualization Studio</span></div>
+<div class="btn-group" style="margin-left: 15px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 15px;">
+<button class="tool-btn" id="btn-prev" title="Step Back"><i data-lucide="chevron-left" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-play" title="Play/Pause" onclick="runOperation()"><i data-lucide="play" style="width:16px;height:16px;color:var(--neon-cyan)"></i> Play</button>
+<button class="tool-btn" id="btn-next" title="Step Forward" onclick="stepOperation()"><i data-lucide="chevron-right" style="width:16px;height:16px"></i></button>
+<button class="tool-btn" id="btn-reset" title="Restart" onclick="resetOperation()"><i data-lucide="rotate-ccw" style="width:16px;height:16px"></i></button>
+</div></div>
+<div style="padding: 15px 20px 0 20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.8rem; color:var(--text-muted); text-transform: uppercase;">Animation Speed Multiplier</span>
+        <span style="font-family:var(--font-mono); font-size:0.8rem; color:var(--text-main);" id="speed-display">1.0x</span>
+    </div>
+    <input type="range" id="anim-speed" min="0.1" max="2.0" step="0.1" value="1.0" style="width:100%; accent-color:var(--neon-cyan);">
+</div>
+<div class="viz-viewport" style="margin: 15px; border-radius: 8px;"><div class="viz-canvas" id="viz-canvas"><svg height="100%" id="trie-canvas" width="100%">
+<defs>
+<marker id="arrowhead" markerheight="7" markerwidth="10" orient="auto" refx="9" refy="3.5">
+<polygon fill="var(--text-secondary)" points="0 0, 10 3.5, 0 7"></polygon>
+</marker>
+</defs>
+</svg></div></div></section></div><div class="column">
+<section class="panel" style="margin-bottom: 0;">
+    <div class="panel-header"><i data-lucide="activity"></i> Performance Profiler</div>
+    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Time Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-cyan); font-weight: bold; font-size: 1.1rem;" id="time-complexity">O(m)</div>
+        </div>
+        <div style="flex: 1; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 10px; border-radius: 6px;">
+            <div style="font-size: 0.65rem; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase;">Space Complexity</div>
+            <div style="font-family: var(--font-mono); color: var(--neon-green); font-weight: bold; font-size: 1.1rem;" id="space-complexity">O(ALPHABET_SIZE * m * n)</div>
+        </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; margin-bottom: 8px; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Total Nodes:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-size">0</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+        <span style="color: var(--text-muted);">Current Depth:</span>
+        <span style="font-family: var(--font-mono); color: var(--text-main);" id="stat-depth">0</span>
+    </div>
+</section>
+<section class="panel" style="flex: 1; padding: 0;">
+<div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<span>Algorithm Code</span>
+<div class="btn-group">
+<button class="lang-btn active" id="lang-go" onclick="setLang('go')">Go</button>
+<button class="lang-btn" id="lang-java" onclick="setLang('java')">Java</button>
+<button class="lang-btn" id="lang-python" onclick="setLang('python')">Python</button>
+</div>
+</div>
+<div class="code-content" id="code-content" style="padding: 0; display: flex; flex-direction: column;">
+<div id="monaco-go" style="flex: 1; width: 100%; display: none;"></div>
+<div id="monaco-java" style="flex: 1; width: 100%; display: none;"></div>
+<div id="monaco-python" style="flex: 1; width: 100%; display: none;"></div>
+</div>
+<div class="code-controls">
+<div class="control-group">
+<span id="operation-info">Insert Operation</span>
+</div>
+</div>
+</div></section></div></div><script>
+        // Trie Node structure
+        class TrieNode {
+            constructor() {
+                this.children = {};
+                this.isEndOfWord = false;
+                this.x = 0;
+                this.y = 0;
+                this.active = false;
+                this.found = false;
+            }
+        }
+
+        // Global variables
+        let root = new TrieNode();
+        let currentOperation = 'insert';
+        let currentLang = 'go';
+        let animationSteps = [];
+        let currentStep = 0;
+        let isRunning = false;
+        
+        let editors = {
+            go: null,
+            java: null,
+            python: null
+        };
+        let currentHighlights = [];
+
+        // Algorithm implementations
+        const algorithms = {
+            insert: {
+                go: `type TrieNode struct {
+    children map[rune]*TrieNode
+    isEndOfWord bool
+}
+
+func insert(root *TrieNode, word string) {
+    node := root
+    for _, ch := range word {
+        if node.children == nil {
+            node.children = make(map[rune]*TrieNode)
+        }
+        if node.children[ch] == nil {
+            node.children[ch] = &TrieNode{}
+        }
+        node = node.children[ch]
+    }
+    node.isEndOfWord = true
+}`,
+                java: `class TrieNode {
+    Map<Character, TrieNode> children;
+    boolean isEndOfWord;
+
+    TrieNode() {
+        children = new HashMap<>();
+        isEndOfWord = false;
+    }
+}
+
+public void insert(TrieNode root, String word) {
+    TrieNode node = root;
+    for (char ch : word.toCharArray()) {
+        node.children.putIfAbsent(ch, new TrieNode());
+        node = node.children.get(ch);
+    }
+    node.isEndOfWord = true;
+}`,
+                python: `class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.is_end_of_word = False
+
+def insert(root, word):
+    node = root
+    for char in word:
+        if char not in node.children:
+            node.children[char] = TrieNode()
+        node = node.children[char]
+    node.is_end_of_word = True`
+            },
+            search: {
+                go: `func search(root *TrieNode, word string) bool {
+    node := root
+    for _, ch := range word {
+        if node.children[ch] == nil {
+            return false
+        }
+        node = node.children[ch]
+    }
+    return node.isEndOfWord
+}`,
+                java: `public boolean search(TrieNode root, String word) {
+    TrieNode node = root;
+    for (char ch : word.toCharArray()) {
+        if (!node.children.containsKey(ch)) {
+            return false;
+        }
+        node = node.children.get(ch);
+    }
+    return node.isEndOfWord;
+}`,
+                python: `def search(root, word):
+    node = root
+    for char in word:
+        if char not in node.children:
+            return False
+        node = node.children[char]
+    return node.is_end_of_word`
+            },
+            startswith: {
+                go: `func startsWith(root *TrieNode, prefix string) bool {
+    node := root
+    for _, ch := range prefix {
+        if node.children[ch] == nil {
+            return false
+        }
+        node = node.children[ch]
+    }
+    return true
+}`,
+                java: `public boolean startsWith(TrieNode root, String prefix) {
+    TrieNode node = root;
+    for (char ch : prefix.toCharArray()) {
+        if (!node.children.containsKey(ch)) {
+            return false;
+        }
+        node = node.children.get(ch);
+    }
+    return true;
+}`,
+                python: `def starts_with(root, prefix):
+    node = root
+    for char in prefix:
+        if char not in node.children:
+            return False
+        node = node.children[char]
+    return True`
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            initMonacoEditors();
+            insertSampleWords();
+        }
+
+        function initMonacoEditors() {
+            require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+            require(['vs/editor/editor.main'], function() {
+                // Initialize Go editor
+                editors.go = monaco.editor.create(document.getElementById('monaco-go'), {
+                    value: algorithms.insert.go,
+                    language: 'go',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Java editor
+                editors.java = monaco.editor.create(document.getElementById('monaco-java'), {
+                    value: algorithms.insert.java,
+                    language: 'java',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Initialize Python editor
+                editors.python = monaco.editor.create(document.getElementById('monaco-python'), {
+                    value: algorithms.insert.python,
+                    language: 'python',
+                    theme: 'vs-dark',
+                    fontSize: 14,
+                    lineHeight: 1.5,
+                    minimap: { enabled: false },
+                    scrollBeyondLastLine: false,
+                    readOnly: true,
+                    automaticLayout: true,
+                    wordWrap: 'on',
+                    glyphMargin: true,
+                    lineNumbers: 'on',
+                    folding: false,
+                    renderLineHighlight: 'none'
+                });
+
+                // Set initial language
+                setLang('go');
+            });
+        }
+
+        function setupCanvas() {
+            const canvas = document.getElementById('trie-canvas');
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            // Event listeners
+        }
+
+        const opTitles = {
+            insert: '➕ Insert Word',
+            search: '🔍 Search Word',
+            startswith: '🔤 Starts With',
+            delete: '❌ Delete Word',
+            clear: '🗑️ Clear Trie'
+        };
+
+        function selectOperation(operation) {
+            currentOperation = operation;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + operation).classList.add('active');
+
+            const titleEl = document.getElementById('studio-title');
+            if (titleEl && opTitles[operation]) {
+                titleEl.innerText = opTitles[operation];
+            }
+            
+            // Update all editors with new operation code
+            Object.keys(editors).forEach(lang => {
+                if (algorithms[operation] && algorithms[operation][lang] && editors[lang]) {
+                    editors[lang].setValue(algorithms[operation][lang]);
+                }
+            });
+
+            updateOperationInfo();
+            resetOperation();
+            clearHighlights();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            
+            // Hide all editors
+            document.getElementById('monaco-go').style.display = 'none';
+            document.getElementById('monaco-java').style.display = 'none';
+            document.getElementById('monaco-python').style.display = 'none';
+
+            // Show selected editor
+            document.getElementById('monaco-' + lang).style.display = 'block';
+            
+            if (editors[lang]) {
+                const code = algorithms[currentOperation][lang];
+                editors[lang].setValue(code);
+                clearHighlights();
+            }
+        }
+
+        function highlightLine(lineNumber) {
+            if (editors[currentLang]) {
+                clearHighlights();
+                const decoration = {
+                    range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'code-line-highlight',
+                        glyphMarginClassName: 'code-line-glyph'
+                    }
+                };
+                currentHighlights = editors[currentLang].deltaDecorations([], [decoration]);
+                editors[currentLang].revealLine(lineNumber, monaco.editor.ScrollType.smooth);
+            }
+        }
+
+        function clearHighlights() {
+            if (editors[currentLang] && currentHighlights.length > 0) {
+                editors[currentLang].deltaDecorations(currentHighlights, []);
+                currentHighlights = [];
+            }
+        }
+
+        function updateOperationInfo() {
+            const info = document.getElementById('operation-info');
+            const operationNames = {
+                insert: 'Insert Word',
+                search: 'Search Word',
+                startswith: 'Starts With',
+                delete: 'Delete Word',
+                clear: 'Clear Trie'
+            };
+            info.textContent = operationNames[currentOperation] || 'Operation';
+        }
+
+        function insertSampleWords() {
+            const words = ['apple', 'app', 'ape', 'bat', 'ball', 'cat'];
+            words.forEach(word => {
+                insertWord(word);
+            });
+            renderTrie();
+            logMessage('Inserted sample words: ' + words.join(', '));
+        }
+
+        function insertWord(word) {
+            if (!word) return;
+            let node = root;
+            for (let char of word) {
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode();
+                }
+                node = node.children[char];
+            }
+            node.isEndOfWord = true;
+        }
+
+        function renderTrie() {
+            const canvas = document.getElementById('trie-canvas');
+            canvas.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" /></marker></defs>';
+
+            if (Object.keys(root.children).length > 0) {
+                calculatePositions(root, 400, 50, 150);
+                drawNode(canvas, root, null, '');
+            }
+        }
+
+        function calculatePositions(node, x, y, offset) {
+            if (node) {
+                node.x = x;
+                node.y = y;
+
+                const children = Object.keys(node.children);
+                const childCount = children.length;
+
+                if (childCount > 0) {
+                    const startX = x - (childCount - 1) * offset / 2;
+                    children.forEach((char, index) => {
+                        const childX = startX + index * offset;
+                        const childY = y + 80;
+                        calculatePositions(node.children[char], childX, childY, offset / Math.max(childCount, 2));
+                    });
+                }
+            }
+        }
+
+        function drawNode(canvas, node, parent, char) {
+            if (!node) return;
+
+            // Draw edges first
+            Object.keys(node.children).forEach(char => {
+                const child = node.children[char];
+                drawEdge(canvas, node.x, node.y, child.x, child.y, char);
+                drawNode(canvas, child, node, char);
+            });
+
+            // Draw node circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', node.x);
+            circle.setAttribute('cy', node.y);
+            circle.setAttribute('r', node.isEndOfWord ? 20 : 18);
+            let classes = 'node-circle';
+            if (node.isEndOfWord) classes += ' end-node';
+            if (node.active) classes += ' active';
+            if (node.found) classes += ' found';
+            circle.setAttribute('class', classes);
+            canvas.appendChild(circle);
+
+            // Draw node text
+            if (char) {
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x);
+                text.setAttribute('y', node.y + 5);
+                text.setAttribute('class', 'node-text');
+                text.textContent = char;
+                canvas.appendChild(text);
+            }
+        }
+
+        function drawEdge(canvas, x1, y1, x2, y2, label) {
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+            line.setAttribute('x1', x1);
+            line.setAttribute('y1', y1 + 18);
+            line.setAttribute('x2', x2);
+            line.setAttribute('y2', y2 - 18);
+            line.setAttribute('class', 'edge-line');
+            canvas.appendChild(line);
+
+            // Edge label
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', midX);
+            text.setAttribute('y', midY);
+            text.setAttribute('class', 'edge-label');
+            text.textContent = label;
+            canvas.appendChild(text);
+        }
+
+        function executeOperation() {
+            const word = document.getElementById('word-input').value.trim();
+            if (!word) {
+                logMessage('Please enter a word');
+                return;
+            }
+
+            switch (currentOperation) {
+                case 'insert':
+                    insertWord(word);
+                    logMessage(`Inserted "${word}" into trie`);
+                    break;
+                case 'search':
+                    const found = searchWord(word);
+                    logMessage(found ? `Found "${word}" in trie` : `"${word}" not found in trie`);
+                    break;
+                case 'startswith':
+                    const starts = startsWith(word);
+                    logMessage(starts ? `Trie contains words starting with "${word}"` : `No words start with "${word}"`);
+                    break;
+                case 'delete':
+                    const deleted = deleteWord(word);
+                    logMessage(deleted ? `Deleted "${word}" from trie` : `"${word}" not found in trie`);
+                    break;
+            }
+
+            renderTrie();
+            document.getElementById('word-input').value = '';
+        }
+
+        function searchWord(word) {
+            let node = root;
+            for (let char of word) {
+                if (!node.children[char]) {
+                    return false;
+                }
+                node = node.children[char];
+            }
+            return node.isEndOfWord;
+        }
+
+        function startsWith(prefix) {
+            let node = root;
+            for (let char of prefix) {
+                if (!node.children[char]) {
+                    return false;
+                }
+                node = node.children[char];
+            }
+            return true;
+        }
+
+        function deleteWord(word) {
+            function deleteHelper(node, word, index) {
+                if (index === word.length) {
+                    if (!node.isEndOfWord) return false;
+                    node.isEndOfWord = false;
+                    return Object.keys(node.children).length === 0;
+                }
+
+                const char = word[index];
+                if (!node.children[char]) return false;
+
+                const shouldDeleteChild = deleteHelper(node.children[char], word, index + 1);
+
+                if (shouldDeleteChild) {
+                    delete node.children[char];
+                    return !node.isEndOfWord && Object.keys(node.children).length === 0;
+                }
+
+                return false;
+            }
+
+            return deleteHelper(root, word, 0);
+        }
+
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+        async function animateInsert(word) {
+            let node = root;
+            node.active = true;
+            renderTrie();
+            await sleep(800);
+            
+            for (let char of word) {
+                node.active = false;
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode();
+                    renderTrie();
+                    await sleep(400);
+                }
+                node = node.children[char];
+                node.active = true;
+                renderTrie();
+                await sleep(800);
+            }
+            node.active = false;
+            node.isEndOfWord = true;
+            node.found = true;
+            renderTrie();
+            await sleep(800);
+            node.found = false;
+            renderTrie();
+        }
+
+        async function animateSearch(word, isStartsWith) {
+            let node = root;
+            node.active = true;
+            renderTrie();
+            await sleep(800);
+            
+            for (let char of word) {
+                node.active = false;
+                if (!node.children[char]) {
+                    logMessage(isStartsWith ? `"${word}" prefix not found` : `"${word}" not found`);
+                    renderTrie();
+                    return false;
+                }
+                node = node.children[char];
+                node.active = true;
+                renderTrie();
+                await sleep(800);
+            }
+            
+            node.active = false;
+            if (isStartsWith || node.isEndOfWord) {
+                node.found = true;
+                renderTrie();
+                logMessage(isStartsWith ? `Found prefix "${word}"` : `Found "${word}"`);
+                await sleep(1000);
+                node.found = false;
+                renderTrie();
+                return true;
+            } else {
+                logMessage(`"${word}" not found (prefix exists but not end of word)`);
+                renderTrie();
+                return false;
+            }
+        }
+
+        async function runOperation() {
+            if (isRunning) return;
+            const word = document.getElementById('word-input').value.trim();
+            if (!word && currentOperation !== 'clear') {
+                logMessage('Please enter a word');
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('btn-run').disabled = true;
+            logMessage(`Running ${currentOperation} operation...`);
+            
+            try {
+                if (currentOperation === 'insert') {
+                    await animateInsert(word);
+                    logMessage(`Inserted "${word}"`);
+                } else if (currentOperation === 'search') {
+                    await animateSearch(word, false);
+                } else if (currentOperation === 'startswith') {
+                    await animateSearch(word, true);
+                } else if (currentOperation === 'delete') {
+                    deleteWord(word);
+                    logMessage(`Deleted "${word}" from trie`);
+                    renderTrie();
+                } else if (currentOperation === 'clear') {
+                    clearTrie();
+                }
+            } finally {
+                isRunning = false;
+                document.getElementById('btn-run').disabled = false;
+                document.getElementById('word-input').value = '';
+            }
+        }
+
+        function stepOperation() {
+            // Step through operation
+            logMessage(`Stepping through ${currentOperation}...`);
+        }
+
+        function resetOperation() {
+            // Reset operation state
+            logMessage('Operation reset.');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function clearTrie() {
+            root = new TrieNode();
+            renderTrie();
+            logMessage('Trie cleared.');
+        }
+
+        function logMessage(message) {
+            const logPanel = document.getElementById('log-panel');
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script><script src="visualizer-common.js"></script></body>
+</html>

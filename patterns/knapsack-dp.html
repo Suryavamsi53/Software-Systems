@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<link href="visualizer-common.css" rel="stylesheet"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Knapsack DP Visualization Visualizer - Pro</title>
+<link href="../styles.css" rel="stylesheet"/>
+<link href="graph-visualizer.css" rel="stylesheet"/>
+<style>
+        /* DP Table */
+        .table-container {
+            overflow-x: auto;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            flex: 1;
+        }
+
+        table {
+            border-collapse: collapse;
+            background-color: var(--bg-tertiary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            min-width: 40px;
+        }
+
+        th {
+            background-color: var(--bg-secondary);
+            color: var(--accent-color);
+        }
+
+        td {
+            transition: background-color 0.3s;
+        }
+
+        .cell-active { background-color: #facc15 !important; color: #000; font-weight: bold; }
+        .cell-compare { background-color: #fb923c !important; color: #000; }
+        .cell-final { background-color: #22c55e !important; color: #000; font-weight: bold; }
+
+        /* Items List */
+        .items-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .item-card {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .item-card.active {
+            border-color: #facc15;
+            box-shadow: 0 0 10px rgba(250, 204, 21, 0.2);
+        }
+
+        .item-val { color: #22c55e; font-weight: bold; }
+        .item-wt { color: var(--text-secondary); font-size: 0.9em; }
+        
+        .formula { font-family: monospace; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 10px; }
+
+        /* Code Panel Styles */
+        .split-view {
+            display: flex;
+            gap: 20px;
+            height: 100%;
+            min-height: 400px;
+        }
+        .canvas-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .code-section {
+            flex: 1;
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        .code-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(255,255,255,0.05);
+        }
+        .algo-code {
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            flex: 1;
+        }
+        .code-line { padding: 2px 5px; border-radius: 4px; }
+        .code-line.active {
+            background-color: rgba(250, 204, 21, 0.2);
+            border-left: 3px solid #facc15;
+            color: #facc15;
+        }
+        .ln { color: var(--text-muted); margin-right: 10px; user-select: none; }
+        .kwd { color: #f472b6; } .com { color: #6b7280; font-style: italic; }
+    </style>
+</head>
+<body>
+
+
+
+<header class="app-header"><div class="app-title"><i data-lucide="layout-grid"></i> Knapsack DP Visualization Visualizer <span style="font-size: 0.8rem; color: var(--neon-purple); border: 1px solid var(--neon-purple); padding: 2px 6px; border-radius: 4px; margin-left: 10px;">PRO</span></div><div style="font-size: 0.85rem; color: var(--text-muted); display:flex; gap:15px;"><span><i data-lucide="activity" style="width:14px; height:14px; vertical-align:middle;"></i> Performance Analytics</span><span><i data-lucide="terminal-square" style="width:14px; height:14px; vertical-align:middle;"></i> Execution Tracing</span></div></header><div class="dashboard"><div class="column"><section class="panel"><div class="panel-header"><i data-lucide="cpu"></i> Configuration</div><div class="nav-section">
+<div class="nav-section-title">Controls</div>
+<div class="control-group">
+<button class="action-btn" id="playBtn" onclick="togglePlay()">▶ Play / Pause</button>
+<button class="action-btn" onclick="stepForward()">👟 Step Forward</button>
+<button class="action-btn" onclick="stepBackward()">↩ Step Backward</button>
+<button class="action-btn warning" onclick="reset()">Reset</button>
+</div>
+</div></section>
+<section class="panel" style="flex: 1; padding: 0; background: transparent; border: none;">
+<div class="terminal-container">
+<div class="terminal-header">
+<div class="mac-btns" style="display:flex; gap:5px; margin-right:10px;">
+<span style="width:8px; height:8px; border-radius:50%; background:#ff5f56;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#ffbd2e;"></span>
+<span style="width:8px; height:8px; border-radius:50%; background:#27c93f;"></span>
+</div>
+<span>bash - trace.sh</span>
+</div>
+<div class="terminal-logs" id="logs-container">
+<div class="log-line"><span class="log-time">[00:00:00]</span><span class="log-type-sys">[SYS]</span><span class="log-msg">System initialized.</span></div>
+</div>
+</div>
+</section>
+</div><div class="column center-col"><section class="panel" style="flex: 1; display:flex; flex-direction:column;"><div class="panel-header" style="justify-content: space-between;"><div><i data-lucide="monitor-play"></i> Algorithm Visualization Studio</div></div><div class="viz-viewport"><div class="viz-canvas" id="viz-canvas"><div class="items-container" id="items-list"></div><div class="table-container">
+<table id="dp-table"></table>
+</div><div style="padding: 10px; text-align: center; background: var(--bg-secondary);">
+<div class="formula" id="formula-text">dp[i][w] = max(dp[i-1][w], val + dp[i-1][w-wt])</div>
+</div></div></div></section></div><div class="column"><section class="panel" style="flex: 1; padding: 0;"><div class="code-section" style="width: 100%; height: 100%; border: none;">
+<div class="code-header">
+<button class="action-btn" onclick="copyCode()" style="padding: 4px 10px; font-size: 0.8rem;">📋 Copy</button>
+<div class="btn-group">
+<button class="tab-btn active" onclick="switchLang('go')">Go</button>
+<button class="tab-btn" onclick="switchLang('java')">Java</button>
+<button class="tab-btn" onclick="switchLang('python')">Python</button>
+</div>
+</div>
+<div class="algo-code" id="code-display"></div>
+</div></section></div></div><script>
+        // Problem Data
+        const CAPACITY = 7;
+        const ITEMS = [
+            { id: 1, w: 1, v: 1 },
+            { id: 2, w: 3, v: 4 },
+            { id: 3, w: 4, v: 5 },
+            { id: 4, w: 5, v: 7 }
+        ];
+
+        // Animation State
+        let steps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let intervalId = null;
+        const ANIMATION_SPEED = 800;
+        let currentLang = 'go';
+        let currentOp = 'knapsack';
+
+        const CODES = {
+            knapsack: {
+                go: `func knapsack(W int, wt []int, val []int, n int) int {
+    dp := make([][]int, n+1)
+    for i := range dp { dp[i] = make([]int, W+1) }
+
+    for i := 1; i <= n; i++ {
+        for w := 0; w <= W; w++ {
+            if wt[i-1] <= w {
+                dp[i][w] = max(dp[i-1][w], 
+                             val[i-1] + dp[i-1][w-wt[i-1]])
+            } else {
+                dp[i][w] = dp[i-1][w]
+            }
+        }
+    }
+    return dp[n][W]
+}`,
+                java: `public int knapsack(int W, int[] wt, int[] val, int n) {
+    int[][] dp = new int[n + 1][W + 1];
+
+    for (int i = 1; i <= n; i++) {
+        for (int w = 0; w <= W; w++) {
+            if (wt[i - 1] <= w) {
+                dp[i][w] = Math.max(dp[i - 1][w],
+                                  val[i - 1] + dp[i - 1][w - wt[i - 1]]);
+            } else {
+                dp[i][w] = dp[i - 1][w];
+            }
+        }
+    }
+    return dp[n][W];
+}`,
+                python: `def knapsack(W, wt, val, n):
+    dp = [[0 for x in range(W + 1)] for x in range(n + 1)]
+
+    for i in range(1, n + 1):
+        for w in range(W + 1):
+            if wt[i-1] <= w:
+                dp[i][w] = max(dp[i-1][w],
+                             val[i-1] + dp[i-1][w-wt[i-1]])
+            else:
+                dp[i][w] = dp[i-1][w]
+
+    return dp[n][W]`
+            }
+        };
+
+        // DOM Elements
+        const table = document.getElementById('dp-table');
+        const itemsList = document.getElementById('items-list');
+        const stepText = document.getElementById('step-text');
+        const formulaText = document.getElementById('formula-text');
+        const playBtn = document.getElementById('playBtn');
+
+        function init() {
+            renderCode('knapsack');
+            renderItems();
+            renderTableStructure();
+            generateSteps();
+            updateView(0);
+        }
+
+        function renderItems() {
+            let html = '';
+            ITEMS.forEach(item => {
+                html += `
+                    <div class="item-card" id="item-${item.id}">
+                        <div>Item ${item.id}</div>
+                        <div class="item-val">Val: ${item.v}</div>
+                        <div class="item-wt">Wt: ${item.w}</div>
+                    </div>
+                `;
+            });
+            itemsList.innerHTML = html;
+        }
+
+        function renderTableStructure() {
+            let html = '<thead><tr><th>Item \\ Cap</th>';
+            for (let w = 0; w <= CAPACITY; w++) {
+                html += `<th>${w}</th>`;
+            }
+            html += '</tr></thead><tbody>';
+
+            // Row 0 (No items)
+            html += '<tr><th>0</th>';
+            for (let w = 0; w <= CAPACITY; w++) html += `<td id="cell-0-${w}">0</td>`;
+            html += '</tr>';
+
+            // Item Rows
+            ITEMS.forEach((item, i) => {
+                html += `<tr><th>${item.id} (w:${item.w}, v:${item.v})</th>`;
+                for (let w = 0; w <= CAPACITY; w++) {
+                    html += `<td id="cell-${i+1}-${w}"></td>`;
+                }
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            table.innerHTML = html;
+        }
+
+        function generateSteps() {
+            steps = [];
+            // DP Matrix
+            const dp = Array(ITEMS.length + 1).fill().map(() => Array(CAPACITY + 1).fill(0));
+
+            // Initial state
+            steps.push({
+                i: 0, w: 0, val: 0,
+                active: [], compare: [], 
+                msg: "Base case: 0 value for 0 items.",
+                lines: { go: 2, java: 2, python: 2 }
+            });
+
+            for (let i = 1; i <= ITEMS.length; i++) {
+                const item = ITEMS[i-1];
+                for (let w = 0; w <= CAPACITY; w++) {
+                    let valWithout = dp[i-1][w];
+                    let valWith = -1;
+                    
+                    if (item.w <= w) {
+                        valWith = item.v + dp[i-1][w - item.w];
+                    }
+
+                    // Step 1: Highlight comparison
+                    let compareCells = [`cell-${i-1}-${w}`];
+                    if (item.w <= w) {
+                        compareCells.push(`cell-${i-1}-${w-item.w}`);
+                    }
+
+                    steps.push({
+                        i: i, w: w,
+                        active: [`cell-${i}-${w}`],
+                        compare: compareCells,
+                        val: 0, // Placeholder
+                        msg: item.w > w 
+                            ? `Item ${i} too heavy (${item.w} > ${w}). Copy from above.`
+                            : `Compare: Skip (${valWithout}) vs Take (${item.v} + ${dp[i-1][w-item.w]} = ${valWith})`
+                    });
+
+                    // Step 2: Fill value
+                    dp[i][w] = Math.max(valWithout, valWith);
+                    steps.push({
+                        i: i, w: w,
+                        active: [`cell-${i}-${w}`],
+                        compare: [],
+                        val: dp[i][w],
+                        msg: `Max value is ${dp[i][w]}`,
+                        lines: item.w <= w ? { go: 8, java: 7, python: 7 } : { go: 11, java: 10, python: 10 }
+                    });
+                }
+            }
+
+            // Final Step
+            steps.push({
+                i: ITEMS.length, w: CAPACITY,
+                active: [`cell-${ITEMS.length}-${CAPACITY}`],
+                compare: [],
+                val: dp[ITEMS.length][CAPACITY],
+                msg: `Final Answer: ${dp[ITEMS.length][CAPACITY]}`,
+                isFinal: true,
+                lines: { go: 15, java: 14, python: 12 }
+            });
+        }
+
+        function updateView(stepIndex) {
+            const state = steps[stepIndex];
+            
+            // Clear previous highlights
+            document.querySelectorAll('td').forEach(td => {
+                td.className = '';
+                // Keep values filled
+                if (td.dataset.filled === 'true') return;
+                // Don't clear values for current row if we are backtracking
+            });
+
+            // Fill values up to current step
+            // This is inefficient but simple for visualizer
+            // Better: store full table state or incremental updates
+            // For simplicity, we'll just re-render values we know
+            // Actually, let's just set the value for the current step
+            if (state.val !== undefined && state.active.length > 0) {
+                const cell = document.getElementById(state.active[0]);
+                if (cell) {
+                    cell.textContent = state.val;
+                    cell.dataset.filled = 'true';
+                }
+            }
+
+            // Highlight
+            state.active.forEach(id => document.getElementById(id)?.classList.add(state.isFinal ? 'cell-final' : 'cell-active'));
+            state.compare.forEach(id => document.getElementById(id)?.classList.add('cell-compare'));
+
+            // Highlight Item
+            document.querySelectorAll('.item-card').forEach(c => c.classList.remove('active'));
+            if (state.i > 0) {
+                document.getElementById(`item-${state.i}`)?.classList.add('active');
+            }
+
+            stepText.textContent = state.msg;
+            
+            if (state.lines) {
+                highlightLine(state.lines[currentLang]);
+            }
+        }
+
+        // Controls
+        function togglePlay() {
+            if (isPlaying) {
+                clearInterval(intervalId);
+                isPlaying = false;
+                playBtn.textContent = "Play";
+            } else {
+                if (currentStep >= steps.length - 1) currentStep = 0;
+                isPlaying = true;
+                playBtn.textContent = "Pause";
+                intervalId = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        updateView(currentStep);
+                    } else {
+                        togglePlay();
+                    }
+                }, ANIMATION_SPEED);
+            }
+        }
+
+        function stepForward() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                updateView(currentStep);
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                // We need to clear the value if we go back
+                const state = steps[currentStep + 1]; // The step we are undoing
+                if (state && state.active.length > 0) {
+                     // Logic to clear value is tricky without full state
+                     // For now, just re-render structure and fast-forward
+                     renderTableStructure();
+                     for(let i=0; i<=currentStep; i++) updateView(i);
+                } else {
+                    updateView(currentStep);
+                }
+            }
+        }
+
+        function reset() {
+            if (isPlaying) togglePlay();
+            currentStep = 0;
+            renderTableStructure();
+            updateView(0);
+        }
+
+        function renderCode(op) {
+            currentOp = op;
+            const code = CODES[op][currentLang];
+            const display = document.getElementById('code-display');
+            display.innerHTML = '';
+            
+            const lines = code.split('\n');
+            lines.forEach((line, i) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.id = `line-${i+1}`;
+                let html = line
+                    .replace(/\b(func|var|return|if|else|for|while|def|class|public|void|int|break|true|false|bool|boolean)\b/g, '<span class="kwd">$1</span>')
+                    .replace(/\/\/.*/g, '<span class="com">$&</span>')
+                    .replace(/#.*/g, '<span class="com">$&</span>');
+                div.innerHTML = `<span class="ln">${i+1}</span>${html}`;
+                display.appendChild(div);
+            });
+        }
+
+        function highlightLine(num) {
+            document.querySelectorAll('.code-line').forEach(l => l.classList.remove('active'));
+            const line = document.getElementById(`line-${num}`);
+            if (line) line.classList.add('active');
+        }
+
+        function copyCode() {
+            const code = CODES[currentOp][currentLang];
+            navigator.clipboard.writeText(code);
+        }
+
+        function switchLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderCode(currentOp);
+            updateView(currentStep);
+        }
+
+        init();
+    </script><script src="visualizer-common.js"></script></body>
+</html>

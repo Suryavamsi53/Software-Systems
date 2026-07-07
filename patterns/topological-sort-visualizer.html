@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topological Sort Visualizer - Software Systems Prep</title>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #0a0a0a;
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2a2a2a;
+            --bg-tertiary: #3a3a3a;
+            --bg-hover: #404040;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #cccccc;
+            --text-muted: #888888;
+            --accent-color: #3b82f6;
+            --neon-blue: #3b82f6;
+            --neon-green: #22c55e;
+            --neon-red: #ef4444;
+            --neon-yellow: #facc15;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--bg-primary);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            margin-bottom: 30px;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+        }
+
+        .sidebar-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section-title {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 6px;
+            margin-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-color);
+            color: white;
+        }
+
+        /* Topo Sort Controls */
+        .topo-controls {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .input-field {
+            flex: 1;
+            padding: 8px 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn.btn-primary {
+            background: var(--accent-color);
+            border-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn.btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn.danger {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+
+        .btn.danger:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content.no-padding {
+            padding: 0;
+        }
+
+        .viz-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Toolbar */
+        .algo-toolbar {
+            background: var(--bg-secondary);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Split View */
+        .split-view {
+            flex: 1;
+            display: flex;
+        }
+
+        /* Canvas Section */
+        .canvas-section {
+            flex: 1;
+            background: var(--bg-primary);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #topo-canvas {
+            flex: 1;
+            background: var(--bg-primary);
+        }
+
+        /* Graph Styles */
+        .node-circle {
+            fill: var(--bg-tertiary);
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .node-circle.active {
+            fill: rgba(59, 130, 246, 0.2);
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+        }
+
+        .node-circle.processed {
+            fill: rgba(34, 197, 94, 0.2);
+            stroke: var(--neon-green);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
+        }
+
+        .node-circle.in-queue {
+            fill: rgba(250, 204, 21, 0.2);
+            stroke: var(--neon-yellow);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.6));
+        }
+
+        .node-text {
+            fill: var(--text-primary);
+            font-weight: bold;
+            font-family: 'Inter', monospace;
+            font-size: 14px;
+            text-anchor: middle;
+            dominant-baseline: central;
+            pointer-events: none;
+        }
+
+        .edge-line {
+            stroke: var(--text-muted);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .edge-line.active {
+            stroke: var(--neon-blue);
+            stroke-width: 3;
+        }
+
+        .edge-line.processed {
+            stroke: var(--neon-green);
+            stroke-width: 3;
+        }
+
+        /* Queue and Result Display */
+        .data-panels {
+            height: 150px;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 20px;
+            padding: 15px;
+        }
+
+        .data-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .data-panel-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .data-items {
+            flex: 1;
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .data-item {
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .data-item.in-queue {
+            background: rgba(250, 204, 21, 0.1);
+            border-color: var(--neon-yellow);
+            color: var(--neon-yellow);
+        }
+
+        .data-item.processed {
+            background: rgba(34, 197, 94, 0.1);
+            border-color: var(--neon-green);
+            color: var(--neon-green);
+        }
+
+        /* Code Section */
+        .code-section {
+            width: 400px;
+            background: var(--bg-primary);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .code-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-header span {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .lang-btn {
+            padding: 6px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+        }
+
+        .lang-btn:hover {
+            background: var(--bg-hover);
+        }
+
+        .lang-btn.active {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .code-content {
+            flex: 1;
+            padding: 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            overflow-y: auto;
+        }
+
+        .code-line {
+            white-space: pre;
+            margin-bottom: 2px;
+        }
+
+        .code-line.highlight {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid var(--accent-color);
+            padding-left: 10px;
+            margin-left: -10px;
+        }
+
+        .kwd { color: #f472b6; font-weight: bold; }
+        .typ { color: #60a5fa; }
+        .num { color: #facc15; }
+        .com { color: #6a9955; font-style: italic; }
+        .func { color: #34d399; }
+
+        .code-controls {
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Cycle Warning */
+        .cycle-warning {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid var(--neon-red);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            z-index: 100;
+            display: none;
+        }
+
+        .cycle-warning h3 {
+            color: var(--neon-red);
+            margin-bottom: 10px;
+        }
+
+        .cycle-warning p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .code-section {
+                width: 350px;
+            }
+        }
+
+        @media (max-width: 1000px) {
+            .sidebar {
+                width: 250px;
+            }
+            .code-section {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1>🌑 Software Systems</h1>
+                <p>Topological Sort</p>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Back</div>
+                <a href="../index.html" class="nav-item">← Dashboard</a>
+                <a href="graphs.html" class="nav-item">← Graphs Pattern</a>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Algorithm</div>
+                <a href="javascript:void(0)" class="nav-item active" id="nav-kahn" onclick="selectAlgorithm('kahn')">Kahn's Algorithm</a>
+                <a href="javascript:void(0)" class="nav-item" id="nav-dfs" onclick="selectAlgorithm('dfs')">DFS-based</a>
+            </div>
+
+            <!-- Topo Sort Controls -->
+            <div class="topo-controls">
+                <div class="control-group">
+                    <label>Graph Scenario</label>
+                    <select id="scenario-select" class="input-field" onchange="loadScenario(this.value)">
+                        <option value="random">🎲 Random DAG</option>
+                        <option value="course">📚 Course Prerequisites</option>
+                        <option value="build">🔨 Build System</option>
+                        <option value="task">📋 Task Dependencies</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>Number of Nodes</label>
+                    <input type="number" id="num-nodes" class="input-field" value="6" min="3" max="12">
+                </div>
+                <div class="control-group">
+                    <label>Animation Speed (ms)</label>
+                    <input type="range" id="animation-speed" min="200" max="1500" value="800" class="input-field">
+                </div>
+                <div class="btn-group">
+                    <button id="generate-graph" class="btn" onclick="generateGraph()">Generate Graph</button>
+                    <button id="clear-graph" class="btn" onclick="clearGraph()">Clear Graph</button>
+                </div>
+                <div class="btn-group">
+                    <button id="start-visualization" class="btn btn-primary" onclick="startVisualization()">Start Sort</button>
+                    <button id="stop-visualization" class="btn danger" onclick="stopVisualization()">Stop</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content no-padding">
+            <div class="viz-container">
+                <div class="algo-toolbar">
+                    <div id="status-text">Ready. Generate a graph and run topological sort.</div>
+                    <div class="control-group">
+                        <button id="btn-run" class="btn btn-primary" onclick="runAlgorithm()">▶ Run</button>
+                        <button id="btn-step" class="btn" onclick="stepAlgorithm()" disabled>Step</button>
+                        <button id="btn-reset" class="btn" onclick="resetVisualization()">Reset</button>
+                    </div>
+                </div>
+
+                <div class="split-view">
+                    <!-- Visualization -->
+                    <div class="canvas-section">
+                        <svg id="topo-canvas" width="100%" height="100%">
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                                         refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" />
+                                </marker>
+                                <marker id="arrowhead-active" markerWidth="10" markerHeight="7"
+                                         refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="var(--neon-blue)" />
+                                </marker>
+                            </defs>
+                        </svg>
+
+                        <!-- Cycle Warning -->
+                        <div id="cycle-warning" class="cycle-warning">
+                            <h3>⚠️ Cycle Detected!</h3>
+                            <p>This graph contains a cycle and cannot be topologically sorted.</p>
+                            <button class="btn" onclick="hideCycleWarning()">Close</button>
+                        </div>
+
+                        <!-- Data Panels -->
+                        <div class="data-panels">
+                            <div class="data-panel">
+                                <div class="data-panel-title">Queue (Indegree 0)</div>
+                                <div id="queue-items" class="data-items"></div>
+                            </div>
+                            <div class="data-panel">
+                                <div class="data-panel-title">Result Order</div>
+                                <div id="result-items" class="data-items"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Code Panel -->
+                    <div class="code-section">
+                        <div class="code-header">
+                            <span>Algorithm Code</span>
+                            <div class="btn-group">
+                                <button id="lang-go" class="lang-btn active" onclick="setLang('go')">Go</button>
+                                <button id="lang-java" class="lang-btn" onclick="setLang('java')">Java</button>
+                                <button id="lang-python" class="lang-btn" onclick="setLang('python')">Python</button>
+                            </div>
+                        </div>
+                        <div class="code-content" id="code-content">
+                            <div class="code-line"><span class="kwd">func</span> <span class="func">topologicalSortKahn</span>(graph [][]<span class="typ">int</span>, n <span class="typ">int</span>) []<span class="typ">int</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;indegree := <span class="kwd">make</span>([]<span class="typ">int</span>, n)</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="com">// Calculate indegrees</span></div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">for</span> i := <span class="kwd">range</span> graph {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, neighbor := <span class="kwd">range</span> graph[i] {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;indegree[neighbor]++</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="com">// Initialize queue with nodes having indegree 0</span></div>
+                            <div class="code-line">&nbsp;&nbsp;queue := []<span class="typ">int</span>{}</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">for</span> i, deg := <span class="kwd">range</span> indegree {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> deg == <span class="num">0</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;queue = <span class="kwd">append</span>(queue, i)</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;result := []<span class="typ">int</span>{}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">for</span> <span class="kwd">len</span>(queue) > <span class="num">0</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;node := queue[<span class="num">0</span>]</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;queue = queue[<span class="num">1</span>:]</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;result = <span class="kwd">append</span>(result, node)</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="com">// Reduce indegree of neighbors</span></div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">for</span> _, neighbor := <span class="kwd">range</span> graph[node] {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;indegree[neighbor]--</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="kwd">if</span> indegree[neighbor] == <span class="num">0</span> {</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;queue = <span class="kwd">append</span>(queue, neighbor)</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;}</div>
+                            <div class="code-line">&nbsp;&nbsp;</div>
+                            <div class="code-line">&nbsp;&nbsp;<span class="kwd">return</span> result</div>
+                            <div class="code-line">}</div>
+                        </div>
+                        <div class="code-controls">
+                            <div class="control-group">
+                                <span id="operation-info">Kahn's Algorithm (BFS-based)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Global variables
+        let nodes = [];
+        let edges = [];
+        let graph = [];
+        let indegree = [];
+        let currentAlgorithm = 'kahn';
+        let currentLang = 'go';
+        let animationSpeed = 800;
+        let isRunning = false;
+        let result = [];
+        let queue = [];
+
+        // Algorithm implementations
+        const algorithms = {
+            kahn: {
+                go: `func topologicalSortKahn(graph [][]int, n int) []int {
+    indegree := make([]int, n)
+
+    // Calculate indegrees
+    for i := range graph {
+        for _, neighbor := range graph[i] {
+            indegree[neighbor]++
+        }
+    }
+
+    // Initialize queue with nodes having indegree 0
+    queue := []int{}
+    for i, deg := range indegree {
+        if deg == 0 {
+            queue = append(queue, i)
+        }
+    }
+
+    result := []int{}
+
+    for len(queue) > 0 {
+        node := queue[0]
+        queue = queue[1:]
+        result = append(result, node)
+
+        // Reduce indegree of neighbors
+        for _, neighbor := range graph[node] {
+            indegree[neighbor]--
+            if indegree[neighbor] == 0 {
+                queue = append(queue, neighbor)
+            }
+        }
+    }
+
+    return result
+}`,
+                java: `public List<Integer> topologicalSortKahn(List<List<Integer>> graph, int n) {
+    int[] indegree = new int[n];
+
+    // Calculate indegrees
+    for (int i = 0; i < graph.size(); i++) {
+        for (int neighbor : graph.get(i)) {
+            indegree[neighbor]++;
+        }
+    }
+
+    // Initialize queue with nodes having indegree 0
+    Queue<Integer> queue = new LinkedList<>();
+    for (int i = 0; i < n; i++) {
+        if (indegree[i] == 0) {
+            queue.add(i);
+        }
+    }
+
+    List<Integer> result = new ArrayList<>();
+
+    while (!queue.isEmpty()) {
+        int node = queue.poll();
+        result.add(node);
+
+        // Reduce indegree of neighbors
+        for (int neighbor : graph.get(node)) {
+            indegree[neighbor]--;
+            if (indegree[neighbor] == 0) {
+                queue.add(neighbor);
+            }
+        }
+    }
+
+    return result;
+}`,
+                python: `def topological_sort_kahn(graph, n):
+    # Calculate indegrees
+    indegree = [0] * n
+    for neighbors in graph:
+        for neighbor in neighbors:
+            indegree[neighbor] += 1
+
+    # Initialize queue with nodes having indegree 0
+    from collections import deque
+    queue = deque([i for i in range(n) if indegree[i] == 0])
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+
+        # Reduce indegree of neighbors
+        for neighbor in graph[node]:
+            indegree[neighbor] -= 1
+            if indegree[neighbor] == 0:
+                queue.append(neighbor)
+
+    return result`
+            },
+            dfs: {
+                go: `func topologicalSortDFS(graph [][]int, n int) []int {
+    visited := make([]bool, n)
+    result := []int{}
+
+    var dfs func(int)
+    dfs = func(node int) {
+        visited[node] = true
+
+        for _, neighbor := range graph[node] {
+            if !visited[neighbor] {
+                dfs(neighbor)
+            }
+        }
+
+        result = append([]int{node}, result...)
+    }
+
+    for i := 0; i < n; i++ {
+        if !visited[i] {
+            dfs(i)
+        }
+    }
+
+    return result
+}`,
+                java: `public List<Integer> topologicalSortDFS(List<List<Integer>> graph, int n) {
+    boolean[] visited = new boolean[n];
+    List<Integer> result = new ArrayList<>();
+
+    for (int i = 0; i < n; i++) {
+        if (!visited[i]) {
+            dfs(i, graph, visited, result);
+        }
+    }
+
+    Collections.reverse(result);
+    return result;
+}
+
+private void dfs(int node, List<List<Integer>> graph, boolean[] visited, List<Integer> result) {
+    visited[node] = true;
+
+    for (int neighbor : graph.get(node)) {
+        if (!visited[neighbor]) {
+            dfs(neighbor, graph, visited, result);
+        }
+    }
+
+    result.add(node);
+}`,
+                python: `def topological_sort_dfs(graph, n):
+    visited = [False] * n
+    result = []
+
+    def dfs(node):
+        visited[node] = True
+
+        for neighbor in graph[node]:
+            if not visited[neighbor]:
+                dfs(neighbor)
+
+        result.insert(0, node)  # Prepend to result
+
+    for i in range(n):
+        if not visited[i]:
+            dfs(i)
+
+    return result`
+            }
+        };
+
+        // Scenarios
+        const scenarios = {
+            random: {
+                nodes: ['A', 'B', 'C', 'D', 'E', 'F'],
+                edges: [
+                    [0, 1], [0, 2], [1, 3], [2, 3], [2, 4], [3, 5], [4, 5]
+                ]
+            },
+            course: {
+                nodes: ['CS101', 'CS102', 'CS201', 'CS202', 'CS301', 'CS302'],
+                edges: [
+                    [0, 1], [0, 2], [1, 3], [2, 3], [2, 4], [3, 5], [4, 5]
+                ]
+            },
+            build: {
+                nodes: ['main.c', 'utils.c', 'main.o', 'utils.o', 'lib.a', 'program'],
+                edges: [
+                    [0, 2], [1, 3], [2, 4], [3, 4], [4, 5]
+                ]
+            },
+            task: {
+                nodes: ['Plan', 'Design', 'Code', 'Test', 'Deploy', 'Monitor'],
+                edges: [
+                    [0, 1], [1, 2], [2, 3], [3, 4], [4, 5]
+                ]
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupCanvas();
+            setupEventListeners();
+            loadScenario('random');
+            renderCode('kahn', 'go');
+        }
+
+        function setupCanvas() {
+            // Canvas setup
+        }
+
+        function setupEventListeners() {
+            document.getElementById('num-nodes').addEventListener('change', () => {
+                generateGraph();
+            });
+            document.getElementById('animation-speed').addEventListener('input', (e) => {
+                animationSpeed = parseInt(e.target.value);
+            });
+        }
+
+        function selectAlgorithm(algorithm) {
+            currentAlgorithm = algorithm;
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            document.getElementById('nav-' + algorithm).classList.add('active');
+            renderCode(algorithm, currentLang);
+            updateOperationInfo();
+            resetVisualization();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('lang-' + lang).classList.add('active');
+            renderCode(currentAlgorithm, lang);
+        }
+
+        function renderCode(algorithm, lang) {
+            const code = algorithms[algorithm][lang];
+            const lines = code.split('\n');
+            const codeContent = document.getElementById('code-content');
+            codeContent.innerHTML = '';
+
+            lines.forEach((line, index) => {
+                const div = document.createElement('div');
+                div.className = 'code-line';
+                div.innerHTML = line.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                codeContent.appendChild(div);
+            });
+        }
+
+        function updateOperationInfo() {
+            const info = document.getElementById('operation-info');
+            const algorithmNames = {
+                kahn: "Kahn's Algorithm (BFS-based)",
+                dfs: "DFS-based Topological Sort"
+            };
+            info.textContent = algorithmNames[currentAlgorithm] || 'Algorithm';
+        }
+
+        function loadScenario(scenario) {
+            const data = scenarios[scenario];
+            nodes = data.nodes.map((label, index) => ({
+                id: index,
+                label: label,
+                x: 0,
+                y: 0
+            }));
+
+            edges = data.edges.map(([u, v]) => ({
+                from: u,
+                to: v
+            }));
+
+            buildGraph();
+            renderGraph();
+            logMessage(`Loaded ${scenario} scenario`);
+        }
+
+        function generateGraph() {
+            const numNodes = parseInt(document.getElementById('num-nodes').value);
+            nodes = [];
+            edges = [];
+
+            // Generate nodes
+            for (let i = 0; i < numNodes; i++) {
+                nodes.push({
+                    id: i,
+                    label: String.fromCharCode(65 + i),
+                    x: 0,
+                    y: 0
+                });
+            }
+
+            // Generate random DAG edges
+            for (let i = 0; i < numNodes; i++) {
+                for (let j = i + 1; j < numNodes; j++) {
+                    if (Math.random() < 0.3) { // 30% chance of edge
+                        edges.push({ from: i, to: j });
+                    }
+                }
+            }
+
+            buildGraph();
+            renderGraph();
+            logMessage(`Generated random DAG with ${numNodes} nodes`);
+        }
+
+        function buildGraph() {
+            const n = nodes.length;
+            graph = Array.from({ length: n }, () => []);
+            indegree = new Array(n).fill(0);
+
+            edges.forEach(edge => {
+                graph[edge.from].push(edge.to);
+                indegree[edge.to]++;
+            });
+        }
+
+        function renderGraph() {
+            const canvas = document.getElementById('topo-canvas');
+            canvas.innerHTML = '<defs><marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--text-secondary)" /></marker><marker id="arrowhead-active" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="var(--neon-blue)" /></marker></defs>';
+
+            // Position nodes in a grid
+            const cols = Math.ceil(Math.sqrt(nodes.length));
+            const rows = Math.ceil(nodes.length / cols);
+            const spacingX = 600 / (cols + 1);
+            const spacingY = 400 / (rows + 1);
+
+            nodes.forEach((node, index) => {
+                const row = Math.floor(index / cols);
+                const col = index % cols;
+                node.x = (col + 1) * spacingX;
+                node.y = (row + 1) * spacingY;
+            });
+
+            // Draw edges
+            edges.forEach((edge, index) => {
+                const fromNode = nodes[edge.from];
+                const toNode = nodes[edge.to];
+
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', fromNode.x);
+                line.setAttribute('y1', fromNode.y);
+                line.setAttribute('x2', toNode.x);
+                line.setAttribute('y2', toNode.y);
+                line.setAttribute('class', 'edge-line');
+                line.setAttribute('marker-end', 'url(#arrowhead)');
+                canvas.appendChild(line);
+            });
+
+            // Draw nodes
+            nodes.forEach(node => {
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x);
+                circle.setAttribute('cy', node.y);
+                circle.setAttribute('r', 25);
+                circle.setAttribute('class', 'node-circle');
+                canvas.appendChild(circle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x);
+                text.setAttribute('y', node.y + 5);
+                text.setAttribute('class', 'node-text');
+                text.textContent = node.label;
+                canvas.appendChild(text);
+            });
+
+            updateDataPanels();
+        }
+
+        function updateDataPanels() {
+            // Update queue items
+            const queueContainer = document.getElementById('queue-items');
+            queueContainer.innerHTML = '';
+
+            queue.forEach(nodeId => {
+                const item = document.createElement('div');
+                item.className = 'data-item in-queue';
+                item.textContent = nodes[nodeId].label;
+                queueContainer.appendChild(item);
+            });
+
+            // Update result items
+            const resultContainer = document.getElementById('result-items');
+            resultContainer.innerHTML = '';
+
+            result.forEach(nodeId => {
+                const item = document.createElement('div');
+                item.className = 'data-item processed';
+                item.textContent = nodes[nodeId].label;
+                resultContainer.appendChild(item);
+            });
+        }
+
+        function clearGraph() {
+            nodes = [];
+            edges = [];
+            graph = [];
+            indegree = [];
+            result = [];
+            queue = [];
+            renderGraph();
+            logMessage('Graph cleared');
+        }
+
+        async function startVisualization() {
+            if (isRunning || nodes.length === 0) return;
+            isRunning = true;
+
+            resetVisualization();
+            logMessage(`Starting ${currentAlgorithm.toUpperCase()} topological sort...`);
+
+            try {
+                if (currentAlgorithm === 'kahn') {
+                    await visualizeKahn();
+                } else if (currentAlgorithm === 'dfs') {
+                    await visualizeDFS();
+                }
+            } catch (error) {
+                logMessage('Visualization stopped');
+            }
+
+            isRunning = false;
+        }
+
+        function stopVisualization() {
+            isRunning = false;
+            logMessage('Visualization stopped');
+        }
+
+        async function visualizeKahn() {
+            // Initialize indegree and queue
+            indegree = new Array(nodes.length).fill(0);
+            edges.forEach(edge => {
+                indegree[edge.to]++;
+            });
+
+            queue = [];
+            for (let i = 0; i < nodes.length; i++) {
+                if (indegree[i] === 0) {
+                    queue.push(i);
+                }
+            }
+
+            result = [];
+            updateDataPanels();
+
+            while (queue.length > 0 && isRunning) {
+                const nodeId = queue.shift();
+                result.push(nodeId);
+
+                // Highlight current node
+                const nodeElement = document.querySelector(`circle[cx="${nodes[nodeId].x}"][cy="${nodes[nodeId].y}"]`);
+                nodeElement.classList.add('active');
+                await sleep(animationSpeed);
+
+                // Process neighbors
+                for (const neighborId of graph[nodeId]) {
+                    // Highlight edge
+                    const edgeElement = Array.from(document.querySelectorAll('.edge-line')).find(line => {
+                        const x1 = parseFloat(line.getAttribute('x1'));
+                        const y1 = parseFloat(line.getAttribute('y1'));
+                        const x2 = parseFloat(line.getAttribute('x2'));
+                        const y2 = parseFloat(line.getAttribute('y2'));
+                        return Math.abs(x1 - nodes[nodeId].x) < 1 && Math.abs(y1 - nodes[nodeId].y) < 1 &&
+                               Math.abs(x2 - nodes[neighborId].x) < 1 && Math.abs(y2 - nodes[neighborId].y) < 1;
+                    });
+
+                    if (edgeElement) {
+                        edgeElement.classList.add('active');
+                        edgeElement.setAttribute('marker-end', 'url(#arrowhead-active)');
+                    }
+
+                    indegree[neighborId]--;
+
+                    if (indegree[neighborId] === 0) {
+                        queue.push(neighborId);
+                        // Mark neighbor as ready
+                        const neighborElement = document.querySelector(`circle[cx="${nodes[neighborId].x}"][cy="${nodes[neighborId].y}"]`);
+                        neighborElement.classList.add('in-queue');
+                    }
+
+                    await sleep(animationSpeed / 2);
+                    if (edgeElement) {
+                        edgeElement.classList.remove('active');
+                        edgeElement.setAttribute('marker-end', 'url(#arrowhead)');
+                    }
+                }
+
+                nodeElement.classList.remove('active');
+                nodeElement.classList.add('processed');
+                updateDataPanels();
+                logMessage(`Processed node ${nodes[nodeId].label}`);
+            }
+
+            if (result.length === nodes.length) {
+                logMessage('Topological sort completed successfully!');
+            } else {
+                showCycleWarning();
+                logMessage('Cycle detected - topological sort not possible');
+            }
+        }
+
+        async function visualizeDFS() {
+            const visited = new Array(nodes.length).fill(false);
+            const recursionStack = new Array(nodes.length).fill(false);
+            result = [];
+
+            async function dfs(nodeId) {
+                if (!isRunning) return;
+
+                visited[nodeId] = true;
+                recursionStack[nodeId] = true;
+
+                // Highlight current node
+                const nodeElement = document.querySelector(`circle[cx="${nodes[nodeId].x}"][cy="${nodes[nodeId].y}"]`);
+                nodeElement.classList.add('active');
+                await sleep(animationSpeed);
+
+                for (const neighborId of graph[nodeId]) {
+                    if (!visited[neighborId]) {
+                        // Highlight edge
+                        const edgeElement = Array.from(document.querySelectorAll('.edge-line')).find(line => {
+                            const x1 = parseFloat(line.getAttribute('x1'));
+                            const y1 = parseFloat(line.getAttribute('y1'));
+                            const x2 = parseFloat(line.getAttribute('x2'));
+                            const y2 = parseFloat(line.getAttribute('y2'));
+                            return Math.abs(x1 - nodes[nodeId].x) < 1 && Math.abs(y1 - nodes[nodeId].y) < 1 &&
+                                   Math.abs(x2 - nodes[neighborId].x) < 1 && Math.abs(y2 - nodes[neighborId].y) < 1;
+                        });
+
+                        if (edgeElement) {
+                            edgeElement.classList.add('active');
+                            edgeElement.setAttribute('marker-end', 'url(#arrowhead-active)');
+                        }
+
+                        await sleep(animationSpeed / 2);
+
+                        if (recursionStack[neighborId]) {
+                            showCycleWarning();
+                            return;
+                        }
+
+                        await dfs(neighborId);
+
+                        if (edgeElement) {
+                            edgeElement.classList.remove('active');
+                            edgeElement.setAttribute('marker-end', 'url(#arrowhead)');
+                        }
+                    } else if (recursionStack[neighborId]) {
+                        showCycleWarning();
+                        return;
+                    }
+                }
+
+                recursionStack[nodeId] = false;
+                result.unshift(nodeId); // Prepend to result
+                nodeElement.classList.remove('active');
+                nodeElement.classList.add('processed');
+                updateDataPanels();
+                logMessage(`Processed node ${nodes[nodeId].label}`);
+            }
+
+            for (let i = 0; i < nodes.length && isRunning; i++) {
+                if (!visited[i]) {
+                    await dfs(i);
+                }
+            }
+
+            if (result.length === nodes.length) {
+                logMessage('DFS topological sort completed successfully!');
+            }
+        }
+
+        function showCycleWarning() {
+            document.getElementById('cycle-warning').style.display = 'block';
+        }
+
+        function hideCycleWarning() {
+            document.getElementById('cycle-warning').style.display = 'none';
+        }
+
+        function runAlgorithm() {
+            startVisualization();
+        }
+
+        function stepAlgorithm() {
+            // Step through algorithm
+            logMessage(`Stepping through ${currentAlgorithm}...`);
+        }
+
+        function resetVisualization() {
+            document.querySelectorAll('.node-circle').forEach(circle => {
+                circle.classList.remove('active', 'processed', 'in-queue');
+            });
+            document.querySelectorAll('.edge-line').forEach(line => {
+                line.classList.remove('active', 'processed');
+                line.setAttribute('marker-end', 'url(#arrowhead)');
+            });
+            result = [];
+            queue = [];
+            updateDataPanels();
+            hideCycleWarning();
+            isRunning = false;
+            logMessage('Visualization reset');
+            document.getElementById('status-text').textContent = 'Ready.';
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function logMessage(message) {
+            // Simple logging - could be enhanced with a log panel
+            console.log(`[${new Date().toLocaleTimeString()}] ${message}`);
+        }
+
+        // Initialize on load
+        window.onload = init;
+    </script>
+    <script src="visualizer-common.js"></script>
+</body>
+</html>

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SDE Prep Dashboard - Premium Edition</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Dashboard Specific Styles */
+    .dashboard-hero {
+      position: relative;
+      padding: 60px 40px;
+      margin-bottom: 40px;
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-bg-glow {
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--accent-color);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 15px;
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .gradient-text {
+      background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-primary {
+      padding: 12px 24px;
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+    }
+
+    .btn-secondary {
+      padding: 12px 24px;
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--text-secondary);
+      transform: translateY(-2px);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      margin-bottom: 40px;
+    }
+
+    .dash-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 25px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .dash-card-icon {
+      font-size: 2.5rem;
+      margin-bottom: 15px;
+      background: var(--bg-tertiary);
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .dash-card-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .dash-card-desc {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      flex: 1;
+      line-height: 1.5;
+    }
+
+    .dash-card-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.1);
+      color: #10b981;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .quick-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #3b82f6, #38bdf8);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+
+      .quick-stats {
+        flex-direction: column;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .btn-primary,
+      .btn-secondary {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar-overlay"></div>
+  <button class="hamburger-btn" aria-label="Open Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+  <div class="container">
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>🌑 SDE Prep</h1>
+        <p>Premium Coding Interview</p>
+      </div>
+      <div class="search-container">
+        <input type="text" id="pattern-search" placeholder="Search patterns..." autocomplete="off">
+      </div>
+      <nav class="sidebar-nav">
+        <a href="index.html" class="nav-item active">🏠 Home Dashboard</a>
+        <a href="visualizer-dashboard.html" class="nav-item">✨ Visualizers Center</a>
+        <a href="python-cheatsheet.html" class="nav-item">🐍 Python Cheatsheet</a>
+        <a href="google-roadmap/index.html" class="nav-item">🗺️ Google Roadmap</a>
+
+        <details class="nav-section" open>
+          <summary class="nav-section-title">Linear Data Structures</summary>
+          <a href="patterns/linked-lists.html" class="nav-item">Linked Lists</a>
+          <a href="patterns/stack.html" class="nav-item">Stacks</a>
+          <a href="patterns/queues.html" class="nav-item">Queues</a>
+          <a href="patterns/slice-visualizer.html" class="nav-item">Slices (Dynamic Arrays)</a>
+        </details>
+
+        <details class="nav-section" open>
+          <summary class="nav-section-title">Non-Linear Structures</summary>
+          <a href="patterns/hash-maps.html" class="nav-item">Hash Maps</a>
+          <a href="patterns/trees.html" class="nav-item">Trees</a>
+          <a href="patterns/graphs.html" class="nav-item">Graphs</a>
+          <a href="patterns/heap.html" class="nav-item">Heaps</a>
+          <a href="patterns/tries.html" class="nav-item">Tries</a>
+        </details>
+
+        <details class="nav-section">
+          <summary class="nav-section-title">Algorithms & Patterns</summary>
+          <a href="patterns/two-pointers.html" class="nav-item">Two Pointers</a>
+          <a href="patterns/sliding-window.html" class="nav-item">Sliding Window</a>
+          <a href="patterns/binary-search.html" class="nav-item">Binary Search</a>
+          <a href="patterns/binary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Binary Search</a>
+          <a href="patterns/jump-search-visualizer.html" class="nav-item indent">↳ Visualizer: Jump Search</a>
+          <a href="patterns/interpolation-search-visualizer.html" class="nav-item indent">↳ Visualizer: Interpolation
+            Search</a>
+          <a href="patterns/exponential-search-visualizer.html" class="nav-item indent">↳ Visualizer: Exponential
+            Search</a>
+          <a href="patterns/ternary-search-visualizer.html" class="nav-item indent">↳ Visualizer: Ternary Search</a>
+          <a href="patterns/kmp-search-visualizer.html" class="nav-item indent">↳ Visualizer: KMP String Search</a>
+          <a href="patterns/dynamic-programming.html" class="nav-item">Dynamic Programming</a>
+          <a href="patterns/backtracking.html" class="nav-item">Backtracking</a>
+        </details>
+      </nav>
+    </aside>
+
+    <!-- MAIN DASHBOARD CONTENT -->
+    <main class="main-content">
+
+      <!-- Premium Hero Section -->
+      <section class="dashboard-hero">
+        <div class="hero-bg-glow"></div>
+        <div class="hero-badge">SDE Prep V2.0</div>
+        <h1 class="hero-title">Master the Interview.<br><span class="gradient-text">Visualize the Code.</span></h1>
+        <p class="hero-subtitle">Stop memorizing text. Start interacting with data structures, simulating real
+          enterprise scenarios, and executing step-by-step algorithms designed to fast-track your coding skills.</p>
+        <div class="hero-actions">
+          <a href="visualizer-dashboard.html" class="btn-primary">🎮 Launch Visualizers</a>
+          <a href="patterns/two-pointers.html" class="btn-secondary">📘 Read the Patterns</a>
+        </div>
+      </section>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-box">
+          <div class="stat-val">18+</div>
+          <div class="stat-label">Core Patterns</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">12</div>
+          <div class="stat-label">Interactive Playgrounds</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Languages (Go, Java, Py)</div>
+        </div>
+      </div>
+
+      <!-- Quick Navigation Cards -->
+      <div class="section-title">
+        <span class="emoji">🚀</span> Quick Launch
+      </div>
+      <div class="dashboard-grid">
+        <a href="visualizer-dashboard.html" class="dash-card">
+          <span class="dash-card-badge">HOT 🔥</span>
+          <div class="dash-card-icon">🕹️</div>
+          <h3 class="dash-card-title">Visualizer Center</h3>
+          <p class="dash-card-desc">Interactive sandboxes for Graphs, Trees, Linked Lists, and Sliding Windows. Run code
+            line-by-line.</p>
+        </a>
+
+        <a href="google-roadmap/index.html" class="dash-card">
+          <div class="dash-card-icon">🗺️</div>
+          <h3 class="dash-card-title">Google Prep Roadmap</h3>
+          <p class="dash-card-desc">Structured study plan with curated resources, mock interviews, and progress tracking.</p>
+        </a>
+
+        <a href="patterns/graphs.html" class="dash-card">
+          <div class="dash-card-icon">🕸️</div>
+          <h3 class="dash-card-title">Graph Algorithms</h3>
+          <p class="dash-card-desc">Deep dive into BFS, DFS, Dijkstra's, and Union-Find with enterprise use-cases.</p>
+        </a>
+      </div>
+
+      <!-- Philosophy Section -->
+      <div class="section-title">
+        <span class="emoji">🧠</span> The Philosophy
+      </div>
+      <div class="dashboard-grid">
+        <div class="dash-card" style="cursor: default; transform: none; box-shadow: none;">
+          <h3 class="dash-card-title" style="color: var(--callout-green);">✅ Scenario-First</h3>
+          <p class="dash-card-desc">Every algorithm is taught through a real-world enterprise situation—like DB
+            indexing, Load Balancer queues, or Payment processors.</p>
+        </div>
+        <div class="dash-card" style="cursor: default; transform: none; box-shadow: none;">
+          <h3 class="dash-card-title" style="color: var(--callout-blue);">🔍 Visual Debugging</h3>
+          <p class="dash-card-desc">Instead of reading dry code chunks, our Visualizers highlight the exact line running
+            alongside an animating data structure.</p>
+        </div>
+      </div>
+
+      <div style="margin-top: 60px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+        <p>Built with 💙 for SDE Candidates. Elevate your prep.</p>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
